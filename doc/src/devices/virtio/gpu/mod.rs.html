@@ -1375,9 +1375,6 @@
 <span id="1374">1374</span>
 <span id="1375">1375</span>
 <span id="1376">1376</span>
-<span id="1377">1377</span>
-<span id="1378">1378</span>
-<span id="1379">1379</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1388,16 +1385,14 @@
 <span class="kw">mod</span> <span class="ident">virtio_gpu</span>;
 
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>, <span class="ident">VecDeque</span>};
+<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">VecDeque</span>};
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::i64</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>::{<span class="self">self</span>, <span class="ident">size_of</span>};
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
-<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
 
@@ -1482,7 +1477,6 @@
 <span class="comment">// First queue is for virtio gpu commands. Second queue is for cursor commands, which we expect</span>
 <span class="comment">// there to be fewer of.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">QUEUE_SIZES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="number">256</span>, <span class="number">16</span>];
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FENCE_POLL_INTERVAL</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_millis</span>(<span class="number">1</span>);
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_NUM</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
@@ -1520,7 +1514,7 @@
     <span class="kw">pub</span> <span class="ident">offsets</span>: [<span class="ident">u32</span>; <span class="number">4</span>],
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Hash</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">enum</span> <span class="ident">VirtioGpuRing</span> {
     <span class="ident">Global</span>,
     <span class="ident">ContextSpecific</span> { <span class="ident">ctx_id</span>: <span class="ident">u32</span>, <span class="ident">ring_idx</span>: <span class="ident">u8</span> },
@@ -1536,7 +1530,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FenceState</span> {
     <span class="ident">descs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FenceDescriptor</span><span class="op">&gt;</span>,
-    <span class="ident">completed_fences</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">VirtioGpuRing</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="ident">completed_fences</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">VirtioGpuRing</span>, <span class="ident">u64</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">QueueReader</span> {
@@ -2155,12 +2149,8 @@
         <span class="self">self</span>.<span class="ident">return_cursor_descriptors</span>.<span class="ident">pop_front</span>()
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fence_poll</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">virtio_gpu</span>.<span class="ident">fence_poll</span>();
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_pending_fences</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        <span class="op">!</span><span class="self">self</span>.<span class="ident">fence_state</span>.<span class="ident">lock</span>().<span class="ident">descs</span>.<span class="ident">is_empty</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">virtio_gpu</span>.<span class="ident">poll</span>();
     }
 }
 
@@ -2187,6 +2177,7 @@
             <span class="ident">InterruptResample</span>,
             <span class="ident">Kill</span>,
             <span class="ident">ResourceBridge</span> { <span class="ident">index</span>: <span class="ident">usize</span> },
+            <span class="ident">VirtioGpuPoll</span>,
         }
 
         <span class="kw">let</span> <span class="ident">wait_ctx</span>: <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">WaitContext::build_with</span>(<span class="kw-2">&amp;</span>[
@@ -2217,6 +2208,13 @@
             }
         }
 
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">poll_desc</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">virtio_gpu</span>.<span class="ident">poll_descriptor</span>() {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">wait_ctx</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">poll_desc</span>, <span class="ident">Token::VirtioGpuPoll</span>) {
+                <span class="macro">error!</span>(<span class="string">&quot;failed adding poll eventfd to WaitContext: {}&quot;</span>, <span class="ident">e</span>);
+                <span class="kw">return</span>;
+            }
+        }
+
         <span class="comment">// TODO(davidriley): The entire main loop processing is somewhat racey and incorrect with</span>
         <span class="comment">// respect to cursor vs control queue processing.  As both currently and originally</span>
         <span class="comment">// written, while the control queue is only processed/read from after the the cursor queue</span>
@@ -2228,14 +2226,7 @@
         <span class="comment">// Declare this outside the loop so we don&#39;t keep allocating and freeing the vector.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">process_resource_bridge</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="self">self</span>.<span class="ident">resource_bridges</span>.<span class="ident">len</span>());
         <span class="lifetime">&#39;wait</span>: <span class="kw">loop</span> {
-            <span class="comment">// If there are outstanding fences, wake up early to poll them.</span>
-            <span class="kw">let</span> <span class="ident">duration</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">has_pending_fences</span>() {
-                <span class="ident">FENCE_POLL_INTERVAL</span>
-            } <span class="kw">else</span> {
-                <span class="ident">Duration::new</span>(<span class="ident">i64::MAX</span> <span class="kw">as</span> <span class="ident">u64</span>, <span class="number">0</span>)
-            };
-
-            <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">wait_ctx</span>.<span class="ident">wait_timeout</span>(<span class="ident">duration</span>) {
+            <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">wait_ctx</span>.<span class="ident">wait</span>() {
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="macro">error!</span>(<span class="string">&quot;failed polling for events: {}&quot;</span>, <span class="ident">e</span>);
@@ -2285,6 +2276,9 @@
                     <span class="ident">Token::InterruptResample</span> =&gt; {
                         <span class="self">self</span>.<span class="ident">interrupt</span>.<span class="ident">interrupt_resample</span>();
                     }
+                    <span class="ident">Token::VirtioGpuPoll</span> =&gt; {
+                        <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">poll</span>();
+                    }
                     <span class="ident">Token::Kill</span> =&gt; {
                         <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
                     }
@@ -2300,8 +2294,6 @@
             <span class="kw">if</span> <span class="ident">ctrl_available</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">process_queue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ctrl_queue</span>) {
                 <span class="ident">signal_used_ctrl</span> <span class="op">=</span> <span class="bool-val">true</span>;
             }
-
-            <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">fence_poll</span>();
 
             <span class="comment">// Process the entire control queue before the resource bridge in case a resource is</span>
             <span class="comment">// created or destroyed by the control queue. Processing the resource bridge first may</span>
@@ -2399,7 +2391,9 @@
             .<span class="ident">use_surfaceless</span>(<span class="ident">gpu_parameters</span>.<span class="ident">renderer_use_surfaceless</span>)
             .<span class="ident">use_external_blob</span>(<span class="ident">external_blob</span>)
             .<span class="ident">use_venus</span>(<span class="ident">gpu_parameters</span>.<span class="ident">use_vulkan</span>)
-            .<span class="ident">use_render_server</span>(<span class="ident">render_server_fd</span>.<span class="ident">is_some</span>());
+            .<span class="ident">use_render_server</span>(<span class="ident">render_server_fd</span>.<span class="ident">is_some</span>())
+            .<span class="ident">use_thread_sync</span>(<span class="bool-val">true</span>)
+            .<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
         <span class="kw">let</span> <span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="ident">GfxstreamFlags::new</span>()
             .<span class="ident">use_egl</span>(<span class="ident">gpu_parameters</span>.<span class="ident">renderer_use_egl</span>)
             .<span class="ident">use_gles</span>(<span class="ident">gpu_parameters</span>.<span class="ident">renderer_use_gles</span>)
