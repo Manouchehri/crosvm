@@ -492,25 +492,6 @@
 <span id="491">491</span>
 <span id="492">492</span>
 <span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -536,11 +517,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="ident">PciCapabilityType</span>, <span class="ident">VirtioPciCap</span>};
 
 <span class="kw">const</span> <span class="ident">VIRTIO_CONFIG_STATUS_RESET</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0</span>;
-
-<span class="doccomment">/// Getting constant definitions from `linux/pci_regs.h`.`</span>
-<span class="kw">const</span> <span class="ident">PCI_COMMAND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4</span>;
-<span class="doccomment">/// Enable bus mastering</span>
-<span class="kw">const</span> <span class="ident">PCI_COMMAND_MASTER</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x4</span>;
 
 <span class="kw">fn</span> <span class="ident">get_pci_cap_addr</span>(<span class="ident">cap</span>: <span class="kw-2">&amp;</span><span class="ident">VirtioPciCap</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VfioRegionAddr</span><span class="op">&gt;</span> {
     <span class="kw">const</span> <span class="ident">PCI_MAX_RESOURCE</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">6</span>;
@@ -601,6 +577,7 @@
 
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">DataInit</span> <span class="kw">for</span> <span class="ident">virtio_pci_notification_cfg</span> {}
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VvuPciCaps</span> {
     <span class="ident">msix_table_size</span>: <span class="ident">u16</span>,
     <span class="ident">common_cfg_addr</span>: <span class="ident">VfioRegionAddr</span>,
@@ -740,7 +717,6 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VvuPciDevice</span> {
     <span class="kw">pub</span> <span class="ident">vfio_dev</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">VfioDevice</span><span class="op">&gt;</span>,
-    <span class="ident">config</span>: <span class="ident">VfioPciConfig</span>,
     <span class="kw">pub</span> <span class="ident">caps</span>: <span class="ident">VvuPciCaps</span>,
     <span class="kw">pub</span> <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">UserQueue</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">queue_notifiers</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">QueueNotifier</span><span class="op">&gt;</span>,
@@ -772,7 +748,6 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pci_dev</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">vfio_dev</span>,
-            <span class="ident">config</span>,
             <span class="ident">caps</span>,
             <span class="ident">queues</span>: <span class="macro">vec!</span>[],
             <span class="ident">queue_notifiers</span>: <span class="macro">vec!</span>[],
@@ -780,21 +755,10 @@
             <span class="ident">notification_evts</span>: <span class="macro">vec!</span>[],
         };
 
+        <span class="ident">config</span>.<span class="ident">set_bus_master</span>();
         <span class="ident">pci_dev</span>.<span class="ident">init</span>(<span class="ident">device_vq_num</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">pci_dev</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">set_bus_master</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cmd</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">PCI_COMMAND</span>);
-
-        <span class="kw">if</span> <span class="ident">cmd</span> <span class="op">&amp;</span> <span class="ident">PCI_COMMAND_MASTER</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span>;
-        }
-
-        <span class="ident">cmd</span> <span class="op">|</span><span class="op">=</span> <span class="ident">PCI_COMMAND_MASTER</span>;
-
-        <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">write_config</span>(<span class="ident">cmd</span>, <span class="ident">PCI_COMMAND</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">set_status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">status</span>: <span class="ident">u8</span>) {
@@ -958,8 +922,6 @@
     }
 
     <span class="kw">fn</span> <span class="ident">init</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">device_vq_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">set_bus_master</span>();
-
         <span class="self">self</span>.<span class="ident">set_status</span>(<span class="ident">VIRTIO_CONFIG_STATUS_RESET</span> <span class="kw">as</span> <span class="ident">u8</span>);
         <span class="comment">// Wait until reset is done with timeout.</span>
         <span class="kw">let</span> <span class="ident">deadline</span> <span class="op">=</span> <span class="ident">Instant::now</span>() <span class="op">+</span> <span class="ident">Duration::from_secs</span>(<span class="number">1</span>);

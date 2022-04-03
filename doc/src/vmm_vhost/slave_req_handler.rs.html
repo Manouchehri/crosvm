@@ -957,8 +957,6 @@
 <span id="956">956</span>
 <span id="957">957</span>
 <span id="958">958</span>
-<span id="959">959</span>
-<span id="960">960</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -1051,9 +1049,7 @@
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">VhostUserSlaveReqHandlerMut</span> {
     <span class="doccomment">/// Returns the type of vhost-user protocol that the handler support.</span>
-    <span class="kw">fn</span> <span class="ident">protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Protocol</span> {
-        <span class="ident">Protocol::Regular</span>
-    }
+    <span class="kw">fn</span> <span class="ident">protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Protocol</span>;
 
     <span class="kw">fn</span> <span class="ident">set_owner</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">reset_owner</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;

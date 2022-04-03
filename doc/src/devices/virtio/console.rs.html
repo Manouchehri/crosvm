@@ -529,18 +529,6 @@
 <span id="528">528</span>
 <span id="529">529</span>
 <span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -606,23 +594,17 @@
     <span class="ident">buffer</span>: <span class="kw-2">&amp;mut</span> <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">receive_queue</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Queue</span>,
 ) -&gt; <span class="ident">result::Result</span><span class="op">&lt;</span>(), <span class="ident">ConsoleError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exhausted_queue</span> <span class="op">=</span> <span class="bool-val">false</span>;
-
     <span class="kw">loop</span> {
-        <span class="kw">let</span> <span class="ident">desc</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">receive_queue</span>.<span class="ident">peek</span>(<span class="ident">mem</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>,
-            <span class="prelude-val">None</span> =&gt; {
-                <span class="ident">exhausted_queue</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                <span class="kw">break</span>;
-            }
-        };
+        <span class="kw">let</span> <span class="ident">desc</span> <span class="op">=</span> <span class="ident">receive_queue</span>
+            .<span class="ident">peek</span>(<span class="ident">mem</span>)
+            .<span class="ident">ok_or</span>(<span class="ident">ConsoleError::RxDescriptorsExhausted</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">desc_index</span> <span class="op">=</span> <span class="ident">desc</span>.<span class="ident">index</span>;
         <span class="comment">// TODO(morg): Handle extra error cases as Err(ConsoleError) instead of just returning.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Writer::new</span>(<span class="ident">mem</span>.<span class="ident">clone</span>(), <span class="ident">desc</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">w</span>) =&gt; <span class="ident">w</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="macro">error!</span>(<span class="string">&quot;console: failed to create Writer: {}&quot;</span>, <span class="ident">e</span>);
-                <span class="kw">break</span>;
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
             }
         };
 
@@ -646,14 +628,8 @@
         }
 
         <span class="kw">if</span> <span class="ident">bytes_written</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">break</span>;
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
-    }
-
-    <span class="kw">if</span> <span class="ident">exhausted_queue</span> {
-        <span class="prelude-val">Err</span>(<span class="ident">ConsoleError::RxDescriptorsExhausted</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">Ok</span>(())
     }
 }
 
