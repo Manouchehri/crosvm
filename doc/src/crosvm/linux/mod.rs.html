@@ -4269,7 +4269,7 @@
                                         <span class="kw">let</span> <span class="ident">irq_chip</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">linux</span>.<span class="ident">irq_chip</span>;
                                         <span class="ident">request</span>.<span class="ident">execute</span>(
                                             <span class="op">|</span><span class="ident">setup</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">setup</span> {
-                                                <span class="ident">IrqSetup::Event</span>(<span class="ident">irq</span>, <span class="ident">ev</span>) =&gt; {
+                                                <span class="ident">IrqSetup::Event</span>(<span class="ident">irq</span>, <span class="ident">ev</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
                                                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event_index</span>) <span class="op">=</span> <span class="ident">irq_chip</span>
                                                         .<span class="ident">register_irq_event</span>(<span class="ident">irq</span>, <span class="ident">ev</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>
                                                     {

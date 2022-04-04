@@ -59,6 +59,29 @@
 <span id="58">58</span>
 <span id="59">59</span>
 <span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -119,6 +142,29 @@
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PCI_VENDOR_ID_INTEL</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x8086</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PCI_VENDOR_ID_REDHAT</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x1b36</span>;
+
+<span class="doccomment">/// A wrapper structure for pci device and vendor id.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PciId</span> {
+    <span class="ident">vendor_id</span>: <span class="ident">u16</span>,
+    <span class="ident">device_id</span>: <span class="ident">u16</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">PciId</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">vendor_id</span>: <span class="ident">u16</span>, <span class="ident">device_id</span>: <span class="ident">u16</span>) -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">vendor_id</span>,
+            <span class="ident">device_id</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">PciId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">pci_id</span>: <span class="ident">PciId</span>) -&gt; <span class="self">Self</span> {
+        <span class="comment">// vendor ID is the lower 16 bits and device id is the upper 16 bits</span>
+        <span class="ident">pci_id</span>.<span class="ident">vendor_id</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">|</span> (<span class="ident">pci_id</span>.<span class="ident">device_id</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>
+    }
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="devices" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
 </body></html>

@@ -184,6 +184,8 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -207,7 +209,9 @@
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_device</span>::{<span class="ident">PciDevice</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciAddress</span>, <span class="ident">PciDeviceError</span>};
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StubPciParameters</span> {
     <span class="kw">pub</span> <span class="ident">address</span>: <span class="ident">PciAddress</span>,
     <span class="kw">pub</span> <span class="ident">vendor_id</span>: <span class="ident">u16</span>,

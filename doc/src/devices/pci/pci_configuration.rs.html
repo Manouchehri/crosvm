@@ -1279,6 +1279,9 @@
 <span id="1278">1278</span>
 <span id="1279">1279</span>
 <span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1296,11 +1299,13 @@
 <span class="comment">// The number of 32bit registers in the config space, 256 bytes.</span>
 <span class="kw">const</span> <span class="ident">NUM_CONFIGURATION_REGISTERS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">64</span>;
 
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PCI_ID_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMAND_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMAND_REG_IO_SPACE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0000_0001</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0000_0002</span>;
 <span class="kw">const</span> <span class="ident">STATUS_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STATUS_REG_CAPABILITIES_USED_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0010_0000</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CLASS_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HEADER_TYPE_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HEADER_TYPE_MULTIFUNCTION_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0080_0000</span>;
@@ -1314,6 +1319,7 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ROM_BAR_IDX</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="number">6</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ROM_BAR_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">12</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CAPABILITY_LIST_HEAD_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x34</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PCI_CAP_NEXT_POINTER</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x1</span>;
 <span class="kw">const</span> <span class="ident">FIRST_CAPABILITY_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x40</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CAPABILITY_MAX_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">255</span>;
@@ -1330,7 +1336,7 @@
 
 <span class="doccomment">/// Classes of PCI nodes.</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">enumn::N</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">enumn::N</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PciClassCode</span> {
     <span class="ident">TooOld</span>,
     <span class="ident">MassStorage</span>,

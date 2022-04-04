@@ -1386,6 +1386,20 @@
 <span id="1385">1385</span>
 <span id="1386">1386</span>
 <span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
+<span id="1394">1394</span>
+<span id="1395">1395</span>
+<span id="1396">1396</span>
+<span id="1397">1397</span>
+<span id="1398">1398</span>
+<span id="1399">1399</span>
+<span id="1400">1400</span>
+<span id="1401">1401</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1913,6 +1927,9 @@
     <span class="doccomment">/// Allocate one gsi, and associate gsi to irqfd with register_irqfd()</span>
     <span class="ident">AllocateOneMsi</span> {
         <span class="ident">irqfd</span>: <span class="ident">Event</span>,
+        <span class="ident">device_id</span>: <span class="ident">u32</span>,
+        <span class="ident">queue_id</span>: <span class="ident">usize</span>,
+        <span class="ident">device_name</span>: <span class="ident">String</span>,
     },
     <span class="doccomment">/// Add one msi route entry into the IRQ chip.</span>
     <span class="ident">AddMsiRoute</span> {
@@ -1931,7 +1948,7 @@
 <span class="doccomment">/// VmIrqRequest::execute can&#39;t take an `IrqChip` argument, because of a dependency cycle between</span>
 <span class="doccomment">/// devices and vm_control, so it takes a Fn that processes an `IrqSetup`.</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">IrqSetup</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">Event</span>(<span class="ident">u32</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Event</span>),
+    <span class="ident">Event</span>(<span class="ident">u32</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Event</span>, <span class="ident">u32</span>, <span class="ident">usize</span>, <span class="ident">String</span>),
     <span class="ident">Route</span>(<span class="ident">IrqRoute</span>),
     <span class="ident">UnRegister</span>(<span class="ident">u32</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Event</span>),
 }
@@ -1951,9 +1968,20 @@
     {
         <span class="kw">use</span> <span class="ident"><span class="self">self</span>::VmIrqRequest</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">AllocateOneMsi</span> { <span class="kw-2">ref</span> <span class="ident">irqfd</span> } =&gt; {
+            <span class="ident">AllocateOneMsi</span> {
+                <span class="kw-2">ref</span> <span class="ident">irqfd</span>,
+                <span class="ident">device_id</span>,
+                <span class="ident">queue_id</span>,
+                <span class="kw-2">ref</span> <span class="ident">device_name</span>,
+            } =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_num</span>) <span class="op">=</span> <span class="ident">sys_allocator</span>.<span class="ident">allocate_irq</span>() {
-                    <span class="kw">match</span> <span class="ident">set_up_irq</span>(<span class="ident">IrqSetup::Event</span>(<span class="ident">irq_num</span>, <span class="ident">irqfd</span>)) {
+                    <span class="kw">match</span> <span class="ident">set_up_irq</span>(<span class="ident">IrqSetup::Event</span>(
+                        <span class="ident">irq_num</span>,
+                        <span class="ident">irqfd</span>,
+                        <span class="ident">device_id</span>,
+                        <span class="ident">queue_id</span>,
+                        <span class="ident">device_name</span>.<span class="ident">clone</span>(),
+                    )) {
                         <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">VmIrqResponse::AllocateOneMsi</span> { <span class="ident">gsi</span>: <span class="ident">irq_num</span> },
                         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="ident">VmIrqResponse::Err</span>(<span class="ident">e</span>),
                     }

@@ -554,6 +554,12 @@
 <span id="553">553</span>
 <span id="554">554</span>
 <span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -626,6 +632,12 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">BusDevice</span>: <span class="ident">Send</span> {
     <span class="doccomment">/// Returns a label suitable for debug output.</span>
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span>;
+
+    <span class="doccomment">/// Returns a unique id per device type suitable for metrics gathering.</span>
+    <span class="comment">// TODO(225991065): Remove this default implementation when all of the crate is upstreamed.</span>
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+        <span class="number">0</span>
+    }
     <span class="doccomment">/// Reads at `offset` from this device</span>
     <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">BusAccessInfo</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {}
     <span class="doccomment">/// Writes at `offset` into this device</span>

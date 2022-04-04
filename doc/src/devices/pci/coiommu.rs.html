@@ -1613,6 +1613,7 @@
 <span id="1612">1612</span>
 <span id="1613">1613</span>
 <span id="1614">1614</span>
+<span id="1615">1615</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1648,6 +1649,7 @@
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 <span class="kw">use</span> <span class="ident">hypervisor::Datamatch</span>;
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span> <span class="kw">as</span> <span class="ident">ThisError</span>;
 
@@ -1699,7 +1701,7 @@
 <span class="kw">const</span> <span class="ident">UNPIN_DEFAULT_INTERVAL</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">60</span>);
 <span class="kw">const</span> <span class="ident">UNPIN_GEN_DEFAULT_THRES</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">10</span>;
 <span class="doccomment">/// Holds the coiommu unpin policy</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CoIommuUnpinPolicy</span> {
     <span class="ident">Off</span>,
     <span class="ident">Lru</span>,
@@ -1732,7 +1734,7 @@
 }
 
 <span class="doccomment">/// Holds the parameters for a coiommu device</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CoIommuParameters</span> {
     <span class="kw">pub</span> <span class="ident">unpin_policy</span>: <span class="ident">CoIommuUnpinPolicy</span>,
     <span class="kw">pub</span> <span class="ident">unpin_interval</span>: <span class="ident">Duration</span>,

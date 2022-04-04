@@ -1891,6 +1891,39 @@
 <span id="1890">1890</span>
 <span id="1891">1891</span>
 <span id="1892">1892</span>
+<span id="1893">1893</span>
+<span id="1894">1894</span>
+<span id="1895">1895</span>
+<span id="1896">1896</span>
+<span id="1897">1897</span>
+<span id="1898">1898</span>
+<span id="1899">1899</span>
+<span id="1900">1900</span>
+<span id="1901">1901</span>
+<span id="1902">1902</span>
+<span id="1903">1903</span>
+<span id="1904">1904</span>
+<span id="1905">1905</span>
+<span id="1906">1906</span>
+<span id="1907">1907</span>
+<span id="1908">1908</span>
+<span id="1909">1909</span>
+<span id="1910">1910</span>
+<span id="1911">1911</span>
+<span id="1912">1912</span>
+<span id="1913">1913</span>
+<span id="1914">1914</span>
+<span id="1915">1915</span>
+<span id="1916">1916</span>
+<span id="1917">1917</span>
+<span id="1918">1918</span>
+<span id="1919">1919</span>
+<span id="1920">1920</span>
+<span id="1921">1921</span>
+<span id="1922">1922</span>
+<span id="1923">1923</span>
+<span id="1924">1924</span>
+<span id="1925">1925</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1924,13 +1957,13 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_device</span>::{<span class="ident">BarRange</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">PciDeviceError</span>, <span class="ident">PciDevice</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
     <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>,
-    <span class="ident">PciClassCode</span>, <span class="ident">PciInterruptPin</span>,
+    <span class="ident">PciClassCode</span>, <span class="ident">PciId</span>, <span class="ident">PciInterruptPin</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
 };
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioError</span>, <span class="ident">VfioIrqType</span>, <span class="ident">VfioPciConfig</span>};
 
 <span class="kw">const</span> <span class="ident">PCI_VENDOR_ID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0</span>;
-<span class="kw">const</span> <span class="ident">INTEL_VENDOR_ID</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x8086</span>;
+<span class="kw">const</span> <span class="ident">PCI_DEVICE_ID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2</span>;
 <span class="kw">const</span> <span class="ident">PCI_COMMAND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x4</span>;
 <span class="kw">const</span> <span class="ident">PCI_COMMAND_MEMORY</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x2</span>;
 <span class="kw">const</span> <span class="ident">PCI_BASE_CLASS_CODE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0B</span>;
@@ -1974,10 +2007,18 @@
     <span class="ident">vm_socket_irq</span>: <span class="ident">Tube</span>,
     <span class="ident">irqfd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="ident">gsi</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">device_id</span>: <span class="ident">u32</span>,
+    <span class="ident">device_name</span>: <span class="ident">String</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">VfioMsiCap</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">VfioPciConfig</span>, <span class="ident">msi_cap_start</span>: <span class="ident">u32</span>, <span class="ident">vm_socket_irq</span>: <span class="ident">Tube</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">VfioPciConfig</span>,
+        <span class="ident">msi_cap_start</span>: <span class="ident">u32</span>,
+        <span class="ident">vm_socket_irq</span>: <span class="ident">Tube</span>,
+        <span class="ident">device_id</span>: <span class="ident">u32</span>,
+        <span class="ident">device_name</span>: <span class="ident">String</span>,
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">msi_ctl</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">msi_cap_start</span> <span class="op">+</span> <span class="ident">PCI_MSI_FLAGS</span>);
 
         <span class="ident">VfioMsiCap</span> {
@@ -1990,6 +2031,8 @@
             <span class="ident">vm_socket_irq</span>,
             <span class="ident">irqfd</span>: <span class="prelude-val">None</span>,
             <span class="ident">gsi</span>: <span class="prelude-val">None</span>,
+            <span class="ident">device_id</span>,
+            <span class="ident">device_name</span>,
         }
     }
 
@@ -2100,12 +2143,17 @@
             },
         };
 
-        <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VmIrqRequest::AllocateOneMsi</span> { <span class="ident">irqfd</span> };
+        <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VmIrqRequest::AllocateOneMsi</span> {
+            <span class="ident">irqfd</span>,
+            <span class="ident">device_id</span>: <span class="self">self</span>.<span class="ident">device_id</span>,
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="self">self</span>.<span class="ident">device_name</span>.<span class="ident">clone</span>(),
+        };
         <span class="kw">let</span> <span class="ident">request_result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vm_socket_irq</span>.<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>);
 
         <span class="comment">// Stash the irqfd in self immediately because we used take above.</span>
         <span class="self">self</span>.<span class="ident">irqfd</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span> {
-            <span class="ident">VmIrqRequest::AllocateOneMsi</span> { <span class="ident">irqfd</span> } =&gt; <span class="prelude-val">Some</span>(<span class="ident">irqfd</span>),
+            <span class="ident">VmIrqRequest::AllocateOneMsi</span> { <span class="ident">irqfd</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">irqfd</span>),
             <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
         };
 
@@ -2168,7 +2216,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VfioMsixCap</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">VfioPciConfig</span>, <span class="ident">msix_cap_start</span>: <span class="ident">u32</span>, <span class="ident">vm_socket_irq</span>: <span class="ident">Tube</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">VfioPciConfig</span>,
+        <span class="ident">msix_cap_start</span>: <span class="ident">u32</span>,
+        <span class="ident">vm_socket_irq</span>: <span class="ident">Tube</span>,
+        <span class="ident">pci_id</span>: <span class="ident">u32</span>,
+        <span class="ident">device_name</span>: <span class="ident">String</span>,
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">msix_ctl</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">msix_cap_start</span> <span class="op">+</span> <span class="ident">PCI_MSIX_FLAGS</span>);
         <span class="kw">let</span> <span class="ident">table</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">msix_cap_start</span> <span class="op">+</span> <span class="ident">PCI_MSIX_TABLE</span>);
         <span class="kw">let</span> <span class="ident">table_pci_bar</span> <span class="op">=</span> <span class="ident">table</span> <span class="op">&amp;</span> <span class="ident">PCI_MSIX_TABLE_BIR</span>;
@@ -2194,7 +2248,7 @@
             <span class="ident">msix_interrupt_evt</span>.<span class="ident">push</span>(<span class="ident">Event::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create msix interrupt&quot;</span>));
         }
         <span class="ident">VfioMsixCap</span> {
-            <span class="ident">config</span>: <span class="ident">MsixConfig::new</span>(<span class="ident">table_size</span> <span class="kw">as</span> <span class="ident">u16</span>, <span class="ident">vm_socket_irq</span>),
+            <span class="ident">config</span>: <span class="ident">MsixConfig::new</span>(<span class="ident">table_size</span> <span class="kw">as</span> <span class="ident">u16</span>, <span class="ident">vm_socket_irq</span>, <span class="ident">pci_id</span>, <span class="ident">device_name</span>),
             <span class="ident">offset</span>: <span class="ident">msix_cap_start</span>,
             <span class="ident">table_size</span>: <span class="ident">table_size</span> <span class="kw">as</span> <span class="ident">u16</span>,
             <span class="ident">table_pci_bar</span>,
@@ -2554,11 +2608,22 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msix_cap</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">VfioMsixCap</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cap_next</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>(<span class="ident">PCI_CAPABILITY_LIST</span>).<span class="ident">into</span>();
+        <span class="kw">let</span> <span class="ident">vendor_id</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">PCI_VENDOR_ID</span>);
+        <span class="kw">let</span> <span class="ident">device_id</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">PCI_DEVICE_ID</span>);
+
+        <span class="kw">let</span> <span class="ident">pci_id</span> <span class="op">=</span> <span class="ident">PciId::new</span>(<span class="ident">vendor_id</span>, <span class="ident">device_id</span>);
+
         <span class="kw">while</span> <span class="ident">cap_next</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="kw">let</span> <span class="ident">cap_id</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">cap_next</span>);
             <span class="kw">if</span> <span class="ident">cap_id</span> <span class="op">==</span> <span class="ident">PCI_CAP_ID_MSI</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msi_socket</span>) <span class="op">=</span> <span class="ident">msi_socket</span>.<span class="ident">take</span>() {
-                    <span class="ident">msi_cap</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VfioMsiCap::new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>, <span class="ident">cap_next</span>, <span class="ident">msi_socket</span>));
+                    <span class="ident">msi_cap</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VfioMsiCap::new</span>(
+                        <span class="kw-2">&amp;</span><span class="ident">config</span>,
+                        <span class="ident">cap_next</span>,
+                        <span class="ident">msi_socket</span>,
+                        <span class="ident">pci_id</span>.<span class="ident">into</span>(),
+                        <span class="ident">dev</span>.<span class="ident">device_name</span>().<span class="ident">to_string</span>(),
+                    ));
                 }
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">cap_id</span> <span class="op">==</span> <span class="ident">PCI_CAP_ID_MSIX</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msix_socket</span>) <span class="op">=</span> <span class="ident">msix_socket</span>.<span class="ident">take</span>() {
@@ -2566,6 +2631,8 @@
                         <span class="kw-2">&amp;</span><span class="ident">config</span>,
                         <span class="ident">cap_next</span>,
                         <span class="ident">msix_socket</span>,
+                        <span class="ident">pci_id</span>.<span class="ident">into</span>(),
+                        <span class="ident">dev</span>.<span class="ident">device_name</span>().<span class="ident">to_string</span>(),
                     ))));
                 }
             }
@@ -2573,10 +2640,9 @@
             <span class="ident">cap_next</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>(<span class="ident">offset</span>).<span class="ident">into</span>();
         }
 
-        <span class="kw">let</span> <span class="ident">vendor_id</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">PCI_VENDOR_ID</span>);
         <span class="kw">let</span> <span class="ident">class_code</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">read_config</span>(<span class="ident">PCI_BASE_CLASS_CODE</span>);
 
-        <span class="kw">let</span> <span class="ident">is_intel_gfx</span> <span class="op">=</span> <span class="ident">vendor_id</span> <span class="op">==</span> <span class="ident">INTEL_VENDOR_ID</span>
+        <span class="kw">let</span> <span class="ident">is_intel_gfx</span> <span class="op">=</span> <span class="ident">vendor_id</span> <span class="op">==</span> <span class="ident">PCI_VENDOR_ID_INTEL</span>
             <span class="op">&amp;&amp;</span> <span class="ident">class_code</span> <span class="op">==</span> <span class="ident">PciClassCode::DisplayController</span>.<span class="ident">get_register_value</span>();
         <span class="kw">let</span> <span class="ident">device_data</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">is_intel_gfx</span> {
             <span class="prelude-val">Some</span>(<span class="ident">DeviceData::IntelGfxData</span> {
@@ -3435,7 +3501,7 @@
         <span class="comment">// Make intel gfx&#39;s opregion as mmio bar, and allocate a gpa for it</span>
         <span class="comment">// then write this gpa into pci cfg register</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">index</span>, <span class="ident">size</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">get_cap_type_info</span>(
-            <span class="ident">VFIO_REGION_TYPE_PCI_VENDOR_TYPE</span> <span class="op">|</span> (<span class="ident">INTEL_VENDOR_ID</span> <span class="kw">as</span> <span class="ident">u32</span>),
+            <span class="ident">VFIO_REGION_TYPE_PCI_VENDOR_TYPE</span> <span class="op">|</span> (<span class="ident">PCI_VENDOR_ID_INTEL</span> <span class="kw">as</span> <span class="ident">u32</span>),
             <span class="ident">VFIO_REGION_SUBTYPE_INTEL_IGD_OPREGION</span>,
         ) {
             <span class="kw">let</span> <span class="ident">address</span> <span class="op">=</span> <span class="self">self</span>

@@ -624,6 +624,11 @@
 <span id="623">623</span>
 <span id="624">624</span>
 <span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -640,7 +645,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::bus</span>::{<span class="ident">BusDeviceObj</span>, <span class="ident">BusRange</span>, <span class="ident">BusType</span>, <span class="ident">ConfigWriteResult</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{
     <span class="self">self</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">BAR0_REG</span>, <span class="ident">COMMAND_REG</span>, <span class="ident">COMMAND_REG_IO_SPACE_MASK</span>,
-    <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>, <span class="ident">NUM_BAR_REGS</span>, <span class="ident">ROM_BAR_REG</span>,
+    <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>, <span class="ident">NUM_BAR_REGS</span>, <span class="ident">PCI_ID_REG</span>, <span class="ident">ROM_BAR_REG</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciAddress</span>, <span class="ident">PciAddressError</span>, <span class="ident">PciInterruptPin</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::ipc_memory_mapper::IpcMemoryMapper</span>;
@@ -823,6 +828,11 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PciDevice</span><span class="op">&gt;</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">T</span> {
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="ident">PciDevice::debug_label</span>(<span class="self">self</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+        <span class="comment">// Use the PCI ID for PCI devices, which contains the PCI vendor ID and the PCI device ID</span>
+        <span class="ident">PciDevice::read_config_register</span>(<span class="self">self</span>, <span class="ident">PCI_ID_REG</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">info</span>: <span class="ident">BusAccessInfo</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
