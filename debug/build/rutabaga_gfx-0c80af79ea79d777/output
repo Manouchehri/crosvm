@@ -135,41 +135,41 @@ build configuration:
 - NEEDS_MOUNTS=0
 - SYSROOT=/
 
-CC		gbm_helpers.c ->  gbm_helpers.pic.o
-CC		gbm_helpers.c ->  gbm_helpers.pie.o
+CC		minigbm_helpers.c ->  minigbm_helpers.pic.o
+CC		minigbm_helpers.c ->  minigbm_helpers.pie.o
 CC		virtgpu.c ->  virtgpu.pic.o
 CC		virtgpu.c ->  virtgpu.pie.o
-CC		mediatek.c ->  mediatek.pic.o
-CC		mediatek.c ->  mediatek.pie.o
 CC		drv_helpers.c ->  drv_helpers.pic.o
 CC		drv_helpers.c ->  drv_helpers.pie.o
 CC		gbm.c ->  gbm.pic.o
 CC		gbm.c ->  gbm.pie.o
-CC		dri.c ->  dri.pic.o
-CC		dri.c ->  dri.pie.o
 CC		i915.c ->  i915.pic.o
 CC		i915.c ->  i915.pie.o
+CC		dri.c ->  dri.pic.o
+CC		dri.c ->  dri.pie.o
 CC		virtgpu_virgl.c ->  virtgpu_virgl.pic.o
 CC		virtgpu_virgl.c ->  virtgpu_virgl.pie.o
 CC		drv_array_helpers.c ->  drv_array_helpers.pic.o
 CC		drv_array_helpers.c ->  drv_array_helpers.pie.o
+CC		gbm_helpers.c ->  gbm_helpers.pic.o
+CC		gbm_helpers.c ->  gbm_helpers.pie.o
+CC		virtgpu_cross_domain.c ->  virtgpu_cross_domain.pic.o
+CC		virtgpu_cross_domain.c ->  virtgpu_cross_domain.pie.o
 CC		drv.c ->  drv.pic.o
 CC		drv.c ->  drv.pie.o
 CC		msm.c ->  msm.pic.o
 CC		msm.c ->  msm.pie.o
-CC		vc4.c ->  vc4.pic.o
-CC		vc4.c ->  vc4.pie.o
-CC		minigbm_helpers.c ->  minigbm_helpers.pic.o
-CC		minigbm_helpers.c ->  minigbm_helpers.pie.o
-CC		dumb_driver.c ->  dumb_driver.pic.o
-CC		dumb_driver.c ->  dumb_driver.pie.o
 CC		rockchip.c ->  rockchip.pic.o
 CC		rockchip.c ->  rockchip.pie.o
+CC		vc4.c ->  vc4.pic.o
+CC		vc4.c ->  vc4.pie.o
+CC		mediatek.c ->  mediatek.pic.o
+CC		mediatek.c ->  mediatek.pie.o
+CC		dumb_driver.c ->  dumb_driver.pic.o
+CC		dumb_driver.c ->  dumb_driver.pie.o
 CC		amdgpu.c ->  amdgpu.pic.o
 CC		amdgpu.c ->  amdgpu.pie.o
-CC		virtgpu_cross_domain.c ->  virtgpu_cross_domain.pic.o
-CC		virtgpu_cross_domain.c ->  virtgpu_cross_domain.pie.o
-AR		gbm_helpers.pie.o virtgpu.pie.o mediatek.pie.o drv_helpers.pie.o gbm.pie.o dri.pie.o i915.pie.o virtgpu_virgl.pie.o drv_array_helpers.pie.o drv.pie.o msm.pie.o vc4.pie.o minigbm_helpers.pie.o dumb_driver.pie.o rockchip.pie.o amdgpu.pie.o virtgpu_cross_domain.pie.o -> libminigbm.pie.a
+AR		minigbm_helpers.pie.o virtgpu.pie.o drv_helpers.pie.o gbm.pie.o i915.pie.o dri.pie.o virtgpu_virgl.pie.o drv_array_helpers.pie.o gbm_helpers.pie.o virtgpu_cross_domain.pie.o drv.pie.o msm.pie.o rockchip.pie.o vc4.pie.o mediatek.pie.o dumb_driver.pie.o amdgpu.pie.o -> libminigbm.pie.a
 make[1]: Leaving directory '/home/runner/work/crosvm/crosvm/docs/target/html/debug/build/rutabaga_gfx-0c80af79ea79d777/out/minigbm'
 The Meson build system
 Version: 0.62.0
@@ -178,7 +178,7 @@ Build dir: /home/runner/work/crosvm/crosvm/docs/target/html/debug/build/rutabaga
 Build type: native build
 Project name: virglrenderer
 Project version: 0.9.0
-C compiler for the host machine: cc (gcc 9.3.0 "cc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0")
+C compiler for the host machine: cc (gcc 9.4.0 "cc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0")
 C linker for the host machine: cc ld.bfd 2.34
 Host machine cpu family: x86_64
 Host machine cpu: x86_64
@@ -252,7 +252,7 @@ Configuration summary:
 
 Build targets in project: 7
 NOTICE: Future-deprecated features used:
- * 0.56.0: {'dependency.get_pkgconfig_variable', 'meson.build_root'}
+ * 0.56.0: {'meson.build_root', 'dependency.get_pkgconfig_variable'}
 
 virglrenderer 0.9.0
 
@@ -271,19 +271,19 @@ Found ninja-1.10.0 at /usr/bin/ninja
 [8/44] Compiling C object src/mesa/libmesa.a.p/util_u_math.c.o
 [9/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_cso_cache_cso_cache.c.o
 [10/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_debug_describe.c.o
-[11/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_texture.c.o
-[12/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_format.c.o
-[13/44] Generating src/gallium/u_format_table.c with a custom command (wrapped by meson to capture output)
+[11/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_format.c.o
+[12/44] Generating src/gallium/u_format_table.c with a custom command (wrapped by meson to capture output)
+[13/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_texture.c.o
 [14/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_util_u_hash_table.c.o
 [15/44] Compiling C object src/gallium/libgallium.a.p/meson-generated_.._u_format_table.c.o
 [16/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_cso_cache_cso_hash.c.o
-[17/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_dump.c.o
-[18/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_info.c.o
+[17/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_info.c.o
+[18/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_dump.c.o
 [19/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_scan.c.o
-[20/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_sanity.c.o
-[21/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_strings.c.o
-[22/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_parse.c.o
-[23/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_build.c.o
+[20/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_strings.c.o
+[21/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_sanity.c.o
+[22/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_build.c.o
+[23/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_parse.c.o
 [24/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_iterate.c.o
 [25/44] Compiling C object src/gallium/libgallium.a.p/auxiliary_tgsi_tgsi_util.c.o
 [26/44] Compiling C object src/libvirgl.a.p/iov.c.o
@@ -302,8 +302,8 @@ Found ninja-1.10.0 at /usr/bin/ninja
 [39/44] Compiling C object src/libvirgl.a.p/vrend_winsys_egl.c.o
 [40/44] Compiling C object src/libvirgl.a.p/vrend_winsys_glx.c.o
 [41/44] Compiling C object src/libvirglrenderer.a.p/virglrenderer.c.o
-[42/44] Compiling C object src/libvirgl.a.p/vrend_shader.c.o
-[43/44] Compiling C object src/libvirgl.a.p/vrend_renderer.c.o
+[42/44] Compiling C object src/libvirgl.a.p/vrend_renderer.c.o
+[43/44] Compiling C object src/libvirgl.a.p/vrend_shader.c.o
 [44/44] Linking static target src/libvirglrenderer.a
 cargo:rustc-link-search=/home/runner/work/crosvm/crosvm/./docs/target/html/debug/build/rutabaga_gfx-0c80af79ea79d777/out/virglrenderer/src
 cargo:rustc-link-search=/home/runner/work/crosvm/crosvm/./docs/target/html/debug/build/rutabaga_gfx-0c80af79ea79d777/out/minigbm
