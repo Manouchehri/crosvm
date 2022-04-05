@@ -1137,21 +1137,6 @@
 <span id="1136">1136</span>
 <span id="1137">1137</span>
 <span id="1138">1138</span>
-<span id="1139">1139</span>
-<span id="1140">1140</span>
-<span id="1141">1141</span>
-<span id="1142">1142</span>
-<span id="1143">1143</span>
-<span id="1144">1144</span>
-<span id="1145">1145</span>
-<span id="1146">1146</span>
-<span id="1147">1147</span>
-<span id="1148">1148</span>
-<span id="1149">1149</span>
-<span id="1150">1150</span>
-<span id="1151">1151</span>
-<span id="1152">1152</span>
-<span id="1153">1153</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1945,12 +1930,7 @@
             <span class="comment">// writable device should set VIRTIO_BLK_F_FLUSH + VIRTIO_BLK_F_DISCARD</span>
             <span class="comment">// + VIRTIO_BLK_F_WRITE_ZEROES + VIRTIO_F_VERSION_1 + VIRTIO_BLK_F_BLK_SIZE</span>
             <span class="comment">// + VIRTIO_BLK_F_SEG_MAX + VIRTIO_RING_F_EVENT_IDX</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="macro">assert_eq!</span>(<span class="number">0x120006244</span>, <span class="ident">b</span>.<span class="ident">features</span>());
-
-            <span class="comment">// VIRTIO_F_SEG_MAX is not supported on Windows</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-            <span class="macro">assert_eq!</span>(<span class="number">0x120006240</span>, <span class="ident">b</span>.<span class="ident">features</span>());
         }
 
         <span class="comment">// read-write block device, non-sparse</span>
@@ -1961,12 +1941,7 @@
             <span class="comment">// writable device should set VIRTIO_BLK_F_FLUSH</span>
             <span class="comment">// + VIRTIO_BLK_F_WRITE_ZEROES + VIRTIO_F_VERSION_1 + VIRTIO_BLK_F_BLK_SIZE</span>
             <span class="comment">// + VIRTIO_BLK_F_SEG_MAX + VIRTIO_RING_F_EVENT_IDX</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="macro">assert_eq!</span>(<span class="number">0x120004244</span>, <span class="ident">b</span>.<span class="ident">features</span>());
-
-            <span class="comment">// VIRTIO_F_SEG_MAX is not supported on Windows</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-            <span class="macro">assert_eq!</span>(<span class="number">0x120006240</span>, <span class="ident">b</span>.<span class="ident">features</span>());
         }
 
         <span class="comment">// read-only block device</span>
@@ -1977,12 +1952,7 @@
             <span class="comment">// read-only device should set VIRTIO_BLK_F_FLUSH and VIRTIO_BLK_F_RO</span>
             <span class="comment">// + VIRTIO_F_VERSION_1 + VIRTIO_BLK_F_BLK_SIZE + VIRTIO_BLK_F_SEG_MAX</span>
             <span class="comment">// + VIRTIO_RING_F_EVENT_IDX</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="macro">assert_eq!</span>(<span class="number">0x120000264</span>, <span class="ident">b</span>.<span class="ident">features</span>());
-
-            <span class="comment">// VIRTIO_F_SEG_MAX is not supported on Windows</span>
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-            <span class="macro">assert_eq!</span>(<span class="number">0x120000260</span>, <span class="ident">b</span>.<span class="ident">features</span>());
         }
     }
 
