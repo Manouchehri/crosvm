@@ -1375,6 +1375,7 @@
 <span id="1374">1374</span>
 <span id="1375">1375</span>
 <span id="1376">1376</span>
+<span id="1377">1377</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2401,7 +2402,8 @@
             .<span class="ident">use_surfaceless</span>(<span class="ident">gpu_parameters</span>.<span class="ident">renderer_use_surfaceless</span>)
             .<span class="ident">use_guest_angle</span>(<span class="ident">gpu_parameters</span>.<span class="ident">gfxstream_use_guest_angle</span>)
             .<span class="ident">use_syncfd</span>(<span class="ident">gpu_parameters</span>.<span class="ident">gfxstream_use_syncfd</span>)
-            .<span class="ident">use_vulkan</span>(<span class="ident">gpu_parameters</span>.<span class="ident">use_vulkan</span>);
+            .<span class="ident">use_vulkan</span>(<span class="ident">gpu_parameters</span>.<span class="ident">use_vulkan</span>)
+            .<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rutabaga_channels</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RutabagaChannel</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> (<span class="ident">channel_name</span>, <span class="ident">path</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">channels</span> {

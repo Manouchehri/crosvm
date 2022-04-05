@@ -556,6 +556,12 @@
 <span id="555">555</span>
 <span id="556">556</span>
 <span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -615,7 +621,7 @@
 
     <span class="kw">pub</span> <span class="ident">get_drm_fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">cookie</span>: <span class="kw-2">*mut</span> <span class="ident">c_void</span>) -&gt; <span class="ident">c_int</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">write_context_fence</span>:
-        <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">cookie</span>: <span class="kw-2">*mut</span> <span class="ident">c_void</span>, <span class="ident">fence</span>: <span class="ident">u64</span>, <span class="ident">ctx_idx</span>: <span class="ident">u32</span>, <span class="ident">ring_idx</span>: <span class="ident">u8</span>)<span class="op">&gt;</span>,
+        <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">cookie</span>: <span class="kw-2">*mut</span> <span class="ident">c_void</span>, <span class="ident">fence_id</span>: <span class="ident">u64</span>, <span class="ident">ctx_id</span>: <span class="ident">u32</span>, <span class="ident">ring_idx</span>: <span class="ident">u8</span>),
 }
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
@@ -716,12 +722,11 @@
     ) -&gt; <span class="ident">c_int</span>;
     <span class="kw">fn</span> <span class="ident">stream_renderer_resource_unmap</span>(<span class="ident">res_handle</span>: <span class="ident">u32</span>) -&gt; <span class="ident">c_int</span>;
     <span class="kw">fn</span> <span class="ident">stream_renderer_resource_map_info</span>(<span class="ident">res_handle</span>: <span class="ident">u32</span>, <span class="ident">map_info</span>: <span class="kw-2">*mut</span> <span class="ident">u32</span>) -&gt; <span class="ident">c_int</span>;
+    <span class="kw">fn</span> <span class="ident">stream_renderer_context_create_fence</span>(<span class="ident">fence_id</span>: <span class="ident">u64</span>, <span class="ident">ctx_id</span>: <span class="ident">u32</span>, <span class="ident">ring_idx</span>: <span class="ident">u8</span>) -&gt; <span class="ident">c_int</span>;
 }
 
 <span class="doccomment">/// The virtio-gpu backend state tracker which supports accelerated rendering.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gfxstream</span> {
-    <span class="ident">fence_handler</span>: <span class="ident">RutabagaFenceHandler</span>,
-}
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gfxstream</span>;
 
 <span class="kw">struct</span> <span class="ident">GfxstreamContext</span> {
     <span class="ident">ctx_id</span>: <span class="ident">u32</span>,
@@ -770,6 +775,15 @@
     <span class="kw">fn</span> <span class="ident">component_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RutabagaComponentType</span> {
         <span class="ident">RutabagaComponentType::Gfxstream</span>
     }
+
+    <span class="kw">fn</span> <span class="ident">context_create_fence</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">fence</span>: <span class="ident">RutabagaFence</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Safe becase only integers are given to gfxstream, not memory.</span>
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
+            <span class="ident">stream_renderer_context_create_fence</span>(<span class="ident">fence</span>.<span class="ident">fence_id</span>, <span class="ident">fence</span>.<span class="ident">ctx_id</span>, <span class="ident">fence</span>.<span class="ident">ring_idx</span>)
+        };
+
+        <span class="ident">ret_to_res</span>(<span class="ident">ret</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">GfxstreamContext</span> {
@@ -788,7 +802,7 @@
     <span class="ident">destroy_gl_context</span>: <span class="prelude-val">None</span>,
     <span class="ident">make_current</span>: <span class="prelude-val">None</span>,
     <span class="ident">get_drm_fd</span>: <span class="prelude-val">None</span>,
-    <span class="ident">write_context_fence</span>: <span class="prelude-val">None</span>,
+    <span class="ident">write_context_fence</span>,
 };
 
 <span class="kw">fn</span> <span class="ident">map_func</span>(<span class="ident">resource_id</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ExternalMappingResult</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> {
@@ -817,7 +831,7 @@
     ) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RutabagaComponent</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cookie</span>: <span class="kw-2">*mut</span> <span class="ident">VirglCookie</span> <span class="op">=</span> <span class="ident">Box::into_raw</span>(<span class="ident">Box::new</span>(<span class="ident">VirglCookie</span> {
             <span class="ident">render_server_fd</span>: <span class="prelude-val">None</span>,
-            <span class="ident">fence_handler</span>: <span class="prelude-val">None</span>,
+            <span class="ident">fence_handler</span>: <span class="prelude-val">Some</span>(<span class="ident">fence_handler</span>),
         }));
 
         <span class="kw">unsafe</span> {
@@ -832,7 +846,7 @@
             );
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">Gfxstream</span> { <span class="ident">fence_handler</span> }))
+        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">Gfxstream</span>))
     }
 
     <span class="kw">fn</span> <span class="ident">map_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">resource_id</span>: <span class="ident">u32</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
@@ -871,9 +885,7 @@
 
     <span class="kw">fn</span> <span class="ident">create_fence</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">fence</span>: <span class="ident">RutabagaFence</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">pipe_virgl_renderer_create_fence</span>(<span class="ident">fence</span>.<span class="ident">fence_id</span> <span class="kw">as</span> <span class="ident">i32</span>, <span class="ident">fence</span>.<span class="ident">ctx_id</span>) };
-        <span class="comment">// This can be moved to the cookie once gfxstream directly calls the</span>
-        <span class="comment">// write_fence callback in pipe_virgl_renderer_create_fence</span>
-        <span class="self">self</span>.<span class="ident">fence_handler</span>.<span class="ident">call</span>(<span class="ident">fence</span>);
+
         <span class="ident">ret_to_res</span>(<span class="ident">ret</span>)
     }
 
