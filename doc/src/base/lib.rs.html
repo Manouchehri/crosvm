@@ -82,13 +82,23 @@
 <span id="81">81</span>
 <span id="82">82</span>
 <span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">common</span>;
+<span class="kw">mod</span> <span class="ident">alloc</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor_reflection</span>;
+<span class="kw">mod</span> <span class="ident">errno</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">external_mapping</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">scoped_event_macro</span>;
+<span class="kw">mod</span> <span class="ident">tube</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">unix</span>;
@@ -96,8 +106,10 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">windows</span>;
 
-<span class="kw">mod</span> <span class="ident">tube</span>;
-
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alloc::LayoutAllocation</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">errno</span>::{<span class="ident">errno_result</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">external_mapping</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ExternalMappingError</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">ExternalMappingResult</span>, <span class="kw-2">*</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">scoped_event_macro</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tube</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">TubeError</span>, <span class="ident">RecvTube</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">TubeResult</span>, <span class="ident">SendTube</span>, <span class="ident">Tube</span>};
 
 <span class="macro">cfg_if::cfg_if!</span> {
