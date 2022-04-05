@@ -228,7 +228,7 @@
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">remount_mode</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">c_ulong</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">ScopedMinijail</span>(<span class="kw">pub</span> <span class="ident">Minijail</span>);
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">ScopedMinijail</span>(<span class="kw">pub</span> <span class="ident">Minijail</span>);
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">ScopedMinijail</span> {
     <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {

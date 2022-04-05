@@ -2060,6 +2060,19 @@
 <span id="2059">2059</span>
 <span id="2060">2060</span>
 <span id="2061">2061</span>
+<span id="2062">2062</span>
+<span id="2063">2063</span>
+<span id="2064">2064</span>
+<span id="2065">2065</span>
+<span id="2066">2066</span>
+<span id="2067">2067</span>
+<span id="2068">2068</span>
+<span id="2069">2069</span>
+<span id="2070">2070</span>
+<span id="2071">2071</span>
+<span id="2072">2072</span>
+<span id="2073">2073</span>
+<span id="2074">2074</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3422,6 +3435,19 @@
     <span class="kw">match</span> <span class="ident">r</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="op">-</span><span class="ident">e</span>,
+    }
+}
+
+<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">crosvm_get_render_server_fd</span>() -&gt; <span class="ident">c_int</span> {
+    <span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env::var</span>(<span class="string">&quot;CROSVM_GPU_SERVER_FD&quot;</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+        <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="op">-</span><span class="ident">EINVAL</span>,
+    };
+
+    <span class="kw">match</span> <span class="ident">fd</span>.<span class="ident">parse</span>() {
+        <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="kw">if</span> <span class="ident">v</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0</span> =&gt; <span class="ident">v</span>,
+        <span class="kw">_</span> =&gt; <span class="op">-</span><span class="ident">EINVAL</span>,
     }
 }
 
