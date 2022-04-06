@@ -2073,6 +2073,11 @@
 <span id="2072">2072</span>
 <span id="2073">2073</span>
 <span id="2074">2074</span>
+<span id="2075">2075</span>
+<span id="2076">2076</span>
+<span id="2077">2077</span>
+<span id="2078">2078</span>
+<span id="2079">2079</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2137,6 +2142,11 @@
 <span class="kw">const</span> <span class="ident">CROSVM_VCPU_EVENT_KIND_PAUSED</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">const</span> <span class="ident">CROSVM_VCPU_EVENT_KIND_HYPERV_HCALL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">const</span> <span class="ident">CROSVM_VCPU_EVENT_KIND_HYPERV_SYNIC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">4</span>;
+
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CROSVM_GPU_SERVER_FD_ENV</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;CROSVM_GPU_SERVER_FD&quot;</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CROSVM_SOCKET_ENV</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;CROSVM_SOCKET&quot;</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;stats&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CROSVM_STATS_ENV</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;CROSVM_STATS&quot;</span>;
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
@@ -2311,7 +2321,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;stats&quot;</span>)]</span>
 <span class="kw">fn</span> <span class="ident">printstats</span>() {
     <span class="comment">// Unsafe due to racy access - OK for stats</span>
-    <span class="kw">if</span> <span class="ident">std::env::var</span>(<span class="string">&quot;CROSVM_STATS&quot;</span>).<span class="ident">is_ok</span>() {
+    <span class="kw">if</span> <span class="ident">std::env::var</span>(<span class="ident">CROSVM_STATS_ENV</span>).<span class="ident">is_ok</span>() {
         <span class="kw">unsafe</span> {
             <span class="ident">stats::STATS</span>.<span class="ident">print</span>();
         }
@@ -3440,7 +3450,7 @@
 
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">crosvm_get_render_server_fd</span>() -&gt; <span class="ident">c_int</span> {
-    <span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env::var</span>(<span class="string">&quot;CROSVM_GPU_SERVER_FD&quot;</span>) {
+    <span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env::var</span>(<span class="ident">CROSVM_GPU_SERVER_FD_ENV</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
         <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="op">-</span><span class="ident">EINVAL</span>,
     };
@@ -3454,7 +3464,7 @@
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">crosvm_connect</span>(<span class="ident">out</span>: <span class="kw-2">*mut</span> <span class="kw-2">*mut</span> <span class="ident">crosvm</span>) -&gt; <span class="ident">c_int</span> {
     <span class="kw">let</span> <span class="ident">_u</span> <span class="op">=</span> <span class="ident">record</span>(<span class="ident">Stat::Connect</span>);
-    <span class="kw">let</span> <span class="ident">socket_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env::var</span>(<span class="string">&quot;CROSVM_SOCKET&quot;</span>) {
+    <span class="kw">let</span> <span class="ident">socket_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">env::var</span>(<span class="ident">CROSVM_SOCKET_ENV</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
         <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="op">-</span><span class="ident">ENOTCONN</span>,
     };

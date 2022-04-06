@@ -860,6 +860,15 @@
 <span id="859">859</span>
 <span id="860">860</span>
 <span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -871,7 +880,6 @@
 <span class="kw">use</span> <span class="ident">std::io</span>;
 <span class="kw">use</span> <span class="ident">std::io::Read</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::net::UnixDatagram</span>;
-<span class="kw">use</span> <span class="ident">std::os::unix::prelude::RawFd</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Barrier</span>};
@@ -884,16 +892,16 @@
     <span class="ident">MS_RDONLY</span>, <span class="ident">O_NONBLOCK</span>, <span class="ident">SIGCHLD</span>, <span class="ident">SOCK_SEQPACKET</span>,
 };
 
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">protobuf::ProtobufError</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 
-<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">add_fd_flags</span>, <span class="ident">block_signal</span>, <span class="ident">clear_signal</span>, <span class="ident">drop_capabilities</span>, <span class="ident">enable_core_scheduling</span>, <span class="ident">error</span>,
     <span class="ident">getegid</span>, <span class="ident">geteuid</span>, <span class="ident">info</span>, <span class="ident">pipe</span>, <span class="ident">register_rt_signal_handler</span>, <span class="ident">validate_raw_descriptor</span>, <span class="ident">warn</span>,
-    <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MmapError</span>, <span class="ident">PollToken</span>,
-    <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">SignalFd</span>, <span class="ident">WaitContext</span>, <span class="ident">SIGRTMIN</span>,
+    <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MmapError</span>,
+    <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">SignalFd</span>, <span class="ident">WaitContext</span>, <span class="ident">SIGRTMIN</span>,
 };
 <span class="kw">use</span> <span class="ident">kvm</span>::{<span class="ident">Cap</span>, <span class="ident">Datamatch</span>, <span class="ident">IoeventAddress</span>, <span class="ident">Kvm</span>, <span class="ident">Vcpu</span>, <span class="ident">VcpuExit</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
@@ -1362,7 +1370,7 @@
         .<span class="ident">context</span>(<span class="string">&quot;error marking stderr nonblocking&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fds</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">RawFd</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::default</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">env_fds</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">Descriptor</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::default</span>();
 
     <span class="kw">let</span> <span class="ident">_default_render_server_params</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::platform::GpuRenderServerParameters</span> {
         <span class="ident">path</span>: <span class="ident">std::path::PathBuf::from</span>(<span class="string">&quot;/usr/libexec/virgl_render_server&quot;</span>),
@@ -1386,7 +1394,10 @@
     <span class="kw">let</span> (<span class="ident">_render_server_jail</span>, <span class="ident">_render_server_fd</span>) <span class="op">=</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parameters</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">gpu_render_server_parameters</span> {
             <span class="kw">let</span> (<span class="ident">jail</span>, <span class="ident">fd</span>) <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::platform::gpu::start_gpu_render_server</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>, <span class="ident">parameters</span>)<span class="question-mark">?</span>;
-            <span class="ident">fds</span>.<span class="ident">push</span>((<span class="ident">String::from</span>(<span class="string">&quot;CROSVM_GPU_SERVER_FD&quot;</span>), <span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>()));
+            <span class="ident">env_fds</span>.<span class="ident">push</span>((
+                <span class="ident">crosvm_plugin::CROSVM_GPU_SERVER_FD_ENV</span>.<span class="ident">to_string</span>(),
+                <span class="ident">Descriptor</span>(<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>()),
+            ));
             (
                 <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::platform::jail_helpers::ScopedMinijail</span>(<span class="ident">jail</span>)),
                 <span class="prelude-val">Some</span>(<span class="ident">fd</span>),
@@ -1505,7 +1516,14 @@
         .<span class="ident">context</span>(<span class="string">&quot;failed to create kvm irqchip&quot;</span>)<span class="question-mark">?</span>;
     <span class="ident">vm</span>.<span class="ident">create_pit</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create kvm PIT&quot;</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">plugin</span> <span class="op">=</span> <span class="ident">Process::new</span>(<span class="ident">vcpu_count</span>, <span class="ident">plugin_path</span>, <span class="kw-2">&amp;</span><span class="ident">plugin_args</span>, <span class="ident">jail</span>, <span class="ident">stderr_wr</span>, <span class="ident">fds</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">plugin</span> <span class="op">=</span> <span class="ident">Process::new</span>(
+        <span class="ident">vcpu_count</span>,
+        <span class="ident">plugin_path</span>,
+        <span class="kw-2">&amp;</span><span class="ident">plugin_args</span>,
+        <span class="ident">jail</span>,
+        <span class="ident">stderr_wr</span>,
+        <span class="ident">env_fds</span>,
+    )<span class="question-mark">?</span>;
     <span class="comment">// Now that the jail for the plugin has been created and we had a chance to adjust gids there,</span>
     <span class="comment">// we can drop all our capabilities in case we had any.</span>
     <span class="ident">drop_capabilities</span>().<span class="ident">context</span>(<span class="string">&quot;failed to drop process capabilities&quot;</span>)<span class="question-mark">?</span>;
