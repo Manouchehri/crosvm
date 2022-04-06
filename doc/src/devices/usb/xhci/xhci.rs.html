@@ -396,6 +396,18 @@
 <span id="395">395</span>
 <span id="396">396</span>
 <span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -413,7 +425,8 @@
     <span class="ident">host_backend_device_provider::HostBackendDeviceProvider</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">UtilsError</span>, <span class="ident">EventLoop</span>, <span class="ident">FailHandle</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
+<span class="kw">use</span> <span class="ident">base::error</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
@@ -424,6 +437,10 @@
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone irq event: {0}&quot;</span>)]</span>
+    <span class="ident">CloneIrqEvent</span>(<span class="ident">base::Error</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone resample event: {0}&quot;</span>)]</span>
+    <span class="ident">CloneResampleEvent</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create command ring controller: {0}&quot;</span>)]</span>
     <span class="ident">CreateCommandRingController</span>(<span class="ident">CommandRingControllerError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable interrupter: {0}&quot;</span>)]</span>
@@ -476,15 +493,22 @@
         <span class="ident">fail_handle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FailHandle</span><span class="op">&gt;</span>,
         <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
         <span class="ident">device_provider</span>: <span class="ident">HostBackendDeviceProvider</span>,
-        <span class="ident">irq_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="ident">Event</span>,
+        <span class="ident">interrupt_evt</span>: <span class="ident">IrqLevelEvent</span>,
         <span class="ident">regs</span>: <span class="ident">XhciRegs</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">event_loop</span>, <span class="ident">join_handle</span>) <span class="op">=</span>
             <span class="ident">EventLoop::start</span>(<span class="string">&quot;xhci&quot;</span>.<span class="ident">to_string</span>(), <span class="prelude-val">Some</span>(<span class="ident">fail_handle</span>.<span class="ident">clone</span>()))
                 .<span class="ident">map_err</span>(<span class="ident">Error::StartEventLoop</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">irq_evt</span> <span class="op">=</span> <span class="ident">interrupt_evt</span>
+            .<span class="ident">get_trigger</span>()
+            .<span class="ident">try_clone</span>()
+            .<span class="ident">map_err</span>(<span class="ident">Error::CloneIrqEvent</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">interrupter</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Interrupter::new</span>(<span class="ident">mem</span>.<span class="ident">clone</span>(), <span class="ident">irq_evt</span>, <span class="kw-2">&amp;</span><span class="ident">regs</span>)));
         <span class="kw">let</span> <span class="ident">event_loop</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">event_loop</span>);
+        <span class="kw">let</span> <span class="ident">irq_resample_evt</span> <span class="op">=</span> <span class="ident">interrupt_evt</span>
+            .<span class="ident">get_resample</span>()
+            .<span class="ident">try_clone</span>()
+            .<span class="ident">map_err</span>(<span class="ident">Error::CloneResampleEvent</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">intr_resample_handler</span> <span class="op">=</span>
             <span class="ident">IntrResampleHandler::start</span>(<span class="kw-2">&amp;</span><span class="ident">event_loop</span>, <span class="ident">interrupter</span>.<span class="ident">clone</span>(), <span class="ident">irq_resample_evt</span>)
                 .<span class="ident">ok_or</span>(<span class="ident">Error::StartResampleHandler</span>)<span class="question-mark">?</span>;

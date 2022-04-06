@@ -785,6 +785,7 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::base_features</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::VIRTIO_MSI_NO_VECTOR</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
     <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
     <span class="kw">use</span> <span class="ident">net_util::fakes::FakeTap</span>;
     <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
@@ -847,8 +848,7 @@
             <span class="ident">guest_memory</span>,
             <span class="ident">Interrupt::new</span>(
                 <span class="ident">Arc::new</span>(<span class="ident">AtomicUsize::new</span>(<span class="number">0</span>)),
-                <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
-                <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
+                <span class="ident">IrqLevelEvent::new</span>().<span class="ident">unwrap</span>(),
                 <span class="prelude-val">None</span>,
                 <span class="ident">VIRTIO_MSI_NO_VECTOR</span>,
             ),

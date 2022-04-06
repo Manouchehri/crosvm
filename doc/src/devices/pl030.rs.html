@@ -192,11 +192,11 @@
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">Event</span>};
+<span class="kw">use</span> <span class="ident">base::warn</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::time</span>::{<span class="ident">SystemTime</span>, <span class="ident">UNIX_EPOCH</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">IrqEdgeEvent</span>};
 
 <span class="comment">// Register offsets</span>
 <span class="comment">// Data register</span>
@@ -226,7 +226,7 @@
 <span class="doccomment">/// An emulated ARM pl030 RTC</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pl030</span> {
     <span class="comment">// Event to be used to interrupt the guest for an alarm event</span>
-    <span class="ident">alarm_evt</span>: <span class="ident">Event</span>,
+    <span class="ident">alarm_evt</span>: <span class="ident">IrqEdgeEvent</span>,
 
     <span class="comment">// This is the delta we subtract from current time to get the</span>
     <span class="comment">// counter value</span>
@@ -250,7 +250,7 @@
 
 <span class="kw">impl</span> <span class="ident">Pl030</span> {
     <span class="doccomment">/// Constructs a Pl030 device</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">evt</span>: <span class="ident">Event</span>) -&gt; <span class="ident">Pl030</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">evt</span>: <span class="ident">IrqEdgeEvent</span>) -&gt; <span class="ident">Pl030</span> {
         <span class="ident">Pl030</span> {
             <span class="ident">alarm_evt</span>: <span class="ident">evt</span>,
             <span class="ident">counter_delta_time</span>: <span class="ident">get_epoch_time</span>(),
@@ -290,7 +290,7 @@
                 <span class="kw">if</span> <span class="ident">reg_val</span> <span class="op">==</span> <span class="number">0</span> {
                     <span class="self">self</span>.<span class="ident">interrupt_active</span> <span class="op">=</span> <span class="bool-val">false</span>;
                 } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">alarm_evt</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+                    <span class="self">self</span>.<span class="ident">alarm_evt</span>.<span class="ident">trigger</span>().<span class="ident">unwrap</span>();
                     <span class="self">self</span>.<span class="ident">interrupt_active</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 }
             }
@@ -351,7 +351,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_interrupt_status_register</span>() {
-        <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">IrqEdgeEvent::new</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">Pl030::new</span>(<span class="ident">event</span>.<span class="ident">try_clone</span>().<span class="ident">unwrap</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">register</span> <span class="op">=</span> [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
 
@@ -359,7 +359,7 @@
         <span class="ident">device</span>.<span class="ident">write</span>(<span class="ident">pl030_bus_address</span>(<span class="ident">RTCEOI</span>), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
         <span class="ident">device</span>.<span class="ident">read</span>(<span class="ident">pl030_bus_address</span>(<span class="ident">RTCSTAT</span>), <span class="kw-2">&amp;mut</span> <span class="ident">register</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">register</span>, [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
-        <span class="macro">assert_eq!</span>(<span class="ident">event</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>(), <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">event</span>.<span class="ident">get_trigger</span>().<span class="ident">read</span>().<span class="ident">unwrap</span>(), <span class="number">1</span>);
 
         <span class="comment">// clear interrupt</span>
         <span class="ident">device</span>.<span class="ident">write</span>(<span class="ident">pl030_bus_address</span>(<span class="ident">RTCEOI</span>), <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]);
@@ -369,7 +369,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_match_register</span>() {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">Pl030::new</span>(<span class="ident">Event::new</span>().<span class="ident">unwrap</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">Pl030::new</span>(<span class="ident">IrqEdgeEvent::new</span>().<span class="ident">unwrap</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">register</span> <span class="op">=</span> [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>];
 
         <span class="ident">device</span>.<span class="ident">write</span>(<span class="ident">pl030_bus_address</span>(<span class="ident">RTCMR</span>), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]);

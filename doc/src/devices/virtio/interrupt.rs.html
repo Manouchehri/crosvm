@@ -134,13 +134,12 @@
 <span id="133">133</span>
 <span id="134">134</span>
 <span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">INTERRUPT_STATUS_CONFIG_CHANGED</span>, <span class="ident">INTERRUPT_STATUS_USED_RING</span>, <span class="ident">VIRTIO_MSI_NO_VECTOR</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::irq_event::IrqLevelEvent</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::MsixConfig</span>;
 <span class="kw">use</span> <span class="ident">base::Event</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
@@ -169,8 +168,7 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Interrupt</span> {
     <span class="ident">interrupt_status</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AtomicUsize</span><span class="op">&gt;</span>,
-    <span class="ident">interrupt_evt</span>: <span class="ident">Event</span>,
-    <span class="ident">interrupt_resample_evt</span>: <span class="ident">Event</span>,
+    <span class="ident">interrupt_evt</span>: <span class="ident">IrqLevelEvent</span>,
     <span class="ident">msix_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsixConfig</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">config_msix_vector</span>: <span class="ident">u16</span>,
 }
@@ -200,7 +198,7 @@
             <span class="op">==</span> <span class="number">0</span>
         {
             <span class="comment">// Write to irqfd to inject INTx interrupt</span>
-            <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+            <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">trigger</span>().<span class="ident">unwrap</span>();
         }
     }
 
@@ -209,12 +207,12 @@
     }
 
     <span class="kw">fn</span> <span class="ident">get_resample_evt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Event</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_resample_evt</span>)
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">get_resample</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">do_interrupt_resample</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">interrupt_status</span>.<span class="ident">load</span>(<span class="ident">Ordering::SeqCst</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
+            <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">trigger</span>().<span class="ident">unwrap</span>();
         }
     }
 }
@@ -243,15 +241,13 @@
 <span class="kw">impl</span> <span class="ident">Interrupt</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">interrupt_status</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AtomicUsize</span><span class="op">&gt;</span>,
-        <span class="ident">interrupt_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">interrupt_resample_evt</span>: <span class="ident">Event</span>,
+        <span class="ident">interrupt_evt</span>: <span class="ident">IrqLevelEvent</span>,
         <span class="ident">msix_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsixConfig</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">config_msix_vector</span>: <span class="ident">u16</span>,
     ) -&gt; <span class="ident">Interrupt</span> {
         <span class="ident">Interrupt</span> {
             <span class="ident">interrupt_status</span>,
             <span class="ident">interrupt_evt</span>,
-            <span class="ident">interrupt_resample_evt</span>,
             <span class="ident">msix_config</span>,
             <span class="ident">config_msix_vector</span>,
         }
@@ -259,12 +255,12 @@
 
     <span class="doccomment">/// Get a reference to the interrupt event.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_interrupt_evt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Event</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_evt</span>
+        <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">get_trigger</span>()
     }
 
     <span class="doccomment">/// Handle interrupt resampling event, reading the value from the event and doing the resample.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">interrupt_resample</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span>.<span class="ident">read</span>();
+        <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">clear_resample</span>();
         <span class="self">self</span>.<span class="ident">do_interrupt_resample</span>();
     }
 

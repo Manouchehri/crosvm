@@ -1300,7 +1300,6 @@
 <span id="1299">1299</span>
 <span id="1300">1300</span>
 <span id="1301">1301</span>
-<span id="1302">1302</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1318,7 +1317,7 @@
 };
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="self">self</span>, <span class="ident">error</span>, <span class="ident">set_rt_prio_limit</span>, <span class="ident">set_rt_round_robin</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>,
-    <span class="ident">Event</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SharedMemoryUnix</span>,
+    <span class="ident">FromRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SharedMemoryUnix</span>,
 };
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
@@ -1327,6 +1326,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::ac97_mixer::Ac97Mixer</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::ac97_regs</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
 <span class="kw">const</span> <span class="ident">INPUT_SAMPLE_RATE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">48000</span>;
 <span class="kw">const</span> <span class="ident">DEVICE_INPUT_CHANNEL_COUNT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span>;
@@ -1342,7 +1342,7 @@
     <span class="ident">glob_sta</span>: <span class="ident">u32</span>,
 
     <span class="comment">// IRQ event - driven by the glob_sta register.</span>
-    <span class="ident">irq_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+    <span class="ident">irq_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Ac97BusMasterRegs</span> {
@@ -1551,12 +1551,12 @@
     }
 
     <span class="doccomment">/// Provides the events needed to raise interrupts in the guest.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_irq_event</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irq_evt</span>: <span class="ident">Event</span>, <span class="ident">irq_resample_evt</span>: <span class="ident">Event</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_irq_event</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irq_evt</span>: <span class="ident">IrqLevelEvent</span>) {
         <span class="kw">let</span> <span class="ident">thread_regs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">lock</span>().<span class="ident">irq_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>);
+        <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">lock</span>().<span class="ident">irq_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">expect</span>(<span class="string">&quot;cloning irq_evt failed&quot;</span>));
         <span class="self">self</span>.<span class="ident">irq_resample_thread</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
             <span class="kw">loop</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">irq_resample_evt</span>.<span class="ident">read</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">irq_evt</span>.<span class="ident">get_resample</span>().<span class="ident">read</span>() {
                     <span class="macro">error!</span>(
                         <span class="string">&quot;Failed to read the irq event from the resample thread: {}.&quot;</span>,
                         <span class="ident">e</span>,
@@ -1567,11 +1567,9 @@
                     <span class="comment">// Scope for the lock on thread_regs.</span>
                     <span class="kw">let</span> <span class="ident">regs</span> <span class="op">=</span> <span class="ident">thread_regs</span>.<span class="ident">lock</span>();
                     <span class="kw">if</span> <span class="ident">regs</span>.<span class="ident">has_irq</span>() {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>) <span class="op">=</span> <span class="ident">regs</span>.<span class="ident">irq_evt</span>.<span class="ident">as_ref</span>() {
-                            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">irq_evt</span>.<span class="ident">write</span>(<span class="number">1</span>) {
-                                <span class="macro">error!</span>(<span class="string">&quot;Failed to set the irq from the resample thread: {}.&quot;</span>, <span class="ident">e</span>);
-                                <span class="kw">break</span>;
-                            }
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">irq_evt</span>.<span class="ident">trigger</span>() {
+                            <span class="macro">error!</span>(<span class="string">&quot;Failed to set the irq from the resample thread: {}.&quot;</span>, <span class="ident">e</span>);
+                            <span class="kw">break</span>;
                         }
                     }
                 }
@@ -2242,9 +2240,9 @@
 
     <span class="kw">if</span> <span class="ident">interrupt_high</span> {
         <span class="ident">regs</span>.<span class="ident">glob_sta</span> <span class="op">|</span><span class="op">=</span> <span class="ident">int_mask</span>;
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>) <span class="op">=</span> <span class="ident">regs</span>.<span class="ident">irq_evt</span>.<span class="ident">as_ref</span>() {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">irq_evt</span>) <span class="op">=</span> <span class="ident">regs</span>.<span class="ident">irq_evt</span> {
             <span class="comment">// Ignore write failure, nothing can be done about it from here.</span>
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">irq_evt</span>.<span class="ident">write</span>(<span class="number">1</span>);
+            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">irq_evt</span>.<span class="ident">trigger</span>();
         }
     } <span class="kw">else</span> {
         <span class="ident">regs</span>.<span class="ident">glob_sta</span> <span class="op">&amp;=</span> <span class="op">!</span><span class="ident">int_mask</span>;

@@ -1913,17 +1913,6 @@
 <span id="1912">1912</span>
 <span id="1913">1913</span>
 <span id="1914">1914</span>
-<span id="1915">1915</span>
-<span id="1916">1916</span>
-<span id="1917">1917</span>
-<span id="1918">1918</span>
-<span id="1919">1919</span>
-<span id="1920">1920</span>
-<span id="1921">1921</span>
-<span id="1922">1922</span>
-<span id="1923">1923</span>
-<span id="1924">1924</span>
-<span id="1925">1925</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1961,6 +1950,7 @@
 };
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioError</span>, <span class="ident">VfioIrqType</span>, <span class="ident">VfioPciConfig</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
 <span class="kw">const</span> <span class="ident">PCI_VENDOR_ID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0</span>;
 <span class="kw">const</span> <span class="ident">PCI_DEVICE_ID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2</span>;
@@ -2573,8 +2563,7 @@
     <span class="ident">hotplug_bus_number</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="comment">// hot plug device has bus number specified at device creation.</span>
     <span class="ident">guest_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="ident">pci_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
-    <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-    <span class="ident">interrupt_resample_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+    <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
     <span class="ident">mmio_regions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span>,
     <span class="ident">io_regions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span>,
     <span class="ident">msi_cap</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VfioMsiCap</span><span class="op">&gt;</span>,
@@ -2659,7 +2648,6 @@
             <span class="ident">guest_address</span>,
             <span class="ident">pci_address</span>: <span class="prelude-val">None</span>,
             <span class="ident">interrupt_evt</span>: <span class="prelude-val">None</span>,
-            <span class="ident">interrupt_resample_evt</span>: <span class="prelude-val">None</span>,
             <span class="ident">mmio_regions</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">io_regions</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">msi_cap</span>,
@@ -2697,41 +2685,35 @@
     }
 
     <span class="kw">fn</span> <span class="ident">enable_intx</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">interrupt_evt</span>.<span class="ident">is_none</span>() <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span>.<span class="ident">is_none</span>() {
-            <span class="kw">return</span>;
-        }
-
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">interrupt_evt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_evt</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span>
-                <span class="self">self</span>.<span class="ident">device</span>
-                    .<span class="ident">irq_enable</span>(<span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(<span class="ident">interrupt_evt</span>)], <span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>, <span class="number">0</span>)
-            {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">irq_enable</span>(
+                <span class="kw-2">&amp;</span>[<span class="prelude-val">Some</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_trigger</span>())],
+                <span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>,
+                <span class="number">0</span>,
+            ) {
                 <span class="macro">error!</span>(<span class="string">&quot;{} Intx enable failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
                 <span class="kw">return</span>;
             }
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">irq_resample_evt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">irq_mask</span>(<span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>) {
-                    <span class="macro">error!</span>(<span class="string">&quot;{} Intx mask failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
-                    <span class="self">self</span>.<span class="ident">disable_intx</span>();
-                    <span class="kw">return</span>;
-                }
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>
-                    .<span class="ident">device</span>
-                    .<span class="ident">resample_virq_enable</span>(<span class="ident">irq_resample_evt</span>, <span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>)
-                {
-                    <span class="macro">error!</span>(<span class="string">&quot;{} resample enable failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
-                    <span class="self">self</span>.<span class="ident">disable_intx</span>();
-                    <span class="kw">return</span>;
-                }
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">irq_unmask</span>(<span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>) {
-                    <span class="macro">error!</span>(<span class="string">&quot;{} Intx unmask failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
-                    <span class="self">self</span>.<span class="ident">disable_intx</span>();
-                    <span class="kw">return</span>;
-                }
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">irq_mask</span>(<span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>) {
+                <span class="macro">error!</span>(<span class="string">&quot;{} Intx mask failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
+                <span class="self">self</span>.<span class="ident">disable_intx</span>();
+                <span class="kw">return</span>;
             }
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>
+                .<span class="ident">device</span>
+                .<span class="ident">resample_virq_enable</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_resample</span>(), <span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>)
+            {
+                <span class="macro">error!</span>(<span class="string">&quot;{} resample enable failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
+                <span class="self">self</span>.<span class="ident">disable_intx</span>();
+                <span class="kw">return</span>;
+            }
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">irq_unmask</span>(<span class="ident">VFIO_PCI_INTX_IRQ_INDEX</span>) {
+                <span class="macro">error!</span>(<span class="string">&quot;{} Intx unmask failed: {}&quot;</span>, <span class="self">self</span>.<span class="ident">debug_label</span>(), <span class="ident">e</span>);
+                <span class="self">self</span>.<span class="ident">disable_intx</span>();
+                <span class="kw">return</span>;
+            }
+            <span class="self">self</span>.<span class="ident">irq_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VfioIrqType::Intx</span>);
         }
-
-        <span class="self">self</span>.<span class="ident">irq_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VfioIrqType::Intx</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">disable_intx</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
@@ -3411,10 +3393,8 @@
     <span class="kw">fn</span> <span class="ident">keep_rds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rds</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">keep_rds</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">interrupt_evt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">as_raw_descriptor</span>());
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">interrupt_resample_evt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_resample_evt</span>.<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_resample</span>().<span class="ident">as_raw_descriptor</span>());
         }
         <span class="ident">rds</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">vm_socket_mem</span>.<span class="ident">as_raw_descriptor</span>());
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msi_cap</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">msi_cap</span> {
@@ -3428,8 +3408,7 @@
 
     <span class="kw">fn</span> <span class="ident">assign_irq</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
+        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>,
         <span class="ident">_irq_num</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">PciInterruptPin</span>)<span class="op">&gt;</span> {
         <span class="comment">// Is INTx configured?</span>
@@ -3443,7 +3422,6 @@
 
         <span class="comment">// Keep event/resample event references.</span>
         <span class="self">self</span>.<span class="ident">interrupt_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
-        <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_resample_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
 
         <span class="comment">// enable INTX</span>
         <span class="self">self</span>.<span class="ident">enable_intx</span>();

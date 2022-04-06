@@ -474,13 +474,6 @@
 <span id="473">473</span>
 <span id="474">474</span>
 <span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -490,7 +483,7 @@
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 
 <span class="kw">use</span> <span class="ident">audio_streams::shm_streams</span>::{<span class="ident">NullShmStreamSource</span>, <span class="ident">ShmStreamSource</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">libcras</span>::{<span class="ident">CrasClient</span>, <span class="ident">CrasClientType</span>, <span class="ident">CrasSocketType</span>, <span class="ident">CrasSysError</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -511,6 +504,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::snd::vios_backend::Error</span> <span class="kw">as</span> <span class="ident">VioSError</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::snd::vios_backend::VioSShmStreamSource</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
 <span class="comment">// Use 82801AA because it&#39;s what qemu does.</span>
 <span class="kw">const</span> <span class="ident">PCI_DEVICE_ID_INTEL_82801AA_5</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">0x2415</span>;
@@ -597,8 +591,7 @@
     <span class="ident">pci_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="comment">// The irq events are temporarily saved here. They need to be passed to the device after the</span>
     <span class="comment">// jail forks. This happens when the bus is first written.</span>
-    <span class="ident">irq_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-    <span class="ident">irq_resample_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+    <span class="ident">irq_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
     <span class="ident">bus_master</span>: <span class="ident">Ac97BusMaster</span>,
     <span class="ident">mixer</span>: <span class="ident">Ac97Mixer</span>,
     <span class="ident">backend</span>: <span class="ident">Ac97Backend</span>,
@@ -628,7 +621,6 @@
             <span class="ident">config_regs</span>,
             <span class="ident">pci_address</span>: <span class="prelude-val">None</span>,
             <span class="ident">irq_evt</span>: <span class="prelude-val">None</span>,
-            <span class="ident">irq_resample_evt</span>: <span class="prelude-val">None</span>,
             <span class="ident">bus_master</span>: <span class="ident">Ac97BusMaster::new</span>(<span class="ident">mem</span>, <span class="ident">audio_server</span>),
             <span class="ident">mixer</span>: <span class="ident">Ac97Mixer::new</span>(),
             <span class="ident">backend</span>,
@@ -787,12 +779,10 @@
 
     <span class="kw">fn</span> <span class="ident">assign_irq</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
+        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>,
         <span class="ident">irq_num</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">PciInterruptPin</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">irq_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
-        <span class="self">self</span>.<span class="ident">irq_resample_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_resample_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
         <span class="kw">let</span> <span class="ident">gsi</span> <span class="op">=</span> <span class="ident">irq_num</span><span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">pin</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pci_address</span>.<span class="ident">map_or</span>(
             <span class="ident">PciInterruptPin::IntA</span>,
@@ -887,10 +877,8 @@
             <span class="ident">rds</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">server_fds</span>);
         }
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">irq_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">as_raw_descriptor</span>());
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_resample_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">irq_resample_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">irq_resample_evt</span>.<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">get_resample</span>().<span class="ident">as_raw_descriptor</span>());
         }
         <span class="ident">rds</span>
     }
@@ -914,10 +902,8 @@
             <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">bar0</span> <span class="op">&amp;&amp;</span> <span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">MIXER_REGS_SIZE</span> =&gt; <span class="self">self</span>.<span class="ident">write_mixer</span>(<span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar0</span>, <span class="ident">data</span>),
             <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">bar1</span> <span class="op">&amp;&amp;</span> <span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">bar1</span> <span class="op">+</span> <span class="ident">MASTER_REGS_SIZE</span> =&gt; {
                 <span class="comment">// Check if the irq needs to be passed to the device.</span>
-                <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>), <span class="prelude-val">Some</span>(<span class="ident">irq_resample_evt</span>)) <span class="op">=</span>
-                    (<span class="self">self</span>.<span class="ident">irq_evt</span>.<span class="ident">take</span>(), <span class="self">self</span>.<span class="ident">irq_resample_evt</span>.<span class="ident">take</span>())
-                {
-                    <span class="self">self</span>.<span class="ident">bus_master</span>.<span class="ident">set_irq_event</span>(<span class="ident">irq_evt</span>, <span class="ident">irq_resample_evt</span>);
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">irq_evt</span>.<span class="ident">take</span>() {
+                    <span class="self">self</span>.<span class="ident">bus_master</span>.<span class="ident">set_irq_event</span>(<span class="ident">irq_evt</span>);
                 }
                 <span class="self">self</span>.<span class="ident">write_bus_master</span>(<span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar1</span>, <span class="ident">data</span>)
             }

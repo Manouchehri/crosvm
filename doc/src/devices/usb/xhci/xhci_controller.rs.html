@@ -320,11 +320,6 @@
 <span id="319">319</span>
 <span id="320">320</span>
 <span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -341,7 +336,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::usb::xhci::xhci_backend_device_provider::XhciBackendDeviceProvider</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::usb::xhci::xhci_regs</span>::{<span class="ident">init_xhci_mmio_space_and_regs</span>, <span class="ident">XhciRegs</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils::FailHandle</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicBool</span>, <span class="ident">Ordering</span>};
@@ -408,8 +404,7 @@
     },
     <span class="ident">IrqAssigned</span> {
         <span class="ident">device_provider</span>: <span class="ident">HostBackendDeviceProvider</span>,
-        <span class="ident">irq_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="ident">Event</span>,
+        <span class="ident">irq_evt</span>: <span class="ident">IrqLevelEvent</span>,
     },
     <span class="ident">Initialized</span> {
         <span class="ident">mmio</span>: <span class="ident">RegisterSpace</span>,
@@ -458,7 +453,6 @@
             <span class="ident">XhciControllerState::IrqAssigned</span> {
                 <span class="ident">device_provider</span>,
                 <span class="ident">irq_evt</span>,
-                <span class="ident">irq_resample_evt</span>,
             } =&gt; {
                 <span class="kw">let</span> (<span class="ident">mmio</span>, <span class="ident">regs</span>) <span class="op">=</span> <span class="ident">init_xhci_mmio_space_and_regs</span>();
                 <span class="kw">let</span> <span class="ident">fail_handle</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FailHandle</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">XhciFailHandle::new</span>(<span class="kw-2">&amp;</span><span class="ident">regs</span>));
@@ -467,7 +461,6 @@
                     <span class="self">self</span>.<span class="ident">mem</span>.<span class="ident">clone</span>(),
                     <span class="ident">device_provider</span>,
                     <span class="ident">irq_evt</span>,
-                    <span class="ident">irq_resample_evt</span>,
                     <span class="ident">regs</span>,
                 ) {
                     <span class="prelude-val">Ok</span>(<span class="ident">xhci</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">xhci</span>),
@@ -520,11 +513,10 @@
             <span class="ident">XhciControllerState::IrqAssigned</span> {
                 <span class="ident">device_provider</span>,
                 <span class="ident">irq_evt</span>,
-                <span class="ident">irq_resample_evt</span>,
             } =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keep_rds</span> <span class="op">=</span> <span class="ident">device_provider</span>.<span class="ident">keep_rds</span>();
-                <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">as_raw_descriptor</span>());
-                <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">irq_resample_evt</span>.<span class="ident">as_raw_descriptor</span>());
+                <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">as_raw_descriptor</span>());
+                <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">irq_evt</span>.<span class="ident">get_resample</span>().<span class="ident">as_raw_descriptor</span>());
                 <span class="ident">keep_rds</span>
             }
             <span class="kw">_</span> =&gt; {
@@ -536,8 +528,7 @@
 
     <span class="kw">fn</span> <span class="ident">assign_irq</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
+        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>,
         <span class="ident">irq_num</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">PciInterruptPin</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">gsi</span> <span class="op">=</span> <span class="ident">irq_num</span><span class="question-mark">?</span>;
@@ -551,7 +542,6 @@
                 <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">XhciControllerState::IrqAssigned</span> {
                     <span class="ident">device_provider</span>,
                     <span class="ident">irq_evt</span>: <span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>,
-                    <span class="ident">irq_resample_evt</span>: <span class="ident">irq_resample_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>,
                 }
             }
             <span class="kw">_</span> =&gt; {

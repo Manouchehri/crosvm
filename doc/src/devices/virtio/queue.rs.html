@@ -890,8 +890,6 @@
 <span id="889">889</span>
 <span id="890">890</span>
 <span id="891">891</span>
-<span id="892">892</span>
-<span id="893">893</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1515,7 +1513,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::<span class="kw">super</span>::Interrupt</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">base::Event</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
     <span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
     <span class="kw">use</span> <span class="ident">std::sync::atomic::AtomicUsize</span>;
     <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
@@ -1617,8 +1615,7 @@
 
         <span class="kw">let</span> <span class="ident">interrupt</span> <span class="op">=</span> <span class="ident">Interrupt::new</span>(
             <span class="ident">Arc::new</span>(<span class="ident">AtomicUsize::new</span>(<span class="number">0</span>)),
-            <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">IrqLevelEvent::new</span>().<span class="ident">unwrap</span>(),
             <span class="prelude-val">None</span>,
             <span class="number">10</span>,
         );
@@ -1694,8 +1691,7 @@
 
         <span class="kw">let</span> <span class="ident">interrupt</span> <span class="op">=</span> <span class="ident">Interrupt::new</span>(
             <span class="ident">Arc::new</span>(<span class="ident">AtomicUsize::new</span>(<span class="number">0</span>)),
-            <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">Event::new</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">IrqLevelEvent::new</span>().<span class="ident">unwrap</span>(),
             <span class="prelude-val">None</span>,
             <span class="number">10</span>,
         );

@@ -528,11 +528,6 @@
 <span id="527">527</span>
 <span id="528">528</span>
 <span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -552,6 +547,7 @@
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pcie_device::PcieDevice</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
 <span class="kw">const</span> <span class="ident">BR_MSIX_TABLE_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x0</span>;
 <span class="kw">const</span> <span class="ident">BR_MSIX_PBA_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x100</span>;
@@ -592,8 +588,7 @@
     <span class="ident">setting_bar</span>: <span class="ident">u8</span>,
     <span class="ident">msix_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsixConfig</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-    <span class="ident">interrupt_resample_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+    <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">PciBridge</span> {
@@ -638,7 +633,6 @@
             <span class="ident">msix_config</span>,
             <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-val">None</span>,
             <span class="ident">interrupt_evt</span>: <span class="prelude-val">None</span>,
-            <span class="ident">interrupt_resample_evt</span>: <span class="prelude-val">None</span>,
         }
     }
 
@@ -723,10 +717,8 @@
     <span class="kw">fn</span> <span class="ident">keep_rds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">interrupt_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">as_raw_descriptor</span>());
-        }
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">interrupt_resample_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_resample_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_resample_evt</span>.<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_resample</span>().<span class="ident">as_raw_descriptor</span>());
         }
         <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">get_msi_socket</span>();
         <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">descriptor</span>);
@@ -735,12 +727,10 @@
 
     <span class="kw">fn</span> <span class="ident">assign_irq</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-        <span class="ident">irq_resample_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
+        <span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>,
         <span class="ident">irq_num</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">PciInterruptPin</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">interrupt_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
-        <span class="self">self</span>.<span class="ident">interrupt_resample_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_resample_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
         <span class="kw">let</span> <span class="ident">msix_config_clone</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">clone</span>();
         <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">clone_interrupt</span>(<span class="ident">msix_config_clone</span>);
 
