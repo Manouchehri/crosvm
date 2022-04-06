@@ -1320,6 +1320,10 @@
 <span id="1319">1319</span>
 <span id="1320">1320</span>
 <span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1527,6 +1531,7 @@
             <span class="ident">flags</span>: <span class="number">0</span>,
             <span class="ident">iova</span>,
             <span class="ident">size</span>,
+            ..<span class="ident">Default::default</span>()
         };
 
         <span class="comment">// Safe as file is vfio container, dma_unmap is constructed by us, and</span>
@@ -1544,6 +1549,7 @@
             <span class="ident">argsz</span>: <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">vfio_iommu_type1_info</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span>,
             <span class="ident">flags</span>: <span class="number">0</span>,
             <span class="ident">iova_pgsizes</span>: <span class="number">0</span>,
+            ..<span class="ident">Default::default</span>()
         };
 
         <span class="comment">// Safe as file is vfio container, iommu_info has valid values,</span>
@@ -2192,6 +2198,7 @@
             <span class="ident">flags</span>: <span class="number">0</span>,
             <span class="ident">num_regions</span>: <span class="number">0</span>,
             <span class="ident">num_irqs</span>: <span class="number">0</span>,
+            ..<span class="ident">Default::default</span>()
         };
 
         <span class="comment">// Safe as we are the owner of device_file and dev_info which are valid value,</span>
@@ -2251,6 +2258,7 @@
             <span class="ident">flags</span>: <span class="number">0</span>,
             <span class="ident">num_regions</span>: <span class="number">0</span>,
             <span class="ident">num_irqs</span>: <span class="number">0</span>,
+            ..<span class="ident">Default::default</span>()
         };
         <span class="comment">// Safe as we are the owner of dev and dev_info which are valid value,</span>
         <span class="comment">// and we verify the return value.</span>

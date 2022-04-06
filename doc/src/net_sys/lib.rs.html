@@ -41,26 +41,6 @@
 <span id="40">40</span>
 <span id="41">41</span>
 <span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-<span id="48">48</span>
-<span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
-<span id="62">62</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright TUNTAP, 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -71,33 +51,13 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>};
 
-<span class="comment">// generated with bindgen /usr/include/linux/if.h --no-unstable-rust</span>
-<span class="comment">// --constified-enum &#39;*&#39; --with-derive-default -- -D __UAPI_DEF_IF_IFNAMSIZ -D</span>
-<span class="comment">// __UAPI_DEF_IF_NET_DEVICE_FLAGS -D __UAPI_DEF_IF_IFREQ -D __UAPI_DEF_IF_IFMAP</span>
-<span class="comment">// Name is &quot;iff&quot; to avoid conflicting with &quot;if&quot; keyword.</span>
-<span class="comment">// Generated against Linux 4.11 to include fix &quot;uapi: fix linux/if.h userspace</span>
-<span class="comment">// compilation errors&quot;.</span>
-<span class="comment">// Manual fixup of ifrn_name to be of type c_uchar instead of c_char.</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::all</span>)]</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">iff</span>;
-<span class="comment">// generated with bindgen /usr/include/linux/if_tun.h --no-unstable-rust</span>
-<span class="comment">// --constified-enum &#39;*&#39; --with-derive-default</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">if_tun</span>;
-<span class="comment">// generated with bindgen /usr/include/linux/in.h --no-unstable-rust</span>
-<span class="comment">// --constified-enum &#39;*&#39; --with-derive-default</span>
-<span class="comment">// Name is &quot;inn&quot; to avoid conflicting with &quot;in&quot; keyword.</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">inn</span>;
-<span class="comment">// generated with bindgen /usr/include/linux/sockios.h --no-unstable-rust</span>
-<span class="comment">// --constified-enum &#39;*&#39; --with-derive-default</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">iff</span>; <span class="comment">// Named &quot;iff&quot; to avoid conflicting with &quot;if&quot; keyword.</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sockios</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::if_tun</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iff</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::inn</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sockios</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::if_tun</span>::{<span class="ident">sock_fprog</span>, <span class="ident">TUN_F_CSUM</span>, <span class="ident">TUN_F_TSO4</span>, <span class="ident">TUN_F_TSO6</span>, <span class="ident">TUN_F_TSO_ECN</span>, <span class="ident">TUN_F_UFO</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::iff</span>::{<span class="ident">ifreq</span>, <span class="ident">net_device_flags</span>};
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">TUNTAP</span>: <span class="ident">::std::os::raw::c_uint</span> <span class="op">=</span> <span class="number">84</span>;
-
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ARPHRD_ETHER</span>: <span class="ident">sa_family_t</span> <span class="op">=</span> <span class="number">1</span>;
 
 <span class="macro">ioctl_iow_nr!</span>(<span class="ident">TUNSETNOCSUM</span>, <span class="ident">TUNTAP</span>, <span class="number">200</span>, <span class="ident">::std::os::raw::c_int</span>);
 <span class="macro">ioctl_iow_nr!</span>(<span class="ident">TUNSETDEBUG</span>, <span class="ident">TUNTAP</span>, <span class="number">201</span>, <span class="ident">::std::os::raw::c_int</span>);
