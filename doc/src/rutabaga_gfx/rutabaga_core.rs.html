@@ -1012,7 +1012,7 @@
     <span class="kw">fn</span> <span class="ident">detach</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_resource</span>: <span class="kw-2">&amp;</span><span class="ident">RutabagaResource</span>);
 
     <span class="doccomment">/// Implementations must create a fence on specified `ring_idx` in `fence`.  This</span>
-    <span class="doccomment">/// allows for multiple syncrhonizations timelines per RutabagaContext.</span>
+    <span class="doccomment">/// allows for multiple synchronizations timelines per RutabagaContext.</span>
     <span class="kw">fn</span> <span class="ident">context_create_fence</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_fence</span>: <span class="ident">RutabagaFence</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">RutabagaError::Unsupported</span>)
     }
