@@ -91,6 +91,7 @@ sourcesIndex["sync"] = {"name":"","files":["condvar.rs","lib.rs","mutex.rs"]};
 sourcesIndex["sys_util"] = {"name":"","dirs":[{"name":"linux","files":["mod.rs","syslog.rs"]}],"files":["acpi_event.rs","capabilities.rs","clock.rs","descriptor.rs","descriptor_reflection.rs","eventfd.rs","file_flags.rs","file_traits.rs","get_filesystem_type.rs","handle_eintr.rs","ioctl.rs","lib.rs","mmap.rs","net.rs","netlink.rs","poll.rs","priority.rs","rand.rs","raw_fd.rs","read_dir.rs","sched.rs","scoped_path.rs","scoped_signal_handler.rs","shm.rs","signal.rs","signalfd.rs","sock_ctrl_msg.rs","syslog.rs","terminal.rs","timerfd.rs","vsock.rs","write_zeroes.rs"]};
 sourcesIndex["sys_util_core"] = {"name":"","files":["alloc.rs","errno.rs","external_mapping.rs","lib.rs","scoped_event_macro.rs"]};
 sourcesIndex["tempfile"] = {"name":"","dirs":[{"name":"file","dirs":[{"name":"imp","files":["mod.rs","unix.rs"]}],"files":["mod.rs"]}],"files":["dir.rs","error.rs","lib.rs","spooled.rs","util.rs"]};
+sourcesIndex["terminal_size"] = {"name":"","files":["lib.rs","unix.rs"]};
 sourcesIndex["thiserror"] = {"name":"","files":["aserror.rs","display.rs","lib.rs"]};
 sourcesIndex["thiserror_impl"] = {"name":"","files":["ast.rs","attr.rs","expand.rs","fmt.rs","generics.rs","lib.rs","prop.rs","valid.rs"]};
 sourcesIndex["tpm2"] = {"name":"","files":["lib.rs"]};

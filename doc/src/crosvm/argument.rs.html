@@ -851,16 +851,6 @@
 <span id="850">850</span>
 <span id="851">851</span>
 <span id="852">852</span>
-<span id="853">853</span>
-<span id="854">854</span>
-<span id="855">855</span>
-<span id="856">856</span>
-<span id="857">857</span>
-<span id="858">858</span>
-<span id="859">859</span>
-<span id="860">860</span>
-<span id="861">861</span>
-<span id="862">862</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -907,11 +897,11 @@
 <span class="doccomment">//! ```</span>
 
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
-<span class="kw">use</span> <span class="ident">std::env</span>;
 <span class="kw">use</span> <span class="ident">std::result</span>;
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
+<span class="kw">use</span> <span class="ident">terminal_size</span>::{<span class="ident">terminal_size</span>, <span class="ident">Width</span>};
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 
 <span class="doccomment">/// An error with argument parsing.</span>
@@ -1224,12 +1214,10 @@
 
 <span class="kw">const</span> <span class="ident">DEFAULT_COLUMNS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">80</span>;
 
-<span class="doccomment">/// Get the number of columns on a display.</span>
+<span class="doccomment">/// Get the number of columns on a display, with a reasonable default.</span>
 <span class="kw">fn</span> <span class="ident">get_columns</span>() -&gt; <span class="ident">usize</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">columns_string</span>) <span class="op">=</span> <span class="ident">env::var</span>(<span class="string">&quot;COLUMNS&quot;</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">columns</span>) <span class="op">=</span> <span class="ident">usize::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">columns_string</span>) {
-            <span class="kw">return</span> <span class="ident">columns</span>;
-        }
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">Width</span>(<span class="ident">columns</span>), <span class="kw">_</span>)) <span class="op">=</span> <span class="ident">terminal_size</span>() {
+        <span class="kw">return</span> <span class="ident">columns</span>.<span class="ident">into</span>();
     }
     <span class="ident">DEFAULT_COLUMNS</span>
 }
@@ -1713,14 +1701,6 @@ I am going to give you another paragraph. However I don&#39;t know if it is usef
           paragraph. However I don&#39;t know if it
           is useful&quot;</span>
         );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">column</span>() {
-        <span class="ident">env::set_var</span>(<span class="string">&quot;COLUMNS&quot;</span>, <span class="string">&quot;100&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">get_columns</span>(), <span class="number">100</span>);
-        <span class="ident">env::remove_var</span>(<span class="string">&quot;COLUMNS&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">get_columns</span>(), <span class="number">80</span>);
     }
 }
 </code></pre></div>
