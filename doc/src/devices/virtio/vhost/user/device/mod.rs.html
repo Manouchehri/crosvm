@@ -26,6 +26,8 @@
 <span id="25">25</span>
 <span id="26">26</span>
 <span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -50,6 +52,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fs::run_fs_device</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gpu::run_gpu_device</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">all</span>(<span class="ident">windows</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>), <span class="ident">not</span>(<span class="ident">windows</span>)))]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::run_net_device</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vsock::run_vsock_device</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl::run_wl_device</span>;

@@ -146,6 +146,8 @@
 <span id="145">145</span>
 <span id="146">146</span>
 <span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -263,12 +265,14 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::eq_op</span>)]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::nonminimal_bool</span>)]</span>
     <span class="kw">fn</span> <span class="ident">cmp</span>() {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x300</span>);
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x301</span>);
         <span class="macro">assert!</span>(<span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">b</span>);
         <span class="macro">assert!</span>(<span class="ident">b</span> <span class="op">&gt;</span> <span class="ident">a</span>);
         <span class="macro">assert!</span>(<span class="op">!</span>(<span class="ident">a</span> <span class="op">&lt;</span> <span class="ident">a</span>));
+        <span class="macro">assert!</span>(<span class="ident">a</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">a</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

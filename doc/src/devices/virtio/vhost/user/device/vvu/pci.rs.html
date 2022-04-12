@@ -492,12 +492,36 @@
 <span id="491">491</span>
 <span id="492">492</span>
 <span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="doccomment">//! Implement a userspace PCI device driver for the virtio vhost-user device.</span>
 
+<span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
 
@@ -505,6 +529,7 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">info</span>, <span class="ident">Event</span>};
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 <span class="kw">use</span> <span class="ident">memoffset::offset_of</span>;
+<span class="kw">use</span> <span class="ident">resources::Alloc</span>;
 <span class="kw">use</span> <span class="ident">vfio_sys</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">virtio_sys::vhost::VIRTIO_F_VERSION_1</span>;
 
@@ -512,7 +537,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioPciConfig</span>, <span class="ident">VfioRegionAddr</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu</span>::{
     <span class="ident">bus::open_vfio_device</span>,
-    <span class="ident">queue</span>::{<span class="ident">DescTableAddrs</span>, <span class="ident">UserQueue</span>},
+    <span class="ident">queue</span>::{<span class="ident">DescTableAddrs</span>, <span class="ident">IovaAllocator</span>, <span class="ident">UserQueue</span>},
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="ident">PciCapabilityType</span>, <span class="ident">VirtioPciCap</span>};
 
@@ -738,13 +763,20 @@
     <span class="doccomment">/// * `pci_id` - PCI device ID such as `&quot;0000:00:05.0&quot;`.</span>
     <span class="doccomment">/// * `device_vq_num` - number of virtqueues that the device backend (e.g. block) may use.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">pci_id</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">device_vq_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">pci_address</span> <span class="op">=</span> <span class="ident">PciAddress::from_string</span>(<span class="ident">pci_id</span>).<span class="ident">context</span>(<span class="string">&quot;failed to parse PCI address&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">pci_address</span> <span class="op">=</span> <span class="ident">PciAddress::from_str</span>(<span class="ident">pci_id</span>).<span class="ident">context</span>(<span class="string">&quot;failed to parse PCI address&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">vfio_dev</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">open_vfio_device</span>(<span class="ident">pci_address</span>)<span class="question-mark">?</span>);
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">VfioPciConfig::new</span>(<span class="ident">vfio_dev</span>.<span class="ident">clone</span>());
         <span class="kw">let</span> <span class="ident">caps</span> <span class="op">=</span> <span class="ident">VvuPciCaps::new</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>)<span class="question-mark">?</span>;
         <span class="ident">vfio_dev</span>
             .<span class="ident">check_device_info</span>()
             .<span class="ident">context</span>(<span class="string">&quot;failed to check VFIO device information&quot;</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">page_mask</span> <span class="op">=</span> <span class="ident">vfio_dev</span>
+            .<span class="ident">vfio_get_iommu_page_size_mask</span>()
+            .<span class="ident">context</span>(<span class="string">&quot;failed to get iommu page size mask&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">page_mask</span> <span class="op">&amp;</span> (<span class="ident">base::pagesize</span>() <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">==</span> <span class="number">0</span> {
+            <span class="macro">bail!</span>(<span class="string">&quot;Unsupported iommu page mask {:x}&quot;</span>, <span class="ident">page_mask</span>);
+        }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pci_dev</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">vfio_dev</span>,
@@ -803,7 +835,7 @@
             <span class="ident">QueueType::Rx</span> =&gt; <span class="bool-val">true</span>,
             <span class="ident">QueueType::Tx</span> =&gt; <span class="bool-val">false</span>,
         };
-        <span class="kw">let</span> <span class="ident">queue</span> <span class="op">=</span> <span class="ident">UserQueue::new</span>(<span class="ident">queue_size</span>, <span class="ident">device_writable</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">queue</span> <span class="op">=</span> <span class="ident">UserQueue::new</span>(<span class="ident">queue_size</span>, <span class="ident">device_writable</span>, <span class="ident">typ</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="self">self</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">DescTableAddrs</span> { <span class="ident">desc</span>, <span class="ident">avail</span>, <span class="ident">used</span> } <span class="op">=</span> <span class="ident">queue</span>.<span class="ident">desc_table_addrs</span>()<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">desc_lo</span> <span class="op">=</span> (<span class="ident">desc</span> <span class="op">&amp;</span> <span class="number">0xffffffff</span>) <span class="kw">as</span> <span class="ident">u32</span>;
@@ -983,6 +1015,20 @@
 
         <span class="macro">info!</span>(<span class="string">&quot;vvu device started&quot;</span>);
         <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">IovaAllocator</span> <span class="kw">for</span> <span class="ident">VvuPciDevice</span> {
+    <span class="kw">fn</span> <span class="ident">alloc_iova</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">tag</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">vfio_dev</span>
+            .<span class="ident">alloc_iova</span>(<span class="ident">size</span>, <span class="ident">base::pagesize</span>() <span class="kw">as</span> <span class="ident">u64</span>, <span class="ident">Alloc::VvuQueue</span>(<span class="ident">tag</span>))
+            .<span class="ident">context</span>(<span class="string">&quot;failed to find an iova region to map the gpa region to&quot;</span>)
+    }
+
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">map_iova</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iova</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">addr</span>: <span class="kw-2">*const</span> <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">vfio_dev</span>
+            .<span class="ident">vfio_dma_map</span>(<span class="ident">iova</span>, <span class="ident">size</span>, <span class="ident">addr</span> <span class="kw">as</span> <span class="ident">u64</span>, <span class="bool-val">true</span>)
+            .<span class="ident">context</span>(<span class="string">&quot;failed to map iova&quot;</span>)
     }
 }
 </code></pre></div>

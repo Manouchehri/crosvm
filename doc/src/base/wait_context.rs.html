@@ -155,22 +155,16 @@
 <span id="154">154</span>
 <span id="155">155</span>
 <span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
-<span id="162">162</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">os::unix::io::AsRawFd</span>, <span class="ident">time::Duration</span>};
+<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor::AsRawDescriptor</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">platform</span>::{<span class="ident">PollContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>},
-    <span class="ident">wrap_descriptor</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
+    <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 
@@ -253,11 +247,8 @@
         <span class="ident">event_type</span>: <span class="ident">EventType</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">add_fd_with_events</span>(
-            <span class="kw-2">&amp;</span><span class="ident">wrap_descriptor</span>(<span class="ident">descriptor</span>),
-            <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>),
-            <span class="ident">token</span>,
-        )
+        <span class="self">self</span>.<span class="number">0</span>
+            .<span class="ident">add_fd_with_events</span>(<span class="ident">descriptor</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
     }
 
     <span class="doccomment">/// Adds multiple triggers to the WaitContext.</span>
@@ -276,17 +267,14 @@
         <span class="ident">event_type</span>: <span class="ident">EventType</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">modify</span>(
-            <span class="kw-2">&amp;</span><span class="ident">wrap_descriptor</span>(<span class="ident">descriptor</span>),
-            <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>),
-            <span class="ident">token</span>,
-        )
+        <span class="self">self</span>.<span class="number">0</span>
+            .<span class="ident">modify</span>(<span class="ident">descriptor</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
     }
 
     <span class="doccomment">/// Removes the given handle from triggers registered in the WaitContext if</span>
     <span class="doccomment">/// present.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="ident">wrap_descriptor</span>(<span class="ident">descriptor</span>))
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">delete</span>(<span class="ident">descriptor</span>)
     }
 
     <span class="doccomment">/// Waits for one or more of the registered triggers to become signaled.</span>
@@ -311,7 +299,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_fd</span>()
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 

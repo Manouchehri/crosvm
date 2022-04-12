@@ -172,6 +172,54 @@
 <span id="171">171</span>
 <span id="172">172</span>
 <span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -186,15 +234,23 @@
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vfio_sys</span>::<span class="kw-2">*</span>;
 
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">IrqEdgeEvent</span>, <span class="ident">IrqLevelEvent</span>};
+
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DirectIrqError</span> {
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone trigger event: {0}&quot;</span>)]</span>
+    <span class="ident">CloneEvent</span>(<span class="ident">base::Error</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone resample event: {0}&quot;</span>)]</span>
+    <span class="ident">CloneResampleEvent</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable direct irq&quot;</span>)]</span>
     <span class="ident">Enable</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable gpe irq&quot;</span>)]</span>
     <span class="ident">EnableGpe</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable direct sci irq&quot;</span>)]</span>
     <span class="ident">EnableSci</span>,
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable wake irq&quot;</span>)]</span>
+    <span class="ident">EnableWake</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to open /dev/plat-irq-forward: {0}&quot;</span>)]</span>
     <span class="ident">Open</span>(<span class="ident">io::Error</span>),
 }
@@ -207,8 +263,19 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DirectIrq</span> {
-    <span class="doccomment">/// Create DirectIrq object to access hardware triggered interrupts.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trigger</span>: <span class="ident">Event</span>, <span class="ident">resample</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trigger_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="ident">resample_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Event</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">trigger</span> <span class="op">=</span> <span class="ident">trigger_evt</span>
+            .<span class="ident">try_clone</span>()
+            .<span class="ident">map_err</span>(<span class="ident">DirectIrqError::CloneEvent</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">resample</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event</span>) <span class="op">=</span> <span class="ident">resample_evt</span> {
+            <span class="prelude-val">Some</span>(
+                <span class="ident">event</span>
+                    .<span class="ident">try_clone</span>()
+                    .<span class="ident">map_err</span>(<span class="ident">DirectIrqError::CloneResampleEvent</span>)<span class="question-mark">?</span>,
+            )
+        } <span class="kw">else</span> {
+            <span class="prelude-val">None</span>
+        };
         <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">OpenOptions::new</span>()
             .<span class="ident">read</span>(<span class="bool-val">true</span>)
             .<span class="ident">write</span>(<span class="bool-val">true</span>)
@@ -220,6 +287,16 @@
             <span class="ident">resample</span>,
             <span class="ident">sci_irq_prepared</span>: <span class="bool-val">false</span>,
         })
+    }
+
+    <span class="doccomment">/// Create DirectIrq object to access hardware edge triggered interrupts.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_edge</span>(<span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqEdgeEvent</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+        <span class="ident">DirectIrq::new</span>(<span class="ident">irq_evt</span>.<span class="ident">get_trigger</span>(), <span class="prelude-val">None</span>)
+    }
+
+    <span class="doccomment">/// Create DirectIrq object to access hardware level triggered interrupts.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_level</span>(<span class="ident">irq_evt</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+        <span class="ident">DirectIrq::new</span>(<span class="ident">irq_evt</span>.<span class="ident">get_trigger</span>(), <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">get_resample</span>()))
     }
 
     <span class="doccomment">/// Enable hardware triggered interrupt handling.</span>
@@ -252,6 +329,10 @@
         };
 
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">irq_wake_enable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irq_num</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">plat_irq_wake_ioctl</span>(<span class="ident">irq_num</span>, <span class="ident">PLAT_IRQ_WAKE_ENABLE</span>)
     }
 
     <span class="doccomment">/// Enable hardware triggered SCI interrupt handling for GPE.</span>
@@ -302,6 +383,21 @@
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">PLAT_IRQ_FORWARD_SET</span>(), <span class="kw-2">&amp;</span><span class="ident">irq_set</span>[<span class="number">0</span>]) };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="prelude-val">Err</span>(<span class="ident">DirectIrqError::Enable</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">plat_irq_wake_ioctl</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irq_num</span>: <span class="ident">u32</span>, <span class="ident">action</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">irq_wake_set</span> <span class="op">=</span> <span class="ident">vec_with_array_field</span>::<span class="op">&lt;</span><span class="ident">plat_irq_wake_set</span>, <span class="ident">u32</span><span class="op">&gt;</span>(<span class="number">0</span>);
+        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">argsz</span> <span class="op">=</span> (<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">plat_irq_wake_set</span><span class="op">&gt;</span>()) <span class="kw">as</span> <span class="ident">u32</span>;
+        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">action_flags</span> <span class="op">=</span> <span class="ident">action</span>;
+        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">irq_number_host</span> <span class="op">=</span> <span class="ident">irq_num</span>;
+
+        <span class="comment">// Safe as we are the owner of plat_irq_wake_set and irq_wake_set which are valid value</span>
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">PLAT_IRQ_WAKE_SET</span>(), <span class="kw-2">&amp;</span><span class="ident">irq_wake_set</span>[<span class="number">0</span>]) };
+        <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">DirectIrqError::EnableWake</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(())
         }

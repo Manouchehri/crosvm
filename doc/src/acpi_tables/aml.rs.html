@@ -3717,13 +3717,13 @@ package length is 2**28.&quot;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_pkg_length</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">62</span>].<span class="ident">to_vec</span>(), <span class="bool-val">true</span>), <span class="macro">vec!</span>[<span class="number">63</span>]);
+        <span class="macro">assert_eq!</span>(<span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">62</span>], <span class="bool-val">true</span>), <span class="macro">vec!</span>[<span class="number">63</span>]);
         <span class="macro">assert_eq!</span>(
-            <span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">64</span>].<span class="ident">to_vec</span>(), <span class="bool-val">true</span>),
+            <span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">64</span>], <span class="bool-val">true</span>),
             <span class="macro">vec!</span>[<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span> <span class="op">|</span> (<span class="number">66</span> <span class="op">&amp;</span> <span class="number">0xf</span>), <span class="number">66</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>]
         );
         <span class="macro">assert_eq!</span>(
-            <span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">4096</span>].<span class="ident">to_vec</span>(), <span class="bool-val">true</span>),
+            <span class="ident">create_pkg_length</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="number">4096</span>], <span class="bool-val">true</span>),
             <span class="macro">vec!</span>[
                 <span class="number">2</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span> <span class="op">|</span> (<span class="number">4099</span> <span class="op">&amp;</span> <span class="number">0xf</span>) <span class="kw">as</span> <span class="ident">u8</span>,
                 (<span class="number">4099</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>) <span class="kw">as</span> <span class="ident">u8</span>,

@@ -1282,6 +1282,8 @@
 <span id="1281">1281</span>
 <span id="1282">1282</span>
 <span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1307,6 +1309,8 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STATUS_REG_CAPABILITIES_USED_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0010_0000</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CLASS_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CLASS_REG_REVISION_ID_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HEADER_TYPE_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HEADER_TYPE_MULTIFUNCTION_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0080_0000</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BAR0_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4</span>;

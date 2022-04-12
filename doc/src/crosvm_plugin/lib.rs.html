@@ -2077,7 +2077,6 @@
 <span id="2076">2076</span>
 <span id="2077">2077</span>
 <span id="2078">2078</span>
-<span id="2079">2079</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2599,8 +2598,7 @@
             <span class="ident">entry</span>.<span class="ident">irq_id</span> <span class="op">=</span> <span class="ident">route</span>.<span class="ident">irq_id</span>;
             <span class="kw">match</span> <span class="ident">route</span>.<span class="ident">kind</span> {
                 <span class="ident">CROSVM_IRQ_ROUTE_IRQCHIP</span> =&gt; {
-                    <span class="kw">let</span> <span class="ident">irqchip</span>: <span class="kw-2">&amp;mut</span> <span class="ident">MainRequest_SetIrqRouting_Route_Irqchip</span>;
-                    <span class="ident">irqchip</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">mut_irqchip</span>();
+                    <span class="kw">let</span> <span class="ident">irqchip</span>: <span class="kw-2">&amp;mut</span> <span class="ident">MainRequest_SetIrqRouting_Route_Irqchip</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">mut_irqchip</span>();
                     <span class="comment">// Safe because route.kind indicates which union field is valid.</span>
                     <span class="ident">irqchip</span>.<span class="ident">irqchip</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">route</span>.<span class="ident">route</span>.<span class="ident">irqchip</span> }.<span class="ident">irqchip</span>;
                     <span class="ident">irqchip</span>.<span class="ident">pin</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">route</span>.<span class="ident">route</span>.<span class="ident">irqchip</span> }.<span class="ident">pin</span>;

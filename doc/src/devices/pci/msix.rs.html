@@ -648,7 +648,6 @@
 <span id="647">647</span>
 <span id="648">648</span>
 <span id="649">649</span>
-<span id="650">650</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -903,16 +902,15 @@
         <span class="self">self</span>.<span class="ident">msi_device_socket</span>
             .<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>)
             .<span class="ident">map_err</span>(<span class="ident">MsixError::AllocateOneMsiSend</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">irq_num</span>: <span class="ident">u32</span>;
-        <span class="kw">match</span> <span class="self">self</span>
+        <span class="kw">let</span> <span class="ident">irq_num</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
             .<span class="ident">msi_device_socket</span>
             .<span class="ident">recv</span>()
             .<span class="ident">map_err</span>(<span class="ident">MsixError::AllocateOneMsiRecv</span>)<span class="question-mark">?</span>
         {
-            <span class="ident">VmIrqResponse::AllocateOneMsi</span> { <span class="ident">gsi</span> } =&gt; <span class="ident">irq_num</span> <span class="op">=</span> <span class="ident">gsi</span>,
+            <span class="ident">VmIrqResponse::AllocateOneMsi</span> { <span class="ident">gsi</span> } =&gt; <span class="ident">gsi</span>,
             <span class="ident">VmIrqResponse::Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">MsixError::AllocateOneMsi</span>(<span class="ident">e</span>)),
             <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-        }
+        };
         <span class="self">self</span>.<span class="ident">irq_vec</span>[<span class="ident">index</span>] <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">IrqfdGsi</span> {
             <span class="ident">irqfd</span>: <span class="kw">match</span> <span class="ident">request</span> {
                 <span class="ident">VmIrqRequest::AllocateOneMsi</span> { <span class="ident">irqfd</span>, .. } =&gt; <span class="ident">irqfd</span>,

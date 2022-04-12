@@ -527,7 +527,6 @@
 <span id="526">526</span>
 <span id="527">527</span>
 <span id="528">528</span>
-<span id="529">529</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -542,7 +541,7 @@
     <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::PciInterruptPin</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
 <span class="kw">use</span> <span class="ident">hypervisor::Datamatch</span>;
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
 
@@ -717,8 +716,7 @@
     <span class="kw">fn</span> <span class="ident">keep_rds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">interrupt_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_evt</span> {
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">as_raw_descriptor</span>());
-            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">interrupt_evt</span>.<span class="ident">get_resample</span>().<span class="ident">as_raw_descriptor</span>());
+            <span class="ident">rds</span>.<span class="ident">extend</span>(<span class="ident">interrupt_evt</span>.<span class="ident">as_raw_descriptors</span>());
         }
         <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">get_msi_socket</span>();
         <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">descriptor</span>);

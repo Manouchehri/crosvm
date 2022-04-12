@@ -1021,7 +1021,6 @@
 <span id="1020">1020</span>
 <span id="1021">1021</span>
 <span id="1022">1022</span>
-<span id="1023">1023</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1403,8 +1402,7 @@
     <span class="kw">fn</span> <span class="ident">as_raw_descriptors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">component_disks</span>
             .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">file</span>.<span class="ident">as_raw_descriptors</span>())
-            .<span class="ident">flatten</span>()
+            .<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">file</span>.<span class="ident">as_raw_descriptors</span>())
             .<span class="ident">collect</span>()
     }
 }

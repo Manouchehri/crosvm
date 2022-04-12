@@ -302,48 +302,6 @@
 <span id="301">301</span>
 <span id="302">302</span>
 <span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
-<span id="342">342</span>
-<span id="343">343</span>
-<span id="344">344</span>
-<span id="345">345</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -359,20 +317,20 @@
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::<span class="kw-2">*</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">Timer</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">Timer</span>};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">sync::Mutex</span> <span class="kw">as</span> <span class="ident">AsyncMutex</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>, <span class="ident">TimerAsync</span>};
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 <span class="kw">use</span> <span class="ident">disk::create_async_disk_file</span>;
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::block::asynchronous</span>::{<span class="ident">flush_disk</span>, <span class="ident">process_one_chain</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::block::asynchronous</span>::{<span class="ident">flush_disk</span>, <span class="ident">handle_queue</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::block</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device</span>::{
     <span class="ident">handler</span>::{<span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>},
     <span class="ident">vvu::pci::VvuPciDevice</span>,
 };
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="self">self</span>, <span class="ident">base_features</span>, <span class="ident">block::sys</span>::<span class="kw-2">*</span>, <span class="ident">copy_config</span>, <span class="ident">Queue</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="self">self</span>, <span class="ident">base_features</span>, <span class="ident">block::sys</span>::<span class="kw-2">*</span>, <span class="ident">copy_config</span>};
 
 <span class="kw">const</span> <span class="ident">QUEUE_SIZE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">256</span>;
 <span class="kw">const</span> <span class="ident">NUM_QUEUES</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">16</span>;
@@ -586,48 +544,6 @@
     <span class="kw">fn</span> <span class="ident">stop_queue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">handle</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">workers</span>.<span class="ident">get_mut</span>(<span class="ident">idx</span>).<span class="ident">and_then</span>(<span class="ident">Option::take</span>) {
             <span class="ident">handle</span>.<span class="ident">abort</span>();
-        }
-    }
-}
-
-<span class="comment">// There is one async task running `handle_queue` per virtio queue in use.</span>
-<span class="comment">// Receives messages from the guest and queues a task to complete the operations with the async</span>
-<span class="comment">// executor.</span>
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_queue</span>(
-    <span class="ident">ex</span>: <span class="ident">Executor</span>,
-    <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
-    <span class="ident">disk_state</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">DiskState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">queue</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">evt</span>: <span class="ident">EventAsync</span>,
-    <span class="ident">interrupt</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Doorbell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">flush_timer</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">TimerAsync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">flush_timer_armed</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) {
-    <span class="kw">loop</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">evt</span>.<span class="ident">next_val</span>().<span class="kw">await</span> {
-            <span class="macro">error!</span>(<span class="string">&quot;Failed to read the next queue event: {}&quot;</span>, <span class="ident">e</span>);
-            <span class="kw">continue</span>;
-        }
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">descriptor_chain</span>) <span class="op">=</span> <span class="ident">queue</span>.<span class="ident">borrow_mut</span>().<span class="ident">pop</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>) {
-            <span class="kw">let</span> <span class="ident">queue</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">queue</span>);
-            <span class="kw">let</span> <span class="ident">disk_state</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">disk_state</span>);
-            <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">clone</span>();
-            <span class="kw">let</span> <span class="ident">interrupt</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">interrupt</span>);
-            <span class="kw">let</span> <span class="ident">flush_timer</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">flush_timer</span>);
-            <span class="kw">let</span> <span class="ident">flush_timer_armed</span> <span class="op">=</span> <span class="ident">Rc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">flush_timer_armed</span>);
-            <span class="ident">ex</span>.<span class="ident">spawn_local</span>(<span class="kw">async</span> <span class="kw">move</span> {
-                <span class="ident">process_one_chain</span>(
-                    <span class="ident">queue</span>,
-                    <span class="ident">descriptor_chain</span>,
-                    <span class="ident">disk_state</span>,
-                    <span class="ident">mem</span>,
-                    <span class="kw-2">&amp;</span><span class="ident">interrupt</span>,
-                    <span class="ident">flush_timer</span>,
-                    <span class="ident">flush_timer_armed</span>,
-                )
-                .<span class="kw">await</span>
-            })
-            .<span class="ident">detach</span>();
         }
     }
 }

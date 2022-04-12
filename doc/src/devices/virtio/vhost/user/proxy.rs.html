@@ -1416,6 +1416,9 @@
 <span id="1415">1415</span>
 <span id="1416">1416</span>
 <span id="1417">1417</span>
+<span id="1418">1418</span>
+<span id="1419">1419</span>
+<span id="1420">1420</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1464,7 +1467,7 @@
         <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciCapability</span>,
         <span class="ident">PciCapabilityID</span>,
     },
-    <span class="ident">virtio::VIRTIO_MSI_NO_VECTOR</span>,
+    <span class="ident">virtio</span>::{<span class="ident">VIRTIO_F_ACCESS_PLATFORM</span>, <span class="ident">VIRTIO_MSI_NO_VECTOR</span>},
 };
 
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -1489,17 +1492,6 @@
 <span class="kw">const</span> <span class="ident">VIRTIO_VHOST_USER_STATUS_SLAVE_UP</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0</span>;
 
 <span class="kw">const</span> <span class="ident">BAR_INDEX</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">2</span>;
-<span class="comment">// Bar size represents the amount of memory to be mapped for a sibling VM. Each</span>
-<span class="comment">// Virtio Vhost User Slave implementation requires access to the entire sibling</span>
-<span class="comment">// memory. It&#39;s assumed that sibling VM memory would be &lt;= 8GB, hence this</span>
-<span class="comment">// constant value.</span>
-<span class="comment">//</span>
-<span class="comment">// TODO(abhishekbh): Understand why shared memory region size and overall bar</span>
-<span class="comment">// size differ in the QEMU implementation. The metadata required to map sibling</span>
-<span class="comment">// memory is about 16 MB per GB of sibling memory per device. Therefore, it is</span>
-<span class="comment">// in our interest to not waste space here and correlate it tightly to the</span>
-<span class="comment">// actual maximum memory a sibling VM can have.</span>
-<span class="kw">const</span> <span class="ident">BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>;
 
 <span class="comment">// Bar configuration.</span>
 <span class="comment">// All offsets are from the starting of bar `BAR_INDEX`.</span>
@@ -1510,8 +1502,8 @@
 <span class="kw">const</span> <span class="ident">NOTIFICATIONS_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
 <span class="kw">const</span> <span class="ident">SHARED_MEMORY_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">NOTIFICATIONS_OFFSET</span> <span class="op">+</span> <span class="ident">NOTIFICATIONS_SIZE</span>;
 <span class="comment">// TODO(abhishekbh): Copied from qemu with VVU support. This should be same as</span>
-<span class="comment">// `BAR_SIZE` but it&#39;s significantly lower than the memory allocated to a</span>
-<span class="comment">// sibling VM. Figure out how these two are related.</span>
+<span class="comment">// VirtioVhostUser.device_bar_size, but it&#39;s significantly  lower than the</span>
+<span class="comment">// memory allocated to a sibling VM. Figure out how these two are related.</span>
 <span class="kw">const</span> <span class="ident">SHARED_MEMORY_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
 
 <span class="comment">// Notifications region related constants.</span>
@@ -1659,11 +1651,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VirtioVhostUserConfig</span> {
-    <span class="kw">fn</span> <span class="ident">is_slave_up</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_slave_up</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">check_status_bit</span>(<span class="ident">VIRTIO_VHOST_USER_STATUS_SLAVE_UP</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">check_status_bit</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bit</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">check_status_bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bit</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">status</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">status</span>.<span class="ident">to_native</span>();
         <span class="ident">status</span> <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">bit</span>) <span class="op">&gt;</span> <span class="number">0</span>
     }
@@ -2371,6 +2363,14 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VirtioVhostUser</span> {
     <span class="ident">base_features</span>: <span class="ident">u64</span>,
 
+    <span class="comment">// Represents the amount of memory to be mapped for a sibling VM. Each</span>
+    <span class="comment">// Virtio Vhost User Slave implementation requires access to the entire sibling</span>
+    <span class="comment">// memory.</span>
+    <span class="comment">//</span>
+    <span class="comment">// TODO(abhishekbh): Understand why shared memory region size and overall bar</span>
+    <span class="comment">// size differ in the QEMU implementation.</span>
+    <span class="ident">device_bar_size</span>: <span class="ident">u64</span>,
+
     <span class="comment">// Bound socket waiting to accept a socket connection from the Vhost-user</span>
     <span class="comment">// sibling.</span>
     <span class="ident">listener</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnixListener</span><span class="op">&gt;</span>,
@@ -2413,9 +2413,15 @@
         <span class="ident">main_process_tube</span>: <span class="ident">Tube</span>,
         <span class="ident">pci_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
         <span class="ident">uuid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Uuid</span><span class="op">&gt;</span>,
+        <span class="ident">max_sibling_mem_size</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VirtioVhostUser</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">device_bar_size</span> <span class="op">=</span> <span class="ident">max_sibling_mem_size</span>
+            .<span class="ident">checked_next_power_of_two</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;Sibling too large&quot;</span>);
+
         <span class="prelude-val">Ok</span>(<span class="ident">VirtioVhostUser</span> {
-            <span class="ident">base_features</span>,
+            <span class="ident">base_features</span>: <span class="ident">base_features</span> <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">VIRTIO_F_ACCESS_PLATFORM</span>,
+            <span class="ident">device_bar_size</span>,
             <span class="ident">listener</span>: <span class="prelude-val">Some</span>(<span class="ident">listener</span>),
             <span class="ident">config</span>: <span class="ident">VirtioVhostUserConfig</span> {
                 <span class="ident">status</span>: <span class="ident">Le32::from</span>(<span class="number">0</span>),
@@ -2752,7 +2758,7 @@
 
         <span class="macro">vec!</span>[<span class="ident">PciBarConfiguration::new</span>(
             <span class="ident">BAR_INDEX</span> <span class="kw">as</span> <span class="ident">usize</span>,
-            <span class="ident">BAR_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="self">self</span>.<span class="ident">device_bar_size</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="comment">// NotPrefetchable so as to exit on every read / write event in the</span>
             <span class="comment">// guest.</span>

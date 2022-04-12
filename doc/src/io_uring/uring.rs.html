@@ -1566,6 +1566,15 @@
 <span id="1565">1565</span>
 <span id="1566">1566</span>
 <span id="1567">1567</span>
+<span id="1568">1568</span>
+<span id="1569">1569</span>
+<span id="1570">1570</span>
+<span id="1571">1571</span>
+<span id="1572">1572</span>
+<span id="1573">1573</span>
+<span id="1574">1574</span>
+<span id="1575">1575</span>
+<span id="1576">1576</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1581,7 +1590,10 @@
 <span class="kw">use</span> <span class="ident">std::pin::Pin</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicPtr</span>, <span class="ident">AtomicU32</span>, <span class="ident">AtomicU64</span>, <span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">MappedRegion</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">Protection</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">AsRawDescriptor</span>, <span class="ident">MappedRegion</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">Protection</span>, <span class="ident">RawDescriptor</span>,
+    <span class="ident">WatchingEvents</span>,
+};
 <span class="kw">use</span> <span class="ident">data_model::IoBufMut</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
@@ -2224,6 +2236,12 @@
 <span class="kw">impl</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">URingContext</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
         <span class="self">self</span>.<span class="ident">ring_file</span>.<span class="ident">as_raw_fd</span>()
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">URingContext</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">ring_file</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 

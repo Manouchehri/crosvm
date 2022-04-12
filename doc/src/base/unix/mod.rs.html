@@ -678,6 +678,12 @@
 <span id="677">677</span>
 <span id="678">678</span>
 <span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1162,6 +1168,12 @@
             }
         }
     }
+}
+
+<span class="doccomment">/// Verifies that |raw_descriptor| is actually owned by this process and duplicates it</span>
+<span class="doccomment">/// to ensure that we have a unique handle to it.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">validate_raw_descriptor</span>(<span class="ident">raw_descriptor</span>: <span class="ident">RawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
+    <span class="ident">validate_raw_fd</span>(<span class="ident">raw_descriptor</span>)
 }
 
 <span class="doccomment">/// Verifies that |raw_fd| is actually owned by this process and duplicates it to ensure that</span>

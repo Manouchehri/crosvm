@@ -52,6 +52,12 @@
 <span id="51">51</span>
 <span id="52">52</span>
 <span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -98,6 +104,12 @@
     <span class="ident">PLAT_IRQ_FORWARD_SET</span>,
     <span class="ident">PLAT_IRQ_FORWARD_TYPE</span>,
     <span class="ident">PLAT_IRQ_FORWARD_BASE</span>
+);
+
+<span class="macro">ioctl_io_nr!</span>(
+    <span class="ident">PLAT_IRQ_WAKE_SET</span>,
+    <span class="ident">PLAT_IRQ_FORWARD_TYPE</span>,
+    <span class="ident">PLAT_IRQ_FORWARD_BASE</span> <span class="op">+</span> <span class="number">1</span>
 );
 
 <span class="macro">ioctl_io_nr!</span>(

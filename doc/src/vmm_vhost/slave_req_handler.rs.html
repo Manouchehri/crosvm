@@ -956,7 +956,6 @@
 <span id="955">955</span>
 <span id="956">956</span>
 <span id="957">957</span>
-<span id="958">958</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -1788,11 +1787,10 @@
         <span class="kw">if</span> <span class="ident">size</span> <span class="op">-</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VhostUserConfig</span><span class="op">&gt;</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">msg</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidMessage</span>);
         }
-        <span class="kw">let</span> <span class="ident">flags</span>: <span class="ident">VhostUserConfigFlags</span>;
-        <span class="kw">match</span> <span class="ident">VhostUserConfigFlags::from_bits</span>(<span class="ident">msg</span>.<span class="ident">flags</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">val</span>) =&gt; <span class="ident">flags</span> <span class="op">=</span> <span class="ident">val</span>,
+        <span class="kw">let</span> <span class="ident">flags</span>: <span class="ident">VhostUserConfigFlags</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">VhostUserConfigFlags::from_bits</span>(<span class="ident">msg</span>.<span class="ident">flags</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
             <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidMessage</span>),
-        }
+        };
 
         <span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">set_config</span>(<span class="ident">msg</span>.<span class="ident">offset</span>, <span class="ident">buf</span>, <span class="ident">flags</span>)
     }

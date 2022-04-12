@@ -144,6 +144,15 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -214,6 +223,8 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAT_IRQ_FORWARD_SET_EDGE_TRIGGER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAT_IRQ_FORWARD_SET_LEVEL_SCI_FOR_GPE_TRIGGER_EVENTFD</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">8</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAT_IRQ_FORWARD_SET_LEVEL_SCI_FOR_GPE_UNMASK_EVENTFD</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">16</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAT_IRQ_WAKE_ENABLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PLAT_IRQ_WAKE_DISABLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACPI_GPE_FORWARD_SET_TRIGGER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">ACPI_GPE_FORWARD_CLEAR_TRIGGER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">__s8</span> <span class="op">=</span> <span class="ident">::std::os::raw::c_schar</span>;
@@ -281,6 +292,13 @@
     <span class="kw">pub</span> <span class="ident">irq_number_host</span>: <span class="ident">__u32</span>,
     <span class="kw">pub</span> <span class="ident">count</span>: <span class="ident">__u32</span>,
     <span class="kw">pub</span> <span class="ident">eventfd</span>: <span class="ident">__IncompleteArrayField</span><span class="op">&lt;</span><span class="ident">__u8</span><span class="op">&gt;</span>,
+}
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">plat_irq_wake_set</span> {
+    <span class="kw">pub</span> <span class="ident">argsz</span>: <span class="ident">__u32</span>,
+    <span class="kw">pub</span> <span class="ident">action_flags</span>: <span class="ident">__u32</span>,
+    <span class="kw">pub</span> <span class="ident">irq_number_host</span>: <span class="ident">__u32</span>,
 }
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>

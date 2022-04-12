@@ -818,7 +818,6 @@
     <span class="ident">fs::File</span>,
     <span class="ident">i32</span>, <span class="ident">i64</span>,
     <span class="ident">marker::PhantomData</span>,
-    <span class="ident">os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>, <span class="ident">RawFd</span>},
     <span class="ident">ptr::null_mut</span>,
     <span class="ident">slice</span>, <span class="ident">thread</span>,
     <span class="ident">time::Duration</span>,
@@ -830,6 +829,7 @@
 };
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 
 <span class="kw">const</span> <span class="ident">POLL_CONTEXT_MAX_EVENTS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">16</span>;
 
@@ -1115,7 +1115,7 @@
             <span class="kw">return</span> <span class="ident">errno_result</span>();
         }
         <span class="prelude-val">Ok</span>(<span class="ident">EpollContext</span> {
-            <span class="ident">epoll_ctx</span>: <span class="kw">unsafe</span> { <span class="ident">File::from_raw_fd</span>(<span class="ident">epoll_fd</span>) },
+            <span class="ident">epoll_ctx</span>: <span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">epoll_fd</span>) },
             <span class="ident">tokens</span>: <span class="ident">PhantomData</span>,
         })
     }
@@ -1125,7 +1125,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is equivalent to calling `new` followed by `add_many`. If there is an error, this will</span>
     <span class="doccomment">/// return the error instead of the new context.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with</span>(<span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with</span>(<span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">EpollContext::new</span>()<span class="question-mark">?</span>;
         <span class="ident">ctx</span>.<span class="ident">add_many</span>(<span class="ident">fd_tokens</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">ctx</span>)
@@ -1136,7 +1136,7 @@
     <span class="doccomment">/// This is equivalent to calling `add` with each `fd` and `token`. If there are any errors,</span>
     <span class="doccomment">/// this method will stop adding `fd`s and return the first error, leaving this context in a</span>
     <span class="doccomment">/// undefined state.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_many</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_many</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> (<span class="ident">fd</span>, <span class="ident">token</span>) <span class="kw">in</span> <span class="ident">fd_tokens</span> {
             <span class="self">self</span>.<span class="ident">add</span>(<span class="kw-2">*</span><span class="ident">fd</span>, <span class="ident">T::from_raw_token</span>(<span class="ident">token</span>.<span class="ident">as_raw_token</span>()))<span class="question-mark">?</span>;
         }
@@ -1149,7 +1149,7 @@
     <span class="doccomment">/// A `fd` can only be added once and does not need to be kept open. If the `fd` is dropped and</span>
     <span class="doccomment">/// there were no duplicated file descriptors (i.e. adding the same descriptor with a different</span>
     <span class="doccomment">/// FD number) added to this context, events will not be reported by `wait` anymore.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">add_fd_with_events</span>(<span class="ident">fd</span>, <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(), <span class="ident">token</span>)
     }
 
@@ -1161,7 +1161,7 @@
     <span class="doccomment">/// FD number) added to this context, events will not be reported by `wait` anymore.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_fd_with_events</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">events</span>: <span class="ident">WatchingEvents</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1173,9 +1173,9 @@
         <span class="comment">// structure. Then we check the return value.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">epoll_ctl</span>(
-                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="ident">EPOLL_CTL_ADD</span>,
-                <span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="kw-2">&amp;mut</span> <span class="ident">evt</span>,
             )
         };
@@ -1187,7 +1187,7 @@
 
     <span class="doccomment">/// If `fd` was previously added to this context, the watched events will be replaced with</span>
     <span class="doccomment">/// `events` and the token associated with it will be replaced with the given `token`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">events</span>: <span class="ident">WatchingEvents</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">events</span>: <span class="ident">WatchingEvents</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">epoll_event</span> {
             <span class="ident">events</span>: <span class="ident">events</span>.<span class="number">0</span>,
             <span class="ident">u64</span>: <span class="ident">token</span>.<span class="ident">as_raw_token</span>(),
@@ -1196,9 +1196,9 @@
         <span class="comment">// structure. Then we check the return value.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">epoll_ctl</span>(
-                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="ident">EPOLL_CTL_MOD</span>,
-                <span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="kw-2">&amp;mut</span> <span class="ident">evt</span>,
             )
         };
@@ -1214,14 +1214,14 @@
     <span class="doccomment">/// method or by closing/dropping (if and only if the fd was never dup()&#39;d/fork()&#39;d) the `fd`.</span>
     <span class="doccomment">/// Failure to do so will cause the `wait` method to always return immediately, causing ~100%</span>
     <span class="doccomment">/// CPU load.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Safe because we give a valid epoll FD and FD to stop watching. Then we check the return</span>
         <span class="comment">// value.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">epoll_ctl</span>(
-                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="ident">EPOLL_CTL_DEL</span>,
-                <span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(),
+                <span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(),
                 <span class="ident">null_mut</span>(),
             )
         };
@@ -1272,7 +1272,7 @@
             <span class="comment">// pointer, which we trust the kernel to fill in properly.</span>
             <span class="kw">unsafe</span> {
                 <span class="macro">handle_eintr_errno!</span>(<span class="ident">epoll_wait</span>(
-                    <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>(),
+                    <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>(),
                     <span class="kw-2">&amp;mut</span> <span class="ident">epoll_events</span>[<span class="number">0</span>],
                     <span class="ident">max_events</span>,
                     <span class="ident">timeout_millis</span>
@@ -1292,15 +1292,15 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">IntoRawFd</span> <span class="kw">for</span> <span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">into_raw_fd</span>(<span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">into_raw_fd</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">EpollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">into_raw_descriptor</span>()
     }
 }
 
@@ -1357,7 +1357,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is equivalent to calling `new` followed by `add_many`. If there is an error, this will</span>
     <span class="doccomment">/// return the error instead of the new context.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with</span>(<span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_with</span>(<span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="ident">PollContext::new</span>()<span class="question-mark">?</span>;
         <span class="ident">ctx</span>.<span class="ident">add_many</span>(<span class="ident">fd_tokens</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">ctx</span>)
@@ -1368,7 +1368,7 @@
     <span class="doccomment">/// This is equivalent to calling `add` with each `fd` and `token`. If there are any errors,</span>
     <span class="doccomment">/// this method will stop adding `fd`s and return the first error, leaving this context in a</span>
     <span class="doccomment">/// undefined state.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_many</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_many</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd_tokens</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">T</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> (<span class="ident">fd</span>, <span class="ident">token</span>) <span class="kw">in</span> <span class="ident">fd_tokens</span> {
             <span class="self">self</span>.<span class="ident">add</span>(<span class="kw-2">*</span><span class="ident">fd</span>, <span class="ident">T::from_raw_token</span>(<span class="ident">token</span>.<span class="ident">as_raw_token</span>()))<span class="question-mark">?</span>;
         }
@@ -1381,7 +1381,7 @@
     <span class="doccomment">/// A `fd` can only be added once and does not need to be kept open. If the `fd` is dropped and</span>
     <span class="doccomment">/// there were no duplicated file descriptors (i.e. adding the same descriptor with a different</span>
     <span class="doccomment">/// FD number) added to this context, events will not be reported by `wait` anymore.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">add_fd_with_events</span>(<span class="ident">fd</span>, <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(), <span class="ident">token</span>)
     }
 
@@ -1393,7 +1393,7 @@
     <span class="doccomment">/// FD number) added to this context, events will not be reported by `wait` anymore.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_fd_with_events</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">events</span>: <span class="ident">WatchingEvents</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1405,7 +1405,7 @@
 
     <span class="doccomment">/// If `fd` was previously added to this context, the watched events will be replaced with</span>
     <span class="doccomment">/// `events` and the token associated with it will be replaced with the given `token`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">events</span>: <span class="ident">WatchingEvents</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">events</span>: <span class="ident">WatchingEvents</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">modify</span>(<span class="ident">fd</span>, <span class="ident">events</span>, <span class="ident">token</span>)
     }
 
@@ -1415,7 +1415,7 @@
     <span class="doccomment">/// method or by closing/dropping (if and only if the fd was never dup()&#39;d/fork()&#39;d) the `fd`.</span>
     <span class="doccomment">/// Failure to do so will cause the `wait` method to always return immediately, causing ~100%</span>
     <span class="doccomment">/// CPU load.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">delete</span>(<span class="ident">fd</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">hangups</span>.<span class="ident">set</span>(<span class="number">0</span>);
         <span class="self">self</span>.<span class="ident">max_hangups</span>.<span class="ident">set</span>(<span class="self">self</span>.<span class="ident">max_hangups</span>.<span class="ident">get</span>() <span class="op">-</span> <span class="number">1</span>);
@@ -1487,15 +1487,15 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_fd</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">IntoRawFd</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">into_raw_fd</span>(<span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">into_raw_fd</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">into_raw_descriptor</span>()
     }
 }
 

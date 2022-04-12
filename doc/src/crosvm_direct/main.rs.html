@@ -4264,6 +4264,82 @@
 <span id="4263">4263</span>
 <span id="4264">4264</span>
 <span id="4265">4265</span>
+<span id="4266">4266</span>
+<span id="4267">4267</span>
+<span id="4268">4268</span>
+<span id="4269">4269</span>
+<span id="4270">4270</span>
+<span id="4271">4271</span>
+<span id="4272">4272</span>
+<span id="4273">4273</span>
+<span id="4274">4274</span>
+<span id="4275">4275</span>
+<span id="4276">4276</span>
+<span id="4277">4277</span>
+<span id="4278">4278</span>
+<span id="4279">4279</span>
+<span id="4280">4280</span>
+<span id="4281">4281</span>
+<span id="4282">4282</span>
+<span id="4283">4283</span>
+<span id="4284">4284</span>
+<span id="4285">4285</span>
+<span id="4286">4286</span>
+<span id="4287">4287</span>
+<span id="4288">4288</span>
+<span id="4289">4289</span>
+<span id="4290">4290</span>
+<span id="4291">4291</span>
+<span id="4292">4292</span>
+<span id="4293">4293</span>
+<span id="4294">4294</span>
+<span id="4295">4295</span>
+<span id="4296">4296</span>
+<span id="4297">4297</span>
+<span id="4298">4298</span>
+<span id="4299">4299</span>
+<span id="4300">4300</span>
+<span id="4301">4301</span>
+<span id="4302">4302</span>
+<span id="4303">4303</span>
+<span id="4304">4304</span>
+<span id="4305">4305</span>
+<span id="4306">4306</span>
+<span id="4307">4307</span>
+<span id="4308">4308</span>
+<span id="4309">4309</span>
+<span id="4310">4310</span>
+<span id="4311">4311</span>
+<span id="4312">4312</span>
+<span id="4313">4313</span>
+<span id="4314">4314</span>
+<span id="4315">4315</span>
+<span id="4316">4316</span>
+<span id="4317">4317</span>
+<span id="4318">4318</span>
+<span id="4319">4319</span>
+<span id="4320">4320</span>
+<span id="4321">4321</span>
+<span id="4322">4322</span>
+<span id="4323">4323</span>
+<span id="4324">4324</span>
+<span id="4325">4325</span>
+<span id="4326">4326</span>
+<span id="4327">4327</span>
+<span id="4328">4328</span>
+<span id="4329">4329</span>
+<span id="4330">4330</span>
+<span id="4331">4331</span>
+<span id="4332">4332</span>
+<span id="4333">4333</span>
+<span id="4334">4334</span>
+<span id="4335">4335</span>
+<span id="4336">4336</span>
+<span id="4337">4337</span>
+<span id="4338">4338</span>
+<span id="4339">4339</span>
+<span id="4340">4340</span>
+<span id="4341">4341</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4963,6 +5039,41 @@
     <span class="prelude-val">Ok</span>(<span class="ident">ac97_params</span>)
 }
 
+<span class="kw">enum</span> <span class="ident">MsrAction</span> {
+    <span class="ident">Invalid</span>,
+    <span class="doccomment">/// Read MSR value from host CPU0 regardless of current vcpu.</span>
+    <span class="ident">ReadFromCPU0</span>,
+}
+
+<span class="kw">fn</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+    <span class="comment">// TODO(b/215297064): Implement different type of operations, such</span>
+    <span class="comment">// as write or reading from the correct CPU.</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">argument::parse_key_value_options</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="ident">value</span>, <span class="string">&#39;,&#39;</span>);
+    <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">options</span>
+        .<span class="ident">next</span>()
+        .<span class="ident">ok_or</span>(<span class="ident">argument::Error::ExpectedValue</span>(<span class="ident">String::from</span>(
+            <span class="string">&quot;userspace-msr: expected index&quot;</span>,
+        )))<span class="question-mark">?</span>
+        .<span class="ident">key_numeric</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrAction::Invalid</span>;
+    <span class="kw">for</span> <span class="ident">opt</span> <span class="kw">in</span> <span class="ident">options</span> {
+        <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">key</span>() {
+            <span class="string">&quot;action&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
+                <span class="string">&quot;r0&quot;</span> =&gt; <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrAction::ReadFromCPU0</span>,
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad action&quot;</span>))),
+            },
+            <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_key_err</span>()),
+        }
+    }
+
+    <span class="kw">match</span> <span class="ident">msr_config</span> {
+        <span class="ident">MsrAction::ReadFromCPU0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">index</span>),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(
+            <span class="string">&quot;userspace-msr action not specified&quot;</span>.<span class="ident">to_string</span>(),
+        )),
+    }
+}
+
 <span class="kw">fn</span> <span class="ident">parse_serial_options</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span><span class="ident">SerialParameters</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">serial_setting</span>: <span class="ident">SerialParameters</span> <span class="op">=</span>
         <span class="ident">from_key_values</span>(<span class="ident">s</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::ConfigParserError</span>(<span class="ident">e</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>;
@@ -5185,7 +5296,7 @@
         )))<span class="question-mark">?</span>
         .<span class="ident">key</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">StubPciParameters</span> {
-        <span class="ident">address</span>: <span class="ident">PciAddress::from_string</span>(<span class="ident">addr</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+        <span class="ident">address</span>: <span class="ident">PciAddress::from_str</span>(<span class="ident">addr</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
             <span class="ident">value</span>: <span class="ident">addr</span>.<span class="ident">to_owned</span>(),
             <span class="ident">expected</span>: <span class="macro">format!</span>(<span class="string">&quot;stub-pci-device: expected PCI address: {}&quot;</span>, <span class="ident">e</span>),
         })<span class="question-mark">?</span>,
@@ -6372,6 +6483,21 @@
                 );
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+        <span class="string">&quot;direct-wake-irq&quot;</span> =&gt; {
+            <span class="ident">cfg</span>.<span class="ident">direct_wake_irq</span>
+                .<span class="ident">push</span>(
+                    <span class="ident">value</span>
+                        .<span class="ident">unwrap</span>()
+                        .<span class="ident">parse</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                            <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                                <span class="string">&quot;this value for `direct-wake-irq` must be an unsigned integer&quot;</span>,
+                            ),
+                        })<span class="question-mark">?</span>,
+                );
+        }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
         <span class="string">&quot;direct-gpe&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">direct_gpe</span>.<span class="ident">push</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">parse</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                 <span class="ident">argument::Error::InvalidValue</span> {
@@ -6406,6 +6532,10 @@
         <span class="string">&quot;no-legacy&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">no_legacy</span> <span class="op">=</span> <span class="bool-val">true</span>;
         }
+        <span class="string">&quot;userspace-msr&quot;</span> =&gt; {
+            <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
+            <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">insert</span>(<span class="ident">index</span>);
+        }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
         <span class="string">&quot;host-cpu-topology&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">host_cpu_topology</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -6437,7 +6567,7 @@
                             }
 
                             <span class="ident">vvu_opt</span>.<span class="ident">addr</span> <span class="op">=</span>
-                                <span class="prelude-val">Some</span>(<span class="ident">PciAddress::from_string</span>(<span class="ident">pci_address</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                                <span class="prelude-val">Some</span>(<span class="ident">PciAddress::from_str</span>(<span class="ident">pci_address</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
                                     <span class="ident">argument::Error::InvalidValue</span> {
                                         <span class="ident">value</span>: <span class="ident">pci_address</span>.<span class="ident">to_string</span>(),
                                         <span class="ident">expected</span>: <span class="macro">format!</span>(<span class="string">&quot;vvu-proxy PCI address: {}&quot;</span>, <span class="ident">e</span>),
@@ -6634,6 +6764,12 @@
                 })
                 .<span class="ident">collect</span>();
             <span class="ident">cfg</span>.<span class="ident">mmio_address_ranges</span> <span class="op">=</span> <span class="ident">ranges</span><span class="question-mark">?</span>;
+        }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+        <span class="string">&quot;task-profiles&quot;</span> =&gt; {
+            <span class="kw">for</span> <span class="ident">name</span> <span class="kw">in</span> <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">split</span>(<span class="string">&#39;,&#39;</span>) {
+                <span class="ident">cfg</span>.<span class="ident">task_profiles</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>());
+            }
         }
         <span class="string">&quot;help&quot;</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::PrintHelp</span>),
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
@@ -6998,9 +7134,14 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-edge-irq&quot;</span>, <span class="string">&quot;irq&quot;</span>, <span class="string">&quot;Enable interrupt passthrough&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+          <span class="ident">Argument::value</span>(<span class="string">&quot;direct-wake-irq&quot;</span>, <span class="string">&quot;irq&quot;</span>, <span class="string">&quot;Enable wakeup interrupt for host&quot;</span>),
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-gpe&quot;</span>, <span class="string">&quot;gpe&quot;</span>, <span class="string">&quot;Enable GPE interrupt and register access passthrough&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;dmi&quot;</span>, <span class="string">&quot;DIR&quot;</span>, <span class="string">&quot;Directory with smbios_entry_point/DMI files&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;no-legacy&quot;</span>, <span class="string">&quot;Don&#39;t use legacy KBD/RTC devices emulation&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,action=r0&quot;</span>, <span class="string">&quot;Userspace MSR handling. Takes INDEX of the MSR and how they are handled.
+                              action=r0 - forward RDMSR to host kernel cpu0.
+&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
           <span class="ident">Argument::flag</span>(<span class="string">&quot;host-cpu-topology&quot;</span>, <span class="string">&quot;Use mirror cpu topology of Host for Guest VM&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;privileged-vm&quot;</span>, <span class="string">&quot;Grant this Guest VM certian privileges to manage Host resources, such as power management.&quot;</span>),
@@ -7040,6 +7181,8 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
                           <span class="string">&quot;Ranges (inclusive) into which to limit guest mmio addresses. Note that
                            this this may cause mmio allocations to fail if the specified ranges are
                            incompatible with the default ranges calculated by crosvm.&quot;</span>),
+          <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+          <span class="ident">Argument::value</span>(<span class="string">&quot;task-profiles&quot;</span>, <span class="string">&quot;NAME[,...]&quot;</span>, <span class="string">&quot;Comma-separated names of the task profiles to apply to all threads in crosvm including the vCPU threads.&quot;</span>),
           <span class="ident">Argument::short_flag</span>(<span class="string">&#39;h&#39;</span>, <span class="string">&quot;help&quot;</span>, <span class="string">&quot;Print help message.&quot;</span>)];
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="ident">Config::default</span>();
@@ -8527,6 +8670,15 @@ with a &#39;--backing_file&#39;.&quot;</span>
             <span class="ident">parse_file_backed_mapping</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;addr=0x3042,size=0xff0,path=/dev/mem,align&quot;</span>)).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">address</span>, <span class="number">0x3000</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">size</span>, <span class="number">0x2000</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">parse_userspace_msr_options_test</span>() {
+        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=r0&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">index</span>, <span class="number">0x10</span>);
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=none&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;hoge&quot;</span>).<span class="ident">is_err</span>());
     }
 }
 </code></pre></div>

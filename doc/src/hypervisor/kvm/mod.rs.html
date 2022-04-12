@@ -1482,6 +1482,39 @@
 <span id="1481">1481</span>
 <span id="1482">1482</span>
 <span id="1483">1483</span>
+<span id="1484">1484</span>
+<span id="1485">1485</span>
+<span id="1486">1486</span>
+<span id="1487">1487</span>
+<span id="1488">1488</span>
+<span id="1489">1489</span>
+<span id="1490">1490</span>
+<span id="1491">1491</span>
+<span id="1492">1492</span>
+<span id="1493">1493</span>
+<span id="1494">1494</span>
+<span id="1495">1495</span>
+<span id="1496">1496</span>
+<span id="1497">1497</span>
+<span id="1498">1498</span>
+<span id="1499">1499</span>
+<span id="1500">1500</span>
+<span id="1501">1501</span>
+<span id="1502">1502</span>
+<span id="1503">1503</span>
+<span id="1504">1504</span>
+<span id="1505">1505</span>
+<span id="1506">1506</span>
+<span id="1507">1507</span>
+<span id="1508">1508</span>
+<span id="1509">1509</span>
+<span id="1510">1510</span>
+<span id="1511">1511</span>
+<span id="1512">1512</span>
+<span id="1513">1513</span>
+<span id="1514">1514</span>
+<span id="1515">1515</span>
+<span id="1516">1516</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1499,11 +1532,11 @@
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
 <span class="kw">use</span> <span class="ident">std::cmp</span>::{<span class="ident">min</span>, <span class="ident">Reverse</span>};
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">BinaryHeap</span>};
-<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
+<span class="kw">use</span> <span class="ident">std::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 <span class="kw">use</span> <span class="ident">std::ffi::CString</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>::{<span class="ident">size_of</span>, <span class="ident">ManuallyDrop</span>};
 <span class="kw">use</span> <span class="ident">std::os::raw</span>::{<span class="ident">c_int</span>, <span class="ident">c_ulong</span>, <span class="ident">c_void</span>};
-<span class="kw">use</span> <span class="ident">std::os::unix</span>::{<span class="ident">io::AsRawFd</span>, <span class="ident">prelude::OsStrExt</span>};
+<span class="kw">use</span> <span class="ident">std::os::unix::prelude::OsStrExt</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 <span class="kw">use</span> <span class="ident">std::ptr::copy_nonoverlapping</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic::AtomicU64</span>;
@@ -2107,7 +2140,7 @@
         <span class="ident">slot</span>: <span class="ident">u32</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">fd_offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2321,6 +2354,20 @@
                 }
                 <span class="prelude-val">Ok</span>(())
             }
+            <span class="ident">KVM_EXIT_X86_RDMSR</span> =&gt; {
+                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+                <span class="comment">// union field to use.</span>
+                <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
+
+                <span class="kw">match</span> <span class="ident">data</span>.<span class="ident">try_into</span>() {
+                    <span class="prelude-val">Ok</span>(<span class="ident">data</span>) =&gt; {
+                        <span class="ident">msr</span>.<span class="ident">data</span> <span class="op">=</span> <span class="ident">u64::from_ne_bytes</span>(<span class="ident">data</span>);
+                        <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">0</span>;
+                    }
+                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
+                }
+                <span class="prelude-val">Ok</span>(())
+            }
             <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
         }
     }
@@ -2398,7 +2445,7 @@
 
         <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
         <span class="comment">// kernel told us how large it was.</span>
-        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">kvm_run</span>) };
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
         <span class="kw">match</span> <span class="ident">run</span>.<span class="ident">exit_reason</span> {
             <span class="ident">KVM_EXIT_IO</span> =&gt; {
                 <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
@@ -2519,6 +2566,25 @@
                         <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))
                     }
                 }
+            }
+            <span class="ident">KVM_EXIT_X86_RDMSR</span> =&gt; {
+                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+                <span class="comment">// union field to use.</span>
+                <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
+                <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">msr</span>.<span class="ident">index</span>;
+                <span class="comment">// By default fail the MSR read unless it was handled later.</span>
+                <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">1</span>;
+                <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::RdMsr</span> { <span class="ident">index</span> })
+            }
+            <span class="ident">KVM_EXIT_X86_WRMSR</span> =&gt; {
+                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+                <span class="comment">// union field to use.</span>
+                <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
+                <span class="comment">// By default fail the MSR write.</span>
+                <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">1</span>;
+                <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">msr</span>.<span class="ident">index</span>;
+                <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">msr</span>.<span class="ident">data</span>;
+                <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::WrMsr</span> { <span class="ident">index</span>, <span class="ident">data</span> })
             }
             <span class="ident">r</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown kvm exit reason: {}&quot;</span>, <span class="ident">r</span>),
         }

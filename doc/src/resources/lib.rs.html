@@ -77,6 +77,8 @@
 <span id="76">76</span>
 <span id="77">77</span>
 <span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -91,7 +93,7 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::system_allocator</span>::{<span class="ident">MemRegion</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
 
-<span class="kw">mod</span> <span class="ident">address_allocator</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">address_allocator</span>;
 <span class="kw">mod</span> <span class="ident">system_allocator</span>;
 
 <span class="doccomment">/// Used to tag SystemAllocator allocations.</span>
@@ -115,6 +117,8 @@
     <span class="ident">PciBridgePrefetchWindow</span> { <span class="ident">bus</span>: <span class="ident">u8</span>, <span class="ident">dev</span>: <span class="ident">u8</span>, <span class="ident">func</span>: <span class="ident">u8</span> },
     <span class="doccomment">/// File-backed memory mapping.</span>
     <span class="ident">FileBacked</span>(<span class="ident">u64</span>),
+    <span class="doccomment">/// virtio vhost user queue with queue id</span>
+    <span class="ident">VvuQueue</span>(<span class="ident">u8</span>),
 }
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>

@@ -1276,7 +1276,7 @@
 
     <span class="kw">fn</span> <span class="ident">receive_msg</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">opaque_data</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+        <span class="ident">opaque_data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
         <span class="ident">descriptors</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">i32</span>; <span class="ident">CROSS_DOMAIN_MAX_IDENTIFIERS</span>],
     ) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="comment">// If any errors happen, the socket will get dropped, preventing more reading.</span>
@@ -1319,7 +1319,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">fence</span>: <span class="ident">RutabagaFence</span>,
         <span class="ident">resample_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-        <span class="ident">receive_buf</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+        <span class="ident">receive_buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
     ) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">wait_ctx</span>.<span class="ident">wait</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stop_thread</span> <span class="op">=</span> <span class="bool-val">false</span>;

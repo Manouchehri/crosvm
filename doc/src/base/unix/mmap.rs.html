@@ -1154,6 +1154,10 @@
 <span id="1153">1153</span>
 <span id="1154">1154</span>
 <span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1165,11 +1169,11 @@
     <span class="ident">cmp::min</span>,
     <span class="ident">io</span>,
     <span class="ident">mem::size_of</span>,
-    <span class="ident">os::unix::io::AsRawFd</span>,
     <span class="ident">ptr</span>::{<span class="ident">copy_nonoverlapping</span>, <span class="ident">null_mut</span>, <span class="ident">read_unaligned</span>, <span class="ident">write_unaligned</span>},
 };
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::external_mapping::ExternalMapping</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::AsRawDescriptor</span>;
 <span class="kw">use</span> <span class="ident">libc</span>::{
     <span class="ident">c_int</span>, <span class="ident">c_void</span>, <span class="ident">read</span>, <span class="ident">write</span>, {<span class="self">self</span>},
 };
@@ -1293,7 +1297,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">_offset</span>: <span class="ident">usize</span>,
         <span class="ident">_size</span>: <span class="ident">usize</span>,
-        <span class="ident">_fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">_fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">_fd_offset</span>: <span class="ident">u64</span>,
         <span class="ident">_prot</span>: <span class="ident">Protection</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1389,11 +1393,15 @@
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">/// * `fd` - File descriptor to mmap from.</span>
     <span class="doccomment">/// * `size` - Size of memory region in bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd</span>(<span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd</span>(<span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
         <span class="ident">MemoryMapping::from_fd_offset</span>(<span class="ident">fd</span>, <span class="ident">size</span>, <span class="number">0</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd_offset</span>(<span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">size</span>: <span class="ident">usize</span>, <span class="ident">offset</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd_offset</span>(
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
+        <span class="ident">size</span>: <span class="ident">usize</span>,
+        <span class="ident">offset</span>: <span class="ident">u64</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
         <span class="ident">MemoryMapping::from_fd_offset_protection</span>(<span class="ident">fd</span>, <span class="ident">size</span>, <span class="ident">offset</span>, <span class="ident">Protection::read_write</span>())
     }
 
@@ -1406,7 +1414,7 @@
     <span class="doccomment">/// * `flags` - flags passed directly to mmap.</span>
     <span class="doccomment">/// * `prot` - Protection (e.g. readable/writable) of the memory region.</span>
     <span class="kw">fn</span> <span class="ident">from_fd_offset_flags</span>(
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">flags</span>: <span class="ident">c_int</span>,
@@ -1427,7 +1435,7 @@
     <span class="doccomment">/// * `offset` - Offset in bytes from the beginning of `fd` to start the mmap.</span>
     <span class="doccomment">/// * `prot` - Protection (e.g. readable/writable) of the memory region.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd_offset_protection</span>(
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
@@ -1442,7 +1450,7 @@
     <span class="doccomment">/// * `size` - Size of memory region in bytes.</span>
     <span class="doccomment">/// * `offset` - Offset in bytes from the beginning of `fd` to start the mmap.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fd_offset_protection_populate</span>(
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
@@ -1498,7 +1506,7 @@
     <span class="doccomment">/// present at `(addr..addr+size)`.</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_fd_offset_protection_fixed</span>(
         <span class="ident">addr</span>: <span class="kw-2">*mut</span> <span class="ident">u8</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
@@ -1519,7 +1527,7 @@
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">prot</span>: <span class="ident">c_int</span>,
         <span class="ident">flags</span>: <span class="ident">c_int</span>,
-        <span class="ident">fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
+        <span class="ident">fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">flags</span>;
         <span class="comment">// If addr is provided, set the FIXED flag, and validate addr alignment</span>
@@ -1539,7 +1547,7 @@
                 <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&gt;</span> <span class="ident">libc::off_t::max_value</span>() <span class="kw">as</span> <span class="ident">u64</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidOffset</span>);
                 }
-                (<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(), <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">libc::off_t</span>)
+                (<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(), <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">libc::off_t</span>)
             }
             <span class="prelude-val">None</span> =&gt; (<span class="op">-</span><span class="number">1</span>, <span class="number">0</span>),
         };
@@ -1740,7 +1748,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_to_memory</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">mem_offset</span>: <span class="ident">usize</span>,
-        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="kw-2">mut</span> <span class="ident">count</span>: <span class="ident">usize</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">range_end</span>(<span class="ident">mem_offset</span>, <span class="ident">count</span>)
@@ -1750,7 +1758,7 @@
             <span class="comment">// read call.</span>
             <span class="kw">match</span> <span class="kw">unsafe</span> {
                 <span class="ident">read</span>(
-                    <span class="ident">src</span>.<span class="ident">as_raw_fd</span>(),
+                    <span class="ident">src</span>.<span class="ident">as_raw_descriptor</span>(),
                     <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">mem_offset</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">c_void</span>,
                     <span class="ident">count</span>,
                 )
@@ -1799,7 +1807,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_from_memory</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">mem_offset</span>: <span class="ident">usize</span>,
-        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="kw-2">mut</span> <span class="ident">count</span>: <span class="ident">usize</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">range_end</span>(<span class="ident">mem_offset</span>, <span class="ident">count</span>)
@@ -1809,7 +1817,7 @@
             <span class="comment">// write call.</span>
             <span class="kw">match</span> <span class="kw">unsafe</span> {
                 <span class="ident">write</span>(
-                    <span class="ident">dst</span>.<span class="ident">as_raw_fd</span>(),
+                    <span class="ident">dst</span>.<span class="ident">as_raw_descriptor</span>(),
                     <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">mem_offset</span>) <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">c_void</span>,
                     <span class="ident">count</span>,
                 )
@@ -1964,7 +1972,7 @@
     <span class="doccomment">/// * `offset` - Page aligned offset into the arena in bytes.</span>
     <span class="doccomment">/// * `size` - Size of memory region in bytes.</span>
     <span class="doccomment">/// * `fd` - File descriptor to mmap from.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_fd</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">size</span>: <span class="ident">usize</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_fd</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">size</span>: <span class="ident">usize</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">add_fd_offset</span>(<span class="ident">offset</span>, <span class="ident">size</span>, <span class="ident">fd</span>, <span class="number">0</span>)
     }
 
@@ -1980,7 +1988,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">fd_offset</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">add_fd_offset_protection</span>(<span class="ident">offset</span>, <span class="ident">size</span>, <span class="ident">fd</span>, <span class="ident">fd_offset</span>, <span class="ident">Protection::read_write</span>())
@@ -2000,7 +2008,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">fd_offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -2014,7 +2022,7 @@
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
-        <span class="ident">fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
+        <span class="ident">fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Ensure offset is page-aligned</span>
         <span class="kw">if</span> <span class="ident">offset</span> <span class="op">%</span> <span class="ident">pagesize</span>() <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
@@ -2067,7 +2075,7 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawFd</span>,
+        <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">fd_offset</span>: <span class="ident">u64</span>,
         <span class="ident">prot</span>: <span class="ident">Protection</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
