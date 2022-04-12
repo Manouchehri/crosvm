@@ -4340,6 +4340,89 @@
 <span id="4339">4339</span>
 <span id="4340">4340</span>
 <span id="4341">4341</span>
+<span id="4342">4342</span>
+<span id="4343">4343</span>
+<span id="4344">4344</span>
+<span id="4345">4345</span>
+<span id="4346">4346</span>
+<span id="4347">4347</span>
+<span id="4348">4348</span>
+<span id="4349">4349</span>
+<span id="4350">4350</span>
+<span id="4351">4351</span>
+<span id="4352">4352</span>
+<span id="4353">4353</span>
+<span id="4354">4354</span>
+<span id="4355">4355</span>
+<span id="4356">4356</span>
+<span id="4357">4357</span>
+<span id="4358">4358</span>
+<span id="4359">4359</span>
+<span id="4360">4360</span>
+<span id="4361">4361</span>
+<span id="4362">4362</span>
+<span id="4363">4363</span>
+<span id="4364">4364</span>
+<span id="4365">4365</span>
+<span id="4366">4366</span>
+<span id="4367">4367</span>
+<span id="4368">4368</span>
+<span id="4369">4369</span>
+<span id="4370">4370</span>
+<span id="4371">4371</span>
+<span id="4372">4372</span>
+<span id="4373">4373</span>
+<span id="4374">4374</span>
+<span id="4375">4375</span>
+<span id="4376">4376</span>
+<span id="4377">4377</span>
+<span id="4378">4378</span>
+<span id="4379">4379</span>
+<span id="4380">4380</span>
+<span id="4381">4381</span>
+<span id="4382">4382</span>
+<span id="4383">4383</span>
+<span id="4384">4384</span>
+<span id="4385">4385</span>
+<span id="4386">4386</span>
+<span id="4387">4387</span>
+<span id="4388">4388</span>
+<span id="4389">4389</span>
+<span id="4390">4390</span>
+<span id="4391">4391</span>
+<span id="4392">4392</span>
+<span id="4393">4393</span>
+<span id="4394">4394</span>
+<span id="4395">4395</span>
+<span id="4396">4396</span>
+<span id="4397">4397</span>
+<span id="4398">4398</span>
+<span id="4399">4399</span>
+<span id="4400">4400</span>
+<span id="4401">4401</span>
+<span id="4402">4402</span>
+<span id="4403">4403</span>
+<span id="4404">4404</span>
+<span id="4405">4405</span>
+<span id="4406">4406</span>
+<span id="4407">4407</span>
+<span id="4408">4408</span>
+<span id="4409">4409</span>
+<span id="4410">4410</span>
+<span id="4411">4411</span>
+<span id="4412">4412</span>
+<span id="4413">4413</span>
+<span id="4414">4414</span>
+<span id="4415">4415</span>
+<span id="4416">4416</span>
+<span id="4417">4417</span>
+<span id="4418">4418</span>
+<span id="4419">4419</span>
+<span id="4420">4420</span>
+<span id="4421">4421</span>
+<span id="4422">4422</span>
+<span id="4423">4423</span>
+<span id="4424">4424</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -6924,10 +7007,15 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;cras-snd&quot;</span>,
           <span class="string">&quot;[capture=true,client=crosvm,socket=unified,num_output_streams=1,num_input_streams=1]&quot;</span>,
           <span class="string">&quot;Comma separated key=value pairs for setting up cras snd devices.
+
               Possible key values:
+
               capture - Enable audio capture. Default to false.
+
               client_type - Set specific client type for cras backend.
+
               num_output_streams - Set number of output PCM streams
+
               num_input_streams - Set number of input PCM streams&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;no-smt&quot;</span>, <span class="string">&quot;Don&#39;t use SMT in the guest&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;rt-cpus&quot;</span>, <span class="string">&quot;CPUSET&quot;</span>, <span class="string">&quot;Comma-separated list of CPUs or CPU ranges to run VCPUs on. (e.g. 0,1-3,5) (default: none)&quot;</span>),
@@ -6949,10 +7037,15 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;rwroot&quot;</span>, <span class="string">&quot;PATH[,key=value[,key=value[,...]]&quot;</span>, <span class="string">&quot;Path to a writable root disk image followed by optional comma-separated options.
                               See --disk for valid options.&quot;</span>),
           <span class="ident">Argument::short_value</span>(<span class="string">&#39;d&#39;</span>, <span class="string">&quot;disk&quot;</span>, <span class="string">&quot;PATH[,key=value[,key=value[,...]]&quot;</span>, <span class="string">&quot;Path to a disk image followed by optional comma-separated options.
+
                               Valid keys:
+
                               sparse=BOOL - Indicates whether the disk should support the discard operation (default: true)
+
                               block_size=BYTES - Set the reported block size of the disk (default: 512)
+
                               id=STRING - Set the block device identifier to an ASCII string, up to 20 characters (default: no ID)
+
                               o_direct=BOOL - Use O_DIRECT mode to bypass page cache&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;rwdisk&quot;</span>, <span class="string">&quot;PATH[,key=value[,key=value[,...]]&quot;</span>, <span class="string">&quot;Path to a writable disk image followed by optional comma-separated options.
                               See --disk for valid options.&quot;</span>),
@@ -6969,27 +7062,43 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;ac97&quot;</span>,
                           <span class="string">&quot;[backend=BACKEND,capture=true,capture_effect=EFFECT,client_type=TYPE,shm-fd=FD,client-fd=FD,server-fd=FD]&quot;</span>,
                           <span class="string">&quot;Comma separated key=value pairs for setting up Ac97 devices. Can be given more than once .
+
                               Possible key values:
+
                               backend=(null, cras, vios) - Where to route the audio device. If not provided, backend will default to null.
                               `null` for /dev/null, cras for CRAS server and vios for VioS server.
+
                               capture - Enable audio capture
+
                               capture_effects - | separated effects to be enabled for recording. The only supported effect value now is EchoCancellation or aec.
+
                               client_type - Set specific client type for cras backend.
+
                               socket_type - Set specific socket type for cras backend.
+
                               server - The to the VIOS server (unix socket).&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;sound&quot;</span>, <span class="string">&quot;[PATH]&quot;</span>, <span class="string">&quot;Path to the VioS server socket for setting up virtio-snd devices.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;serial&quot;</span>,
                           <span class="string">&quot;type=TYPE,[hardware=HW,num=NUM,path=PATH,input=PATH,console,earlycon,stdin]&quot;</span>,
                           <span class="string">&quot;Comma separated key=value pairs for setting up serial devices. Can be given more than once.
+
                               Possible key values:
+
                               type=(stdout,syslog,sink,file) - Where to route the serial device
+
                               hardware=(serial,virtio-console) - Which type of serial hardware to emulate. Defaults to 8250 UART (serial).
+
                               num=(1,2,3,4) - Serial Device Number. If not provided, num will default to 1.
+
                               path=PATH - The path to the file to write to when type=file
+
                               input=PATH - The path to the file to read from when not stdin
+
                               console - Use this serial device as the guest console. Can only be given once. Will default to first serial port if not provided.
+
                               earlycon - Use this serial device as the early console. Can only be given once.
+
                               stdin - Direct standard input to this serial device. Can only be given once. Will default to first serial port if not provided.
                               &quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;syslog-tag&quot;</span>, <span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;When logging to syslog, use the provided tag.&quot;</span>),
@@ -7008,15 +7117,26 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;cid&quot;</span>, <span class="string">&quot;CID&quot;</span>, <span class="string">&quot;Context ID for virtual sockets.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;shared-dir&quot;</span>, <span class="string">&quot;PATH:TAG[:type=TYPE:writeback=BOOL:timeout=SECONDS:uidmap=UIDMAP:gidmap=GIDMAP:cache=CACHE:dax=BOOL,posix_acl=BOOL]&quot;</span>,
                           <span class="string">&quot;Colon-separated options for configuring a directory to be shared with the VM.
+
                               The first field is the directory to be shared and the second field is the tag that the VM can use to identify the device.
+
                               The remaining fields are key=value pairs that may appear in any order.  Valid keys are:
+
                               type=(p9, fs) - Indicates whether the directory should be shared via virtio-9p or virtio-fs (default: p9).
+
                               uidmap=UIDMAP - The uid map to use for the device&#39;s jail in the format \&quot;inner outer count[,inner outer count]\&quot; (default: 0 &lt;current euid&gt; 1).
+
                               gidmap=GIDMAP - The gid map to use for the device&#39;s jail in the format \&quot;inner outer count[,inner outer count]\&quot; (default: 0 &lt;current egid&gt; 1).
+
                               cache=(never, auto, always) - Indicates whether the VM can cache the contents of the shared directory (default: auto).  When set to \&quot;auto\&quot; and the type is \&quot;fs\&quot;, the VM will use close-to-open consistency for file contents.
+
                               timeout=SECONDS - How long the VM should consider file attributes and directory entries to be valid (default: 5).  If the VM has exclusive access to the directory, then this should be a large value.  If the directory can be modified by other processes, then this should be 0.
+
                               writeback=BOOL - Enables writeback caching (default: false).  This is only safe to do when the VM has exclusive access to the files in a directory.  Additionally, the server should have read permission for all files as the VM may issue read requests even for files that are opened write-only.
-                              dax=BOOL - Enables DAX support.  Enabling DAX can improve performance for frequently accessed files by mapping regions of the file directly into the VM&#39;s memory.  There is a cost of slightly increased latency the first time the file is accessed.  Since the mapping is shared directly from the host kernel&#39;s file cache, enabling DAX can improve performance even when the guest cache policy is \&quot;Never\&quot;.  The default value for this option is \&quot;false\&quot;.
+
+                              dax=BOOL - Enables DAX support.  Enabling DAX can improve performance for frequently accessed files by mapping regions of the file directly into the VM&#39;s memory.
+There is a cost of slightly increased latency the first time the file is accessed.  Since the mapping is shared directly from the host kernel&#39;s file cache, enabling DAX can improve performance even when the guest cache policy is \&quot;Never\&quot;.  The default value for this option is \&quot;false\&quot;.
+
                               posix_acl=BOOL - Indicates whether the shared directory supports POSIX ACLs.  This should only be enabled when the underlying file system supports POSIX ACLs.  The default value for this option is \&quot;true\&quot;.
 &quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;seccomp-policy-dir&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to seccomp .policy files.&quot;</span>),
@@ -7044,32 +7164,51 @@
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;gpu&quot;</span>,
                                   <span class="string">&quot;[width=INT,height=INT]&quot;</span>,
                                   <span class="string">&quot;(EXPERIMENTAL) Comma separated key=value pairs for setting up a virtio-gpu device
+
                               Possible key values:
+
                               backend=(2d|virglrenderer|gfxstream) - Which backend to use for virtio-gpu (determining rendering protocol)
+
                               width=INT - The width of the virtual display connected to the virtio-gpu.
+
                               height=INT - The height of the virtual display connected to the virtio-gpu.
+
                               egl[=true|=false] - If the backend should use a EGL context for rendering.
+
                               glx[=true|=false] - If the backend should use a GLX context for rendering.
+
                               surfaceless[=true|=false] - If the backend should use a surfaceless context for rendering.
+
                               angle[=true|=false] - If the gfxstream backend should use ANGLE (OpenGL on Vulkan) as its native OpenGL driver.
+
                               syncfd[=true|=false] - If the gfxstream backend should support EGL_ANDROID_native_fence_sync
+
                               vulkan[=true|=false] - If the backend should support vulkan
+
                               cache-path=PATH - The path to the virtio-gpu device shader cache.
+
                               cache-size=SIZE - The maximum size of the shader cache.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;gpu-display&quot;</span>,
                                   <span class="string">&quot;[width=INT,height=INT]&quot;</span>,
                                   <span class="string">&quot;(EXPERIMENTAL) Comma separated key=value pairs for setting up a display on the virtio-gpu device
+
                               Possible key values:
+
                               width=INT - The width of the virtual display connected to the virtio-gpu.
+
                               height=INT - The height of the virtual display connected to the virtio-gpu.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;gpu-render-server&quot;</span>,
                                   <span class="string">&quot;[path=PATH]&quot;</span>,
                                   <span class="string">&quot;(EXPERIMENTAL) Comma separated key=value pairs for setting up a render server for the virtio-gpu device
+
                               Possible key values:
+
                               path=PATH - The path to the render server executable.
+
                               cache-path=PATH - The path to the render server shader cache.
+
                               cache-size=SIZE - The maximum size of the shader cache.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
           <span class="ident">Argument::flag</span>(<span class="string">&quot;software-tpm&quot;</span>, <span class="string">&quot;enable a software emulated trusted platform module device&quot;</span>),
@@ -7084,7 +7223,9 @@
           <span class="ident">Argument::flag</span>(<span class="string">&quot;split-irqchip&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) enable split-irqchip support&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;bios&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to BIOS/firmware ROM&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;vfio&quot;</span>, <span class="string">&quot;PATH[,guest-address=auto|&lt;BUS:DEVICE.FUNCTION&gt;][,iommu=on|off]&quot;</span>, <span class="string">&quot;Path to sysfs of PCI pass through or mdev device.
+
 guest-address=auto|&lt;BUS:DEVICE.FUNCTION&gt; - PCI address that the device will be assigned in the guest (default: auto).  When set to \&quot;auto\&quot;, the device will be assigned an address that mirrors its address in the host.
+
 iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;vfio-platform&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to sysfs of platform pass through&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;virtio-iommu&quot;</span>, <span class="string">&quot;Add a virtio-iommu device&quot;</span>),
@@ -7102,7 +7243,9 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;battery&quot;</span>,
                                   <span class="string">&quot;[type=TYPE]&quot;</span>,
                                   <span class="string">&quot;Comma separated key=value pairs for setting up battery device
+
                               Possible key values:
+
                               type=goldfish - type of battery emulation, defaults to goldfish&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;gdb&quot;</span>, <span class="string">&quot;PORT&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) gdb on the given port&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;no-balloon&quot;</span>, <span class="string">&quot;Don&#39;t use virtio-balloon device in the guest&quot;</span>),
@@ -7123,7 +7266,9 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
                           <span class="string">&quot;Path to a socket path for vhost-user fs, and tag for the shared dir&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;vvu-proxy&quot;</span>, <span class="string">&quot;SOCKET_PATH[,addr=DOMAIN:BUS:DEVICE.FUNCTION,uuid=UUID]&quot;</span>, <span class="string">&quot;Socket path for the Virtio Vhost User proxy device.
                               Parameters
+
                               addr=BUS:DEVICE.FUNCTION - PCI address that the proxy device will be allocated (default: automatically allocated)
+
                               uuid=UUID - UUID which will be stored in VVU PCI config space that is readable from guest userspace&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-pmio&quot;</span>, <span class="string">&quot;PATH@RANGE[,RANGE[,...]]&quot;</span>, <span class="string">&quot;Path and ranges for direct port mapped I/O access. RANGE may be decimal or hex (starting with 0x).&quot;</span>),
@@ -7140,6 +7285,7 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::value</span>(<span class="string">&quot;dmi&quot;</span>, <span class="string">&quot;DIR&quot;</span>, <span class="string">&quot;Directory with smbios_entry_point/DMI files&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;no-legacy&quot;</span>, <span class="string">&quot;Don&#39;t use legacy KBD/RTC devices emulation&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,action=r0&quot;</span>, <span class="string">&quot;Userspace MSR handling. Takes INDEX of the MSR and how they are handled.
+
                               action=r0 - forward RDMSR to host kernel cpu0.
 &quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
@@ -7147,29 +7293,49 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::flag</span>(<span class="string">&quot;privileged-vm&quot;</span>, <span class="string">&quot;Grant this Guest VM certian privileges to manage Host resources, such as power management.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;stub-pci-device&quot;</span>, <span class="string">&quot;DOMAIN:BUS:DEVICE.FUNCTION[,vendor=NUM][,device=NUM][,class=NUM][,subsystem_vendor=NUM][,subsystem_device=NUM][,revision=NUM]&quot;</span>, <span class="string">&quot;Comma-separated key=value pairs for setting up a stub PCI device that just enumerates. The first option in the list must specify a PCI address to claim.
                               Optional further parameters
+
                               vendor=NUM - PCI vendor ID
+
                               device=NUM - PCI device ID
+
                               class=NUM - PCI class (including class code, subclass, and programming interface)
+
                               subsystem_vendor=NUM - PCI subsystem vendor ID
+
                               subsystem_device=NUM - PCI subsystem device ID
+
                               revision=NUM - revision&quot;</span>),
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;coiommu&quot;</span>,
                           <span class="string">&quot;unpin_policy=POLICY,unpin_interval=NUM,unpin_limit=NUM,unpin_gen_threshold=NUM &quot;</span>,
                           <span class="string">&quot;Comma separated key=value pairs for setting up coiommu devices.
+
                               Possible key values:
+
                               unpin_policy=lru - LRU unpin policy.
+
                               unpin_interval=NUM - Unpin interval time in seconds.
+
                               unpin_limit=NUM - Unpin limit for each unpin cycle, in unit of page count. 0 is invalid.
+
                               unpin_gen_threshold=NUM -  Number of unpin intervals a pinned page must be busy for to be aged into the older which is less frequently checked generation.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;file-backed-mapping&quot;</span>, <span class="string">&quot;addr=NUM,size=SIZE,path=PATH[,offset=NUM][,ro][,rw][,sync]&quot;</span>, <span class="string">&quot;Map the given file into guest memory at the specified address.
+
                               Parameters (addr, size, path are required):
+
                               addr=NUM - guest physical address to map at
+
                               size=NUM - amount of memory to map
+
                               path=PATH - path to backing file/device to map
+
                               offset=NUM - offset in backing file (default 0)
+
                               ro - make the mapping readonly (default)
+
                               rw - make the mapping writable
+
                               sync - open backing file with O_SYNC
+
                               align - whether to adjust addr and size to page boundaries implicitly&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;pcie-root-port&quot;</span>, <span class="string">&quot;PATH[,hp_gpe=NUM]&quot;</span>, <span class="string">&quot;Path to sysfs of host pcie root port and host pcie root port hotplug gpe number&quot;</span>),
