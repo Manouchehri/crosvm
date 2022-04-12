@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["PollToken","Implements the PollToken trait for a given `enum`."]]});
+initSidebarItems({"derive":[["PollToken","Implements the PollToken trait for a given `enum`."]],"fn":[["field_member",""],["generate_as_raw_token",""],["generate_from_raw_token",""],["poll_token_inner",""],["variant_bits",""]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["QUEUE_SIZE",""],["QUEUE_SIZES",""]],"enum":[["VhostVsockDeviceParameter",""]],"struct":[["VhostVsockConfig",""],["Vsock",""]]});
+initSidebarItems({"constant":[["NUM_QUEUES",""],["QUEUE_SIZE",""],["QUEUE_SIZES",""]],"enum":[["VhostVsockDeviceParameter",""]],"static":[["VHOST_VSOCK_DEFAULT_PATH",""]],"struct":[["VhostVsockConfig",""],["Vsock",""]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["host_backend",""],["xhci",""]]});
+initSidebarItems({"mod":[["host_backend",""],["log",""],["xhci",""]]});

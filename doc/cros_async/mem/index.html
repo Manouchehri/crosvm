@@ -4,6 +4,15 @@
 memory region instead of an absolute pointer.
 The backing memory referenced by the region can be an array, an mmapped file, or guest memory.
 The offset is a u64 to allow having file or guest offsets &gt;4GB when run on a 32bit host.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.VecIoWrapper.html" title="cros_async::mem::VecIoWrapper struct">VecIoWrapper</a></div><div class="item-right docblock-short"><p>Wrapper to be used for passing a Vec in as backing memory for asynchronous operations.  The
+wrapper owns a Vec according to the borrow checker. It is loaning this vec out to the kernel(or
+other modifiers) through the <code>BackingMemory</code> trait. This allows multiple modifiers of the array
+in the <code>Vec</code> while this struct is alive. The data in the Vec is loaned to the kernel not the
+data structure itself, the length, capacity, and pointer to memory cannot be modified.
+To ensure that those operations can be done safely, no access is allowed to the <code>Vec</code>’s memory
+starting at the time that <code>VecIoWrapper</code> is constructed until the time it is turned back in to a
+<code>Vec</code> using <code>to_inner</code>. The returned <code>Vec</code> is guaranteed to be valid as any combination of bits
+in a <code>Vec</code> of <code>u8</code> is valid.</p>
 </div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Error.html" title="cros_async::mem::Error enum">Error</a></div><div class="item-right docblock-short"></div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.BackingMemory.html" title="cros_async::mem::BackingMemory trait">BackingMemory</a></div><div class="item-right docblock-short"><p>Trait for memory that can yeild both iovecs in to the backing memory.

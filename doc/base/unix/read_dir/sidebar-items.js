@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["read_dir",""]],"struct":[["DirEntry",""],["ReadDir",""]]});
+initSidebarItems({"fn":[["read_dir",""],["strip_padding",""]],"struct":[["DirEntry",""],["LinuxDirent64",""],["ReadDir",""]]});

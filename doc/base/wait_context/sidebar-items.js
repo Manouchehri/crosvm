@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["EventType","Represents types of events to watch for."]],"fn":[["convert_to_watching_events",""]],"struct":[["TriggeredEvent","Represents an event that has been signaled and waited for via a wait function."],["WaitContext","Used to wait for multiple objects which are eligible for waiting."]],"trait":[["EventToken",""]]});

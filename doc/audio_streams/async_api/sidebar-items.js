@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["AudioStreamsExecutor","Trait of Executor functionality used by `audio_streams`."],["ReadAsync",""],["ReadWriteAsync",""],["WriteAsync",""]],"type":[["AsyncStream",""]]});

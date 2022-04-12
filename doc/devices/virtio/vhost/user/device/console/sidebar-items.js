@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["run_console_device","Starts a vhost-user console device. Returns an error if the given `args` is invalid or the device fails to run."],["run_rx_queue",""],["run_tx_queue",""]],"struct":[["ConsoleBackend",""],["ConsoleDevice",""],["Options",""]]});

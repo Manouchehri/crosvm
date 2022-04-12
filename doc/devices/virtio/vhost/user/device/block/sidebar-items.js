@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["NUM_QUEUES",""],["QUEUE_SIZE",""]],"fn":[["run_block_device","Starts a vhost-user block device. Returns an error if the given `args` is invalid or the device fails to run."]],"struct":[["BlockBackend",""],["Options",""]]});

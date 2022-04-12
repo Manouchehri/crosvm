@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Event","See EventFd for struct- and method-level documentation."],["ScopedEvent","An `Event` wrapper which triggers when it goes out of scope."]]});

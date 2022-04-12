@@ -1,5 +1,3 @@
 (function() {var implementors = {};
-implementors["serde"] = [];
-implementors["serde_json"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"struct\" href=\"serde_json/struct.Error.html\" title=\"struct serde_json::Error\">Error</a>","synthetic":false,"types":["serde_json::error::Error"]}];
-implementors["serde_keyvalue"] = [{"text":"impl <a class=\"trait\" href=\"serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"struct\" href=\"serde_keyvalue/struct.ParseError.html\" title=\"struct serde_keyvalue::ParseError\">ParseError</a>","synthetic":false,"types":["serde_keyvalue::key_values::ParseError"]}];
+implementors["serde_keyvalue"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/serde/1.0.136/serde/de/trait.Error.html\" title=\"trait serde::de::Error\">Error</a> for <a class=\"struct\" href=\"serde_keyvalue/key_values/struct.ParseError.html\" title=\"struct serde_keyvalue::key_values::ParseError\">ParseError</a>","synthetic":false,"types":["serde_keyvalue::key_values::ParseError"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

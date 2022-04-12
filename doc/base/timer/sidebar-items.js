@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["build_timer",""]],"struct":[["FakeTimer","See FakeTimerFd for struct- and method-level documentation."],["Timer","See TimerFd for struct- and method-level documentation."]]});

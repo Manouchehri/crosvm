@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Executor","An executor for scheduling tasks that poll futures to completion."]],"fn":[["async_poll_from","Creates a concrete `IoSourceExt` using the fd_executor."],["async_uring_from",""]]});

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["FakeNet",""]]});
+initSidebarItems({"constant":[["TMP_FILE",""]],"struct":[["FakeNet",""]]});

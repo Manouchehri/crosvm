@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["gdb_thread",""]],"struct":[["GdbStub",""]]});
+initSidebarItems({"enum":[["Error",""]],"fn":[["gdb_thread",""]],"struct":[["GdbStub",""]],"type":[["ArchUsize",""],["GdbResult",""]]});

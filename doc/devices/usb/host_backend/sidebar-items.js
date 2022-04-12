@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["error",""],["host_backend_device_provider",""],["host_device",""],["usb_endpoint",""]]});
+initSidebarItems({"mod":[["error",""],["host_backend_device_provider",""],["host_device",""],["usb_endpoint",""],["utils",""]]});
