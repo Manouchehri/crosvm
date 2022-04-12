@@ -1055,13 +1055,6 @@
 <span id="1054">1054</span>
 <span id="1055">1055</span>
 <span id="1056">1056</span>
-<span id="1057">1057</span>
-<span id="1058">1058</span>
-<span id="1059">1059</span>
-<span id="1060">1060</span>
-<span id="1061">1061</span>
-<span id="1062">1062</span>
-<span id="1063">1063</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1529,25 +1522,18 @@
             .<span class="ident">async_from</span>(<span class="ident">h</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to create asyn handler source&quot;</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">done</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
-            <span class="kw">loop</span> {
-                <span class="comment">// Wait for requests from the sibling.</span>
-                <span class="comment">// `read_u64()` returns the number of requests arrived.</span>
-                <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">handler_source</span>
-                    .<span class="ident">read_u64</span>()
-                    .<span class="kw">await</span>
-                    .<span class="ident">context</span>(<span class="string">&quot;failed to wait for handler source&quot;</span>)<span class="question-mark">?</span>;
-                <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">count</span> {
-                    <span class="ident">req_handler</span>
-                        .<span class="ident">handle_request</span>()
-                        .<span class="ident">context</span>(<span class="string">&quot;failed to handle request&quot;</span>)<span class="question-mark">?</span>;
-                }
+        <span class="kw">loop</span> {
+            <span class="comment">// Wait for requests from the sibling.</span>
+            <span class="comment">// `read_u64()` returns the number of requests arrived.</span>
+            <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">handler_source</span>
+                .<span class="ident">read_u64</span>()
+                .<span class="kw">await</span>
+                .<span class="ident">context</span>(<span class="string">&quot;failed to wait for handler source&quot;</span>)<span class="question-mark">?</span>;
+            <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">count</span> {
+                <span class="ident">req_handler</span>
+                    .<span class="ident">handle_request</span>()
+                    .<span class="ident">context</span>(<span class="string">&quot;failed to handle request&quot;</span>)<span class="question-mark">?</span>;
             }
-        };
-        <span class="kw">match</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">done</span>) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(())) =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>).<span class="ident">context</span>(<span class="string">&quot;executor error&quot;</span>),
         }
     }
 }
