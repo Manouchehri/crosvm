@@ -276,6 +276,15 @@
 <span id="275">275</span>
 <span id="276">276</span>
 <span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -411,19 +420,28 @@
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Rutabaga2D</span> {
+    <span class="ident">latest_created_fence_id</span>: <span class="ident">u32</span>,
     <span class="ident">fence_handler</span>: <span class="ident">RutabagaFenceHandler</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Rutabaga2D</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">fence_handler</span>: <span class="ident">RutabagaFenceHandler</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RutabagaComponent</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">Rutabaga2D</span> { <span class="ident">fence_handler</span> }))
+        <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">Rutabaga2D</span> {
+            <span class="ident">latest_created_fence_id</span>: <span class="number">0</span>,
+            <span class="ident">fence_handler</span>,
+        }))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">RutabagaComponent</span> <span class="kw">for</span> <span class="ident">Rutabaga2D</span> {
     <span class="kw">fn</span> <span class="ident">create_fence</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">fence</span>: <span class="ident">RutabagaFence</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">latest_created_fence_id</span> <span class="op">=</span> <span class="ident">fence</span>.<span class="ident">fence_id</span> <span class="kw">as</span> <span class="ident">u32</span>;
         <span class="self">self</span>.<span class="ident">fence_handler</span>.<span class="ident">call</span>(<span class="ident">fence</span>);
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+        <span class="self">self</span>.<span class="ident">latest_created_fence_id</span>
     }
 
     <span class="kw">fn</span> <span class="ident">create_3d</span>(

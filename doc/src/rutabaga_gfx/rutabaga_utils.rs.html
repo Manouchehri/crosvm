@@ -590,12 +590,6 @@
 <span id="589">589</span>
 <span id="590">590</span>
 <span id="591">591</span>
-<span id="592">592</span>
-<span id="593">593</span>
-<span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -994,7 +988,6 @@
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
-<span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>;
 
 <span class="doccomment">/// gfxstream flag struct.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
@@ -1047,11 +1040,6 @@
     <span class="doccomment">/// Use ANGLE as the guest GLES driver.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_guest_angle</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
         <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>, <span class="ident">v</span>)
-    }
-
-    <span class="doccomment">/// Use async fence completion callback.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_async_fence_cb</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
-        <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>, <span class="ident">v</span>)
     }
 }
 
@@ -1114,7 +1102,7 @@
 }
 
 <span class="doccomment">/// Enumeration of possible rutabaga components.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RutabagaComponentType</span> {
     <span class="ident">Rutabaga2D</span>,
     <span class="ident">VirglRenderer</span>,
