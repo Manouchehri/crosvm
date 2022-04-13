@@ -559,7 +559,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//! use serde_json::to_string;</span>
-<span class="doccomment">//! use crate::platform::{</span>
+<span class="doccomment">//! use base::{</span>
 <span class="doccomment">//!     FileSerdeWrapper, FromRawDescriptor, SafeDescriptor, SerializeDescriptors,</span>
 <span class="doccomment">//!     deserialize_with_descriptors,</span>
 <span class="doccomment">//! };</span>
@@ -691,7 +691,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use serde_json::to_string;</span>
-<span class="doccomment">/// use crate::platform::{FileSerdeWrapper, SerializeDescriptors};</span>
+<span class="doccomment">/// use base::platform::{FileSerdeWrapper, SerializeDescriptors};</span>
 <span class="doccomment">/// use tempfile::tempfile;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let tmp_f = tempfile().unwrap();</span>
@@ -882,11 +882,11 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use serde::{Deserialize, Serialize};</span>
-<span class="doccomment">/// use crate::platform::RawDescriptor;</span>
+<span class="doccomment">/// use base::platform::RawDescriptor;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[derive(Serialize, Deserialize)]</span>
 <span class="doccomment">/// struct RawContainer {</span>
-<span class="doccomment">///     #[serde(with = &quot;crate::platform::with_raw_descriptor&quot;)]</span>
+<span class="doccomment">///     #[serde(with = &quot;base::platform::with_raw_descriptor&quot;)]</span>
 <span class="doccomment">///     rd: RawDescriptor,</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
@@ -913,11 +913,11 @@
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use std::fs::File;</span>
 <span class="doccomment">/// use serde::{Deserialize, Serialize};</span>
-<span class="doccomment">/// use crate::platform::RawDescriptor;</span>
+<span class="doccomment">/// use base::platform::RawDescriptor;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// #[derive(Serialize, Deserialize)]</span>
 <span class="doccomment">/// struct FileContainer {</span>
-<span class="doccomment">///     #[serde(with = &quot;crate::platform::with_as_descriptor&quot;)]</span>
+<span class="doccomment">///     #[serde(with = &quot;base::platform::with_as_descriptor&quot;)]</span>
 <span class="doccomment">///     file: File,</span>
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>

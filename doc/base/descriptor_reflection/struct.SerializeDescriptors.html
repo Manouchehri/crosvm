@@ -5,7 +5,7 @@ given to an ordinary <code>Serializer</code>.</p>
 <code>deserialize_with_descriptors</code>.</p>
 <h2 id="examples" class="section-header"><a href="#examples">Examples</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">serde_json::to_string</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::platform</span>::{<span class="ident">FileSerdeWrapper</span>, <span class="ident">SerializeDescriptors</span>};
+<span class="kw">use</span> <span class="ident">base::platform</span>::{<span class="ident">FileSerdeWrapper</span>, <span class="ident">SerializeDescriptors</span>};
 <span class="kw">use</span> <span class="ident">tempfile::tempfile</span>;
 
 <span class="kw">let</span> <span class="ident">tmp_f</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">unwrap</span>();
