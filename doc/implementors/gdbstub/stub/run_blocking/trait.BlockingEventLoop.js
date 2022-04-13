@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["crosvm"] = [{"text":"impl BlockingEventLoop for <a class=\"struct\" href=\"crosvm/gdb/struct.GdbStubEventLoop.html\" title=\"struct crosvm::gdb::GdbStubEventLoop\">GdbStubEventLoop</a>","synthetic":false,"types":["crosvm::gdb::GdbStubEventLoop"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
