@@ -808,7 +808,7 @@
 <span class="comment">// Sets up a vcpu and converts it into a runnable vcpu.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">runnable_vcpu</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(
     <span class="ident">cpu_id</span>: <span class="ident">usize</span>,
-    <span class="ident">kvm_vcpu_id</span>: <span class="ident">usize</span>,
+    <span class="ident">vcpu_id</span>: <span class="ident">usize</span>,
     <span class="ident">vcpu</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>,
     <span class="ident">vm</span>: <span class="kw">impl</span> <span class="ident">VmArch</span>,
     <span class="ident">irq_chip</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">IrqChipArch</span>,
@@ -831,7 +831,7 @@
             <span class="comment">// If vcpu is None, it means this arch/hypervisor requires create_vcpu to be called from</span>
             <span class="comment">// the vcpu thread.</span>
             <span class="kw">match</span> <span class="ident">vm</span>
-                .<span class="ident">create_vcpu</span>(<span class="ident">kvm_vcpu_id</span>)
+                .<span class="ident">create_vcpu</span>(<span class="ident">vcpu_id</span>)
                 .<span class="ident">context</span>(<span class="string">&quot;failed to create vcpu&quot;</span>)<span class="question-mark">?</span>
                 .<span class="ident">downcast</span>::<span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>()
             {
@@ -1332,7 +1332,7 @@
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_vcpu</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(
     <span class="ident">cpu_id</span>: <span class="ident">usize</span>,
-    <span class="ident">kvm_vcpu_id</span>: <span class="ident">usize</span>,
+    <span class="ident">vcpu_id</span>: <span class="ident">usize</span>,
     <span class="ident">vcpu</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>,
     <span class="ident">vm</span>: <span class="kw">impl</span> <span class="ident">VmArch</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="kw-2">mut</span> <span class="ident">irq_chip</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IrqChipArch</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
@@ -1393,7 +1393,7 @@
             <span class="kw">let</span> <span class="ident">guest_mem</span> <span class="op">=</span> <span class="ident">vm</span>.<span class="ident">get_memory</span>().<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">runnable_vcpu</span> <span class="op">=</span> <span class="ident">runnable_vcpu</span>(
                 <span class="ident">cpu_id</span>,
-                <span class="ident">kvm_vcpu_id</span>,
+                <span class="ident">vcpu_id</span>,
                 <span class="ident">vcpu</span>,
                 <span class="ident">vm</span>,
                 <span class="ident">irq_chip</span>.<span class="ident">as_mut</span>(),
