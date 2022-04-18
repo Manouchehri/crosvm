@@ -636,7 +636,6 @@
 <span id="635">635</span>
 <span id="636">636</span>
 <span id="637">637</span>
-<span id="638">638</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -654,8 +653,7 @@
     <span class="ident">Bus</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusError</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipAArch64</span>, <span class="ident">PciAddress</span>, <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{
-    <span class="ident">arm64_core_reg</span>, <span class="ident">DeviceKind</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuAArch64</span>,
-    <span class="ident">VcpuFeature</span>, <span class="ident">Vm</span>, <span class="ident">VmAArch64</span>,
+    <span class="ident">DeviceKind</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuAArch64</span>, <span class="ident">VcpuFeature</span>, <span class="ident">Vm</span>, <span class="ident">VmAArch64</span>,
 };
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -1241,7 +1239,7 @@
 
         <span class="comment">// All interrupts masked</span>
         <span class="kw">let</span> <span class="ident">pstate</span> <span class="op">=</span> <span class="ident">PSR_D_BIT</span> <span class="op">|</span> <span class="ident">PSR_A_BIT</span> <span class="op">|</span> <span class="ident">PSR_I_BIT</span> <span class="op">|</span> <span class="ident">PSR_F_BIT</span> <span class="op">|</span> <span class="ident">PSR_MODE_EL1H</span>;
-        <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="macro">arm64_core_reg!</span>(<span class="ident">pstate</span>), <span class="ident">pstate</span>)
+        <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="ident">hypervisor::VcpuRegAArch64::Pstate</span>, <span class="ident">pstate</span>)
             .<span class="ident">map_err</span>(<span class="ident">Error::SetReg</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// Other cpus are powered off initially</span>
@@ -1252,9 +1250,9 @@
                 <span class="ident">get_kernel_addr</span>()
             };
             <span class="kw">let</span> <span class="ident">entry_addr_reg_id</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">protected_vm</span> <span class="op">==</span> <span class="ident">ProtectionType::Protected</span> {
-                <span class="macro">arm64_core_reg!</span>(<span class="ident">regs</span>, <span class="number">1</span>)
+                <span class="ident">hypervisor::VcpuRegAArch64::W1</span>
             } <span class="kw">else</span> {
-                <span class="macro">arm64_core_reg!</span>(<span class="ident">pc</span>)
+                <span class="ident">hypervisor::VcpuRegAArch64::Pc</span>
             };
             <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="ident">entry_addr_reg_id</span>, <span class="ident">entry_addr</span>.<span class="ident">offset</span>())
                 .<span class="ident">map_err</span>(<span class="ident">Error::SetReg</span>)<span class="question-mark">?</span>;
@@ -1262,12 +1260,12 @@
             <span class="comment">/* X0 -- fdt address */</span>
             <span class="kw">let</span> <span class="ident">mem_size</span> <span class="op">=</span> <span class="ident">guest_mem</span>.<span class="ident">memory_size</span>();
             <span class="kw">let</span> <span class="ident">fdt_addr</span> <span class="op">=</span> (<span class="ident">AARCH64_PHYS_MEM_START</span> <span class="op">+</span> <span class="ident">fdt_offset</span>(<span class="ident">mem_size</span>, <span class="ident">has_bios</span>)) <span class="kw">as</span> <span class="ident">u64</span>;
-            <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="macro">arm64_core_reg!</span>(<span class="ident">regs</span>, <span class="number">0</span>), <span class="ident">fdt_addr</span>)
+            <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="ident">hypervisor::VcpuRegAArch64::W0</span>, <span class="ident">fdt_addr</span>)
                 .<span class="ident">map_err</span>(<span class="ident">Error::SetReg</span>)<span class="question-mark">?</span>;
 
             <span class="comment">/* X2 -- image size */</span>
             <span class="kw">if</span> <span class="ident">protected_vm</span> <span class="op">==</span> <span class="ident">ProtectionType::Protected</span> {
-                <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="macro">arm64_core_reg!</span>(<span class="ident">regs</span>, <span class="number">2</span>), <span class="ident">image_size</span> <span class="kw">as</span> <span class="ident">u64</span>)
+                <span class="ident">vcpu</span>.<span class="ident">set_one_reg</span>(<span class="ident">hypervisor::VcpuRegAArch64::W2</span>, <span class="ident">image_size</span> <span class="kw">as</span> <span class="ident">u64</span>)
                     .<span class="ident">map_err</span>(<span class="ident">Error::SetReg</span>)<span class="question-mark">?</span>;
             }
         }
