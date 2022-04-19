@@ -2540,6 +2540,70 @@
 <span id="2539">2539</span>
 <span id="2540">2540</span>
 <span id="2541">2541</span>
+<span id="2542">2542</span>
+<span id="2543">2543</span>
+<span id="2544">2544</span>
+<span id="2545">2545</span>
+<span id="2546">2546</span>
+<span id="2547">2547</span>
+<span id="2548">2548</span>
+<span id="2549">2549</span>
+<span id="2550">2550</span>
+<span id="2551">2551</span>
+<span id="2552">2552</span>
+<span id="2553">2553</span>
+<span id="2554">2554</span>
+<span id="2555">2555</span>
+<span id="2556">2556</span>
+<span id="2557">2557</span>
+<span id="2558">2558</span>
+<span id="2559">2559</span>
+<span id="2560">2560</span>
+<span id="2561">2561</span>
+<span id="2562">2562</span>
+<span id="2563">2563</span>
+<span id="2564">2564</span>
+<span id="2565">2565</span>
+<span id="2566">2566</span>
+<span id="2567">2567</span>
+<span id="2568">2568</span>
+<span id="2569">2569</span>
+<span id="2570">2570</span>
+<span id="2571">2571</span>
+<span id="2572">2572</span>
+<span id="2573">2573</span>
+<span id="2574">2574</span>
+<span id="2575">2575</span>
+<span id="2576">2576</span>
+<span id="2577">2577</span>
+<span id="2578">2578</span>
+<span id="2579">2579</span>
+<span id="2580">2580</span>
+<span id="2581">2581</span>
+<span id="2582">2582</span>
+<span id="2583">2583</span>
+<span id="2584">2584</span>
+<span id="2585">2585</span>
+<span id="2586">2586</span>
+<span id="2587">2587</span>
+<span id="2588">2588</span>
+<span id="2589">2589</span>
+<span id="2590">2590</span>
+<span id="2591">2591</span>
+<span id="2592">2592</span>
+<span id="2593">2593</span>
+<span id="2594">2594</span>
+<span id="2595">2595</span>
+<span id="2596">2596</span>
+<span id="2597">2597</span>
+<span id="2598">2598</span>
+<span id="2599">2599</span>
+<span id="2600">2600</span>
+<span id="2601">2601</span>
+<span id="2602">2602</span>
+<span id="2603">2603</span>
+<span id="2604">2604</span>
+<span id="2605">2605</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2582,6 +2646,8 @@
     <span class="ident">system_api::client::OrgChromiumArcQuota</span>,
     <span class="ident">system_api::UserDataAuth</span>::{
         <span class="ident">SetMediaRWDataFileProjectIdReply</span>, <span class="ident">SetMediaRWDataFileProjectIdRequest</span>,
+        <span class="ident">SetMediaRWDataFileProjectInheritanceFlagReply</span>,
+        <span class="ident">SetMediaRWDataFileProjectInheritanceFlagRequest</span>,
     },
 };
 
@@ -2599,6 +2665,9 @@
 
 <span class="kw">const</span> <span class="ident">FSCRYPT_KEY_DESCRIPTOR_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">8</span>;
 <span class="kw">const</span> <span class="ident">FSCRYPT_KEY_IDENTIFIER_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">16</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>)]</span>
+<span class="kw">const</span> <span class="ident">FS_PROJINHERIT_FL</span>: <span class="ident">c_int</span> <span class="op">=</span> <span class="number">0x20000000</span>;
 
 <span class="comment">// 25 seconds is the default timeout for dbus-send.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>)]</span>
@@ -3624,7 +3693,13 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">set_flags</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">inode</span>: <span class="ident">Inode</span>, <span class="ident">handle</span>: <span class="ident">Handle</span>, <span class="ident">r</span>: <span class="ident">R</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">IoctlReply</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">set_flags</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>), <span class="ident">allow</span>(<span class="ident">unused_variables</span>))]</span> <span class="ident">ctx</span>: <span class="ident">Context</span>,
+        <span class="ident">inode</span>: <span class="ident">Inode</span>,
+        <span class="ident">handle</span>: <span class="ident">Handle</span>,
+        <span class="ident">r</span>: <span class="ident">R</span>,
+    ) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">IoctlReply</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">zero_message_open</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) {
             <span class="self">self</span>.<span class="ident">find_inode</span>(<span class="ident">inode</span>)<span class="question-mark">?</span>
         } <span class="kw">else</span> {
@@ -3632,10 +3707,63 @@
         };
 
         <span class="comment">// The ioctl encoding is a long but the parameter is actually an int.</span>
-        <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">c_int::from_reader</span>(<span class="ident">r</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">in_flags</span> <span class="op">=</span> <span class="ident">c_int::from_reader</span>(<span class="ident">r</span>)<span class="question-mark">?</span>;
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>)]</span>
+        <span class="kw">let</span> <span class="ident">st</span> <span class="op">=</span> <span class="ident">stat</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>)<span class="question-mark">?</span>;
+
+        <span class="comment">// Only privleged uid can perform FS_IOC_SETFLAGS through cryptohome.</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>)]</span>
+        <span class="kw">if</span> <span class="ident">ctx</span>.<span class="ident">uid</span> <span class="op">==</span> <span class="ident">st</span>.<span class="ident">st_uid</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">cfg</span>.<span class="ident">privileged_quota_uids</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">uid</span>) {
+            <span class="comment">// Get the current flag.</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">MaybeUninit</span>::<span class="op">&lt;</span><span class="ident">c_int</span><span class="op">&gt;</span><span class="ident">::zeroed</span>();
+            <span class="comment">// Safe because the kernel will only write to `buf` and we check the return value.</span>
+            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_mut_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>, <span class="ident">FS_IOC_GETFLAGS</span>(), <span class="ident">buf</span>.<span class="ident">as_mut_ptr</span>()) };
+            <span class="kw">if</span> <span class="ident">res</span> <span class="op">&lt;</span> <span class="number">0</span> {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">IoctlReply::Done</span>(<span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())));
+            }
+            <span class="comment">// Safe because the kernel guarantees that the policy is now initialized.</span>
+            <span class="kw">let</span> <span class="ident">current_flags</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">buf</span>.<span class="ident">assume_init</span>() };
+
+            <span class="comment">// Project inheritance flag cannot be changed inside a user namespace.</span>
+            <span class="comment">// Use UserDataAuth to avoid this restriction.</span>
+            <span class="kw">if</span> (<span class="ident">in_flags</span> <span class="op">&amp;</span> <span class="ident">FS_PROJINHERIT_FL</span>) <span class="op">!</span><span class="op">=</span> (<span class="ident">current_flags</span> <span class="op">&amp;</span> <span class="ident">FS_PROJINHERIT_FL</span>) {
+                <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">dbus_connection</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">lock</span>();
+                <span class="kw">let</span> <span class="ident">proxy</span> <span class="op">=</span> <span class="ident">connection</span>.<span class="ident">with_proxy</span>(
+                    <span class="string">&quot;org.chromium.UserDataAuth&quot;</span>,
+                    <span class="string">&quot;/org/chromium/UserDataAuth&quot;</span>,
+                    <span class="ident">DEFAULT_DBUS_TIMEOUT</span>,
+                );
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proto</span>: <span class="ident">SetMediaRWDataFileProjectInheritanceFlagRequest</span> <span class="op">=</span> <span class="ident">Message::new</span>();
+                <span class="comment">// If the input flags contain FS_PROJINHERIT_FL, then it is a set. Otherwise it is a</span>
+                <span class="comment">// reset.</span>
+                <span class="ident">proto</span>.<span class="ident">enable</span> <span class="op">=</span> ((<span class="ident">in_flags</span> <span class="op">&amp;</span> <span class="ident">FS_PROJINHERIT_FL</span>) <span class="op">==</span> <span class="ident">FS_PROJINHERIT_FL</span>);
+                <span class="comment">// Safe because data is a valid file descriptor.</span>
+                <span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">dbus::arg::OwnedFd::new</span>(<span class="ident">base::clone_descriptor</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>)<span class="question-mark">?</span>) };
+                <span class="kw">match</span> <span class="ident">proxy</span>.<span class="ident">set_media_rwdata_file_project_inheritance_flag</span>(
+                    <span class="ident">fd</span>,
+                    <span class="ident">proto</span>.<span class="ident">write_to_bytes</span>().<span class="ident">unwrap</span>(),
+                ) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; {
+                        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">protobuf::parse_from_bytes</span>::<span class="op">&lt;</span>
+                            <span class="ident">SetMediaRWDataFileProjectInheritanceFlagReply</span>,
+                        <span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">r</span>)
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">io::Error::new</span>(<span class="ident">io::ErrorKind::InvalidData</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
+                        <span class="kw">if</span> <span class="op">!</span><span class="ident">r</span>.<span class="ident">success</span> {
+                            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">IoctlReply::Done</span>(<span class="prelude-val">Err</span>(<span class="ident">io::Error::from_raw_os_error</span>(
+                                <span class="ident">r</span>.<span class="ident">error</span>,
+                            ))));
+                        }
+                    }
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::new</span>(<span class="ident">io::ErrorKind::Other</span>, <span class="ident">e</span>));
+                    }
+                };
+            }
+        }
 
         <span class="comment">// Safe because this doesn&#39;t modify any memory and we check the return value.</span>
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>, <span class="ident">FS_IOC_SETFLAGS</span>(), <span class="kw-2">&amp;</span><span class="ident">flags</span>) };
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">data</span>, <span class="ident">FS_IOC_SETFLAGS</span>(), <span class="kw-2">&amp;</span><span class="ident">in_flags</span>) };
         <span class="kw">if</span> <span class="ident">res</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">IoctlReply::Done</span>(<span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())))
         } <span class="kw">else</span> {
@@ -4878,7 +5006,7 @@
                 <span class="kw">if</span> <span class="ident">in_size</span> <span class="op">&lt;</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">c_int</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span> {
                     <span class="prelude-val">Err</span>(<span class="ident">io::Error::from_raw_os_error</span>(<span class="ident">libc::ENOMEM</span>))
                 } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">set_flags</span>(<span class="ident">inode</span>, <span class="ident">handle</span>, <span class="ident">r</span>)
+                    <span class="self">self</span>.<span class="ident">set_flags</span>(<span class="ident">ctx</span>, <span class="ident">inode</span>, <span class="ident">handle</span>, <span class="ident">r</span>)
                 }
             }
             <span class="ident">ENABLE_VERITY</span> =&gt; {
