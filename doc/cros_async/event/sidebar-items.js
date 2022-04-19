@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["EventAsync","An async version of `base::EventFd`."]]});
+initSidebarItems({"struct":[["EventAsync","An async version of `base::Event`."]]});

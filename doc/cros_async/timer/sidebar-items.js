@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["TimerAsync","An async version of base::TimerFd."]]});
+initSidebarItems({"struct":[["TimerAsync","An async version of base::Timer."]]});

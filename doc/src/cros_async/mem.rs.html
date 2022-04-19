@@ -97,6 +97,7 @@
 <span id="96">96</span>
 <span id="97">97</span>
 <span id="98">98</span>
+<span id="99">99</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -124,7 +125,7 @@
     <span class="kw">pub</span> <span class="ident">len</span>: <span class="ident">usize</span>,
 }
 
-<span class="doccomment">/// Trait for memory that can yeild both iovecs in to the backing memory.</span>
+<span class="doccomment">/// Trait for memory that can yield both iovecs in to the backing memory.</span>
 <span class="doccomment">/// Must be OK to modify the backing memory without owning a mut able reference. For example,</span>
 <span class="doccomment">/// this is safe for GuestMemory and VolatileSlices in crosvm as those types guarantee they are</span>
 <span class="doccomment">/// dealt with as volatile.</span>
@@ -162,6 +163,7 @@
 
 <span class="kw">impl</span> <span class="ident">VecIoWrapper</span> {
     <span class="doccomment">/// Get the length of the Vec that is wrapped.</span>
+    <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">windows</span>, <span class="ident">allow</span>(<span class="ident">dead_code</span>))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">len</span>()
     }

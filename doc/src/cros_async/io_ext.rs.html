@@ -500,6 +500,69 @@
 <span id="499">499</span>
 <span id="500">500</span>
 <span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -521,29 +584,60 @@
     <span class="ident">fs::File</span>,
     <span class="ident">io</span>,
     <span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>},
-    <span class="ident">os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">RawFd</span>},
     <span class="ident">sync::Arc</span>,
 };
 
 <span class="kw">use</span> <span class="ident">async_trait::async_trait</span>;
-<span class="kw">use</span> <span class="ident">base::UnixSeqpacket</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span> <span class="kw">as</span> <span class="ident">ThisError</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">BackingMemory</span>, <span class="ident">MemRegion</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">use</span> <span class="ident">base::UnixSeqpacket</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">ThisError</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
     <span class="doccomment">/// An error with a polled(FD) source.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error with a poll source: {0}&quot;</span>)]</span>
-    <span class="ident">Poll</span>(<span class="attribute">#[<span class="ident">from</span>]</span> <span class="ident"><span class="kw">super</span>::poll_source::Error</span>),
+    <span class="ident">Poll</span>(<span class="ident"><span class="kw">crate</span>::sys::unix::poll_source::Error</span>),
     <span class="doccomment">/// An error with a uring source.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error with a uring source: {0}&quot;</span>)]</span>
-    <span class="ident">Uring</span>(<span class="attribute">#[<span class="ident">from</span>]</span> <span class="ident"><span class="kw">super</span>::uring_executor::Error</span>),
+    <span class="ident">Uring</span>(<span class="ident"><span class="kw">crate</span>::sys::unix::uring_executor::Error</span>),
 }
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="attribute">#[<span class="ident">sorted</span>]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">ThisError</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error with an EventAsync: {0}&quot;</span>)]</span>
+    <span class="ident">EventAsync</span>(<span class="ident">base::Error</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error with a handle executor: {0}&quot;</span>)]</span>
+    <span class="ident">HandleExecutor</span>(<span class="ident"><span class="kw">crate</span>::sys::windows::handle_executor::Error</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error with a handle source: {0}&quot;</span>)]</span>
+    <span class="ident">HandleSource</span>(<span class="ident"><span class="kw">crate</span>::sys::windows::handle_source::Error</span>),
+}
+
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::sys::unix::uring_executor::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident"><span class="kw">crate</span>::sys::unix::uring_executor::Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Error::Uring</span>(<span class="ident">err</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::sys::unix::poll_source::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident"><span class="kw">crate</span>::sys::unix::poll_source::Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Error::Poll</span>(<span class="ident">err</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">io::Error</span> {
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">Error</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">use</span> <span class="ident">Error</span>::<span class="kw-2">*</span>;
@@ -551,6 +645,32 @@
             <span class="ident">Poll</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="ident">Uring</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
         }
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">io::Error</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="kw">use</span> <span class="ident">Error</span>::<span class="kw-2">*</span>;
+        <span class="kw">match</span> <span class="ident">e</span> {
+            <span class="ident">EventAsync</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="ident">HandleExecutor</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="ident">HandleSource</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+        }
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::sys::windows::handle_source::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident"><span class="kw">crate</span>::sys::windows::handle_source::Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Error::HandleSource</span>(<span class="ident">err</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::sys::windows::handle_executor::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident"><span class="kw">crate</span>::sys::windows::handle_executor::Error</span>) -&gt; <span class="self">Self</span> {
+        <span class="ident">Error::HandleExecutor</span>(<span class="ident">err</span>)
     }
 }
 
@@ -638,6 +758,10 @@
 
     <span class="doccomment">/// Provides a ref to the underlying IO source.</span>
     <span class="kw">fn</span> <span class="ident">as_source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">F</span>;
+
+    <span class="doccomment">/// Waits on a waitable handle. Needed for</span>
+    <span class="doccomment">/// Windows currently, and subject to a potential future upstream.</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">wait_for_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Marker trait signifying that the implementor is suitable for use with</span>
@@ -646,10 +770,12 @@
 <span class="doccomment">/// (Note: it&#39;d be really nice to implement a TryFrom for any implementors, and</span>
 <span class="doccomment">/// remove our factory functions. Unfortunately</span>
 <span class="doccomment">/// &lt;https://github.com/rust-lang/rust/issues/50133&gt; makes that too painful.)</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoAsync</span>: <span class="ident">AsRawFd</span> {}
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoAsync</span>: <span class="ident">AsRawDescriptor</span> {}
 
 <span class="kw">impl</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="ident">File</span> {}
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">impl</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="ident">UnixSeqpacket</span> {}
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">impl</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">UnixSeqpacket</span> {}
 
 <span class="doccomment">/// Simple wrapper struct to implement IntoAsync on foreign types.</span>
@@ -681,20 +807,20 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">AsyncWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_fd</span>()
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">AsyncWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="ident">AsyncWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="ident">AsyncWrapper</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">test</span>, <span class="ident">unix</span>))]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="ident">base::Event</span>;
     <span class="kw">use</span> <span class="ident">std</span>::{
         <span class="ident">fs</span>::{<span class="ident">File</span>, <span class="ident">OpenOptions</span>},
         <span class="ident">future::Future</span>,
-        <span class="ident">os::unix::io::AsRawFd</span>,
         <span class="ident">pin::Pin</span>,
         <span class="ident">sync::Arc</span>,
         <span class="ident">task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>, <span class="ident">Waker</span>},
@@ -702,16 +828,16 @@
     };
     <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
-    <span class="kw">use</span> <span class="kw">super</span>::{
-        <span class="kw">super</span>::{
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::{
+        <span class="ident">mem::VecIoWrapper</span>,
+        <span class="ident">sys::unix</span>::{
             <span class="ident">executor</span>::{<span class="ident">async_poll_from</span>, <span class="ident">async_uring_from</span>},
-            <span class="ident">mem::VecIoWrapper</span>,
             <span class="ident">uring_executor::use_uring</span>,
-            <span class="ident">Executor</span>, <span class="ident">FdExecutor</span>, <span class="ident">MemRegion</span>, <span class="ident">PollSource</span>, <span class="ident">URingExecutor</span>, <span class="ident">UringSource</span>,
+            <span class="ident">FdExecutor</span>, <span class="ident">PollSource</span>, <span class="ident">URingExecutor</span>, <span class="ident">UringSource</span>,
         },
-        <span class="kw-2">*</span>,
+        <span class="ident">Executor</span>, <span class="ident">MemRegion</span>,
     };
-    <span class="kw">use</span> <span class="ident">base::Event</span>;
 
     <span class="kw">struct</span> <span class="ident">State</span> {
         <span class="ident">should_quit</span>: <span class="ident">bool</span>,
@@ -820,7 +946,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
             <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x55u8</span>; <span class="number">32</span>];
             <span class="kw">let</span> <span class="ident">v_ptr</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">as_ptr</span>();
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">async_source</span>.<span class="ident">read_to_vec</span>(<span class="prelude-val">None</span>, <span class="ident">v</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
@@ -846,7 +972,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
             <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x55u8</span>; <span class="number">32</span>];
             <span class="kw">let</span> <span class="ident">v_ptr</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">as_ptr</span>();
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">async_source</span>.<span class="ident">write_from_vec</span>(<span class="prelude-val">None</span>, <span class="ident">v</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
@@ -871,7 +997,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
             <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">VecIoWrapper::from</span>(<span class="macro">vec!</span>[<span class="number">0x55u8</span>; <span class="number">8192</span>]));
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">async_source</span>
                 .<span class="ident">read_to_mem</span>(
@@ -914,7 +1040,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">async_source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
             <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">VecIoWrapper::from</span>(<span class="macro">vec!</span>[<span class="number">0x55u8</span>; <span class="number">8192</span>]));
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">async_source</span>
                 .<span class="ident">write_from_mem</span>(
@@ -960,7 +1086,7 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span> {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span> {
             <span class="ident">source</span>.<span class="ident">read_u64</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>()
         }
 
@@ -984,7 +1110,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawFd</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">AsRawDescriptor</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IoSourceExt</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
             <span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0x55u8</span>; <span class="number">32</span>];
             <span class="kw">let</span> <span class="ident">v_ptr</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">as_ptr</span>();
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">source</span>.<span class="ident">write_from_vec</span>(<span class="prelude-val">None</span>, <span class="ident">v</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();

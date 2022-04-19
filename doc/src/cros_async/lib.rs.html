@@ -482,65 +482,6 @@
 <span id="481">481</span>
 <span id="482">482</span>
 <span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
-<span id="531">531</span>
-<span id="532">532</span>
-<span id="533">533</span>
-<span id="534">534</span>
-<span id="535">535</span>
-<span id="536">536</span>
-<span id="537">537</span>
-<span id="538">538</span>
-<span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -606,44 +547,41 @@
 <span class="kw">mod</span> <span class="ident">blocking</span>;
 <span class="kw">mod</span> <span class="ident">complete</span>;
 <span class="kw">mod</span> <span class="ident">event</span>;
-<span class="kw">mod</span> <span class="ident">executor</span>;
-<span class="kw">mod</span> <span class="ident">fd_executor</span>;
 <span class="kw">mod</span> <span class="ident">io_ext</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">mem</span>;
-<span class="kw">mod</span> <span class="ident">poll_source</span>;
 <span class="kw">mod</span> <span class="ident">queue</span>;
 <span class="kw">mod</span> <span class="ident">select</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sync</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sys</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::Executor</span>;
 <span class="kw">mod</span> <span class="ident">timer</span>;
-<span class="kw">mod</span> <span class="ident">uring_executor</span>;
-<span class="kw">mod</span> <span class="ident">uring_source</span>;
 <span class="kw">mod</span> <span class="ident">waker</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">async_types</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">base</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">blocking</span>::{<span class="ident">block_on</span>, <span class="ident">BlockingPool</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">base::Event</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">blocking::sys::unix::block_on::block_on</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">blocking::BlockingPool</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">event::EventAsync</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">executor::Executor</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fd_executor::FdExecutor</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">io_ext</span>::{
     <span class="ident">AllocateMode</span>, <span class="ident">AsyncWrapper</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AsyncError</span>, <span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>, <span class="ident">ReadAsync</span>,
     <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">AsyncResult</span>, <span class="ident">WriteAsync</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mem</span>::{<span class="ident">BackingMemory</span>, <span class="ident">MemRegion</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll_source::PollSource</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">select::SelectResult</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::run_one</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">timer::TimerAsync</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">uring_executor::URingExecutor</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">uring_source::UringSource</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">future::Future</span>,
-    <span class="ident">io</span>,
     <span class="ident">marker::PhantomData</span>,
     <span class="ident">pin::Pin</span>,
     <span class="ident">task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>},
 };
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">blocking</span>::{<span class="ident">unblock</span>, <span class="ident">unblock_disarm</span>, <span class="ident">CancellableBlockingPool</span>, <span class="ident">TimeoutAction</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span> <span class="kw">as</span> <span class="ident">ThisError</span>;
 
@@ -651,31 +589,25 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">ThisError</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
     <span class="doccomment">/// Error from the FD executor.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in the FD executor: {0}&quot;</span>)]</span>
-    <span class="ident">FdExecutor</span>(<span class="ident">fd_executor::Error</span>),
+    <span class="ident">FdExecutor</span>(<span class="ident">sys::unix::fd_executor::Error</span>),
+    <span class="doccomment">/// Error from the handle executor.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in the handle executor: {0}&quot;</span>)]</span>
+    <span class="ident">HandleExecutor</span>(<span class="ident">sys::windows::handle_executor::Error</span>),
+    <span class="doccomment">/// Error from Timer.</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in Timer: {0}&quot;</span>)]</span>
+    <span class="ident">Timer</span>(<span class="ident">base::Error</span>),
     <span class="doccomment">/// Error from TimerFd.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in TimerAsync: {0}&quot;</span>)]</span>
     <span class="ident">TimerAsync</span>(<span class="ident">AsyncError</span>),
-    <span class="doccomment">/// Error from TimerFd.</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in TimerFd: {0}&quot;</span>)]</span>
-    <span class="ident">TimerFd</span>(<span class="ident">base::Error</span>),
     <span class="doccomment">/// Error from the uring executor.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failure in the uring executor: {0}&quot;</span>)]</span>
-    <span class="ident">URingExecutor</span>(<span class="ident">uring_executor::Error</span>),
+    <span class="ident">URingExecutor</span>(<span class="ident">sys::unix::uring_executor::Error</span>),
 }
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
-
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">io::Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">Error</span>) -&gt; <span class="self">Self</span> {
-        <span class="kw">use</span> <span class="ident">Error</span>::<span class="kw-2">*</span>;
-        <span class="kw">match</span> <span class="ident">e</span> {
-            <span class="ident">FdExecutor</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
-            <span class="ident">URingExecutor</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
-            <span class="ident">TimerFd</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
-            <span class="ident">TimerAsync</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
-        }
-    }
-}
 
 <span class="comment">// A Future that never completes.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Empty</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -694,56 +626,6 @@
     <span class="ident">Empty</span> {
         <span class="ident">phantom</span>: <span class="ident">PhantomData</span>,
     }
-}
-
-<span class="doccomment">/// Creates an Executor that runs one future to completion.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///  # Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    ```</span>
-<span class="doccomment">///    use cros_async::run_one;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    let fut = async { 55 };</span>
-<span class="doccomment">///    assert_eq!(55, run_one(fut).unwrap());</span>
-<span class="doccomment">///    ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_one</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Future</span><span class="op">&gt;</span>(<span class="ident">fut</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">F::Output</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">uring_executor::use_uring</span>() {
-        <span class="ident">run_one_uring</span>(<span class="ident">fut</span>)
-    } <span class="kw">else</span> {
-        <span class="ident">run_one_poll</span>(<span class="ident">fut</span>)
-    }
-}
-
-<span class="doccomment">/// Creates a URingExecutor that runs one future to completion.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///  # Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    ```</span>
-<span class="doccomment">///    use cros_async::run_one_uring;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    let fut = async { 55 };</span>
-<span class="doccomment">///    assert_eq!(55, run_one_uring(fut).unwrap());</span>
-<span class="doccomment">///    ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_one_uring</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Future</span><span class="op">&gt;</span>(<span class="ident">fut</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">F::Output</span><span class="op">&gt;</span> {
-    <span class="ident">URingExecutor::new</span>()
-        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">ex</span><span class="op">|</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">fut</span>))
-        .<span class="ident">map_err</span>(<span class="ident">Error::URingExecutor</span>)
-}
-
-<span class="doccomment">/// Creates a FdExecutor that runs one future to completion.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///  # Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    ```</span>
-<span class="doccomment">///    use cros_async::run_one_poll;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">///    let fut = async { 55 };</span>
-<span class="doccomment">///    assert_eq!(55, run_one_poll(fut).unwrap());</span>
-<span class="doccomment">///    ```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_one_poll</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Future</span><span class="op">&gt;</span>(<span class="ident">fut</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">F::Output</span><span class="op">&gt;</span> {
-    <span class="ident">FdExecutor::new</span>()
-        .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">ex</span><span class="op">|</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">fut</span>))
-        .<span class="ident">map_err</span>(<span class="ident">Error::FdExecutor</span>)
 }
 
 <span class="comment">// Select helpers to run until any future completes.</span>

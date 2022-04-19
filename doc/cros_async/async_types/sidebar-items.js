@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["async_types",""]],"struct":[["DescriptorAdapter","To use an IO struct with cros_async, the type must be marked with DescriptorIntoAsync (to signify it is suitable for use with async operations), and then wrapped with this type."],["RecvTubeAsync",""],["SendTubeAsync",""]],"trait":[["DescriptorIntoAsync","Like `cros_async::IntoAsync`, except for use with crosvm’s AsRawDescriptor trait object family."]]});
+initSidebarItems({"struct":[["RecvTubeAsync",""],["SendTubeAsync",""]]});

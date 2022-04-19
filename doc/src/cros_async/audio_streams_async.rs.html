@@ -67,6 +67,9 @@
 <span id="66">66</span>
 <span id="67">67</span>
 <span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -80,11 +83,14 @@
 
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">io::Result</span>, <span class="ident">time::Duration</span>};
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">AsyncWrapper</span>, <span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>, <span class="ident">TimerAsync</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>, <span class="ident">TimerAsync</span>};
 <span class="kw">use</span> <span class="ident">async_trait::async_trait</span>;
-<span class="kw">use</span> <span class="ident">audio_streams::async_api</span>::{
-    <span class="ident">AsyncStream</span>, <span class="ident">AudioStreamsExecutor</span>, <span class="ident">ReadAsync</span>, <span class="ident">ReadWriteAsync</span>, <span class="ident">WriteAsync</span>,
-};
+<span class="kw">use</span> <span class="ident">audio_streams::async_api</span>::{<span class="ident">AudioStreamsExecutor</span>, <span class="ident">ReadAsync</span>, <span class="ident">ReadWriteAsync</span>, <span class="ident">WriteAsync</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::AsyncWrapper</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">use</span> <span class="ident">audio_streams::async_api::AsyncStream</span>;
 
 <span class="doccomment">/// A wrapper around IoSourceExt that is compatible with the audio_streams traits.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IoSourceWrapper</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoAsync</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {

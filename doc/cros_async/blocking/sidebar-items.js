@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["block_on",""],["pool",""]]});
+initSidebarItems({"mod":[["cancellable_pool","Provides an async blocking pool whose tasks can be cancelled."],["pool",""],["sys",""]]});
