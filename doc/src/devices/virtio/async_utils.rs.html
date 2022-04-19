@@ -68,7 +68,7 @@
 <span class="doccomment">/// Async task that waits for a signal from `event`.  Once this event is readable, exit. Exiting</span>
 <span class="doccomment">/// this future will cause the main loop to break and the worker thread to exit.</span>
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">await_and_exit</span>(<span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>, <span class="ident">event</span>: <span class="ident">Event</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">event_async</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">event</span>.<span class="number">0</span>, <span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">event_async</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">event</span>, <span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">event_async</span>.<span class="ident">next_val</span>().<span class="kw">await</span>;
     <span class="prelude-val">Ok</span>(())
 }
@@ -82,7 +82,7 @@
         <span class="kw">let</span> <span class="ident">resample_evt</span> <span class="op">=</span> <span class="ident">resample_evt</span>
             .<span class="ident">try_clone</span>()
             .<span class="ident">context</span>(<span class="string">&quot;resample_evt.try_clone() failed&quot;</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Some</span>(<span class="ident">EventAsync::new</span>(<span class="ident">resample_evt</span>.<span class="number">0</span>, <span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async resample event&quot;</span>)<span class="question-mark">?</span>)
+        <span class="prelude-val">Some</span>(<span class="ident">EventAsync::new</span>(<span class="ident">resample_evt</span>, <span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async resample event&quot;</span>)<span class="question-mark">?</span>)
     } <span class="kw">else</span> {
         <span class="prelude-val">None</span>
     };

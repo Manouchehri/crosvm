@@ -541,7 +541,7 @@
         <span class="comment">// Enable any virtqueue features that were negotiated (like VIRTIO_RING_F_EVENT_IDX).</span>
         <span class="ident">queue</span>.<span class="ident">ack_features</span>(<span class="self">self</span>.<span class="ident">acked_features</span>);
 
-        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
             .<span class="ident">context</span>(<span class="string">&quot;Failed to create EventAsync for kick_evt&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">handle</span>, <span class="ident">registration</span>) <span class="op">=</span> <span class="ident">AbortHandle::new_pair</span>();
         <span class="kw">match</span> <span class="ident">idx</span> {
@@ -567,7 +567,7 @@
                     .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;input channel unavailable&quot;</span>))<span class="question-mark">?</span>;
 
                 <span class="comment">// Create the async &#39;in&#39; event so we can await on it.</span>
-                <span class="kw">let</span> <span class="ident">in_avail_async_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">in_avail_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+                <span class="kw">let</span> <span class="ident">in_avail_async_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">in_avail_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
                     .<span class="ident">context</span>(<span class="string">&quot;Failed to create EventAsync for in_avail_evt&quot;</span>)<span class="question-mark">?</span>;
 
                 <span class="self">self</span>.<span class="ident">ex</span>

@@ -626,8 +626,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">executor::Executor</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fd_executor::FdExecutor</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">io_ext</span>::{
-    <span class="ident">AsyncWrapper</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AsyncError</span>, <span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>, <span class="ident">ReadAsync</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">AsyncResult</span>,
-    <span class="ident">WriteAsync</span>,
+    <span class="ident">AllocateMode</span>, <span class="ident">AsyncWrapper</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">AsyncError</span>, <span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>, <span class="ident">ReadAsync</span>,
+    <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">AsyncResult</span>, <span class="ident">WriteAsync</span>,
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mem</span>::{<span class="ident">BackingMemory</span>, <span class="ident">MemRegion</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll_source::PollSource</span>;

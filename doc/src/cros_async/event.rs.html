@@ -84,13 +84,13 @@
 <span id="83">83</span>
 <span id="84">84</span>
 <span id="85">85</span>
+<span id="86">86</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">base::EventFd</span>;
-
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">AsyncResult</span>, <span class="ident">Executor</span>, <span class="ident">IntoAsync</span>, <span class="ident">IoSourceExt</span>};
+<span class="kw">use</span> <span class="ident">base::Event</span> <span class="kw">as</span> <span class="ident">EventFd</span>;
 
 <span class="doccomment">/// An async version of `base::EventFd`.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EventAsync</span> {
@@ -169,6 +169,8 @@
         <span class="macro">assert_eq!</span>(<span class="ident">val</span>, <span class="number">0xaa</span>);
     }
 }
+<span class="comment">// Safe because an `EventFd` is used underneath, which is safe to pass between threads.</span>
+<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">EventAsync</span> {}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cros_async" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
 </body></html>

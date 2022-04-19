@@ -449,6 +449,11 @@
 <span id="448">448</span>
 <span id="449">449</span>
 <span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -467,6 +472,8 @@
 <span class="kw">use</span> <span class="ident">data_model::VolatileSlice</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span> <span class="kw">as</span> <span class="ident">ThisError</span>;
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::AllocateMode</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{
     <span class="ident">fd_executor</span>::{
@@ -768,7 +775,7 @@
     }
 
     <span class="doccomment">/// See `fallocate(2)` for details.</span>
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">fallocate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">file_offset</span>: <span class="ident">u64</span>, <span class="ident">len</span>: <span class="ident">u64</span>, <span class="ident">mode</span>: <span class="ident">u32</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">fallocate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">file_offset</span>: <span class="ident">u64</span>, <span class="ident">len</span>: <span class="ident">u64</span>, <span class="ident">mode</span>: <span class="ident">AllocateMode</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">libc::fallocate64</span>(
                 <span class="self">self</span>.<span class="ident">as_raw_fd</span>(),
@@ -870,7 +877,10 @@
                 .<span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">file_path</span>)
                 .<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">PollSource::new</span>(<span class="ident">f</span>, <span class="ident">ex</span>).<span class="ident">unwrap</span>();
-            <span class="ident">source</span>.<span class="ident">fallocate</span>(<span class="number">0</span>, <span class="number">4096</span>, <span class="number">0</span>).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+            <span class="ident">source</span>
+                .<span class="ident">fallocate</span>(<span class="number">0</span>, <span class="number">4096</span>, <span class="ident">AllocateMode::Default</span>)
+                .<span class="kw">await</span>
+                .<span class="ident">unwrap</span>();
 
             <span class="kw">let</span> <span class="ident">meta_data</span> <span class="op">=</span> <span class="ident">std::fs::metadata</span>(<span class="kw-2">&amp;</span><span class="ident">file_path</span>).<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(<span class="ident">meta_data</span>.<span class="ident">len</span>(), <span class="number">4096</span>);

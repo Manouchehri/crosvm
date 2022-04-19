@@ -301,7 +301,6 @@
 <span id="300">300</span>
 <span id="301">301</span>
 <span id="302">302</span>
-<span id="303">303</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -407,7 +406,7 @@
         <span class="kw">let</span> <span class="ident">flush_timer_write</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(
             <span class="ident">TimerAsync::new</span>(
                 <span class="comment">// Call try_clone() to share the same underlying FD with the `flush_disk` task.</span>
-                <span class="ident">timer</span>.<span class="number">0</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;Failed to clone flush_timer&quot;</span>)<span class="question-mark">?</span>,
+                <span class="ident">timer</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;Failed to clone flush_timer&quot;</span>)<span class="question-mark">?</span>,
                 <span class="ident">ex</span>,
             )
             .<span class="ident">context</span>(<span class="string">&quot;Failed to create an async timer&quot;</span>)<span class="question-mark">?</span>,
@@ -417,7 +416,6 @@
         <span class="comment">// still borrow their copy momentarily to set timeouts.</span>
         <span class="comment">// Call try_clone() to share the same underlying FD with the `flush_disk` task.</span>
         <span class="kw">let</span> <span class="ident">flush_timer_read</span> <span class="op">=</span> <span class="ident">timer</span>
-            .<span class="number">0</span>
             .<span class="ident">try_clone</span>()
             .<span class="ident">context</span>(<span class="string">&quot;Failed to clone flush_timer&quot;</span>)
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">TimerAsync::new</span>(<span class="ident">t</span>, <span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;Failed to create an async timer&quot;</span>))<span class="question-mark">?</span>;
@@ -514,7 +512,7 @@
         <span class="comment">// Enable any virtqueue features that were negotiated (like VIRTIO_RING_F_EVENT_IDX).</span>
         <span class="ident">queue</span>.<span class="ident">ack_features</span>(<span class="self">self</span>.<span class="ident">acked_features</span>);
 
-        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync for kick_evt&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">handle</span>, <span class="ident">registration</span>) <span class="op">=</span> <span class="ident">AbortHandle::new_pair</span>();
 

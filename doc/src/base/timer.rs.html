@@ -74,6 +74,16 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -82,12 +92,11 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FakeClock</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::platform</span>::{<span class="ident">FakeTimerFd</span>, <span class="ident">TimerFd</span>};
-<span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>},
-    <span class="ident">sync::Arc</span>,
-    <span class="ident">time::Duration</span>,
-};
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">sync::Arc</span>, <span class="ident">time::Duration</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">use</span> <span class="ident">std::os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>, <span class="ident">RawFd</span>};
 
 <span class="doccomment">/// See [TimerFd](crate::platform::TimerFd) for struct- and method-level</span>
 <span class="doccomment">/// documentation.</span>
@@ -95,6 +104,13 @@
 <span class="kw">impl</span> <span class="ident">Timer</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Timer</span><span class="op">&gt;</span> {
         <span class="ident">TimerFd::new</span>().<span class="ident">map</span>(<span class="ident">Timer</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">impl</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">Timer</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_fd</span>()
     }
 }
 
@@ -124,6 +140,10 @@
 
             <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolution</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">inner::resolution</span>()
+            }
+
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Timer</span>, <span class="ident">std::io::Error</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">Timer</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>))
             }
         }
 

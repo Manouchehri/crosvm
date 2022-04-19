@@ -563,7 +563,7 @@
         <span class="comment">// Enable any virtqueue features that were negotiated (like VIRTIO_RING_F_EVENT_IDX).</span>
         <span class="ident">queue</span>.<span class="ident">ack_features</span>(<span class="self">self</span>.<span class="ident">acked_features</span>);
 
-        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync for kick_evt&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> (<span class="ident">handle</span>, <span class="ident">registration</span>) <span class="op">=</span> <span class="ident">AbortHandle::new_pair</span>();
         <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">fs_device_tube</span>) <span class="op">=</span> <span class="ident">Tube::pair</span>()<span class="question-mark">?</span>;

@@ -505,7 +505,7 @@
 <span class="kw">use</span> <span class="ident">async_task::Task</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">clone_descriptor</span>, <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">SafeDescriptor</span>,
-    <span class="ident">TimerFd</span>, <span class="ident">Tube</span>, <span class="ident">UnixSeqpacketListener</span>, <span class="ident">UnlinkUnixSeqpacketListener</span>,
+    <span class="ident">Timer</span>, <span class="ident">Tube</span>, <span class="ident">UnixSeqpacketListener</span>, <span class="ident">UnlinkUnixSeqpacketListener</span>,
 };
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">AsyncTube</span>, <span class="ident">AsyncWrapper</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>, <span class="ident">IoSourceExt</span>, <span class="ident">TimerAsync</span>};
 <span class="kw">use</span> <span class="ident">futures</span>::{
@@ -749,7 +749,7 @@
             <span class="kw">_</span> =&gt; <span class="macro">bail!</span>(<span class="string">&quot;attempted to start unknown queue: {}&quot;</span>, <span class="ident">idx</span>),
         }
 
-        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync for kick_evt&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">SharedReader</span> {
@@ -801,8 +801,8 @@
             <span class="self">self</span>.<span class="ident">display_worker</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">task</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">timer</span> <span class="op">=</span> <span class="ident">TimerFd::new</span>()
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create TimerFd&quot;</span>)
+        <span class="kw">let</span> <span class="ident">timer</span> <span class="op">=</span> <span class="ident">Timer::new</span>()
+            .<span class="ident">context</span>(<span class="string">&quot;failed to create Timer&quot;</span>)
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">TimerAsync::new</span>(<span class="ident">t</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create TimerAsync&quot;</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">ex</span>

@@ -546,7 +546,7 @@
         <span class="comment">// Enable any virtqueue features that were negotiated (like VIRTIO_RING_F_EVENT_IDX).</span>
         <span class="ident">queue</span>.<span class="ident">ack_features</span>(<span class="self">self</span>.<span class="ident">acked_features</span>);
 
-        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
+        <span class="kw">let</span> <span class="ident">kick_evt</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">kick_evt</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to create EventAsync for kick_evt&quot;</span>)<span class="question-mark">?</span>;
 
         <span class="comment">// We use this de-structuring let binding to separate borrows so that the compiler doesn&#39;t</span>

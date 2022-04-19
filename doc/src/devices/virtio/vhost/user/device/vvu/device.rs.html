@@ -320,11 +320,11 @@
     <span class="ident">tx_queue</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">UserQueue</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">tx_irq</span>: <span class="ident">Event</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">rx_irq</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">rx_irq</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async event&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">rx_irq</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">rx_irq</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async event&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">rxq</span> <span class="op">=</span> <span class="ident">process_rxq</span>(<span class="ident">rx_irq</span>, <span class="ident">rx_queue</span>, <span class="ident">rx_sender</span>, <span class="ident">rx_evt</span>);
     <span class="macro">pin_mut!</span>(<span class="ident">rxq</span>);
 
-    <span class="kw">let</span> <span class="ident">tx_irq</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">tx_irq</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async event&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">tx_irq</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">tx_irq</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create async event&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">txq</span> <span class="op">=</span> <span class="ident">process_txq</span>(<span class="ident">tx_irq</span>, <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">tx_queue</span>));
     <span class="macro">pin_mut!</span>(<span class="ident">txq</span>);
 
