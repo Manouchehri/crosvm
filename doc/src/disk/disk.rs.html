@@ -888,7 +888,7 @@
 
     <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">punch_hole</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">file_offset</span>: <span class="ident">u64</span>, <span class="ident">length</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">fallocate</span>(<span class="ident">file_offset</span>, <span class="ident">length</span>, <span class="ident">AllocateMode::ZeroRange</span>)
+            .<span class="ident">fallocate</span>(<span class="ident">file_offset</span>, <span class="ident">length</span>, <span class="ident">AllocateMode::PunchHole</span>)
             .<span class="kw">await</span>
             .<span class="ident">map_err</span>(<span class="ident">Error::Fallocate</span>)
     }
