@@ -183,6 +183,7 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -198,6 +199,7 @@
 };
 
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">c_void</span>, <span class="ident">read</span>, <span class="ident">signalfd</span>, <span class="ident">signalfd_siginfo</span>, <span class="ident">EAGAIN</span>, <span class="ident">SFD_CLOEXEC</span>, <span class="ident">SFD_NONBLOCK</span>};
+<span class="kw">use</span> <span class="ident">log::error</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 

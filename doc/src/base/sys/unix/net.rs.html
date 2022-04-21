@@ -1095,7 +1095,6 @@
 <span id="1094">1094</span>
 <span id="1095">1095</span>
 <span id="1096">1096</span>
-<span id="1097">1097</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1106,9 +1105,7 @@
     <span class="ident">ffi::OsString</span>,
     <span class="ident">fs::remove_file</span>,
     <span class="ident">io</span>,
-    <span class="ident">mem</span>::{
-        <span class="ident">size_of</span>, {<span class="self">self</span>},
-    },
+    <span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">size_of</span>},
     <span class="ident">net</span>::{<span class="ident">SocketAddr</span>, <span class="ident">SocketAddrV4</span>, <span class="ident">SocketAddrV6</span>, <span class="ident">TcpListener</span>, <span class="ident">TcpStream</span>, <span class="ident">ToSocketAddrs</span>},
     <span class="ident">ops::Deref</span>,
     <span class="ident">os::unix</span>::{
@@ -1124,6 +1121,7 @@
     <span class="ident">c_int</span>, <span class="ident">in6_addr</span>, <span class="ident">in_addr</span>, <span class="ident">recvfrom</span>, <span class="ident">sa_family_t</span>, <span class="ident">sockaddr</span>, <span class="ident">sockaddr_in</span>, <span class="ident">sockaddr_in6</span>,
     <span class="ident">socklen_t</span>, <span class="ident">AF_INET</span>, <span class="ident">AF_INET6</span>, <span class="ident">MSG_PEEK</span>, <span class="ident">MSG_TRUNC</span>, <span class="ident">SOCK_CLOEXEC</span>, <span class="ident">SOCK_STREAM</span>,
 };
+<span class="kw">use</span> <span class="ident">log::warn</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::{

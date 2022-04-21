@@ -683,6 +683,7 @@
 <span id="682">682</span>
 <span id="683">683</span>
 <span id="684">684</span>
+<span id="685">685</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -692,7 +693,7 @@
 <span class="comment">// Fail sys_util compilation on windows.</span>
 <span class="comment">// This will make any unintentional windows code submitted to the crate unusable.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="macro">compile_error!</span>(<span class="string">&quot;sys_util is not windows friendly crate. See/use win_sys_util.&quot;</span>);
+<span class="macro">compile_error!</span>(<span class="string">&quot;This is not windows friendly mod.&quot;</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">android</span>;
@@ -702,6 +703,7 @@
 <span class="kw">mod</span> <span class="ident">linux</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">linux</span> <span class="kw">as</span> <span class="ident">target_os</span>;
+<span class="kw">use</span> <span class="ident">log::warn</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">handle_eintr</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>

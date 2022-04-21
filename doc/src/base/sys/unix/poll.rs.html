@@ -808,6 +808,7 @@
 <span id="807">807</span>
 <span id="808">808</span>
 <span id="809">809</span>
+<span id="810">810</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -827,6 +828,7 @@
     <span class="ident">c_int</span>, <span class="ident">epoll_create1</span>, <span class="ident">epoll_ctl</span>, <span class="ident">epoll_event</span>, <span class="ident">epoll_wait</span>, <span class="ident">EPOLLHUP</span>, <span class="ident">EPOLLIN</span>, <span class="ident">EPOLLOUT</span>,
     <span class="ident">EPOLLRDHUP</span>, <span class="ident">EPOLL_CLOEXEC</span>, <span class="ident">EPOLL_CTL_ADD</span>, <span class="ident">EPOLL_CTL_DEL</span>, <span class="ident">EPOLL_CTL_MOD</span>,
 };
+<span class="kw">use</span> <span class="ident">log::warn</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
