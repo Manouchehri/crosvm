@@ -904,7 +904,7 @@
 };
 <span class="kw">use</span> <span class="ident">kvm</span>::{<span class="ident">Cap</span>, <span class="ident">Datamatch</span>, <span class="ident">IoeventAddress</span>, <span class="ident">Kvm</span>, <span class="ident">Vcpu</span>, <span class="ident">VcpuExit</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
-<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">Tap</span>, <span class="ident">TapT</span>};
+<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">sys::unix::Tap</span>, <span class="ident">TapTCommon</span>};
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestMemory</span>, <span class="ident">MemoryPolicy</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="self">self</span>::process</span>::<span class="kw-2">*</span>;

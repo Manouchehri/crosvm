@@ -389,7 +389,7 @@
 <span class="kw">use</span> <span class="ident">futures::future</span>::{<span class="ident">AbortHandle</span>, <span class="ident">Abortable</span>};
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">net_util::TapT</span>;
-<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">MacAddress</span>, <span class="ident">Tap</span>};
+<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">sys::unix::Tap</span>, <span class="ident">MacAddress</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">virtio_sys::virtio_net</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;

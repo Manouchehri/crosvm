@@ -1,4 +1,4 @@
 (function() {var implementors = {};
 implementors["cros_async"] = [];
-implementors["net_util"] = [{"text":"impl <a class=\"trait\" href=\"cros_async/io_ext/trait.IntoAsync.html\" title=\"trait cros_async::io_ext::IntoAsync\">IntoAsync</a> for <a class=\"struct\" href=\"net_util/struct.Tap.html\" title=\"struct net_util::Tap\">Tap</a>","synthetic":false,"types":["net_util::Tap"]}];
+implementors["net_util"] = [{"text":"impl <a class=\"trait\" href=\"cros_async/io_ext/trait.IntoAsync.html\" title=\"trait cros_async::io_ext::IntoAsync\">IntoAsync</a> for <a class=\"struct\" href=\"net_util/sys/unix/tap/struct.Tap.html\" title=\"struct net_util::sys::unix::tap::Tap\">Tap</a>","synthetic":false,"types":["net_util::sys::unix::tap::Tap"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

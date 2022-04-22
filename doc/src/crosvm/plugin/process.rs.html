@@ -813,7 +813,7 @@
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">RwLock</span>};
 <span class="kw">use</span> <span class="ident">std::thread::JoinHandle</span>;
 
-<span class="kw">use</span> <span class="ident">net_util::Error</span> <span class="kw">as</span> <span class="ident">NetError</span>;
+<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">NetError</span>, <span class="ident">TapTCommon</span>};
 
 <span class="kw">use</span> <span class="ident">libc</span>::{
     <span class="ident">pid_t</span>, <span class="ident">waitpid</span>, <span class="ident">EINVAL</span>, <span class="ident">ENODATA</span>, <span class="ident">ENOTTY</span>, <span class="ident">STDERR_FILENO</span>, <span class="ident">WEXITSTATUS</span>, <span class="ident">WIFEXITED</span>, <span class="ident">WNOHANG</span>,
@@ -1314,7 +1314,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">handle_get_net_config</span>(
-        <span class="ident">tap</span>: <span class="kw-2">&amp;</span><span class="ident">net_util::Tap</span>,
+        <span class="ident">tap</span>: <span class="kw-2">&amp;</span><span class="ident">net_util::sys::unix::Tap</span>,
         <span class="ident">config</span>: <span class="kw-2">&amp;mut</span> <span class="ident">MainResponse_GetNetConfig</span>,
     ) -&gt; <span class="ident">SysResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Log any NetError so that the cause can be found later, but extract and return the</span>

@@ -1298,7 +1298,7 @@
 };
 <span class="kw">use</span> <span class="ident">hypervisor::Vm</span>;
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
-<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">MacAddress</span>, <span class="ident">Tap</span>, <span class="ident">TapT</span>};
+<span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">sys::unix::Tap</span>, <span class="ident">MacAddress</span>};
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
