@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["set_features",""]],"struct":[["VhostUserHandler",""]],"type":[["SocketMaster",""]]});
+initSidebarItems({"fn":[["set_features",""]],"mod":[["sys",""]],"struct":[["VhostUserHandler",""]]});

@@ -250,67 +250,24 @@
 <span id="249">249</span>
 <span id="250">250</span>
 <span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-<span id="268">268</span>
-<span id="269">269</span>
-<span id="270">270</span>
-<span id="271">271</span>
-<span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
+<span class="kw">mod</span> <span class="ident">sys</span>;
+
 <span class="kw">use</span> <span class="ident">std::io::Write</span>;
-<span class="kw">use</span> <span class="ident">std::os::unix::net::UnixStream</span>;
-<span class="kw">use</span> <span class="ident">std::path::Path</span>;
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">Tube</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::{
-    <span class="ident">MasterReq</span>, <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>,
+    <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>,
 };
-<span class="kw">use</span> <span class="ident">vmm_vhost</span>::{
-    <span class="ident">connection::socket::Endpoint</span> <span class="kw">as</span> <span class="ident">SocketEndpoint</span>, <span class="ident">Master</span>, <span class="ident">VhostBackend</span>, <span class="ident">VhostUserMaster</span>,
-    <span class="ident">VhostUserMemoryRegionInfo</span>, <span class="ident">VringConfigData</span>,
-};
+<span class="kw">use</span> <span class="ident">vmm_vhost</span>::{<span class="ident">VhostBackend</span>, <span class="ident">VhostUserMaster</span>, <span class="ident">VhostUserMemoryRegionInfo</span>, <span class="ident">VringConfigData</span>};
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::vmm::handler::sys::SocketMaster</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::vmm</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="ident">Interrupt</span>, <span class="ident">Queue</span>};
-
-<span class="kw">type</span> <span class="ident">SocketMaster</span> <span class="op">=</span> <span class="ident">Master</span><span class="op">&lt;</span><span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="kw">fn</span> <span class="ident">set_features</span>(<span class="ident">vu</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SocketMaster</span>, <span class="ident">avail_features</span>: <span class="ident">u64</span>, <span class="ident">ack_features</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">avail_features</span> <span class="op">&amp;</span> <span class="ident">ack_features</span>;
@@ -326,41 +283,6 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VhostUserHandler</span> {
-    <span class="doccomment">/// Creates a `VhostUserHandler` instance attached to the provided UDS path</span>
-    <span class="doccomment">/// with features and protocol features initialized.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_path</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
-        <span class="ident">path</span>: <span class="ident">P</span>,
-        <span class="ident">max_queue_num</span>: <span class="ident">u64</span>,
-        <span class="ident">allow_features</span>: <span class="ident">u64</span>,
-        <span class="ident">init_features</span>: <span class="ident">u64</span>,
-        <span class="ident">allow_protocol_features</span>: <span class="ident">VhostUserProtocolFeatures</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="ident">SocketMaster::connect</span>(<span class="ident">path</span>, <span class="ident">max_queue_num</span>)
-                .<span class="ident">map_err</span>(<span class="ident">Error::SocketConnectOnMasterCreate</span>)<span class="question-mark">?</span>,
-            <span class="ident">allow_features</span>,
-            <span class="ident">init_features</span>,
-            <span class="ident">allow_protocol_features</span>,
-        )
-    }
-
-    <span class="doccomment">/// Creates a `VhostUserHandler` instance attached to the provided</span>
-    <span class="doccomment">/// UnixStream with features and protocol features initialized.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_stream</span>(
-        <span class="ident">sock</span>: <span class="ident">UnixStream</span>,
-        <span class="ident">max_queue_num</span>: <span class="ident">u64</span>,
-        <span class="ident">allow_features</span>: <span class="ident">u64</span>,
-        <span class="ident">init_features</span>: <span class="ident">u64</span>,
-        <span class="ident">allow_protocol_features</span>: <span class="ident">VhostUserProtocolFeatures</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="ident">SocketMaster::from_stream</span>(<span class="ident">sock</span>, <span class="ident">max_queue_num</span>),
-            <span class="ident">allow_features</span>,
-            <span class="ident">init_features</span>,
-            <span class="ident">allow_protocol_features</span>,
-        )
-    }
-
     <span class="doccomment">/// Creates a `VhostUserHandler` instance with features and protocol features initialized.</span>
     <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="kw-2">mut</span> <span class="ident">vu</span>: <span class="ident">SocketMaster</span>,
