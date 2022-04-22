@@ -73,7 +73,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">generate_scoped_event</span>, <span class="ident">platform::EventFd</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>};
+<span class="kw">use</span> <span class="ident">std::os::unix::io</span>::{<span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>};
 
 <span class="doccomment">/// See [EventFd](crate::platform::EventFd) for struct- and method-level</span>
 <span class="doccomment">/// documentation.</span>
@@ -104,7 +104,7 @@
 
 <span class="kw">impl</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">Event</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_fd</span>()
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 
