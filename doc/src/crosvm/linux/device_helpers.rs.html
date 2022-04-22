@@ -2452,7 +2452,7 @@
     ))
 }
 
-<span class="doccomment">/// Setup for devices with VIRTIO_F_ACCESS_PLATFORM</span>
+<span class="doccomment">/// Setup for devices with virtio-iommu</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">setup_virtio_access_platform</span>(
     <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
     <span class="ident">iommu_attached_endpoints</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,

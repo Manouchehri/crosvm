@@ -1284,7 +1284,7 @@
 
 <span class="kw">impl</span> <span class="ident">PciDevice</span> <span class="kw">for</span> <span class="ident">VirtioPciDevice</span> {
     <span class="kw">fn</span> <span class="ident">supports_iommu</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
-        (<span class="self">self</span>.<span class="ident">device</span>.<span class="ident">features</span>() <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">VIRTIO_F_ACCESS_PLATFORM</span>)) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
+        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">supports_iommu</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {

@@ -1419,6 +1419,10 @@
 <span id="1418">1418</span>
 <span id="1419">1419</span>
 <span id="1420">1420</span>
+<span id="1421">1421</span>
+<span id="1422">1422</span>
+<span id="1423">1423</span>
+<span id="1424">1424</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2652,6 +2656,10 @@
 <span class="kw">impl</span> <span class="ident">VirtioDevice</span> <span class="kw">for</span> <span class="ident">VirtioVhostUser</span> {
     <span class="kw">fn</span> <span class="ident">features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="self">self</span>.<span class="ident">base_features</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">supports_iommu</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="bool-val">true</span>
     }
 
     <span class="kw">fn</span> <span class="ident">keep_rds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
