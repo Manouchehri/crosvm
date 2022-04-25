@@ -644,6 +644,7 @@
 <span id="643">643</span>
 <span id="644">644</span>
 <span id="645">645</span>
+<span id="646">646</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1131,6 +1132,7 @@
         <span class="ident">_has_bios</span>: <span class="ident">bool</span>,
         <span class="ident">_no_smt</span>: <span class="ident">bool</span>,
         <span class="ident">_host_cpu_topology</span>: <span class="ident">bool</span>,
+        <span class="ident">_itmt</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="comment">// AArch64 doesn&#39;t configure vcpus on the vcpu thread, so nothing to do here.</span>
         <span class="prelude-val">Ok</span>(())

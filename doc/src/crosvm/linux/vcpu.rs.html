@@ -673,6 +673,10 @@
 <span id="672">672</span>
 <span id="673">673</span>
 <span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -747,6 +751,7 @@
     <span class="ident">use_hypervisor_signals</span>: <span class="ident">bool</span>,
     <span class="ident">enable_per_vm_core_scheduling</span>: <span class="ident">bool</span>,
     <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="ident">vcpu_cgroup_tasks_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">V</span>, <span class="ident">VcpuRunHandle</span>)<span class="op">&gt;</span>
 <span class="kw">where</span>
@@ -788,6 +793,7 @@
         <span class="ident">has_bios</span>,
         <span class="ident">no_smt</span>,
         <span class="ident">host_cpu_topology</span>,
+        <span class="ident">itmt</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to configure vcpu&quot;</span>)<span class="question-mark">?</span>;
 
@@ -1224,6 +1230,7 @@
     <span class="op">&gt;</span>,
     <span class="ident">enable_per_vm_core_scheduling</span>: <span class="ident">bool</span>,
     <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
     <span class="ident">vcpu_cgroup_tasks_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
     <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
@@ -1265,6 +1272,7 @@
                 <span class="ident">use_hypervisor_signals</span>,
                 <span class="ident">enable_per_vm_core_scheduling</span>,
                 <span class="ident">host_cpu_topology</span>,
+                <span class="ident">itmt</span>,
                 <span class="ident">vcpu_cgroup_tasks_file</span>,
             );
 

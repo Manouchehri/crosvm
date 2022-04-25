@@ -603,6 +603,8 @@
 <span id="602">602</span>
 <span id="603">603</span>
 <span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1075,6 +1077,7 @@
     <span class="kw">pub</span> <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">task_profiles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
@@ -1202,6 +1205,7 @@
             <span class="ident">strict_balloon</span>: <span class="bool-val">false</span>,
             <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap::new</span>(),
+            <span class="ident">itmt</span>: <span class="bool-val">false</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
             <span class="ident">task_profiles</span>: <span class="ident">Vec::new</span>(),
         }
