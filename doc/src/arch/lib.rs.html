@@ -837,6 +837,110 @@
 <span id="836">836</span>
 <span id="837">837</span>
 <span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -852,6 +956,8 @@
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">Read</span>, <span class="ident">Seek</span>, <span class="ident">SeekFrom</span>};
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+
+<span class="kw">use</span> <span class="ident">libc::sched_getcpu</span>;
 
 <span class="kw">use</span> <span class="ident">acpi_tables::aml::Aml</span>;
 <span class="kw">use</span> <span class="ident">acpi_tables::sdt::SDT</span>;
@@ -1674,6 +1780,108 @@
         .<span class="ident">map_err</span>(<span class="ident">LoadImageError::ReadToMemory</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>((<span class="ident">guest_addr</span>, <span class="ident">size</span>))
+}
+
+<span class="doccomment">/// Read and write permissions setting</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Wrap read_allow and write_allow to store them in MsrHandlers level.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrRWType</span> {
+    <span class="kw">pub</span> <span class="ident">read_allow</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">write_allow</span>: <span class="ident">bool</span>,
+}
+
+<span class="doccomment">/// Handler types for userspace-msr</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrAction</span> {
+    <span class="doccomment">/// Read and write from host directly, and the control of MSR will</span>
+    <span class="doccomment">/// take effect on host.</span>
+    <span class="ident">MsrPassthrough</span>,
+    <span class="doccomment">/// Store the dummy value for msr (copy from host or custom values),</span>
+    <span class="doccomment">/// and the control(WRMSR) of MSR won&#39;t take effect on host.</span>
+    <span class="ident">MsrEmulate</span>,
+}
+
+<span class="doccomment">/// Source CPU of MSR value</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Indicate which CPU that user get/set MSRs from/to.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrValueFrom</span> {
+    <span class="doccomment">/// Read/write MSR value from/into CPU 0.</span>
+    <span class="doccomment">/// The MSR source CPU always be CPU 0.</span>
+    <span class="ident">RWFromCPU0</span>,
+    <span class="doccomment">/// Read/write MSR value from/into the running CPU.</span>
+    <span class="doccomment">/// If vCPU migrates to another pcpu, the MSR source CPU will also change.</span>
+    <span class="ident">RWFromRunningCPU</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">MsrValueFrom</span> {
+    <span class="doccomment">/// Get the physical(host) CPU id from MsrValueFrom type.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_cpu_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">MsrValueFrom::RWFromCPU0</span> =&gt; <span class="number">0</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span> =&gt; {
+                <span class="comment">// Safe because the host supports this sys call.</span>
+                (<span class="kw">unsafe</span> { <span class="ident">sched_getcpu</span>() }) <span class="kw">as</span> <span class="ident">usize</span>
+            }
+        }
+    }
+}
+
+<span class="doccomment">/// If user doesn&#39;t specific CPU0, the default source CPU is running CPU.</span>
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MsrValueFrom</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">MsrValueFrom::RWFromRunningCPU</span>
+    }
+}
+
+<span class="doccomment">/// Config option for userspace-msr handing</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// MsrConfig will be collected with its corresponding MSR&#39;s index.</span>
+<span class="doccomment">/// eg, (msr_index, msr_config)</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrConfig</span> {
+    <span class="doccomment">/// If support RDMSR/WRMSR emulation in crosvm?</span>
+    <span class="kw">pub</span> <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,
+    <span class="doccomment">/// Handlers should be used to handling MSR.</span>
+    <span class="doccomment">/// User must set this field.</span>
+    <span class="kw">pub</span> <span class="ident">action</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrAction</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// MSR source CPU.</span>
+    <span class="kw">pub</span> <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">MsrConfig</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">Default::default</span>()
+    }
+}
+
+<span class="attribute">#[<span class="ident">sorted</span>]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrExitHandlerError</span> {
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Fail to create MSR handler&quot;</span>)]</span>
+    <span class="ident">HandlerCreateFailed</span>,
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error parameter&quot;</span>)]</span>
+    <span class="ident">InvalidParam</span>,
+}
+
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MsrExitHandler</span> {
+    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_index</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_index</span>: <span class="ident">u32</span>, <span class="ident">_data</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">add_handler</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">_index</span>: <span class="ident">u32</span>,
+        <span class="ident">_msr_config</span>: <span class="ident">MsrConfig</span>,
+        <span class="ident">_cpu_id</span>: <span class="ident">usize</span>,
+    ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">MsrExitHandlerError</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(())
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="arch" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

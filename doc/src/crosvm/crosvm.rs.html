@@ -618,14 +618,14 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">plugin</span>;
 
-<span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">BTreeSet</span>};
+<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::net</span>;
 <span class="kw">use</span> <span class="ident">std::ops::RangeInclusive</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::io::RawFd</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 
-<span class="kw">use</span> <span class="ident">arch</span>::{<span class="ident">Pstore</span>, <span class="ident">VcpuAffinity</span>};
+<span class="kw">use</span> <span class="ident">arch</span>::{<span class="ident">MsrConfig</span>, <span class="ident">Pstore</span>, <span class="ident">VcpuAffinity</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
@@ -1074,7 +1074,7 @@
     <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">userspace_msr</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">task_profiles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
@@ -1201,7 +1201,7 @@
             <span class="ident">force_s2idle</span>: <span class="bool-val">false</span>,
             <span class="ident">strict_balloon</span>: <span class="bool-val">false</span>,
             <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec::new</span>(),
-            <span class="ident">userspace_msr</span>: <span class="ident">BTreeSet::new</span>(),
+            <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap::new</span>(),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
             <span class="ident">task_profiles</span>: <span class="ident">Vec::new</span>(),
         }

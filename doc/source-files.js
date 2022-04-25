@@ -48,5 +48,5 @@ sourcesIndex["virtio_sys"] = {"name":"","files":["lib.rs","vhost.rs","virtio_net
 sourcesIndex["vm_control"] = {"name":"","files":["client.rs","gdb.rs","lib.rs"]};
 sourcesIndex["vm_memory"] = {"name":"","files":["guest_address.rs","guest_memory.rs","lib.rs"]};
 sourcesIndex["vmm_vhost"] = {"name":"","dirs":[{"name":"connection","files":["socket.rs","unix.rs","vfio.rs"]},{"name":"sys","files":["unix.rs"]}],"files":["backend.rs","connection.rs","lib.rs","master.rs","master_req_handler.rs","message.rs","slave.rs","slave_fs_cache.rs","slave_req_handler.rs","sys.rs"]};
-sourcesIndex["x86_64"] = {"name":"","files":["acpi.rs","bootparam.rs","bzimage.rs","cpuid.rs","fdt.rs","gdt.rs","interrupts.rs","lib.rs","mpspec.rs","mptable.rs","msr_index.rs","regs.rs","smbios.rs"]};
+sourcesIndex["x86_64"] = {"name":"","files":["acpi.rs","bootparam.rs","bzimage.rs","cpuid.rs","fdt.rs","gdt.rs","interrupts.rs","lib.rs","mpspec.rs","mptable.rs","msr.rs","msr_index.rs","regs.rs","smbios.rs"]};
 createSourceSidebar();

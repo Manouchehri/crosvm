@@ -636,6 +636,14 @@
 <span id="635">635</span>
 <span id="636">636</span>
 <span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -646,7 +654,10 @@
 <span class="kw">use</span> <span class="ident">std::io</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="ident">arch</span>::{<span class="ident">get_serial_cmdline</span>, <span class="ident">GetSerialCmdlineError</span>, <span class="ident">RunnableLinuxVm</span>, <span class="ident">VmComponents</span>, <span class="ident">VmImage</span>};
+<span class="kw">use</span> <span class="ident">arch</span>::{
+    <span class="ident">get_serial_cmdline</span>, <span class="ident">GetSerialCmdlineError</span>, <span class="ident">MsrExitHandler</span>, <span class="ident">RunnableLinuxVm</span>, <span class="ident">VmComponents</span>,
+    <span class="ident">VmImage</span>,
+};
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Event</span>, <span class="ident">MemoryMappingBuilder</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices</span>::{
@@ -1273,6 +1284,11 @@
         <span class="prelude-val">Ok</span>(())
     }
 }
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrAArch64</span>;
+
+<span class="kw">impl</span> <span class="ident">MsrExitHandler</span> <span class="kw">for</span> <span class="ident">MsrAArch64</span> {}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="aarch64" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
 </body></html>

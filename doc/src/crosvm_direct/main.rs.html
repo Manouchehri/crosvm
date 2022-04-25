@@ -4432,6 +4432,93 @@
 <span id="4431">4431</span>
 <span id="4432">4432</span>
 <span id="4433">4433</span>
+<span id="4434">4434</span>
+<span id="4435">4435</span>
+<span id="4436">4436</span>
+<span id="4437">4437</span>
+<span id="4438">4438</span>
+<span id="4439">4439</span>
+<span id="4440">4440</span>
+<span id="4441">4441</span>
+<span id="4442">4442</span>
+<span id="4443">4443</span>
+<span id="4444">4444</span>
+<span id="4445">4445</span>
+<span id="4446">4446</span>
+<span id="4447">4447</span>
+<span id="4448">4448</span>
+<span id="4449">4449</span>
+<span id="4450">4450</span>
+<span id="4451">4451</span>
+<span id="4452">4452</span>
+<span id="4453">4453</span>
+<span id="4454">4454</span>
+<span id="4455">4455</span>
+<span id="4456">4456</span>
+<span id="4457">4457</span>
+<span id="4458">4458</span>
+<span id="4459">4459</span>
+<span id="4460">4460</span>
+<span id="4461">4461</span>
+<span id="4462">4462</span>
+<span id="4463">4463</span>
+<span id="4464">4464</span>
+<span id="4465">4465</span>
+<span id="4466">4466</span>
+<span id="4467">4467</span>
+<span id="4468">4468</span>
+<span id="4469">4469</span>
+<span id="4470">4470</span>
+<span id="4471">4471</span>
+<span id="4472">4472</span>
+<span id="4473">4473</span>
+<span id="4474">4474</span>
+<span id="4475">4475</span>
+<span id="4476">4476</span>
+<span id="4477">4477</span>
+<span id="4478">4478</span>
+<span id="4479">4479</span>
+<span id="4480">4480</span>
+<span id="4481">4481</span>
+<span id="4482">4482</span>
+<span id="4483">4483</span>
+<span id="4484">4484</span>
+<span id="4485">4485</span>
+<span id="4486">4486</span>
+<span id="4487">4487</span>
+<span id="4488">4488</span>
+<span id="4489">4489</span>
+<span id="4490">4490</span>
+<span id="4491">4491</span>
+<span id="4492">4492</span>
+<span id="4493">4493</span>
+<span id="4494">4494</span>
+<span id="4495">4495</span>
+<span id="4496">4496</span>
+<span id="4497">4497</span>
+<span id="4498">4498</span>
+<span id="4499">4499</span>
+<span id="4500">4500</span>
+<span id="4501">4501</span>
+<span id="4502">4502</span>
+<span id="4503">4503</span>
+<span id="4504">4504</span>
+<span id="4505">4505</span>
+<span id="4506">4506</span>
+<span id="4507">4507</span>
+<span id="4508">4508</span>
+<span id="4509">4509</span>
+<span id="4510">4510</span>
+<span id="4511">4511</span>
+<span id="4512">4512</span>
+<span id="4513">4513</span>
+<span id="4514">4514</span>
+<span id="4515">4515</span>
+<span id="4516">4516</span>
+<span id="4517">4517</span>
+<span id="4518">4518</span>
+<span id="4519">4519</span>
+<span id="4520">4520</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4454,7 +4541,9 @@
 <span class="kw">use</span> <span class="ident">std::thread::sleep</span>;
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
-<span class="kw">use</span> <span class="ident">arch</span>::{<span class="ident">set_default_serial_parameters</span>, <span class="ident">Pstore</span>, <span class="ident">VcpuAffinity</span>};
+<span class="kw">use</span> <span class="ident">arch</span>::{
+    <span class="ident">set_default_serial_parameters</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrValueFrom</span>, <span class="ident">Pstore</span>, <span class="ident">VcpuAffinity</span>,
+};
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">getpid</span>, <span class="ident">info</span>, <span class="ident">kill_process_group</span>, <span class="ident">pagesize</span>, <span class="ident">reap_child</span>, <span class="ident">syslog</span>, <span class="ident">warn</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">crosvm::platform::GpuRenderServerParameters</span>;
@@ -5131,15 +5220,9 @@
     <span class="prelude-val">Ok</span>(<span class="ident">ac97_params</span>)
 }
 
-<span class="kw">enum</span> <span class="ident">MsrAction</span> {
-    <span class="ident">Invalid</span>,
-    <span class="doccomment">/// Read MSR value from host CPU0 regardless of current vcpu.</span>
-    <span class="ident">ReadFromCPU0</span>,
-}
+<span class="kw">fn</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">MsrConfig</span>)<span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrConfig::new</span>();
 
-<span class="kw">fn</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
-    <span class="comment">// TODO(b/215297064): Implement different type of operations, such</span>
-    <span class="comment">// as write or reading from the correct CPU.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">argument::parse_key_value_options</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="ident">value</span>, <span class="string">&#39;,&#39;</span>);
     <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">options</span>
         .<span class="ident">next</span>()
@@ -5147,23 +5230,53 @@
             <span class="string">&quot;userspace-msr: expected index&quot;</span>,
         )))<span class="question-mark">?</span>
         .<span class="ident">key_numeric</span>()<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrAction::Invalid</span>;
+
     <span class="kw">for</span> <span class="ident">opt</span> <span class="kw">in</span> <span class="ident">options</span> {
         <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">key</span>() {
+            <span class="string">&quot;type&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
+                <span class="string">&quot;r&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>,
+                <span class="string">&quot;w&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> <span class="op">=</span> <span class="bool-val">true</span>,
+                <span class="string">&quot;rw&quot;</span> <span class="op">|</span> <span class="string">&quot;wr&quot;</span> =&gt; {
+                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                }
+                <span class="kw">_</span> =&gt; {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad type&quot;</span>)));
+                }
+            },
             <span class="string">&quot;action&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
-                <span class="string">&quot;r0&quot;</span> =&gt; <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrAction::ReadFromCPU0</span>,
+                <span class="comment">// Compatible with the original command line format.</span>
+                <span class="comment">// TODO(b:225375705): Deprecate the old cmd format in the future.</span>
+                <span class="string">&quot;r0&quot;</span> =&gt; {
+                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                    <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>);
+                    <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>;
+                }
+                <span class="string">&quot;pass&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
+                <span class="string">&quot;emu&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
                 <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad action&quot;</span>))),
+            },
+            <span class="string">&quot;from&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
+                <span class="string">&quot;cpu0&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>,
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad from&quot;</span>))),
             },
             <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_key_err</span>()),
         }
     }
 
-    <span class="kw">match</span> <span class="ident">msr_config</span> {
-        <span class="ident">MsrAction::ReadFromCPU0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">index</span>),
-        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(
-            <span class="string">&quot;userspace-msr action not specified&quot;</span>.<span class="ident">to_string</span>(),
-        )),
+    <span class="kw">if</span> <span class="op">!</span><span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> {
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
+            <span class="string">&quot;userspace-msr: type is required&quot;</span>,
+        )));
     }
+
+    <span class="kw">if</span> <span class="ident">msr_config</span>.<span class="ident">action</span>.<span class="ident">is_none</span>() {
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
+            <span class="string">&quot;userspace-msr: action is required&quot;</span>,
+        )));
+    }
+
+    <span class="prelude-val">Ok</span>((<span class="ident">index</span>, <span class="ident">msr_config</span>))
 }
 
 <span class="kw">fn</span> <span class="ident">parse_serial_options</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span><span class="ident">SerialParameters</span><span class="op">&gt;</span> {
@@ -6634,8 +6747,16 @@
             <span class="ident">cfg</span>.<span class="ident">no_legacy</span> <span class="op">=</span> <span class="bool-val">true</span>;
         }
         <span class="string">&quot;userspace-msr&quot;</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
-            <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">insert</span>(<span class="ident">index</span>);
+            <span class="kw">let</span> (<span class="ident">index</span>, <span class="ident">msr_config</span>) <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
+            <span class="comment">// TODO(b:225375705): MSR configuration must be unique in the future.</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">old_config</span>) <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">msr_config</span>.<span class="ident">clone</span>()) {
+                <span class="kw">if</span> <span class="ident">old_config</span> <span class="op">!</span><span class="op">=</span> <span class="ident">msr_config</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                        <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                        <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;Same msr must has the same configuration&quot;</span>),
+                    });
+                }
+            }
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
         <span class="string">&quot;host-cpu-topology&quot;</span> =&gt; {
@@ -6971,6 +7092,18 @@
                 ));
             }
         }
+    } <span class="kw">else</span> {
+        <span class="comment">// TODO(b/215297064): Support generic cpuaffinity if there&#39;s a need.</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">is_empty</span>() {
+            <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">msr_config</span>) <span class="kw">in</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">iter</span>() {
+                <span class="kw">if</span> <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">==</span> <span class="ident">MsrValueFrom::RWFromRunningCPU</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(
+                        <span class="string">&quot;`userspace-msr` must set `cpu0` if `host-cpu-topology` is not set&quot;</span>
+                            .<span class="ident">to_owned</span>(),
+                    ));
+                }
+            }
+        }
     }
     <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">balloon</span> <span class="op">&amp;&amp;</span> <span class="ident">cfg</span>.<span class="ident">balloon_control</span>.<span class="ident">is_some</span>() {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(
@@ -7302,10 +7435,15 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-gpe&quot;</span>, <span class="string">&quot;gpe&quot;</span>, <span class="string">&quot;Enable GPE interrupt and register access passthrough&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;dmi&quot;</span>, <span class="string">&quot;DIR&quot;</span>, <span class="string">&quot;Directory with smbios_entry_point/DMI files&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;no-legacy&quot;</span>, <span class="string">&quot;Don&#39;t use legacy KBD/RTC devices emulation&quot;</span>),
-          <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,action=r0&quot;</span>, <span class="string">&quot;Userspace MSR handling. Takes INDEX of the MSR and how they are handled.
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+          <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,type=TYPE,action=TYPE,[from=TYPE]&quot;</span>,
+                              <span class="string">&quot;Userspace MSR handling. Takes INDEX of the MSR and how they are handled.
 
-                              action=r0 - forward RDMSR to host kernel cpu0.
-&quot;</span>),
+                              type=(r|w|rw|wr) - read/write permission control.
+
+                              action=(pass|emu) - if the control of msr is effective on host.
+
+                              from=(cpu0) - source of msr value. if not set, the source is running CPU.&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
           <span class="ident">Argument::flag</span>(<span class="string">&quot;host-cpu-topology&quot;</span>, <span class="string">&quot;Use mirror cpu topology of Host for Guest VM, also copy some cpu feature to Guest VM.&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;privileged-vm&quot;</span>, <span class="string">&quot;Grant this Guest VM certian privileges to manage Host resources, such as power management.&quot;</span>),
@@ -8858,9 +8996,45 @@ with a &#39;--backing_file&#39;.&quot;</span>
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">parse_userspace_msr_options_test</span>() {
-        <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=r0&quot;</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">index</span>, <span class="number">0x10</span>);
+        <span class="kw">let</span> (<span class="ident">pass_cpu0_index</span>, <span class="ident">pass_cpu0_cfg</span>) <span class="op">=</span>
+            <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=r,action=pass,from=cpu0&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_index</span>, <span class="number">0x10</span>);
+        <span class="macro">assert!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">*</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">MsrAction::MsrPassthrough</span>
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromCPU0</span>);
+
+        <span class="kw">let</span> (<span class="ident">pass_cpus_index</span>, <span class="ident">pass_cpus_cfg</span>) <span class="op">=</span>
+            <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=rw,action=emu&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_index</span>, <span class="number">0x10</span>);
+        <span class="macro">assert!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
+        <span class="macro">assert!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">*</span><span class="ident">pass_cpus_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">MsrAction::MsrEmulate</span>
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromRunningCPU</span>);
+
+        <span class="comment">// Compatible with the original command line format.</span>
+        <span class="comment">// TODO(b:225375705): Deprecate the old cmd format in the future.</span>
+        <span class="kw">let</span> (<span class="ident">old_index</span>, <span class="ident">old_cfg</span>) <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=r0&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">old_index</span>, <span class="number">0x10</span>);
+        <span class="macro">assert!</span>(<span class="ident">old_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="kw-2">*</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
+            <span class="ident">MsrAction::MsrPassthrough</span>
+        );
+        <span class="macro">assert_eq!</span>(<span class="ident">old_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromCPU0</span>);
+
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=none&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=pass&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=none&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=rw&quot;</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=w,action=pass,from=f&quot;</span>).<span class="ident">is_err</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10&quot;</span>).<span class="ident">is_err</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;hoge&quot;</span>).<span class="ident">is_err</span>());
     }

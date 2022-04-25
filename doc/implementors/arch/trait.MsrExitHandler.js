@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["x86_64"] = [{"text":"impl <a class=\"trait\" href=\"arch/trait.MsrExitHandler.html\" title=\"trait arch::MsrExitHandler\">MsrExitHandler</a> for <a class=\"struct\" href=\"x86_64/msr/struct.MsrHandlers.html\" title=\"struct x86_64::msr::MsrHandlers\">MsrHandlers</a>","synthetic":false,"types":["x86_64::msr::MsrHandlers"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
