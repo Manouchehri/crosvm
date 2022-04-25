@@ -4423,6 +4423,15 @@
 <span id="4422">4422</span>
 <span id="4423">4423</span>
 <span id="4424">4424</span>
+<span id="4425">4425</span>
+<span id="4426">4426</span>
+<span id="4427">4427</span>
+<span id="4428">4428</span>
+<span id="4429">4429</span>
+<span id="4430">4430</span>
+<span id="4431">4431</span>
+<span id="4432">4432</span>
+<span id="4433">4433</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -5641,16 +5650,25 @@
                     <span class="string">&quot;`mem` already given&quot;</span>.<span class="ident">to_owned</span>(),
                 ));
             }
-            <span class="ident">cfg</span>.<span class="ident">memory</span> <span class="op">=</span>
-                <span class="prelude-val">Some</span>(
-                    <span class="ident">value</span>
-                        .<span class="ident">unwrap</span>()
-                        .<span class="ident">parse</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
-                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
-                            <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;this value for `mem` needs to be integer&quot;</span>),
-                        })<span class="question-mark">?</span>,
-                )
+            <span class="kw">let</span> <span class="ident">memory_size</span>: <span class="ident">u64</span> <span class="op">=</span>
+                <span class="ident">value</span>
+                    .<span class="ident">unwrap</span>()
+                    .<span class="ident">parse</span>()
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                        <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                        <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;this value for `mem` needs to be integer&quot;</span>),
+                    })<span class="question-mark">?</span>;
+            <span class="comment">// Align memory_size to 256MB for MTRR convenience</span>
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+            <span class="comment">// As memory_size is unit of MB, 0xFF is 256MB mask here</span>
+            <span class="kw">let</span> <span class="ident">memory_size</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">memory_size</span> <span class="op">&amp;</span> <span class="number">0xFF_u64</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="macro">warn!</span>(<span class="string">&quot;guest memory size {}MB isn&#39;t aligned to 256MB, it will be truncated to {}MB for MTRR setting convenience&quot;</span>, <span class="ident">memory_size</span>, <span class="ident">memory_size</span> <span class="op">&amp;</span> <span class="op">!</span><span class="number">0xFF_u64</span>);
+                <span class="ident">memory_size</span> <span class="op">&amp;</span> <span class="op">!</span><span class="number">0xFF_u64</span>
+            } <span class="kw">else</span> {
+                <span class="ident">memory_size</span>
+            };
+
+            <span class="ident">cfg</span>.<span class="ident">memory</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">memory_size</span>);
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>)]</span>
         <span class="string">&quot;swiotlb&quot;</span> =&gt; {

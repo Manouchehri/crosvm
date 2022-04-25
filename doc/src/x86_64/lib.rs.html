@@ -1578,6 +1578,13 @@
 <span id="1577">1577</span>
 <span id="1578">1578</span>
 <span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
+<span id="1582">1582</span>
+<span id="1583">1583</span>
+<span id="1584">1584</span>
+<span id="1585">1585</span>
+<span id="1586">1586</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2278,7 +2285,14 @@
 
         <span class="kw">let</span> <span class="ident">guest_mem</span> <span class="op">=</span> <span class="ident">vm</span>.<span class="ident">get_memory</span>();
         <span class="kw">let</span> <span class="ident">kernel_load_addr</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">KERNEL_START_OFFSET</span>);
-        <span class="ident">regs::setup_msrs</span>(<span class="ident">vm</span>, <span class="ident">vcpu</span>, <span class="ident">END_ADDR_BEFORE_32BITS</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetupMsrs</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">end_addr</span> <span class="op">=</span> <span class="ident">guest_mem</span>.<span class="ident">end_addr</span>().<span class="ident">offset</span>();
+        <span class="kw">let</span> (<span class="ident">ram_low_end</span>, <span class="ident">ram_high_end</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">end_addr</span> <span class="op">&gt;</span> <span class="ident">FIRST_ADDR_PAST_32BITS</span> {
+            (<span class="ident">END_ADDR_BEFORE_32BITS</span>, <span class="prelude-val">Some</span>(<span class="ident">end_addr</span>))
+        } <span class="kw">else</span> {
+            (<span class="ident">end_addr</span>, <span class="prelude-val">None</span>)
+        };
+        <span class="ident">regs::setup_msrs</span>(<span class="ident">vm</span>, <span class="ident">vcpu</span>, <span class="ident">ram_low_end</span>, <span class="ident">ram_high_end</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetupMsrs</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">kernel_end</span> <span class="op">=</span> <span class="ident">guest_mem</span>
             .<span class="ident">checked_offset</span>(<span class="ident">kernel_load_addr</span>, <span class="ident">KERNEL_64BIT_ENTRY_OFFSET</span>)
             .<span class="ident">ok_or</span>(<span class="ident">Error::KernelOffsetPastEnd</span>)<span class="question-mark">?</span>;
@@ -3153,8 +3167,8 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">check_32bit_gap_size_alignment</span>() {
-        <span class="comment">// 32bit gap memory is 256 MB aligned to be friendly for MTRR mappings.</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">%</span> (<span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>), <span class="number">0</span>);
+        <span class="comment">// END_ADDR_BEFORE_32BITS is 256 MB aligned to be friendly for MTRR mappings.</span>
+        <span class="macro">assert_eq!</span>(<span class="ident">END_ADDR_BEFORE_32BITS</span> <span class="op">%</span> (<span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>), <span class="number">0</span>);
     }
 }
 </code></pre></div>
