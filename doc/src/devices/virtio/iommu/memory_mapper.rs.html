@@ -728,6 +728,20 @@
 <span id="727">727</span>
 <span id="728">728</span>
 <span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -832,6 +846,12 @@
     <span class="kw">fn</span> <span class="ident">remove_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">iova_start</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
     <span class="kw">fn</span> <span class="ident">get_mask</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>;
 
+    <span class="doccomment">/// Whether or not endpoints can be safely detached from this mapper.</span>
+    <span class="kw">fn</span> <span class="ident">supports_detach</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span>;
+    <span class="doccomment">/// Resets the mapper&#39;s domain back into its initial state. Only necessary</span>
+    <span class="doccomment">/// if |supports_detach| returns true.</span>
+    <span class="kw">fn</span> <span class="ident">reset_domain</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {}
+
     <span class="doccomment">/// Trait for generic MemoryMapper abstraction, that is, all reside on MemoryMapper and want to</span>
     <span class="doccomment">/// be converted back to its original type. Each must provide as_XXX_wrapper() +</span>
     <span class="doccomment">/// as_XXX_wrapper_mut() + into_XXX_wrapper(), default impl methods return None.</span>
@@ -926,6 +946,14 @@
 
     <span class="kw">fn</span> <span class="ident">get_mask</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">mask</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">supports_detach</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="bool-val">true</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">reset_domain</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">clear</span>();
     }
 }
 
