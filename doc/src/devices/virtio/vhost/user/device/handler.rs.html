@@ -1048,13 +1048,6 @@
 <span id="1047">1047</span>
 <span id="1048">1048</span>
 <span id="1049">1049</span>
-<span id="1050">1050</span>
-<span id="1051">1051</span>
-<span id="1052">1052</span>
-<span id="1053">1053</span>
-<span id="1054">1054</span>
-<span id="1055">1055</span>
-<span id="1056">1056</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1120,16 +1113,18 @@
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>, <span class="ident">MemoryRegion</span>};
 <span class="kw">use</span> <span class="ident">vmm_vhost</span>::{
-    <span class="ident">connection::vfio</span>::{<span class="ident">Endpoint</span> <span class="kw">as</span> <span class="ident">VfioEndpoint</span>, <span class="ident">Listener</span> <span class="kw">as</span> <span class="ident">VfioListener</span>},
-    <span class="ident">message</span>::{
-        <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserInflight</span>, <span class="ident">VhostUserMemoryRegion</span>, <span class="ident">VhostUserProtocolFeatures</span>,
-        <span class="ident">VhostUserSingleMemoryRegion</span>, <span class="ident">VhostUserVirtioFeatures</span>, <span class="ident">VhostUserVringAddrFlags</span>,
-        <span class="ident">VhostUserVringState</span>,
+    <span class="ident">connection</span>::{
+        <span class="ident">vfio</span>::{<span class="ident">Endpoint</span> <span class="kw">as</span> <span class="ident">VfioEndpoint</span>, <span class="ident">Listener</span> <span class="kw">as</span> <span class="ident">VfioListener</span>},
+        <span class="ident">Endpoint</span>,
     },
-    <span class="ident">Protocol</span>, <span class="ident">SlaveListener</span>, <span class="ident">SlaveReqHandler</span>,
+    <span class="ident">message</span>::{
+        <span class="ident">MasterReq</span>, <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserInflight</span>, <span class="ident">VhostUserMemoryRegion</span>,
+        <span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserSingleMemoryRegion</span>, <span class="ident">VhostUserVirtioFeatures</span>,
+        <span class="ident">VhostUserVringAddrFlags</span>, <span class="ident">VhostUserVringState</span>,
+    },
+    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>, <span class="ident">Protocol</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">VhostResult</span>, <span class="ident">SlaveListener</span>, <span class="ident">SlaveReqHandler</span>,
+    <span class="ident">VhostUserSlaveReqHandler</span>, <span class="ident">VhostUserSlaveReqHandlerMut</span>,
 };
-
-<span class="kw">use</span> <span class="ident">vmm_vhost</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">VhostResult</span>, <span class="ident">VhostUserSlaveReqHandlerMut</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioRegionAddr</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu</span>::{
@@ -1389,6 +1384,38 @@
     }
 }
 
+<span class="doccomment">/// Performs the run loop for an already-constructor request handler.</span>
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_handler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">req_handler</span>: <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>,
+    <span class="ident">E</span>: <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsRawDescriptor</span>,
+{
+    <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">SafeDescriptor::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">req_handler</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>)
+        .<span class="ident">map</span>(<span class="ident">AsyncWrapper::new</span>)
+        .<span class="ident">context</span>(<span class="string">&quot;failed to get safe descriptor for handler&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">handler_source</span> <span class="op">=</span> <span class="ident">ex</span>
+        .<span class="ident">async_from</span>(<span class="ident">h</span>)
+        .<span class="ident">context</span>(<span class="string">&quot;failed to create an async source&quot;</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">loop</span> {
+        <span class="ident">handler_source</span>
+            .<span class="ident">wait_readable</span>()
+            .<span class="kw">await</span>
+            .<span class="ident">context</span>(<span class="string">&quot;failed to wait for the handler to become readable&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">match</span> <span class="ident">req_handler</span>.<span class="ident">handle_request</span>() {
+            <span class="prelude-val">Ok</span>(()) =&gt; (),
+            <span class="prelude-val">Err</span>(<span class="ident">VhostError::ClientExit</span>) =&gt; {
+                <span class="macro">info!</span>(<span class="string">&quot;vhost-user connection closed&quot;</span>);
+                <span class="comment">// Exit as the client closed the connection.</span>
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                <span class="macro">bail!</span>(<span class="string">&quot;failed to handle a vhost-user request: {}&quot;</span>, <span class="ident">e</span>);
+            }
+        };
+    }
+}
+
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum</span> <span class="ident">HandlerType</span> {
     <span class="ident">VhostUser</span>,
     <span class="ident">Vvu</span> {
@@ -1462,32 +1489,10 @@
                     .<span class="ident">context</span>(<span class="string">&quot;failed to accept an incoming connection&quot;</span>)
             })
             .<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">req_handler</span> <span class="op">=</span>
+        <span class="kw">let</span> <span class="ident">req_handler</span> <span class="op">=</span>
             <span class="ident">SlaveReqHandler::from_stream</span>(<span class="ident">socket</span>, <span class="ident">Arc::new</span>(<span class="ident">std::sync::Mutex::new</span>(<span class="self">self</span>)));
-        <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">SafeDescriptor::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">req_handler</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>)
-            .<span class="ident">map</span>(<span class="ident">AsyncWrapper::new</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;failed to get safe descriptor for handler&quot;</span>);
-        <span class="kw">let</span> <span class="ident">handler_source</span> <span class="op">=</span> <span class="ident">ex</span>
-            .<span class="ident">async_from</span>(<span class="ident">h</span>)
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create an async source&quot;</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">loop</span> {
-            <span class="ident">handler_source</span>
-                .<span class="ident">wait_readable</span>()
-                .<span class="kw">await</span>
-                .<span class="ident">context</span>(<span class="string">&quot;failed to wait for the handler socket to become readable&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">match</span> <span class="ident">req_handler</span>.<span class="ident">handle_request</span>() {
-                <span class="prelude-val">Ok</span>(()) =&gt; (),
-                <span class="prelude-val">Err</span>(<span class="ident">VhostError::ClientExit</span>) =&gt; {
-                    <span class="macro">info!</span>(<span class="string">&quot;vhost-user connection closed&quot;</span>);
-                    <span class="comment">// Exit as the client closed the connection.</span>
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
-                }
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="macro">bail!</span>(<span class="string">&quot;failed to handle a vhost-user request: {}&quot;</span>, <span class="ident">e</span>);
-                }
-            };
-        }
+        <span class="ident">run_handler</span>(<span class="ident">req_handler</span>, <span class="ident">ex</span>).<span class="kw">await</span>
     }
 
     <span class="doccomment">/// Starts listening virtio-vhost-user device with VFIO to handle incoming vhost-user messages</span>
@@ -1510,31 +1515,12 @@
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to create SlaveListener: {}&quot;</span>, <span class="ident">e</span>))
             })<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">req_handler</span> <span class="op">=</span> <span class="ident">listener</span>
+        <span class="kw">let</span> <span class="ident">req_handler</span> <span class="op">=</span> <span class="ident">listener</span>
             .<span class="ident">accept</span>()
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to accept VFIO connection: {}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>
             .<span class="ident">expect</span>(<span class="string">&quot;vvu proxy is unavailable via VFIO&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">SafeDescriptor::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">req_handler</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>)
-            .<span class="ident">map</span>(<span class="ident">AsyncWrapper::new</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;failed to get safe descriptor for handler&quot;</span>);
-        <span class="kw">let</span> <span class="ident">handler_source</span> <span class="op">=</span> <span class="ident">ex</span>
-            .<span class="ident">async_from</span>(<span class="ident">h</span>)
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create asyn handler source&quot;</span>)<span class="question-mark">?</span>;
-
-        <span class="kw">loop</span> {
-            <span class="comment">// Wait for requests from the sibling.</span>
-            <span class="comment">// `read_u64()` returns the number of requests arrived.</span>
-            <span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">handler_source</span>
-                .<span class="ident">read_u64</span>()
-                .<span class="kw">await</span>
-                .<span class="ident">context</span>(<span class="string">&quot;failed to wait for handler source&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">count</span> {
-                <span class="ident">req_handler</span>
-                    .<span class="ident">handle_request</span>()
-                    .<span class="ident">context</span>(<span class="string">&quot;failed to handle request&quot;</span>)<span class="question-mark">?</span>;
-            }
-        }
+        <span class="ident">run_handler</span>(<span class="ident">req_handler</span>, <span class="ident">ex</span>).<span class="kw">await</span>
     }
 }
 
