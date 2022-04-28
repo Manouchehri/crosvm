@@ -625,6 +625,17 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -671,8 +682,9 @@
         <span class="ident">vhost</span>::{
             <span class="ident">user::device</span>::{
                 <span class="ident">handler</span>::{
-                    <span class="ident">create_guest_memory</span>, <span class="ident">create_vvu_guest_memory</span>, <span class="ident">run_handler</span>, <span class="ident">vmm_va_to_gpa</span>,
-                    <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>,
+                    <span class="ident">create_guest_memory</span>,
+                    <span class="ident">sys</span>::{<span class="ident">create_vvu_guest_memory</span>, <span class="ident">run_handler</span>, <span class="ident">HandlerTypeSys</span>},
+                    <span class="ident">vmm_va_to_gpa</span>, <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>,
                 },
                 <span class="ident">vvu</span>::{<span class="ident">doorbell::DoorbellRegion</span>, <span class="ident">pci::VvuPciDevice</span>, <span class="ident">VvuDevice</span>},
             },
@@ -747,9 +759,12 @@
 
 <span class="kw">impl</span> <span class="ident">VhostUserSlaveReqHandlerMut</span> <span class="kw">for</span> <span class="ident">VsockBackend</span> {
     <span class="kw">fn</span> <span class="ident">protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Protocol</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">handler_type</span> {
+        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handler_type</span> {
             <span class="ident">HandlerType::VhostUser</span> =&gt; <span class="ident">Protocol::Regular</span>,
-            <span class="ident">HandlerType::Vvu</span> { .. } =&gt; <span class="ident">Protocol::Virtio</span>,
+            <span class="comment">// TODO(b/230666089): Put in sys directory.</span>
+            <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">system_handler_type</span>) =&gt; <span class="kw">match</span> <span class="ident">system_handler_type</span> {
+                <span class="ident">HandlerTypeSys::Vvu</span> { .. } =&gt; <span class="ident">Protocol::Virtio</span>,
+            },
         }
     }
 
@@ -794,13 +809,20 @@
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">guest_mem</span>, <span class="ident">vmm_maps</span>) <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handler_type</span> {
             <span class="ident">HandlerType::VhostUser</span> =&gt; <span class="ident">create_guest_memory</span>(<span class="ident">contexts</span>, <span class="ident">files</span>)<span class="question-mark">?</span>,
-            <span class="ident">HandlerType::Vvu</span> { <span class="ident">vfio_dev</span>, <span class="ident">caps</span>, .. } =&gt; {
-                <span class="comment">// virtio-vhost-user doesn&#39;t pass FDs.</span>
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">files</span>.<span class="ident">is_empty</span>() {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidParam</span>);
+            <span class="comment">// TODO(b/230666089): Put in sys directory.</span>
+            <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">system_handler_type</span>) =&gt; <span class="kw">match</span> <span class="ident">system_handler_type</span> {
+                <span class="ident">HandlerTypeSys::Vvu</span> { <span class="ident">vfio_dev</span>, <span class="ident">caps</span>, .. } =&gt; {
+                    <span class="comment">// virtio-vhost-user doesn&#39;t pass FDs.</span>
+                    <span class="kw">if</span> <span class="op">!</span><span class="ident">files</span>.<span class="ident">is_empty</span>() {
+                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidParam</span>);
+                    }
+                    <span class="ident">create_vvu_guest_memory</span>(
+                        <span class="ident">vfio_dev</span>.<span class="ident">as_ref</span>(),
+                        <span class="ident">caps</span>.<span class="ident">shared_mem_cfg_addr</span>(),
+                        <span class="ident">contexts</span>,
+                    )<span class="question-mark">?</span>
                 }
-                <span class="ident">create_vvu_guest_memory</span>(<span class="ident">vfio_dev</span>.<span class="ident">as_ref</span>(), <span class="ident">caps</span>.<span class="ident">shared_mem_cfg_addr</span>(), <span class="ident">contexts</span>)<span class="question-mark">?</span>
-            }
+            },
         };
 
         <span class="self">self</span>.<span class="ident">handle</span>
@@ -929,9 +951,9 @@
 
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handler_type</span> {
-            <span class="ident">HandlerType::Vvu</span> {
+            <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">HandlerTypeSys::Vvu</span> {
                 <span class="ident">notification_evts</span>, ..
-            } =&gt; {
+            }) =&gt; {
                 <span class="kw">if</span> <span class="ident">fd</span>.<span class="ident">is_some</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidParam</span>);
                 }
@@ -978,7 +1000,7 @@
 
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handler_type</span> {
-            <span class="ident">HandlerType::Vvu</span> { <span class="ident">vfio_dev</span>, <span class="ident">caps</span>, .. } =&gt; {
+            <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">HandlerTypeSys::Vvu</span> { <span class="ident">vfio_dev</span>, <span class="ident">caps</span>, .. }) =&gt; {
                 <span class="kw">let</span> <span class="ident">vfio</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="ident">vfio_dev</span>);
                 <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">caps</span>.<span class="ident">doorbell_base_addr</span>();
                 <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">VfioRegionAddr</span> {
@@ -1190,11 +1212,11 @@
         <span class="ident">ex</span>,
         <span class="ident">cid</span>,
         <span class="ident">vhost_socket</span>,
-        <span class="ident">HandlerType::Vvu</span> {
+        <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">HandlerTypeSys::Vvu</span> {
             <span class="ident">vfio_dev</span>: <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">device</span>.<span class="ident">vfio_dev</span>),
             <span class="ident">caps</span>: <span class="ident">device</span>.<span class="ident">caps</span>.<span class="ident">clone</span>(),
             <span class="ident">notification_evts</span>: <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;mut</span> <span class="ident">device</span>.<span class="ident">notification_evts</span>),
-        },
+        }),
     )
     .<span class="ident">map</span>(<span class="ident">StdMutex::new</span>)
     .<span class="ident">map</span>(<span class="ident">Arc::new</span>)
