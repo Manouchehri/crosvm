@@ -1423,6 +1423,15 @@
 <span id="1422">1422</span>
 <span id="1423">1423</span>
 <span id="1424">1424</span>
+<span id="1425">1425</span>
+<span id="1426">1426</span>
+<span id="1427">1427</span>
+<span id="1428">1428</span>
+<span id="1429">1429</span>
+<span id="1430">1430</span>
+<span id="1431">1431</span>
+<span id="1432">1432</span>
+<span id="1433">1433</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2127,7 +2136,7 @@
     <span class="comment">// vec for vfio device&#39;s regions</span>
     <span class="ident">regions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VfioRegion</span><span class="op">&gt;</span>,
 
-    <span class="ident">iova_alloc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">AddressAllocator</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">iova_alloc</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">AddressAllocator</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">VfioDevice</span> {
@@ -2156,6 +2165,14 @@
         <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">add_device_num</span>();
         <span class="kw">let</span> <span class="ident">group_descriptor</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">as_raw_descriptor</span>();
 
+        <span class="kw">let</span> <span class="ident">iova_ranges</span> <span class="op">=</span> <span class="ident">container</span>
+            .<span class="ident">lock</span>()
+            .<span class="ident">vfio_iommu_iova_get_iova_ranges</span>()<span class="question-mark">?</span>
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">std::ops::RangeInclusive::new</span>(<span class="ident">r</span>.<span class="ident">start</span>, <span class="ident">r</span>.<span class="ident">end</span>));
+        <span class="kw">let</span> <span class="ident">iova_alloc</span> <span class="op">=</span> <span class="ident">AddressAllocator::new_from_list</span>(<span class="ident">iova_ranges</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
+            .<span class="ident">map_err</span>(<span class="ident">VfioError::Resources</span>)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(<span class="ident">VfioDevice</span> {
             <span class="ident">dev</span>,
             <span class="ident">name</span>,
@@ -2163,7 +2180,7 @@
             <span class="ident">group_descriptor</span>,
             <span class="ident">group_id</span>,
             <span class="ident">regions</span>,
-            <span class="ident">iova_alloc</span>: <span class="prelude-val">None</span>,
+            <span class="ident">iova_alloc</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">iova_alloc</span>)),
         })
     }
 
@@ -2212,7 +2229,7 @@
             <span class="ident">group_descriptor</span>,
             <span class="ident">group_id</span>,
             <span class="ident">regions</span>,
-            <span class="ident">iova_alloc</span>: <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">iova_alloc</span>))),
+            <span class="ident">iova_alloc</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">iova_alloc</span>)),
         })
     }
 
@@ -2777,13 +2794,14 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">alloc_iova</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">align_size</span>: <span class="ident">u64</span>, <span class="ident">alloc</span>: <span class="ident">Alloc</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">iova_alloc</span> {
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">VfioError::NoRescAlloc</span>),
-            <span class="prelude-val">Some</span>(<span class="ident">iova_alloc</span>) =&gt; <span class="ident">iova_alloc</span>
-                .<span class="ident">lock</span>()
-                .<span class="ident">allocate_with_align</span>(<span class="ident">size</span>, <span class="ident">alloc</span>, <span class="string">&quot;alloc_iova&quot;</span>.<span class="ident">to_owned</span>(), <span class="ident">align_size</span>)
-                .<span class="ident">map_err</span>(<span class="ident">VfioError::Resources</span>),
-        }
+        <span class="self">self</span>.<span class="ident">iova_alloc</span>
+            .<span class="ident">lock</span>()
+            .<span class="ident">allocate_with_align</span>(<span class="ident">size</span>, <span class="ident">alloc</span>, <span class="string">&quot;alloc_iova&quot;</span>.<span class="ident">to_owned</span>(), <span class="ident">align_size</span>)
+            .<span class="ident">map_err</span>(<span class="ident">VfioError::Resources</span>)
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_max_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
+        <span class="self">self</span>.<span class="ident">iova_alloc</span>.<span class="ident">lock</span>().<span class="ident">get_max_addr</span>()
     }
 
     <span class="doccomment">/// Gets the vfio device backing `File`.</span>

@@ -2015,6 +2015,11 @@
 <span id="2014">2014</span>
 <span id="2015">2015</span>
 <span id="2016">2016</span>
+<span id="2017">2017</span>
+<span id="2018">2018</span>
+<span id="2019">2019</span>
+<span id="2020">2020</span>
+<span id="2021">2021</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3487,6 +3492,11 @@
             }
         }
         <span class="prelude-val">Ok</span>(<span class="ident">ranges</span>)
+    }
+
+    <span class="doccomment">/// Return the supported iova max address of the Vfio Pci device</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_max_iova</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
+        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">get_max_addr</span>()
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>

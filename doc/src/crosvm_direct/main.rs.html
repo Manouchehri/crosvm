@@ -4555,10 +4555,6 @@
 <span id="4554">4554</span>
 <span id="4555">4555</span>
 <span id="4556">4556</span>
-<span id="4557">4557</span>
-<span id="4558">4558</span>
-<span id="4559">4559</span>
-<span id="4560">4560</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -6538,9 +6534,6 @@
             <span class="kw">let</span> <span class="ident">vfio_dev</span> <span class="op">=</span> <span class="ident">VfioCommand::new</span>(<span class="ident">vfio_type</span>, <span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
             <span class="ident">cfg</span>.<span class="ident">vfio</span>.<span class="ident">push</span>(<span class="ident">vfio_dev</span>);
         }
-        <span class="string">&quot;virtio-iommu&quot;</span> =&gt; {
-            <span class="ident">cfg</span>.<span class="ident">virtio_iommu</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>)]</span>
         <span class="string">&quot;video-decoder&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">video_dec</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">parse_video_options</span>(<span class="ident">value</span>)<span class="question-mark">?</span>);
@@ -7457,7 +7450,6 @@ guest-address=auto|&lt;BUS:DEVICE.FUNCTION&gt; - PCI address that the device wil
 
 iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;vfio-platform&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to sysfs of platform pass through&quot;</span>),
-          <span class="ident">Argument::flag</span>(<span class="string">&quot;virtio-iommu&quot;</span>, <span class="string">&quot;Add a virtio-iommu device&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>)]</span>
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;video-decoder&quot;</span>, <span class="string">&quot;[backend]&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) enable virtio-video decoder device
                               Possible backend values: libvda&quot;</span>),
