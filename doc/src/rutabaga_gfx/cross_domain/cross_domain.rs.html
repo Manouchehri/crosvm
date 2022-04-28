@@ -997,6 +997,7 @@
 <span id="996">996</span>
 <span id="997">997</span>
 <span id="998">998</span>
+<span id="999">999</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1980,6 +1981,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">_ctx_id</span>: <span class="ident">u32</span>,
         <span class="ident">_context_init</span>: <span class="ident">u32</span>,
+        <span class="ident">_context_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>,
         <span class="ident">fence_handler</span>: <span class="ident">RutabagaFenceHandler</span>,
     ) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RutabagaContext</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">CrossDomainContext</span> {

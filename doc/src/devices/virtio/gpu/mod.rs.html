@@ -1378,6 +1378,11 @@
 <span id="1377">1377</span>
 <span id="1378">1378</span>
 <span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
+<span id="1383">1383</span>
+<span id="1384">1384</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1844,9 +1849,14 @@
             <span class="ident">GpuCommand::GetCapset</span>(<span class="ident">info</span>) =&gt; <span class="self">self</span>
                 .<span class="ident">virtio_gpu</span>
                 .<span class="ident">get_capset</span>(<span class="ident">info</span>.<span class="ident">capset_id</span>.<span class="ident">to_native</span>(), <span class="ident">info</span>.<span class="ident">capset_version</span>.<span class="ident">to_native</span>()),
-            <span class="ident">GpuCommand::CtxCreate</span>(<span class="ident">info</span>) =&gt; <span class="self">self</span>
-                .<span class="ident">virtio_gpu</span>
-                .<span class="ident">create_context</span>(<span class="ident">info</span>.<span class="ident">hdr</span>.<span class="ident">ctx_id</span>.<span class="ident">to_native</span>(), <span class="ident">info</span>.<span class="ident">context_init</span>.<span class="ident">to_native</span>()),
+            <span class="ident">GpuCommand::CtxCreate</span>(<span class="ident">info</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">context_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">String::from_utf8</span>(<span class="ident">info</span>.<span class="ident">debug_name</span>.<span class="ident">to_vec</span>()).<span class="ident">ok</span>();
+                <span class="self">self</span>.<span class="ident">virtio_gpu</span>.<span class="ident">create_context</span>(
+                    <span class="ident">info</span>.<span class="ident">hdr</span>.<span class="ident">ctx_id</span>.<span class="ident">to_native</span>(),
+                    <span class="ident">info</span>.<span class="ident">context_init</span>.<span class="ident">to_native</span>(),
+                    <span class="ident">context_name</span>.<span class="ident">as_deref</span>(),
+                )
+            }
             <span class="ident">GpuCommand::CtxDestroy</span>(<span class="ident">info</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">virtio_gpu</span>.<span class="ident">destroy_context</span>(<span class="ident">info</span>.<span class="ident">hdr</span>.<span class="ident">ctx_id</span>.<span class="ident">to_native</span>())
             }
