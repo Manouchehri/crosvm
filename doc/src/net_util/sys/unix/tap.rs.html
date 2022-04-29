@@ -1011,8 +1011,8 @@
         <span class="ident">ifreq</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">if_flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-        <span class="self">self</span>.<span class="ident">if_flags</span>.<span class="ident">into</span>()
+    <span class="kw">fn</span> <span class="ident">if_flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+        <span class="self">self</span>.<span class="ident">if_flags</span> <span class="kw">as</span> <span class="ident">u32</span>
     }
 
     <span class="kw">fn</span> <span class="ident">try_clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
@@ -1179,8 +1179,8 @@
             <span class="ident">ifreq</span>
         }
 
-        <span class="kw">fn</span> <span class="ident">if_flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">i32</span> {
-            <span class="ident">libc::IFF_TAP</span>
+        <span class="kw">fn</span> <span class="ident">if_flags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+            <span class="ident">net_sys::IFF_TAP</span>
         }
 
         <span class="comment">// Return self so it can compile</span>
