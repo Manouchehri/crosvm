@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["FakeTimerFd","FakeTimerFd: For use in tests."],["TimerFd","A safe wrapper around a Linux timerfd (man 2 timerfd_create)."]]});
+initSidebarItems({});
