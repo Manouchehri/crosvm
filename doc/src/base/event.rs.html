@@ -57,9 +57,6 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
-<span id="59">59</span>
-<span id="60">60</span>
-<span id="61">61</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -71,9 +68,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::platform::EventReadResult</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">generate_scoped_event</span>, <span class="ident">platform::EventFd</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::os::unix::io</span>::{<span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>};
 
 <span class="doccomment">/// See [EventFd](crate::platform::EventFd) for struct- and method-level</span>
 <span class="doccomment">/// documentation.</span>
@@ -110,13 +104,13 @@
 
 <span class="kw">impl</span> <span class="ident">FromRawDescriptor</span> <span class="kw">for</span> <span class="ident">Event</span> {
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw_descriptor</span>(<span class="ident">descriptor</span>: <span class="ident">RawDescriptor</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Event</span>(<span class="ident">EventFd::from_raw_fd</span>(<span class="ident">descriptor</span>))
+        <span class="ident">Event</span>(<span class="ident">EventFd::from_raw_descriptor</span>(<span class="ident">descriptor</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">Event</span> {
     <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">into_raw_fd</span>()
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">into_raw_descriptor</span>()
     }
 }
 
