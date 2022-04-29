@@ -773,6 +773,18 @@ gerrit can rebase the commit cleanly. If not, please rebase to <code>cros/main</
 <pre><code class="language-bash">git branch --set-upstream-to cros/main
 git rebase
 </code></pre>
+<h2 id="first-time-setup--running-tools"><a class="header" href="#first-time-setup--running-tools">First time setup / running tools</a></h2>
+<ul>
+<li>
+<p>All CrosVM <code>tools</code> are not expected to work inside the ChromeOS chroot. As such, they must be run
+outside the chroot (but inside the source tree).</p>
+</li>
+<li>
+<p>Cloning the ChromeOS source tree will not clone submodules relied upon by the CrosVM build (e.g.
+as used by <code>tools</code>). To fix this, run <code>git submodules update --init</code> in the <code>crosvm</code> root from
+outside the chroot.</p>
+</li>
+</ul>
 <h2 id="cq-depend"><a class="header" href="#cq-depend">Cq-Depend</a></h2>
 <p><strong>We cannot support Cq-Depend</strong> to sychronize changes with other ChromeOS repositories. Please try
 to make changes in a backwards compatible way to allow them to be submitted independently.</p>
