@@ -1398,6 +1398,18 @@
 <span id="1397">1397</span>
 <span id="1398">1398</span>
 <span id="1399">1399</span>
+<span id="1400">1400</span>
+<span id="1401">1401</span>
+<span id="1402">1402</span>
+<span id="1403">1403</span>
+<span id="1404">1404</span>
+<span id="1405">1405</span>
+<span id="1406">1406</span>
+<span id="1407">1407</span>
+<span id="1408">1408</span>
+<span id="1409">1409</span>
+<span id="1410">1410</span>
+<span id="1411">1411</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1515,6 +1527,7 @@
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">PmResource</span> {
     <span class="kw">fn</span> <span class="ident">pwrbtn_evt</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {}
+    <span class="kw">fn</span> <span class="ident">slpbtn_evt</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {}
     <span class="kw">fn</span> <span class="ident">gpe_evt</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_gpe</span>: <span class="ident">u32</span>) {}
     <span class="kw">fn</span> <span class="ident">register_gpe_notify_dev</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_gpe</span>: <span class="ident">u32</span>, <span class="ident">_notify_dev</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">GpeNotify</span><span class="op">&gt;</span><span class="op">&gt;</span>) {}
 }
@@ -2367,6 +2380,8 @@
     <span class="ident">Exit</span>,
     <span class="doccomment">/// Trigger a power button event in the guest.</span>
     <span class="ident">Powerbtn</span>,
+    <span class="doccomment">/// Trigger a sleep button event in the guest.</span>
+    <span class="ident">Sleepbtn</span>,
     <span class="doccomment">/// Suspend the VM&#39;s VCPUs until resume.</span>
     <span class="ident">Suspend</span>,
     <span class="doccomment">/// Resume the VM&#39;s VCPUs that were previously suspended.</span>
@@ -2440,6 +2455,15 @@
             <span class="ident">VmRequest::Powerbtn</span> =&gt; {
                 <span class="kw">if</span> <span class="ident">pm</span>.<span class="ident">is_some</span>() {
                     <span class="ident">pm</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">lock</span>().<span class="ident">pwrbtn_evt</span>();
+                    <span class="ident">VmResponse::Ok</span>
+                } <span class="kw">else</span> {
+                    <span class="macro">error!</span>(<span class="string">&quot;{:#?} not supported&quot;</span>, <span class="kw-2">*</span><span class="self">self</span>);
+                    <span class="ident">VmResponse::Err</span>(<span class="ident">SysError::new</span>(<span class="ident">ENOTSUP</span>))
+                }
+            }
+            <span class="ident">VmRequest::Sleepbtn</span> =&gt; {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pm</span>) <span class="op">=</span> <span class="ident">pm</span> {
+                    <span class="ident">pm</span>.<span class="ident">lock</span>().<span class="ident">slpbtn_evt</span>();
                     <span class="ident">VmResponse::Ok</span>
                 } <span class="kw">else</span> {
                     <span class="macro">error!</span>(<span class="string">&quot;{:#?} not supported&quot;</span>, <span class="kw-2">*</span><span class="self">self</span>);

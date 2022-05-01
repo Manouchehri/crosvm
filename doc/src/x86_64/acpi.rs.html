@@ -804,7 +804,7 @@
 <span class="kw">const</span> <span class="ident">FADT_MINOR_REVISION</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="comment">// FADT flags</span>
 <span class="kw">const</span> <span class="ident">FADT_POWER_BUTTON</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
-<span class="kw">const</span> <span class="ident">FADT_SLEEP_BUTTON</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
+<span class="kw">const</span> <span class="ident">_FADT_SLEEP_BUTTON</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">FADT_RESET_REGISTER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">10</span>;
 <span class="kw">const</span> <span class="ident">FADT_LOW_POWER_S2IDLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
 <span class="comment">// FADT fields offset</span>
@@ -903,7 +903,7 @@
         <span class="ident">OEM_REVISION</span>,
     );
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fadt_flags</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">FADT_SLEEP_BUTTON</span>; <span class="comment">// mask SLEEP BUTTON</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fadt_flags</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
 
     <span class="kw">if</span> <span class="ident">force_s2idle</span> {
         <span class="ident">fadt_flags</span> <span class="op">|</span><span class="op">=</span> <span class="ident">FADT_LOW_POWER_S2IDLE</span>;

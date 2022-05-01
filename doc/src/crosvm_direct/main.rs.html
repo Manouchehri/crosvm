@@ -4551,6 +4551,22 @@
 <span id="4550">4550</span>
 <span id="4551">4551</span>
 <span id="4552">4552</span>
+<span id="4553">4553</span>
+<span id="4554">4554</span>
+<span id="4555">4555</span>
+<span id="4556">4556</span>
+<span id="4557">4557</span>
+<span id="4558">4558</span>
+<span id="4559">4559</span>
+<span id="4560">4560</span>
+<span id="4561">4561</span>
+<span id="4562">4562</span>
+<span id="4563">4563</span>
+<span id="4564">4564</span>
+<span id="4565">4565</span>
+<span id="4566">4566</span>
+<span id="4567">4567</span>
+<span id="4568">4568</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -7668,6 +7684,20 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
     <span class="ident">vms_request</span>(<span class="kw-2">&amp;</span><span class="ident">VmRequest::Powerbtn</span>, <span class="ident">socket_path</span>)
 }
 
+<span class="kw">fn</span> <span class="ident">sleepbtn_vms</span>(<span class="kw-2">mut</span> <span class="ident">args</span>: <span class="ident">std::env::Args</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
+        <span class="ident">print_help</span>(<span class="string">&quot;crosvm sleepbtn&quot;</span>, <span class="string">&quot;VM_SOCKET...&quot;</span>, <span class="kw-2">&amp;</span>[]);
+        <span class="macro">println!</span>(
+            <span class="string">&quot;Triggers a sleep button event in the crosvm instance listening on each `VM_SOCKET`
+            given.&quot;</span>
+        );
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+    }
+    <span class="kw">let</span> <span class="ident">socket_path</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">next</span>().<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">socket_path</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">socket_path</span>);
+    <span class="ident">vms_request</span>(<span class="kw-2">&amp;</span><span class="ident">VmRequest::Sleepbtn</span>, <span class="ident">socket_path</span>)
+}
+
 <span class="kw">fn</span> <span class="ident">inject_gpe</span>(<span class="kw-2">mut</span> <span class="ident">args</span>: <span class="ident">std::env::Args</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
         <span class="ident">print_help</span>(<span class="string">&quot;crosvm gpe&quot;</span>, <span class="string">&quot;GPE# VM_SOCKET...&quot;</span>, <span class="kw-2">&amp;</span>[]);
@@ -8201,6 +8231,7 @@ with a &#39;--backing_file&#39;.&quot;</span>
     <span class="macro">println!</span>(<span class="string">&quot;    stop - Stops crosvm instances via their control sockets.&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;    suspend - Suspends the crosvm instance.&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;    powerbtn - Triggers a power button event in the crosvm instance.&quot;</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;    sleepbtn - Triggers a sleep button event in the crosvm instance.&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;    gpe - Injects a general-purpose event into the crosvm instance.&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;    usb - Manage attached virtual USB devices.&quot;</span>);
     <span class="macro">println!</span>(<span class="string">&quot;    version - Show package version.&quot;</span>);
@@ -8258,6 +8289,7 @@ with a &#39;--backing_file&#39;.&quot;</span>
             <span class="string">&quot;stop&quot;</span> =&gt; <span class="ident">stop_vms</span>(<span class="ident">args</span>),
             <span class="string">&quot;suspend&quot;</span> =&gt; <span class="ident">suspend_vms</span>(<span class="ident">args</span>),
             <span class="string">&quot;powerbtn&quot;</span> =&gt; <span class="ident">powerbtn_vms</span>(<span class="ident">args</span>),
+            <span class="string">&quot;sleepbtn&quot;</span> =&gt; <span class="ident">sleepbtn_vms</span>(<span class="ident">args</span>),
             <span class="string">&quot;gpe&quot;</span> =&gt; <span class="ident">inject_gpe</span>(<span class="ident">args</span>),
             <span class="string">&quot;usb&quot;</span> =&gt; <span class="ident">modify_usb</span>(<span class="ident">args</span>),
             <span class="string">&quot;version&quot;</span> =&gt; <span class="ident">pkg_version</span>(),

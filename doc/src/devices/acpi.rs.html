@@ -872,6 +872,14 @@
 <span id="871">871</span>
 <span id="872">872</span>
 <span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1440,6 +1448,7 @@
 <span class="kw">const</span> <span class="ident">GPE0_ENABLE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">GPE0_STATUS</span> <span class="op">+</span> (<span class="ident">ACPIPM_RESOURCE_GPE0_BLK_LEN</span> <span class="kw">as</span> <span class="ident">u16</span> <span class="op">/</span> <span class="number">2</span>);
 
 <span class="kw">const</span> <span class="ident">BITMASK_PM1STS_PWRBTN_STS</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
+<span class="kw">const</span> <span class="ident">BITMASK_PM1STS_SLPBTN_STS</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>;
 <span class="kw">const</span> <span class="ident">BITMASK_PM1EN_GBL_EN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">BITMASK_PM1EN_PWRBTN_EN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
 <span class="kw">const</span> <span class="ident">BITMASK_PM1EN_SLPBTN_EN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>;
@@ -1459,6 +1468,13 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pm1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pm1</span>.<span class="ident">lock</span>();
 
         <span class="ident">pm1</span>.<span class="ident">status</span> <span class="op">|</span><span class="op">=</span> <span class="ident">BITMASK_PM1STS_PWRBTN_STS</span>;
+        <span class="ident">pm1</span>.<span class="ident">trigger_sci</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sci_evt</span>);
+    }
+
+    <span class="kw">fn</span> <span class="ident">slpbtn_evt</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pm1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pm1</span>.<span class="ident">lock</span>();
+
+        <span class="ident">pm1</span>.<span class="ident">status</span> <span class="op">|</span><span class="op">=</span> <span class="ident">BITMASK_PM1STS_SLPBTN_STS</span>;
         <span class="ident">pm1</span>.<span class="ident">trigger_sci</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">sci_evt</span>);
     }
 
