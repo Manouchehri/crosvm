@@ -523,12 +523,14 @@ of the platform.</p>
 </span>cfg_if::cfg_if! {
     if #[cfg(unix)] {
         pub mod unix;
-        pub use self::unix::print_hello;
+        use unix as platform;
     } else if #[cfg(windows)] {
         pub mod windows;
-        pub use self::windows::print_hello;
+        use windows as platform;
     }
 }
+
+pub use platform::print;
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>unix.rs</code></p>
@@ -564,16 +566,16 @@ the functions <code>print_u8</code> and <code>print_u16</code> are platform spec
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>use mylib::print_hello;
+</span>use mylib::sys::print;
 
 fn my_print() {
-  print_hello();
+  print();
 
   #[cfg(unix)]
-  mylib::unix::print_u8(1);
+  mylib::sys::unix::print_u8(1);
 
   #[cfg(windows)]
-  mylib::windows::print_u16(1);
+  mylib::sys::windows::print_u16(1);
 }
 
 <span class="boring">}
