@@ -988,8 +988,7 @@ receiving descriptors alongside the plain old bytes that serde consumes.</p>
 <ul>
 <li><code>./src/</code> - The top-level binary front-end for using crosvm.</li>
 <li><code>aarch64</code> - Support code specific to 64 bit ARM architectures.</li>
-<li><code>base</code> - Safe wrappers for small system facilities which provides cross-platform-compatible
-interfaces. For Linux, this is basically a thin wrapper of <code>sys_util</code>.</li>
+<li><code>base</code> - Safe wrappers for system facilities which provides cross-platform-compatible interfaces.</li>
 <li><code>bin</code> - Scripts for code health such as wrappers of <code>rustfmt</code> and <code>clippy</code>.</li>
 <li><code>ci</code> - Scripts for continuous integration.</li>
 <li><code>cros_async</code> - Runtime for async/await programming. This crate provides a <code>Future</code> executor based
@@ -1011,7 +1010,6 @@ devices.</li>
 <li><code>seccomp</code> - Contains minijail seccomp policy files for each sandboxed device. Because some
 syscalls vary by architecture, the seccomp policies are split by architecture.</li>
 <li><code>sync</code> - Our version of <code>std::sync::Mutex</code> and <code>std::sync::Condvar</code>.</li>
-<li><code>sys_util</code> - Mostly safe wrappers for small system facilities such as <code>eventfd</code> or <code>syslog</code>.</li>
 <li><code>third_party</code> - Third-party libraries which we are maintaining on the Chrome OS tree or the AOSP
 tree.</li>
 <li><code>vfio_sys</code> - Low-level (mostly) auto-generated structures, constants and ioctls for <a href="https://www.kernel.org/doc/html/latest/driver-api/vfio.html">VFIO</a>.</li>

@@ -678,21 +678,11 @@
 <span id="677">677</span>
 <span id="678">678</span>
 <span id="679">679</span>
-<span id="680">680</span>
-<span id="681">681</span>
-<span id="682">682</span>
-<span id="683">683</span>
-<span id="684">684</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="doccomment">//! Small system utility modules for usage by other modules.</span>
-
-<span class="comment">// Fail sys_util compilation on windows.</span>
-<span class="comment">// This will make any unintentional windows code submitted to the crate unusable.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="macro">compile_error!</span>(<span class="string">&quot;This is not windows friendly mod.&quot;</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
 <span class="kw">mod</span> <span class="ident">android</span>;
