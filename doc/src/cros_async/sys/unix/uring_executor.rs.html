@@ -1155,6 +1155,19 @@
 <span id="1154">1154</span>
 <span id="1155">1155</span>
 <span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1922,7 +1935,18 @@
         <span class="comment">// Now run the executor loop once more to poll any futures we just woke up.</span>
         <span class="kw">let</span> <span class="ident">waker</span> <span class="op">=</span> <span class="ident">noop_waker</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cx</span> <span class="op">=</span> <span class="ident">Context::from_waker</span>(<span class="kw-2">&amp;</span><span class="ident">waker</span>);
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="ident">cx</span>, <span class="kw">async</span> {});
+        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">run</span>(
+            <span class="kw-2">&amp;mut</span> <span class="ident">cx</span>,
+            <span class="comment">// make sure all pending uring operations are completed as kernel may</span>
+            <span class="comment">// try to write to memory that we may drop</span>
+            <span class="ident">futures::future::poll_fn</span>(<span class="op">|</span><span class="ident">_cx</span><span class="op">|</span> {
+                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ring</span>.<span class="ident">lock</span>().<span class="ident">ops</span>.<span class="ident">is_empty</span>() {
+                    <span class="ident">Poll::Ready</span>(())
+                } <span class="kw">else</span> {
+                    <span class="ident">Poll::Pending</span>
+                }
+            }),
+        );
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">res</span> {
             <span class="macro">warn!</span>(<span class="string">&quot;Failed to drive uring to completion: {}&quot;</span>, <span class="ident">e</span>);
@@ -2225,6 +2249,8 @@
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to run executor&quot;</span>);
     }
 
+    <span class="comment">// We always submit and drain all operations to not leave anything dangling</span>
+    <span class="attribute">#[<span class="ident">ignore</span>]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">drop_before_completion</span>() {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">use_uring</span>() {
