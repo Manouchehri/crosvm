@@ -59,11 +59,14 @@
 <span id="58">58</span>
 <span id="59">59</span>
 <span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">mod</span> <span class="ident">alloc</span>;
+<span class="kw">mod</span> <span class="ident">clock</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor_reflection</span>;
 <span class="kw">mod</span> <span class="ident">errno</span>;
@@ -79,6 +82,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::platform</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alloc::LayoutAllocation</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">clock</span>::{<span class="ident">Clock</span>, <span class="ident">FakeClock</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">errno</span>::{<span class="ident">errno_result</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">external_mapping</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ExternalMappingError</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">ExternalMappingResult</span>, <span class="kw-2">*</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::{<span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>};
