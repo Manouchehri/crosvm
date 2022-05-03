@@ -107,7 +107,7 @@
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">EventReadResult</span>, <span class="ident">ScopedEvent</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">Unix</span> <span class="kw">as</span> <span class="ident">MemoryMappingUnix</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">shm</span>::{<span class="ident">SharedMemory</span>, <span class="ident">Unix</span> <span class="kw">as</span> <span class="ident">SharedMemoryUnix</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">shm::SharedMemory</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wait_context</span>::{<span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">TriggeredEvent</span>, <span class="ident">WaitContext</span>};
      } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::MemoryMappingBuilderWindows</span>;

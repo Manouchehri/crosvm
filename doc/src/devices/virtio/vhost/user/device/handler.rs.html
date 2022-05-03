@@ -1048,7 +1048,7 @@
             <span class="ident">region</span>.<span class="ident">memory_size</span>,
             <span class="ident">GuestAddress</span>(<span class="ident">region</span>.<span class="ident">guest_phys_addr</span>),
             <span class="ident">region</span>.<span class="ident">mmap_offset</span>,
-            <span class="ident">Arc::new</span>(<span class="ident">SharedMemory::from_safe_descriptor</span>(<span class="ident">SafeDescriptor::from</span>(<span class="ident">file</span>)).<span class="ident">unwrap</span>()),
+            <span class="ident">Arc::new</span>(<span class="ident">SharedMemory::from_safe_descriptor</span>(<span class="ident">SafeDescriptor::from</span>(<span class="ident">file</span>), <span class="prelude-val">None</span>).<span class="ident">unwrap</span>()),
         )
         .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
             <span class="macro">error!</span>(<span class="string">&quot;failed to create a memory region: {}&quot;</span>, <span class="ident">e</span>);

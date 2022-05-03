@@ -1300,6 +1300,7 @@
 <span id="1299">1299</span>
 <span id="1300">1300</span>
 <span id="1301">1301</span>
+<span id="1302">1302</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1317,7 +1318,7 @@
 };
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="self">self</span>, <span class="ident">error</span>, <span class="ident">set_rt_prio_limit</span>, <span class="ident">set_rt_round_robin</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>,
-    <span class="ident">FromRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SharedMemoryUnix</span>,
+    <span class="ident">FromRawDescriptor</span>, <span class="ident">RawDescriptor</span>,
 };
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
@@ -1880,7 +1881,8 @@
             <span class="kw">let</span> <span class="ident">rd</span> <span class="op">=</span> <span class="ident">base::clone_descriptor</span>(<span class="ident">desc</span>).<span class="ident">map_err</span>(<span class="ident">AudioError::CloneDescriptor</span>)<span class="question-mark">?</span>;
             <span class="comment">// Safe because the fd is owned.</span>
             <span class="kw">let</span> <span class="ident">sd</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">base::SafeDescriptor::from_raw_descriptor</span>(<span class="ident">rd</span>) };
-            <span class="ident">base::SharedMemory::from_safe_descriptor</span>(<span class="ident">sd</span>).<span class="ident">map_err</span>(<span class="ident">AudioError::CreateSharedMemory</span>)<span class="question-mark">?</span>
+            <span class="ident">base::SharedMemory::from_safe_descriptor</span>(<span class="ident">sd</span>, <span class="prelude-val">None</span>)
+                .<span class="ident">map_err</span>(<span class="ident">AudioError::CreateSharedMemory</span>)<span class="question-mark">?</span>
         };
 
         <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="self">self</span>
