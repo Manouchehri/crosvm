@@ -1311,10 +1311,10 @@
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// # use base::platform::{Result, EventFd, PollContext, PollEvents};</span>
+<span class="doccomment">/// # use base::platform::{Result, Event, PollContext, PollEvents};</span>
 <span class="doccomment">/// # fn test() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">///     let evt1 = EventFd::new()?;</span>
-<span class="doccomment">///     let evt2 = EventFd::new()?;</span>
+<span class="doccomment">///     let evt1 = Event::new()?;</span>
+<span class="doccomment">///     let evt2 = Event::new()?;</span>
 <span class="doccomment">///     evt2.write(1)?;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">///     let ctx: PollContext&lt;u32&gt; = PollContext::new()?;</span>
@@ -1503,14 +1503,14 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident"><span class="kw">super</span>::EventFd</span>, <span class="kw-2">*</span>};
+    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident"><span class="kw">super</span>::Event</span>, <span class="kw-2">*</span>};
     <span class="kw">use</span> <span class="ident">base_poll_token_derive::PollToken</span>;
     <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">os::unix::net::UnixStream</span>, <span class="ident">time::Instant</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">poll_context</span>() {
-        <span class="kw">let</span> <span class="ident">evt1</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">evt2</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">evt1</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">evt2</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
         <span class="ident">evt1</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
         <span class="ident">evt2</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">ctx</span>: <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">PollContext::build_with</span>(<span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">evt1</span>, <span class="number">1</span>), (<span class="kw-2">&amp;</span><span class="ident">evt2</span>, <span class="number">2</span>)]).<span class="ident">unwrap</span>();
@@ -1541,7 +1541,7 @@
         <span class="kw">let</span> <span class="ident">ctx</span>: <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">PollContext::new</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">evts</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">EVT_COUNT</span>);
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">EVT_COUNT</span> {
-            <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
             <span class="ident">evt</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
             <span class="ident">ctx</span>.<span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="ident">i</span>).<span class="ident">unwrap</span>();
             <span class="ident">evts</span>.<span class="ident">push</span>(<span class="ident">evt</span>);

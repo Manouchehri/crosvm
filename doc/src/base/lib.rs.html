@@ -61,6 +61,7 @@
 <span id="60">60</span>
 <span id="61">61</span>
 <span id="62">62</span>
+<span id="63">63</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -70,6 +71,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">descriptor_reflection</span>;
 <span class="kw">mod</span> <span class="ident">errno</span>;
+<span class="kw">mod</span> <span class="ident">event</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">external_mapping</span>;
 <span class="kw">mod</span> <span class="ident">mmap</span>;
 <span class="kw">mod</span> <span class="ident">notifiers</span>;
@@ -84,6 +86,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">alloc::LayoutAllocation</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">clock</span>::{<span class="ident">Clock</span>, <span class="ident">FakeClock</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">errno</span>::{<span class="ident">errno_result</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">EventReadResult</span>, <span class="ident">ScopedEvent</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">external_mapping</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ExternalMappingError</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">ExternalMappingResult</span>, <span class="kw-2">*</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::{<span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">notifiers</span>::<span class="kw-2">*</span>;
@@ -97,7 +100,6 @@
 
 <span class="macro">cfg_if::cfg_if!</span> {
      <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">event</span>;
         <span class="kw">mod</span> <span class="ident">shm</span>;
         <span class="kw">mod</span> <span class="ident">wait_context</span>;
 
@@ -105,12 +107,12 @@
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">unix::net</span>::<span class="kw-2">*</span>;
 
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">EventReadResult</span>, <span class="ident">ScopedEvent</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">Unix</span> <span class="kw">as</span> <span class="ident">MemoryMappingUnix</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">shm::SharedMemory</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wait_context</span>::{<span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">TriggeredEvent</span>, <span class="ident">WaitContext</span>};
      } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::MemoryMappingBuilderWindows</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::EventExt</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tube</span>::{<span class="ident">deserialize_and_recv</span>, <span class="ident">serialize_and_send</span>, <span class="ident">set_duplicate_handle_tube</span>, <span class="ident">set_alias_pid</span>, <span class="ident">DuplicateHandleTube</span>};
      } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);

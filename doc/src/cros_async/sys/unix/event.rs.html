@@ -84,10 +84,10 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">FdExecutor</span>, <span class="ident">URingExecutor</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsyncResult</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>};
-<span class="kw">use</span> <span class="ident">base::Event</span> <span class="kw">as</span> <span class="ident">EventFd</span>;
+<span class="kw">use</span> <span class="ident">base::Event</span>;
 
 <span class="kw">impl</span> <span class="ident">EventAsync</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">event</span>: <span class="ident">EventFd</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
         <span class="ident">ex</span>.<span class="ident">async_from</span>(<span class="ident">event</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">io_source</span><span class="op">|</span> <span class="ident">EventAsync</span> { <span class="ident">io_source</span> })
     }
@@ -98,12 +98,12 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_poll</span>(<span class="ident">event</span>: <span class="ident">EventFd</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">FdExecutor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_poll</span>(<span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">FdExecutor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
         <span class="ident"><span class="kw">super</span>::executor::async_poll_from</span>(<span class="ident">event</span>, <span class="ident">ex</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">io_source</span><span class="op">|</span> <span class="ident">EventAsync</span> { <span class="ident">io_source</span> })
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_uring</span>(<span class="ident">event</span>: <span class="ident">EventFd</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">URingExecutor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_uring</span>(<span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">URingExecutor</span>) -&gt; <span class="ident">AsyncResult</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> {
         <span class="ident"><span class="kw">super</span>::executor::async_uring_from</span>(<span class="ident">event</span>, <span class="ident">ex</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">io_source</span><span class="op">|</span> <span class="ident">EventAsync</span> { <span class="ident">io_source</span> })
     }
 }
@@ -116,12 +116,12 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">next_val_reads_value</span>() {
-        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span>(<span class="ident">event</span>: <span class="ident">EventFd</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="ident">u64</span> {
+        <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">go</span>(<span class="ident">event</span>: <span class="ident">Event</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="ident">u64</span> {
             <span class="kw">let</span> <span class="ident">event_async</span> <span class="op">=</span> <span class="ident">EventAsync::new</span>(<span class="ident">event</span>, <span class="ident">ex</span>).<span class="ident">unwrap</span>();
             <span class="ident">event_async</span>.<span class="ident">next_val</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>()
         }
 
-        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
         <span class="ident">eventfd</span>.<span class="ident">write</span>(<span class="number">0xaa</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">go</span>(<span class="ident">eventfd</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>)).<span class="ident">unwrap</span>();
@@ -138,7 +138,7 @@
             <span class="ident">event_async</span>.<span class="ident">next_val</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>()
         }
 
-        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
         <span class="ident">eventfd</span>.<span class="ident">write</span>(<span class="number">0xaa</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">uring_ex</span> <span class="op">=</span> <span class="ident">URingExecutor::new</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">uring_ex</span>
@@ -146,7 +146,7 @@
             .<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">val</span>, <span class="number">0xaa</span>);
 
-        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">eventfd</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">unwrap</span>();
         <span class="ident">eventfd</span>.<span class="ident">write</span>(<span class="number">0xaa</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">poll_ex</span> <span class="op">=</span> <span class="ident">FdExecutor::new</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">poll_ex</span>

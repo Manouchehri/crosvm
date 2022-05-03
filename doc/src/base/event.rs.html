@@ -57,6 +57,7 @@
 <span id="56">56</span>
 <span id="57">57</span>
 <span id="58">58</span>
+<span id="59">59</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -67,16 +68,17 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::platform::EventReadResult</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">generate_scoped_event</span>, <span class="ident">platform::EventFd</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">generate_scoped_event</span>, <span class="ident">platform::Event</span> <span class="kw">as</span> <span class="ident">PlatformEvent</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 
-<span class="doccomment">/// See [EventFd](crate::platform::EventFd) for struct- and method-level</span>
+<span class="doccomment">/// See [PlatformEvent](crate::platform::PlatformEvent) for struct- and method-level</span>
 <span class="doccomment">/// documentation.</span>
+<span class="comment">// TODO(b:231344063) Move/update documentation.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">transparent</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Event</span>(<span class="kw">pub</span> <span class="ident">EventFd</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Event</span>(<span class="kw">pub</span> <span class="ident">PlatformEvent</span>);
 <span class="kw">impl</span> <span class="ident">Event</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span> {
-        <span class="ident">EventFd::new</span>().<span class="ident">map</span>(<span class="ident">Event</span>)
+        <span class="ident">PlatformEvent::new</span>().<span class="ident">map</span>(<span class="ident">Event</span>)
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">v</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -104,7 +106,7 @@
 
 <span class="kw">impl</span> <span class="ident">FromRawDescriptor</span> <span class="kw">for</span> <span class="ident">Event</span> {
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw_descriptor</span>(<span class="ident">descriptor</span>: <span class="ident">RawDescriptor</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">Event</span>(<span class="ident">EventFd::from_raw_descriptor</span>(<span class="ident">descriptor</span>))
+        <span class="ident">Event</span>(<span class="ident">PlatformEvent::from_raw_descriptor</span>(<span class="ident">descriptor</span>))
     }
 }
 

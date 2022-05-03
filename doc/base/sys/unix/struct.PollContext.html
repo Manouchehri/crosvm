@@ -6,8 +6,8 @@
     max_hangups: <a class="struct" href="https://doc.rust-lang.org/1.58.1/core/cell/struct.Cell.html" title="struct core::cell::Cell">Cell</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.58.1/std/primitive.usize.html">usize</a>&gt;,
 }</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Used to poll multiple objects that have file descriptors.</p>
 <h2 id="example" class="section-header"><a href="#example">Example</a></h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let</span> <span class="ident">evt1</span> <span class="op">=</span> <span class="ident">EventFd::new</span>()<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">evt2</span> <span class="op">=</span> <span class="ident">EventFd::new</span>()<span class="question-mark">?</span>;
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code>    <span class="kw">let</span> <span class="ident">evt1</span> <span class="op">=</span> <span class="ident">Event::new</span>()<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">evt2</span> <span class="op">=</span> <span class="ident">Event::new</span>()<span class="question-mark">?</span>;
     <span class="ident">evt2</span>.<span class="ident">write</span>(<span class="number">1</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">ctx</span>: <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">PollContext::new</span>()<span class="question-mark">?</span>;

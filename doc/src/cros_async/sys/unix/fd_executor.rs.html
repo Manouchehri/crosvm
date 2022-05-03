@@ -640,9 +640,6 @@
 <span id="639">639</span>
 <span id="640">640</span>
 <span id="641">641</span>
-<span id="642">642</span>
-<span id="643">643</span>
-<span id="644">644</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -668,10 +665,7 @@
 };
 
 <span class="kw">use</span> <span class="ident">async_task::Task</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">add_fd_flags</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">EpollContext</span>, <span class="ident">EpollEvents</span>, <span class="ident">Event</span> <span class="kw">as</span> <span class="ident">EventFd</span>,
-    <span class="ident">WatchingEvents</span>,
-};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">add_fd_flags</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">EpollContext</span>, <span class="ident">EpollEvents</span>, <span class="ident">Event</span>, <span class="ident">WatchingEvents</span>};
 <span class="kw">use</span> <span class="ident">futures::task::noop_waker</span>;
 <span class="kw">use</span> <span class="ident">pin_utils::pin_mut</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -688,12 +682,12 @@
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">ThisError</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
-    <span class="doccomment">/// Failed to clone the EventFd for waking the executor.</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to clone the EventFd for waking the executor: {0}&quot;</span>)]</span>
-    <span class="ident">CloneEventFd</span>(<span class="ident">base::Error</span>),
-    <span class="doccomment">/// Failed to create the EventFd for waking the executor.</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to create the EventFd for waking the executor: {0}&quot;</span>)]</span>
-    <span class="ident">CreateEventFd</span>(<span class="ident">base::Error</span>),
+    <span class="doccomment">/// Failed to clone the Event for waking the executor.</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to clone the Event for waking the executor: {0}&quot;</span>)]</span>
+    <span class="ident">CloneEvent</span>(<span class="ident">base::Error</span>),
+    <span class="doccomment">/// Failed to create the Event for waking the executor.</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to create the Event for waking the executor: {0}&quot;</span>)]</span>
+    <span class="ident">CreateEvent</span>(<span class="ident">base::Error</span>),
     <span class="doccomment">/// Creating a context to wait on FDs failed.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;An error creating the fd waiting context: {0}&quot;</span>)]</span>
     <span class="ident">CreatingContext</span>(<span class="ident">base::Error</span>),
@@ -722,8 +716,8 @@
     <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">Error</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">use</span> <span class="ident">Error</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="ident">e</span> {
-            <span class="ident">CloneEventFd</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
-            <span class="ident">CreateEventFd</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="ident">CloneEvent</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="ident">CreateEvent</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="ident">DuplicatingFd</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
             <span class="ident">ExecutorGone</span> =&gt; <span class="ident">io::Error::new</span>(<span class="ident">io::ErrorKind::Other</span>, <span class="ident">e</span>),
             <span class="ident">CreatingContext</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
@@ -862,15 +856,15 @@
 <span class="comment">// * The executor then polls the non-epoll future that became ready, any epoll futures that</span>
 <span class="comment">//   completed, and the notify_task function, which then queues up another read on the eventfd and</span>
 <span class="comment">//   the process can repeat.</span>
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">notify_task</span>(<span class="ident">notify</span>: <span class="ident">EventFd</span>, <span class="ident">raw</span>: <span class="ident">Weak</span><span class="op">&lt;</span><span class="ident">RawExecutor</span><span class="op">&gt;</span>) {
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">notify_task</span>(<span class="ident">notify</span>: <span class="ident">Event</span>, <span class="ident">raw</span>: <span class="ident">Weak</span><span class="op">&lt;</span><span class="ident">RawExecutor</span><span class="op">&gt;</span>) {
     <span class="ident">add_fd_flags</span>(<span class="ident">notify</span>.<span class="ident">as_raw_descriptor</span>(), <span class="ident">libc::O_NONBLOCK</span>)
-        .<span class="ident">expect</span>(<span class="string">&quot;Failed to set notify EventFd as non-blocking&quot;</span>);
+        .<span class="ident">expect</span>(<span class="string">&quot;Failed to set notify Event as non-blocking&quot;</span>);
 
     <span class="kw">loop</span> {
         <span class="kw">match</span> <span class="ident">notify</span>.<span class="ident">read</span>() {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {}
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">errno</span>() <span class="op">==</span> <span class="ident">libc::EWOULDBLOCK</span> =&gt; {}
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected error while reading notify EventFd: {}&quot;</span>, <span class="ident">e</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected error while reading notify Event: {}&quot;</span>, <span class="ident">e</span>),
         }
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ex</span>) <span class="op">=</span> <span class="ident">raw</span>.<span class="ident">upgrade</span>() {
@@ -879,7 +873,7 @@
                     <span class="ident">notify</span>.<span class="ident">as_raw_descriptor</span>(),
                     <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(),
                 )
-                .<span class="ident">expect</span>(<span class="string">&quot;Failed to add notify EventFd to PollCtx&quot;</span>);
+                .<span class="ident">expect</span>(<span class="string">&quot;Failed to add notify Event to PollCtx&quot;</span>);
 
             <span class="comment">// We don&#39;t want to hold an active reference to the executor in the .await below.</span>
             <span class="ident">mem::drop</span>(<span class="ident">ex</span>);
@@ -892,7 +886,7 @@
             <span class="kw">match</span> <span class="ident">op</span>.<span class="kw">await</span> {
                 <span class="prelude-val">Ok</span>(()) =&gt; {}
                 <span class="prelude-val">Err</span>(<span class="ident">Error::ExecutorGone</span>) =&gt; <span class="kw">break</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected error while waiting for notify EventFd: {}&quot;</span>, <span class="ident">e</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected error while waiting for notify Event: {}&quot;</span>, <span class="ident">e</span>),
             }
         } <span class="kw">else</span> {
             <span class="comment">// The executor is gone so we should also exit.</span>
@@ -902,7 +896,7 @@
 }
 
 <span class="comment">// Indicates that the executor is either within or about to make a PollContext::wait() call. When a</span>
-<span class="comment">// waker sees this value, it will write to the notify EventFd, which will cause the</span>
+<span class="comment">// waker sees this value, it will write to the notify Event, which will cause the</span>
 <span class="comment">// PollContext::wait() call to return.</span>
 <span class="kw">const</span> <span class="ident">WAITING</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="number">0x1d5b_c019u32</span> <span class="kw">as</span> <span class="ident">i32</span>;
 
@@ -918,11 +912,11 @@
     <span class="ident">ops</span>: <span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Slab</span><span class="op">&lt;</span><span class="ident">OpStatus</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">blocking_pool</span>: <span class="ident">BlockingPool</span>,
     <span class="ident">state</span>: <span class="ident">AtomicI32</span>,
-    <span class="ident">notify</span>: <span class="ident">EventFd</span>,
+    <span class="ident">notify</span>: <span class="ident">Event</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">RawExecutor</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">notify</span>: <span class="ident">EventFd</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">notify</span>: <span class="ident">Event</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">RawExecutor</span> {
             <span class="ident">queue</span>: <span class="ident">RunnableQueue::new</span>(),
             <span class="ident">poll_ctx</span>: <span class="ident">EpollContext::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreatingContext</span>)<span class="question-mark">?</span>,
@@ -1141,10 +1135,10 @@
 
 <span class="kw">impl</span> <span class="ident">FdExecutor</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FdExecutor</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">notify</span> <span class="op">=</span> <span class="ident">EventFd::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEventFd</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">notify</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">notify</span>
             .<span class="ident">try_clone</span>()
-            .<span class="ident">map_err</span>(<span class="ident">Error::CloneEventFd</span>)
+            .<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)
             .<span class="ident">and_then</span>(<span class="ident">RawExecutor::new</span>)
             .<span class="ident">map</span>(<span class="ident">Arc::new</span>)<span class="question-mark">?</span>;
 
