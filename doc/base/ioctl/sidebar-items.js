@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["ioctl","Run an ioctl with no arguments."],["ioctl_with_mut_ptr","Run an ioctl with a mutable raw pointer."],["ioctl_with_mut_ref","Run an ioctl with a mutable reference."],["ioctl_with_ptr","Run an ioctl with a raw pointer."],["ioctl_with_ref","Run an ioctl with an immutable reference."],["ioctl_with_val","Run an ioctl with a single value argument."]]});
