@@ -746,7 +746,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ioctl</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">netlink</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll</span>::{<span class="ident">EpollContext</span>, <span class="ident">EpollEvents</span>, <span class="ident">PollContext</span> <span class="kw">as</span> <span class="ident">EventContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">priority</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sched</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">scoped_signal_handler</span>::<span class="kw-2">*</span>;

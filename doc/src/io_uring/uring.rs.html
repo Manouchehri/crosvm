@@ -2469,7 +2469,7 @@
     <span class="kw">use</span> <span class="ident">std::thread</span>;
     <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
-    <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">pipe</span>, <span class="ident">PollContext</span>};
+    <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">pipe</span>, <span class="ident">EventContext</span>};
     <span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
     <span class="kw">use</span> <span class="ident">tempfile</span>::{<span class="ident">tempfile</span>, <span class="ident">TempDir</span>};
 
@@ -2639,7 +2639,7 @@
         <span class="ident">f</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">unwrap</span>();
         <span class="ident">f</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>).<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">ctx</span>: <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">PollContext::build_with</span>(<span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">uring</span>, <span class="number">1</span>)]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">ctx</span>: <span class="ident">EventContext</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">EventContext::build_with</span>(<span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">uring</span>, <span class="number">1</span>)]).<span class="ident">unwrap</span>();
         {
             <span class="comment">// Test that the uring context isn&#39;t readable before any events are complete.</span>
             <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">wait_timeout</span>(<span class="ident">Duration::from_millis</span>(<span class="number">1</span>)).<span class="ident">unwrap</span>();

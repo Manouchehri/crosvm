@@ -163,7 +163,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor::AsRawDescriptor</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">platform</span>::{<span class="ident">PollContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>},
+    <span class="ident">platform</span>::{<span class="ident">EventContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>},
     <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -220,12 +220,12 @@
 <span class="doccomment">/// #   Ok(())</span>
 <span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span>(<span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span>(<span class="ident">EventContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates a new WaitContext.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">PollContext::new</span>().<span class="ident">map</span>(<span class="ident">WaitContext</span>)
+        <span class="ident">EventContext::new</span>().<span class="ident">map</span>(<span class="ident">WaitContext</span>)
     }
 
     <span class="doccomment">/// Creates a new WaitContext with the the associated triggers.</span>
