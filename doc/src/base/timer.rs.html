@@ -558,7 +558,7 @@
     <span class="kw">fn</span> <span class="ident">one_shot</span>() {
         <span class="comment">// This test relies on the host having a reliable clock and not being</span>
         <span class="comment">// overloaded, so it&#39;s marked as &quot;ignore&quot;.  You can run by running</span>
-        <span class="comment">// cargo test -p win_sys_util timer -- --ignored</span>
+        <span class="comment">// cargo test -p base timer -- --ignored</span>
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tfd</span> <span class="op">=</span> <span class="ident">Timer::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create Timer&quot;</span>);
 
@@ -602,7 +602,7 @@
     <span class="kw">fn</span> <span class="ident">repeating</span>() {
         <span class="comment">// This test relies on the host having a reliable clock and not being</span>
         <span class="comment">// overloaded, so it&#39;s marked as &quot;ignore&quot;.  You can run by running</span>
-        <span class="comment">// cargo test -p win_sys_util timer -- --ignored</span>
+        <span class="comment">// cargo test -p base timer -- --ignored</span>
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tfd</span> <span class="op">=</span> <span class="ident">Timer::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create Timer&quot;</span>);
 
@@ -694,7 +694,7 @@
     <span class="kw">fn</span> <span class="ident">zero_interval</span>() {
         <span class="comment">// This test relies on the host having a reliable clock and not being</span>
         <span class="comment">// overloaded, so it&#39;s marked as &quot;ignore&quot;.  You can run by running</span>
-        <span class="comment">// cargo test -p win_sys_util timer -- --ignored</span>
+        <span class="comment">// cargo test -p base timer -- --ignored</span>
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tfd</span> <span class="op">=</span> <span class="ident">Timer::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create timer&quot;</span>);
 
