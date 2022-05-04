@@ -4567,6 +4567,30 @@
 <span id="4566">4566</span>
 <span id="4567">4567</span>
 <span id="4568">4568</span>
+<span id="4569">4569</span>
+<span id="4570">4570</span>
+<span id="4571">4571</span>
+<span id="4572">4572</span>
+<span id="4573">4573</span>
+<span id="4574">4574</span>
+<span id="4575">4575</span>
+<span id="4576">4576</span>
+<span id="4577">4577</span>
+<span id="4578">4578</span>
+<span id="4579">4579</span>
+<span id="4580">4580</span>
+<span id="4581">4581</span>
+<span id="4582">4582</span>
+<span id="4583">4583</span>
+<span id="4584">4584</span>
+<span id="4585">4585</span>
+<span id="4586">4586</span>
+<span id="4587">4587</span>
+<span id="4588">4588</span>
+<span id="4589">4589</span>
+<span id="4590">4590</span>
+<span id="4591">4591</span>
+<span id="4592">4592</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -6583,6 +6607,29 @@
             <span class="comment">// Protected VMs can&#39;t trust the RNG device, so don&#39;t provide it.</span>
             <span class="ident">cfg</span>.<span class="ident">rng</span> <span class="op">=</span> <span class="bool-val">false</span>;
         }
+        <span class="string">&quot;unprotected-vm-with-firmware&quot;</span> =&gt; {
+            <span class="kw">let</span> <span class="ident">pvm_fw</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>());
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">pvm_fw</span>.<span class="ident">exists</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;the unprotected-vm-with-firmware path does not exist&quot;</span>),
+                });
+            }
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">pvm_fw</span>.<span class="ident">is_file</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                        <span class="string">&quot;the unprotected-vm-with-firmware path should be a file&quot;</span>,
+                    ),
+                });
+            }
+            <span class="ident">cfg</span>.<span class="ident">protected_vm</span> <span class="op">=</span> <span class="ident">ProtectionType::UnprotectedWithFirmware</span>;
+            <span class="ident">cfg</span>.<span class="ident">pvm_fw</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">pvm_fw</span>);
+            <span class="comment">// Disable balloon, USB and RNG devices the same as we do for protected VMs.</span>
+            <span class="ident">cfg</span>.<span class="ident">balloon</span> <span class="op">=</span> <span class="bool-val">false</span>;
+            <span class="ident">cfg</span>.<span class="ident">usb</span> <span class="op">=</span> <span class="bool-val">false</span>;
+            <span class="ident">cfg</span>.<span class="ident">rng</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        }
         <span class="string">&quot;battery&quot;</span> =&gt; {
             <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">parse_battery_options</span>(<span class="ident">value</span>)<span class="question-mark">?</span>;
             <span class="ident">cfg</span>.<span class="ident">battery_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">params</span>);
@@ -7465,8 +7512,9 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;video-encoder&quot;</span>, <span class="string">&quot;[backend]&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) enable virtio-video encoder device
                               Possible backend values: libvda&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;acpi-table&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to user provided ACPI table&quot;</span>),
-          <span class="ident">Argument::flag</span>(<span class="string">&quot;protected-vm&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) prevent host access to guest memory&quot;</span>),
+          <span class="ident">Argument::flag</span>(<span class="string">&quot;protected-vm&quot;</span>, <span class="string">&quot;Prevent host access to guest memory&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;protected-vm-without-firmware&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) prevent host access to guest memory, but don&#39;t use protected VM firmware&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;unprotected-vm-with-firmware&quot;</span>,<span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;(EXPERIMENTAL/FOR DEBUGGING) Use VM firmware, but allow host access to guest memory&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;swiotlb&quot;</span>, <span class="string">&quot;N&quot;</span>, <span class="string">&quot;(EXPERIMENTAL) Size of virtio swiotlb buffer in MiB (default: 64 if `--protected-vm` or `--protected-vm-without-firmware` is present).&quot;</span>),
           <span class="ident">Argument::flag_or_value</span>(<span class="string">&quot;battery&quot;</span>,

@@ -943,6 +943,9 @@
 <span id="942">942</span>
 <span id="943">943</span>
 <span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1051,6 +1054,9 @@
     <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">direct_gpe</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// A file to load as pVM firmware. Must be `Some` iff</span>
+    <span class="doccomment">/// `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
+    <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Holds the elements needed to run a Linux VM. Created by `build_vm`.</span>

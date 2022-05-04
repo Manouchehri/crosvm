@@ -602,6 +602,9 @@
 <span id="601">601</span>
 <span id="602">602</span>
 <span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -972,6 +975,8 @@
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Must be `Some` iff `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
+    <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">memory_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
@@ -1202,6 +1207,7 @@
             <span class="ident">itmt</span>: <span class="bool-val">false</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
             <span class="ident">task_profiles</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">pvm_fw</span>: <span class="prelude-val">None</span>,
         }
     }
 }

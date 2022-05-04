@@ -461,6 +461,10 @@
 <span id="460">460</span>
 <span id="461">461</span>
 <span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -922,6 +926,10 @@
     <span class="doccomment">/// The VM should be run in protected mode, but booted directly without pVM firmware. The host</span>
     <span class="doccomment">/// will still be unable to access the VM memory, but it won&#39;t be given any secrets.</span>
     <span class="ident">ProtectedWithoutFirmware</span>,
+    <span class="doccomment">/// The VM should be run in unprotected mode, but with the same memory layout as protected mode,</span>
+    <span class="doccomment">/// protected VM firmware loaded, and simulating protected mode as much as possible. This is</span>
+    <span class="doccomment">/// useful for debugging the protected VM firmware and other protected mode issues.</span>
+    <span class="ident">UnprotectedWithFirmware</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="hypervisor" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
