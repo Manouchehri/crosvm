@@ -530,7 +530,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SafeDescriptor</span>};
 
 <span class="doccomment">/// A shared memory file descriptor and its size.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharedMemory</span> {
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">with</span> <span class="op">=</span> <span class="string">&quot;super::with_as_descriptor&quot;</span>)]</span>
     <span class="ident">fd</span>: <span class="ident">File</span>,

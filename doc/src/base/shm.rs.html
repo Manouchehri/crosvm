@@ -102,7 +102,7 @@
 
 <span class="doccomment">/// See [SharedMemory](crate::platform::SharedMemory) for struct- and method-level</span>
 <span class="doccomment">/// documentation.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharedMemory</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">SysUtilSharedMemory</span>);
 <span class="kw">impl</span> <span class="ident">SharedMemory</span> {

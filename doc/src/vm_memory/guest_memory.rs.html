@@ -1053,6 +1053,7 @@
 <span id="1052">1052</span>
 <span id="1053">1053</span>
 <span id="1054">1054</span>
+<span id="1055">1055</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1123,7 +1124,7 @@
 }
 
 <span class="doccomment">/// A file-like object backing `MemoryRegion`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">BackingObject</span> {
     <span class="ident">Shm</span>(<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span>),
     <span class="ident">File</span>(<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>),
@@ -1150,6 +1151,7 @@
 <span class="doccomment">/// A regions of memory mapped memory.</span>
 <span class="doccomment">/// Holds the memory mapping with its offset in guest memory.</span>
 <span class="doccomment">/// Also holds the backing object for the mapping and the offset in that object of the mapping.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemoryRegion</span> {
     <span class="ident">mapping</span>: <span class="ident">MemoryMapping</span>,
     <span class="ident">guest_base</span>: <span class="ident">GuestAddress</span>,
@@ -1217,7 +1219,7 @@
 
 <span class="doccomment">/// Tracks memory regions and where they are mapped in the guest, along with shm</span>
 <span class="doccomment">/// fds of the underlying memory regions.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GuestMemory</span> {
     <span class="ident">regions</span>: <span class="ident">Arc</span><span class="op">&lt;</span>[<span class="ident">MemoryRegion</span>]<span class="op">&gt;</span>,
 }
