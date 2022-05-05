@@ -465,6 +465,47 @@
 <span id="464">464</span>
 <span id="465">465</span>
 <span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -678,6 +719,26 @@
     }
 }
 
+<span class="doccomment">/// Operation for Io and Mmio</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">IoOperation</span> {
+    <span class="ident">Read</span>,
+    <span class="ident">Write</span> {
+        <span class="doccomment">/// Data to be written.</span>
+        <span class="doccomment">///</span>
+        <span class="doccomment">/// For 64 bit architecture, Mmio and Io only work with at most 8 bytes of data.</span>
+        <span class="ident">data</span>: [<span class="ident">u8</span>; <span class="number">8</span>],
+    },
+}
+
+<span class="doccomment">/// Parameters describing an MMIO or PIO from the guest.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IoParams</span> {
+    <span class="kw">pub</span> <span class="ident">address</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">usize</span>,
+    <span class="kw">pub</span> <span class="ident">operation</span>: <span class="ident">IoOperation</span>,
+}
+
 <span class="doccomment">/// A virtual CPU holding a virtualized hardware thread&#39;s state, such as registers and interrupt</span>
 <span class="doccomment">/// state, which may be used to execute virtual machines.</span>
 <span class="doccomment">///</span>
@@ -706,7 +767,7 @@
     <span class="doccomment">/// Note that the state of the VCPU and associated VM must be setup first for this to do</span>
     <span class="doccomment">/// anything useful. The given `run_handle` must be the same as the one returned by</span>
     <span class="doccomment">/// `take_run_handle` for this `Vcpu`.</span>
-    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">run_handle</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuRunHandle</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VcpuExit</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">run_handle</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuRunHandle</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VcpuExit</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Returns the vcpu id.</span>
     <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
@@ -723,11 +784,48 @@
     <span class="doccomment">/// signal-safe way when called.</span>
     <span class="kw">fn</span> <span class="ident">set_local_immediate_exit_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>();
 
-    <span class="doccomment">/// Sets the data received by a mmio read, ioport in, or hypercall instruction.</span>
+    <span class="doccomment">/// Handles an incoming MMIO request from the guest.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This function should be called after `Vcpu::run` returns an `VcpuExit::IoIn`,</span>
-    <span class="doccomment">/// `VcpuExit::MmioRead`, or &#39;VcpuExit::HypervHcall`.</span>
-    <span class="kw">fn</span> <span class="ident">set_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// This function should be called after `Vcpu::run` returns `VcpuExit::Mmio`, and in the same</span>
+    <span class="doccomment">/// thread as run().</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Once called, it will determine whether a MMIO read or MMIO write was the reason for the MMIO</span>
+    <span class="doccomment">/// exit, call `handle_fn` with the respective IoParams to perform the MMIO read or write, and</span>
+    <span class="doccomment">/// set the return data in the vcpu so that the vcpu can resume running.</span>
+    <span class="kw">fn</span> <span class="ident">handle_mmio</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle_fn</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">IoParams</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Handles an incoming PIO from the guest.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function should be called after `Vcpu::run` returns `VcpuExit::Io`, and in the same</span>
+    <span class="doccomment">/// thread as run().</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Once called, it will determine whether an input or output was the reason for the Io exit,</span>
+    <span class="doccomment">/// call `handle_fn` with the respective IoParams to perform the input/output operation, and set</span>
+    <span class="doccomment">/// the return data in the vcpu so that the vcpu can resume running.</span>
+    <span class="kw">fn</span> <span class="ident">handle_io</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle_fn</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">IoParams</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Handles the HYPERV_HYPERCALL exit from a vcpu.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function should be called after `Vcpu::run` returns `VcpuExit::HypervHcall`, and in the</span>
+    <span class="doccomment">/// same thread as run.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Once called, it will parse the appropriate input parameters to the provided function to</span>
+    <span class="doccomment">/// handle the hyperv call, and then set the return data into the vcpu so it can resume running.</span>
+    <span class="kw">fn</span> <span class="ident">handle_hyperv_hypercall</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">HypervHypercall</span>) -&gt; <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Handles a RDMSR exit from the guest.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function should be called after `Vcpu::run` returns `VcpuExit::RdMsr`,</span>
+    <span class="doccomment">/// and in the same thread as run.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// It will put `data` into the guest buffer and return.</span>
+    <span class="kw">fn</span> <span class="ident">handle_rdmsr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Handles a WRMSR exit from the guest by removing any error indication for the operation.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function should be called after `Vcpu::run` returns `VcpuExit::WrMsr`,</span>
+    <span class="doccomment">/// and in the same thread as run.</span>
+    <span class="kw">fn</span> <span class="ident">handle_wrmsr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
 
     <span class="doccomment">/// Signals to the hypervisor that this guest is being paused by userspace.  Only works on Vms</span>
     <span class="doccomment">/// that support `VmCap::PvClockSuspend`.</span>
@@ -770,47 +868,16 @@
 <span class="doccomment">/// A reason why a VCPU exited. One of these returns every time `Vcpu::run` is called.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">VcpuExit</span> {
-    <span class="doccomment">/// An out port instruction was run on the given port with the given data.</span>
-    <span class="ident">IoOut</span> {
-        <span class="ident">port</span>: <span class="ident">u16</span>,
-        <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">data</span>: [<span class="ident">u8</span>; <span class="number">8</span>],
-    },
-    <span class="doccomment">/// An in port instruction was run on the given port.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The data that the instruction receives should be set with `set_data` before `Vcpu::run` is</span>
-    <span class="doccomment">/// called again.</span>
-    <span class="ident">IoIn</span> {
-        <span class="ident">port</span>: <span class="ident">u16</span>,
-        <span class="ident">size</span>: <span class="ident">usize</span>,
-    },
-    <span class="doccomment">/// A read instruction was run against the given MMIO address.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The data that the instruction receives should be set with `set_data` before `Vcpu::run` is</span>
-    <span class="doccomment">/// called again.</span>
-    <span class="ident">MmioRead</span> {
-        <span class="ident">address</span>: <span class="ident">u64</span>,
-        <span class="ident">size</span>: <span class="ident">usize</span>,
-    },
-    <span class="doccomment">/// A write instruction was run against the given MMIO address with the given data.</span>
-    <span class="ident">MmioWrite</span> {
-        <span class="ident">address</span>: <span class="ident">u64</span>,
-        <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">data</span>: [<span class="ident">u8</span>; <span class="number">8</span>],
-    },
+    <span class="doccomment">/// An io instruction needs to be emulated.</span>
+    <span class="doccomment">/// vcpu handle_io should be called to handle the io operation</span>
+    <span class="ident">Io</span>,
+    <span class="doccomment">/// A mmio instruction needs to be emulated.</span>
+    <span class="doccomment">/// vcpu handle_mmio should be called to handle the mmio operation</span>
+    <span class="ident">Mmio</span>,
     <span class="ident">IoapicEoi</span> {
         <span class="ident">vector</span>: <span class="ident">u8</span>,
     },
-    <span class="ident">HypervSynic</span> {
-        <span class="ident">msr</span>: <span class="ident">u32</span>,
-        <span class="ident">control</span>: <span class="ident">u64</span>,
-        <span class="ident">evt_page</span>: <span class="ident">u64</span>,
-        <span class="ident">msg_page</span>: <span class="ident">u64</span>,
-    },
-    <span class="ident">HypervHcall</span> {
-        <span class="ident">input</span>: <span class="ident">u64</span>,
-        <span class="ident">params</span>: [<span class="ident">u64</span>; <span class="number">2</span>],
-    },
+    <span class="ident">HypervHypercall</span>,
     <span class="ident">Unknown</span>,
     <span class="ident">Exception</span>,
     <span class="ident">Hypercall</span>,
@@ -845,6 +912,21 @@
     <span class="ident">WrMsr</span> {
         <span class="ident">index</span>: <span class="ident">u32</span>,
         <span class="ident">data</span>: <span class="ident">u64</span>,
+    },
+}
+
+<span class="doccomment">/// A hypercall with parameters being made from the guest.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">HypervHypercall</span> {
+    <span class="ident">HypervSynic</span> {
+        <span class="ident">msr</span>: <span class="ident">u32</span>,
+        <span class="ident">control</span>: <span class="ident">u64</span>,
+        <span class="ident">evt_page</span>: <span class="ident">u64</span>,
+        <span class="ident">msg_page</span>: <span class="ident">u64</span>,
+    },
+    <span class="ident">HypervHcall</span> {
+        <span class="ident">input</span>: <span class="ident">u64</span>,
+        <span class="ident">params</span>: [<span class="ident">u64</span>; <span class="number">2</span>],
     },
 }
 

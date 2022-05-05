@@ -1522,6 +1522,7 @@
 <span id="1521">1521</span>
 <span id="1522">1522</span>
 <span id="1523">1523</span>
+<span id="1524">1524</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1539,7 +1540,7 @@
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
 <span class="kw">use</span> <span class="ident">std::cmp</span>::{<span class="ident">min</span>, <span class="ident">Reverse</span>};
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">BinaryHeap</span>};
-<span class="kw">use</span> <span class="ident">std::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
+<span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">std::ffi::CString</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>::{<span class="ident">size_of</span>, <span class="ident">ManuallyDrop</span>};
 <span class="kw">use</span> <span class="ident">std::os::raw</span>::{<span class="ident">c_int</span>, <span class="ident">c_ulong</span>, <span class="ident">c_void</span>};
@@ -1565,8 +1566,9 @@
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">ClockState</span>, <span class="ident">Datamatch</span>, <span class="ident">DeviceKind</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">IoEventAddress</span>, <span class="ident">IrqRoute</span>,
-    <span class="ident">IrqSource</span>, <span class="ident">MPState</span>, <span class="ident">MemSlot</span>, <span class="ident">ProtectionType</span>, <span class="ident">Vcpu</span>, <span class="ident">VcpuExit</span>, <span class="ident">VcpuRunHandle</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>,
+    <span class="ident">ClockState</span>, <span class="ident">Datamatch</span>, <span class="ident">DeviceKind</span>, <span class="ident">HypervHypercall</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">IoEventAddress</span>,
+    <span class="ident">IoOperation</span>, <span class="ident">IoParams</span>, <span class="ident">IrqRoute</span>, <span class="ident">IrqSource</span>, <span class="ident">MPState</span>, <span class="ident">MemSlot</span>, <span class="ident">ProtectionType</span>, <span class="ident">Vcpu</span>, <span class="ident">VcpuExit</span>,
+    <span class="ident">VcpuRunHandle</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>,
 };
 
 <span class="comment">// Wrapper around KVM_SET_USER_MEMORY_REGION ioctl, which creates, modifies, or deletes a mapping</span>
@@ -2304,88 +2306,6 @@
         <span class="ident">f</span>
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::cast_ptr_alignment</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">set_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
-        <span class="comment">// kernel told us how large it was. The pointer is page aligned so casting to a different</span>
-        <span class="comment">// type is well defined, hence the clippy allow attribute.</span>
-        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
-        <span class="kw">match</span> <span class="ident">run</span>.<span class="ident">exit_reason</span> {
-            <span class="ident">KVM_EXIT_IO</span> =&gt; {
-                <span class="kw">let</span> <span class="ident">run_start</span> <span class="op">=</span> <span class="ident">run</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>;
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">io</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">io</span> };
-                <span class="kw">if</span> <span class="ident">io</span>.<span class="ident">direction</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">!</span><span class="op">=</span> <span class="ident">KVM_EXIT_IO_IN</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>));
-                }
-                <span class="kw">let</span> <span class="ident">data_size</span> <span class="op">=</span> (<span class="ident">io</span>.<span class="ident">count</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">*</span> (<span class="ident">io</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>);
-                <span class="kw">if</span> <span class="ident">data_size</span> <span class="op">!</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>));
-                }
-                <span class="comment">// The data_offset is defined by the kernel to be some number of bytes into the</span>
-                <span class="comment">// kvm_run structure, which we have fully mmap&#39;d.</span>
-                <span class="kw">unsafe</span> {
-                    <span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span> <span class="ident">run_start</span>.<span class="ident">offset</span>(<span class="ident">io</span>.<span class="ident">data_offset</span> <span class="kw">as</span> <span class="ident">isize</span>);
-                    <span class="ident">copy_nonoverlapping</span>(<span class="ident">data</span>.<span class="ident">as_ptr</span>(), <span class="ident">data_ptr</span>, <span class="ident">data_size</span>);
-                }
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="ident">KVM_EXIT_MMIO</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">mmio</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">mmio</span> };
-                <span class="kw">if</span> <span class="ident">mmio</span>.<span class="ident">is_write</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>));
-                }
-                <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">mmio</span>.<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>;
-                <span class="kw">if</span> <span class="ident">len</span> <span class="op">!</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>));
-                }
-                <span class="ident">mmio</span>.<span class="ident">data</span>[..<span class="ident">len</span>].<span class="ident">copy_from_slice</span>(<span class="ident">data</span>);
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="ident">KVM_EXIT_HYPERV</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">hyperv</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">hyperv</span> };
-                <span class="kw">if</span> <span class="ident">hyperv</span>.<span class="ident">type_</span> <span class="op">!</span><span class="op">=</span> <span class="ident">KVM_EXIT_HYPERV_HCALL</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>));
-                }
-                <span class="kw">let</span> <span class="ident">hcall</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">hyperv</span>.<span class="ident">u</span>.<span class="ident">hcall</span> };
-                <span class="kw">match</span> <span class="ident">data</span>.<span class="ident">try_into</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">data</span>) =&gt; {
-                        <span class="ident">hcall</span>.<span class="ident">result</span> <span class="op">=</span> <span class="ident">u64::from_ne_bytes</span>(<span class="ident">data</span>);
-                    }
-                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
-                }
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="ident">KVM_EXIT_X86_RDMSR</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
-
-                <span class="kw">match</span> <span class="ident">data</span>.<span class="ident">try_into</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">data</span>) =&gt; {
-                        <span class="ident">msr</span>.<span class="ident">data</span> <span class="op">=</span> <span class="ident">u64::from_ne_bytes</span>(<span class="ident">data</span>);
-                        <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">0</span>;
-                    }
-                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
-                }
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="ident">KVM_EXIT_X86_WRMSR</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
-                <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="prelude-val">Ok</span>(())
-            }
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
-        }
-    }
-
     <span class="kw">fn</span> <span class="ident">pvclock_ctrl</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">pvclock_ctrl_arch</span>()
     }
@@ -2441,7 +2361,7 @@
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::cast_ptr_alignment</span>)]</span>
     <span class="comment">// The pointer is page aligned so casting to a different type is well defined, hence the clippy</span>
     <span class="comment">// allow attribute.</span>
-    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">run_handle</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuRunHandle</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VcpuExit</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">run_handle</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuRunHandle</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VcpuExit</span><span class="op">&gt;</span> {
         <span class="comment">// Acquire is used to ensure this check is ordered after the `compare_exchange` in `run`.</span>
         <span class="kw">if</span> <span class="self">self</span>
             .<span class="ident">vcpu_run_handle_fingerprint</span>
@@ -2461,74 +2381,15 @@
         <span class="comment">// kernel told us how large it was.</span>
         <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
         <span class="kw">match</span> <span class="ident">run</span>.<span class="ident">exit_reason</span> {
-            <span class="ident">KVM_EXIT_IO</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">io</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">io</span> };
-                <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">io</span>.<span class="ident">port</span>;
-                <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> (<span class="ident">io</span>.<span class="ident">count</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">*</span> (<span class="ident">io</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>);
-                <span class="kw">match</span> <span class="ident">io</span>.<span class="ident">direction</span> <span class="kw">as</span> <span class="ident">u32</span> {
-                    <span class="ident">KVM_EXIT_IO_IN</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::IoIn</span> { <span class="ident">port</span>, <span class="ident">size</span> }),
-                    <span class="ident">KVM_EXIT_IO_OUT</span> =&gt; {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">8</span>];
-                        <span class="kw">let</span> <span class="ident">run_start</span> <span class="op">=</span> <span class="ident">run</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">kvm_run</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span>;
-                        <span class="comment">// The data_offset is defined by the kernel to be some number of bytes</span>
-                        <span class="comment">// into the kvm_run structure, which we have fully mmap&#39;d.</span>
-                        <span class="kw">unsafe</span> {
-                            <span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span> <span class="ident">run_start</span>.<span class="ident">offset</span>(<span class="ident">io</span>.<span class="ident">data_offset</span> <span class="kw">as</span> <span class="ident">isize</span>);
-                            <span class="ident">copy_nonoverlapping</span>(<span class="ident">data_ptr</span>, <span class="ident">data</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">min</span>(<span class="ident">size</span>, <span class="ident">data</span>.<span class="ident">len</span>()));
-                        }
-                        <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::IoOut</span> { <span class="ident">port</span>, <span class="ident">size</span>, <span class="ident">data</span> })
-                    }
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
-                }
-            }
-            <span class="ident">KVM_EXIT_MMIO</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">mmio</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">mmio</span> };
-                <span class="kw">let</span> <span class="ident">address</span> <span class="op">=</span> <span class="ident">mmio</span>.<span class="ident">phys_addr</span>;
-                <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">mmio</span>.<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">mmio</span>.<span class="ident">data</span>.<span class="ident">len</span>());
-                <span class="kw">if</span> <span class="ident">mmio</span>.<span class="ident">is_write</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                    <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::MmioWrite</span> {
-                        <span class="ident">address</span>,
-                        <span class="ident">size</span>,
-                        <span class="ident">data</span>: <span class="ident">mmio</span>.<span class="ident">data</span>,
-                    })
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::MmioRead</span> { <span class="ident">address</span>, <span class="ident">size</span> })
-                }
-            }
+            <span class="ident">KVM_EXIT_IO</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Io</span>),
+            <span class="ident">KVM_EXIT_MMIO</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Mmio</span>),
             <span class="ident">KVM_EXIT_IOAPIC_EOI</span> =&gt; {
                 <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
                 <span class="comment">// union field to use.</span>
                 <span class="kw">let</span> <span class="ident">vector</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">eoi</span>.<span class="ident">vector</span> };
                 <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::IoapicEoi</span> { <span class="ident">vector</span> })
             }
-            <span class="ident">KVM_EXIT_HYPERV</span> =&gt; {
-                <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
-                <span class="comment">// union field to use.</span>
-                <span class="kw">let</span> <span class="ident">hyperv</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">hyperv</span> };
-                <span class="kw">match</span> <span class="ident">hyperv</span>.<span class="ident">type_</span> <span class="kw">as</span> <span class="ident">u32</span> {
-                    <span class="ident">KVM_EXIT_HYPERV_SYNIC</span> =&gt; {
-                        <span class="kw">let</span> <span class="ident">synic</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">hyperv</span>.<span class="ident">u</span>.<span class="ident">synic</span> };
-                        <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::HypervSynic</span> {
-                            <span class="ident">msr</span>: <span class="ident">synic</span>.<span class="ident">msr</span>,
-                            <span class="ident">control</span>: <span class="ident">synic</span>.<span class="ident">control</span>,
-                            <span class="ident">evt_page</span>: <span class="ident">synic</span>.<span class="ident">evt_page</span>,
-                            <span class="ident">msg_page</span>: <span class="ident">synic</span>.<span class="ident">msg_page</span>,
-                        })
-                    }
-                    <span class="ident">KVM_EXIT_HYPERV_HCALL</span> =&gt; {
-                        <span class="kw">let</span> <span class="ident">hcall</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">hyperv</span>.<span class="ident">u</span>.<span class="ident">hcall</span> };
-                        <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::HypervHcall</span> {
-                            <span class="ident">input</span>: <span class="ident">hcall</span>.<span class="ident">input</span>,
-                            <span class="ident">params</span>: <span class="ident">hcall</span>.<span class="ident">params</span>,
-                        })
-                    }
-                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
-                }
-            }
+            <span class="ident">KVM_EXIT_HYPERV</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::HypervHypercall</span>),
             <span class="ident">KVM_EXIT_UNKNOWN</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Unknown</span>),
             <span class="ident">KVM_EXIT_EXCEPTION</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Exception</span>),
             <span class="ident">KVM_EXIT_HYPERCALL</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Hypercall</span>),
@@ -2602,6 +2463,147 @@
             }
             <span class="ident">r</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unknown kvm exit reason: {}&quot;</span>, <span class="ident">r</span>),
         }
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_mmio</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle_fn</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">IoParams</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
+        <span class="comment">// kernel told us how large it was. The pointer is page aligned so casting to a different</span>
+        <span class="comment">// type is well defined, hence the clippy allow attribute.</span>
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
+        <span class="comment">// Verify that the handler is called in the right context.</span>
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_MMIO</span>);
+        <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+        <span class="comment">// union field to use.</span>
+        <span class="kw">let</span> <span class="ident">mmio</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">mmio</span> };
+        <span class="kw">let</span> <span class="ident">address</span> <span class="op">=</span> <span class="ident">mmio</span>.<span class="ident">phys_addr</span>;
+        <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">mmio</span>.<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">mmio</span>.<span class="ident">data</span>.<span class="ident">len</span>());
+        <span class="kw">if</span> <span class="ident">mmio</span>.<span class="ident">is_write</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="ident">handle_fn</span>(<span class="ident">IoParams</span> {
+                <span class="ident">address</span>,
+                <span class="ident">size</span>,
+                <span class="ident">operation</span>: <span class="ident">IoOperation::Write</span> { <span class="ident">data</span>: <span class="ident">mmio</span>.<span class="ident">data</span> },
+            });
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="ident">handle_fn</span>(<span class="ident">IoParams</span> {
+            <span class="ident">address</span>,
+            <span class="ident">size</span>,
+            <span class="ident">operation</span>: <span class="ident">IoOperation::Read</span>,
+        }) {
+            <span class="ident">mmio</span>.<span class="ident">data</span>[..<span class="ident">size</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>[..<span class="ident">size</span>]);
+            <span class="prelude-val">Ok</span>(())
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_io</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle_fn</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">IoParams</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
+        <span class="comment">// kernel told us how large it was. The pointer is page aligned so casting to a different</span>
+        <span class="comment">// type is well defined, hence the clippy allow attribute.</span>
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
+        <span class="comment">// Verify that the handler is called in the right context.</span>
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_IO</span>);
+        <span class="kw">let</span> <span class="ident">run_start</span> <span class="op">=</span> <span class="ident">run</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>;
+        <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+        <span class="comment">// union field to use.</span>
+        <span class="kw">let</span> <span class="ident">io</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">io</span> };
+        <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> (<span class="ident">io</span>.<span class="ident">count</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">*</span> (<span class="ident">io</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="kw">match</span> <span class="ident">io</span>.<span class="ident">direction</span> <span class="kw">as</span> <span class="ident">u32</span> {
+            <span class="ident">KVM_EXIT_IO_IN</span> =&gt; {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="ident">handle_fn</span>(<span class="ident">IoParams</span> {
+                    <span class="ident">address</span>: <span class="ident">io</span>.<span class="ident">port</span>.<span class="ident">into</span>(),
+                    <span class="ident">size</span>,
+                    <span class="ident">operation</span>: <span class="ident">IoOperation::Read</span>,
+                }) {
+                    <span class="comment">// The data_offset is defined by the kernel to be some number of bytes</span>
+                    <span class="comment">// into the kvm_run structure, which we have fully mmap&#39;d.</span>
+                    <span class="kw">unsafe</span> {
+                        <span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span> <span class="ident">run_start</span>.<span class="ident">offset</span>(<span class="ident">io</span>.<span class="ident">data_offset</span> <span class="kw">as</span> <span class="ident">isize</span>);
+                        <span class="ident">copy_nonoverlapping</span>(<span class="ident">data</span>.<span class="ident">as_ptr</span>(), <span class="ident">data_ptr</span>, <span class="ident">size</span>);
+                    }
+                    <span class="prelude-val">Ok</span>(())
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))
+                }
+            }
+            <span class="ident">KVM_EXIT_IO_OUT</span> =&gt; {
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">8</span>];
+                <span class="comment">// The data_offset is defined by the kernel to be some number of bytes</span>
+                <span class="comment">// into the kvm_run structure, which we have fully mmap&#39;d.</span>
+                <span class="kw">unsafe</span> {
+                    <span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span> <span class="ident">run_start</span>.<span class="ident">offset</span>(<span class="ident">io</span>.<span class="ident">data_offset</span> <span class="kw">as</span> <span class="ident">isize</span>);
+                    <span class="ident">copy_nonoverlapping</span>(<span class="ident">data_ptr</span>, <span class="ident">data</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">min</span>(<span class="ident">size</span>, <span class="ident">data</span>.<span class="ident">len</span>()));
+                }
+                <span class="ident">handle_fn</span>(<span class="ident">IoParams</span> {
+                    <span class="ident">address</span>: <span class="ident">io</span>.<span class="ident">port</span>.<span class="ident">into</span>(),
+                    <span class="ident">size</span>,
+                    <span class="ident">operation</span>: <span class="ident">IoOperation::Write</span> { <span class="ident">data</span> },
+                });
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_hyperv_hypercall</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">handle_fn</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">HypervHypercall</span>) -&gt; <span class="ident">u64</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
+        <span class="comment">// kernel told us how large it was.</span>
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
+        <span class="comment">// Verify that the handler is called in the right context.</span>
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_HYPERV_HCALL</span>);
+        <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+        <span class="comment">// union field to use.</span>
+        <span class="kw">let</span> <span class="ident">hyperv</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">hyperv</span> };
+        <span class="kw">match</span> <span class="ident">hyperv</span>.<span class="ident">type_</span> <span class="kw">as</span> <span class="ident">u32</span> {
+            <span class="ident">KVM_EXIT_HYPERV_SYNIC</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">synic</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="ident">hyperv</span>.<span class="ident">u</span>.<span class="ident">synic</span> };
+                <span class="ident">handle_fn</span>(<span class="ident">HypervHypercall::HypervSynic</span> {
+                    <span class="ident">msr</span>: <span class="ident">synic</span>.<span class="ident">msr</span>,
+                    <span class="ident">control</span>: <span class="ident">synic</span>.<span class="ident">control</span>,
+                    <span class="ident">evt_page</span>: <span class="ident">synic</span>.<span class="ident">evt_page</span>,
+                    <span class="ident">msg_page</span>: <span class="ident">synic</span>.<span class="ident">msg_page</span>,
+                });
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="ident">KVM_EXIT_HYPERV_HCALL</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">hcall</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">hyperv</span>.<span class="ident">u</span>.<span class="ident">hcall</span> };
+                <span class="ident">hcall</span>.<span class="ident">result</span> <span class="op">=</span> <span class="ident">handle_fn</span>(<span class="ident">HypervHypercall::HypervHcall</span> {
+                    <span class="ident">input</span>: <span class="ident">hcall</span>.<span class="ident">input</span>,
+                    <span class="ident">params</span>: <span class="ident">hcall</span>.<span class="ident">params</span>,
+                });
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">EINVAL</span>)),
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_rdmsr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
+        <span class="comment">// kernel told us how large it was.</span>
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
+        <span class="comment">// Verify that the handler is called in the right context.</span>
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_X86_RDMSR</span>);
+        <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+        <span class="comment">// union field to use.</span>
+        <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
+        <span class="ident">msr</span>.<span class="ident">data</span> <span class="op">=</span> <span class="ident">data</span>;
+        <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">handle_wrmsr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="comment">// Safe because we know we mapped enough memory to hold the kvm_run struct because the</span>
+        <span class="comment">// kernel told us how large it was.</span>
+        <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
+        <span class="comment">// Verify that the handler is called in the right context.</span>
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_X86_WRMSR</span>);
+        <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
+        <span class="comment">// union field to use.</span>
+        <span class="kw">let</span> <span class="ident">msr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">msr</span> };
+        <span class="ident">msr</span>.<span class="ident">error</span> <span class="op">=</span> <span class="number">0</span>;
     }
 }
 
