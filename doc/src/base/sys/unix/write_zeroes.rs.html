@@ -170,51 +170,6 @@
 <span id="169">169</span>
 <span id="170">170</span>
 <span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
-<span id="181">181</span>
-<span id="182">182</span>
-<span id="183">183</span>
-<span id="184">184</span>
-<span id="185">185</span>
-<span id="186">186</span>
-<span id="187">187</span>
-<span id="188">188</span>
-<span id="189">189</span>
-<span id="190">190</span>
-<span id="191">191</span>
-<span id="192">192</span>
-<span id="193">193</span>
-<span id="194">194</span>
-<span id="195">195</span>
-<span id="196">196</span>
-<span id="197">197</span>
-<span id="198">198</span>
-<span id="199">199</span>
-<span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -222,9 +177,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">cmp::min</span>,
     <span class="ident">fs::File</span>,
-    <span class="ident">io</span>::{
-        <span class="ident">Error</span>, <span class="ident">ErrorKind</span>, <span class="ident">Seek</span>, <span class="ident">SeekFrom</span>, {<span class="self">self</span>},
-    },
+    <span class="ident">io</span>::{<span class="self">self</span>, <span class="ident">Error</span>, <span class="ident">ErrorKind</span>},
     <span class="ident">os::unix::fs::FileExt</span>,
 };
 
@@ -240,35 +193,6 @@
     <span class="kw">fn</span> <span class="ident">punch_hole</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">length</span>: <span class="ident">u64</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">fallocate</span>(<span class="self">self</span>, <span class="ident">FallocateMode::PunchHole</span>, <span class="bool-val">true</span>, <span class="ident">offset</span>, <span class="ident">length</span> <span class="kw">as</span> <span class="ident">u64</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">io::Error::from_raw_os_error</span>(<span class="ident">e</span>.<span class="ident">errno</span>()))
-    }
-}
-
-<span class="doccomment">/// A trait for writing zeroes to a stream.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WriteZeroes</span> {
-    <span class="doccomment">/// Write up to `length` bytes of zeroes to the stream, returning how many bytes were written.</span>
-    <span class="kw">fn</span> <span class="ident">write_zeroes</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
-
-    <span class="doccomment">/// Write zeroes to the stream until `length` bytes have been written.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This method will continuously call `write_zeroes` until the requested</span>
-    <span class="doccomment">/// `length` is satisfied or an error is encountered.</span>
-    <span class="kw">fn</span> <span class="ident">write_zeroes_all</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">length</span>: <span class="ident">usize</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">while</span> <span class="ident">length</span> <span class="op">&gt;</span> <span class="number">0</span> {
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">write_zeroes</span>(<span class="ident">length</span>) {
-                <span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::from</span>(<span class="ident">ErrorKind::WriteZero</span>)),
-                <span class="prelude-val">Ok</span>(<span class="ident">bytes_written</span>) =&gt; {
-                    <span class="ident">length</span> <span class="op">=</span> <span class="ident">length</span>
-                        .<span class="ident">checked_sub</span>(<span class="ident">bytes_written</span>)
-                        .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::from</span>(<span class="ident">ErrorKind::Other</span>))<span class="question-mark">?</span>
-                }
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">ErrorKind::Interrupted</span> {
-                        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>);
-                    }
-                }
-            }
-        }
-        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -327,16 +251,6 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">WriteZeroesAt</span> <span class="op">+</span> <span class="ident">Seek</span><span class="op">&gt;</span> <span class="ident">WriteZeroes</span> <span class="kw">for</span> <span class="ident">T</span> {
-    <span class="kw">fn</span> <span class="ident">write_zeroes</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">length</span>: <span class="ident">usize</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Current</span>(<span class="number">0</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">nwritten</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">write_zeroes_at</span>(<span class="ident">offset</span>, <span class="ident">length</span>)<span class="question-mark">?</span>;
-        <span class="comment">// Advance the seek cursor as if we had done a real write().</span>
-        <span class="self">self</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Current</span>(<span class="ident">nwritten</span> <span class="kw">as</span> <span class="ident">i64</span>))<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">length</span>)
-    }
-}
-
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
@@ -371,10 +285,8 @@
         }
 
         <span class="comment">// Overwrite some of the data with zeroes</span>
-        <span class="ident">f</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Start</span>(<span class="number">2345</span>)).<span class="ident">unwrap</span>();
-        <span class="ident">f</span>.<span class="ident">write_zeroes_all</span>(<span class="number">4321</span>).<span class="ident">expect</span>(<span class="string">&quot;write_zeroes failed&quot;</span>);
-        <span class="comment">// Verify seek position after write_zeroes_all()</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">f</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Current</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>(), <span class="number">2345</span> <span class="op">+</span> <span class="number">4321</span>);
+        <span class="ident">f</span>.<span class="ident">write_zeroes_all_at</span>(<span class="number">2345</span>, <span class="number">4321</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;write_zeroes failed&quot;</span>);
 
         <span class="comment">// Read back the data and verify that it is now zero</span>
         <span class="ident">f</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Start</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>();
@@ -412,10 +324,8 @@
         <span class="ident">f</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">orig_data</span>).<span class="ident">unwrap</span>();
 
         <span class="comment">// Overwrite some of the data with zeroes</span>
-        <span class="ident">f</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Start</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>();
-        <span class="ident">f</span>.<span class="ident">write_zeroes_all</span>(<span class="number">0x10001</span>).<span class="ident">expect</span>(<span class="string">&quot;write_zeroes failed&quot;</span>);
-        <span class="comment">// Verify seek position after write_zeroes_all()</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">f</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Current</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>(), <span class="number">0x10001</span>);
+        <span class="ident">f</span>.<span class="ident">write_zeroes_all_at</span>(<span class="number">0</span>, <span class="number">0x10001</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;write_zeroes failed&quot;</span>);
 
         <span class="comment">// Read back the data and verify that it is now zero</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">readback</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">0x20000</span>];

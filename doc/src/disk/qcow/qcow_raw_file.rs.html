@@ -159,7 +159,6 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
-<span id="161">161</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -168,7 +167,7 @@
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">BufWriter</span>, <span class="ident">Read</span>, <span class="ident">Seek</span>, <span class="ident">SeekFrom</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">std::mem::size_of</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">FileReadWriteAtVolatile</span>, <span class="ident">WriteZeroes</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">FileReadWriteAtVolatile</span>, <span class="ident">WriteZeroesAt</span>};
 <span class="kw">use</span> <span class="ident">data_model::VolatileSlice</span>;
 
 <span class="doccomment">/// A qcow file. Allows reading/writing clusters and appending clusters.</span>
@@ -304,8 +303,7 @@
     <span class="doccomment">/// Zeros out a cluster in the file.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zero_cluster</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">u64</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cluster_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cluster_size</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="self">self</span>.<span class="ident">file</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Start</span>(<span class="ident">address</span>))<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">file</span>.<span class="ident">write_zeroes_all</span>(<span class="ident">cluster_size</span>)<span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">file</span>.<span class="ident">write_zeroes_all_at</span>(<span class="ident">address</span>, <span class="ident">cluster_size</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
