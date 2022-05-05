@@ -333,6 +333,12 @@
 <span id="332">332</span>
 <span id="333">333</span>
 <span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -345,7 +351,10 @@
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>};
 <span class="kw">use</span> <span class="ident">argh::FromArgs</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">get_max_open_files</span>, <span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">UnlinkUnixListener</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">error</span>, <span class="ident">get_max_open_files</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>,
+    <span class="ident">UnlinkUnixListener</span>,
+};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">EventAsync</span>, <span class="ident">Executor</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le32</span>};
 <span class="kw">use</span> <span class="ident">fuse::Server</span>;
@@ -477,10 +486,13 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keep_rds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> <span class="op">=</span> [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>].<span class="ident">to_vec</span>();
         <span class="ident">keep_rds</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">fs</span>.<span class="ident">keep_rds</span>());
 
+        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">ex</span>.<span class="ident">clone</span>();
+        <span class="ident">keep_rds</span>.<span class="ident">extend</span>(<span class="ident">ex</span>.<span class="ident">as_raw_descriptors</span>());
+
         <span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Server::new</span>(<span class="ident">fs</span>));
 
         <span class="prelude-val">Ok</span>(<span class="ident">FsBackend</span> {
-            <span class="ident">ex</span>: <span class="ident">ex</span>.<span class="ident">clone</span>(),
+            <span class="ident">ex</span>,
             <span class="ident">server</span>,
             <span class="ident">tag</span>: <span class="ident">fs_tag</span>,
             <span class="ident">avail_features</span>,

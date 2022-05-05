@@ -640,6 +640,29 @@
 <span id="639">639</span>
 <span id="640">640</span>
 <span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -665,7 +688,10 @@
 };
 
 <span class="kw">use</span> <span class="ident">async_task::Task</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">add_fd_flags</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">EpollContext</span>, <span class="ident">EpollEvents</span>, <span class="ident">Event</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">add_fd_flags</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">EpollContext</span>, <span class="ident">EpollEvents</span>, <span class="ident">Event</span>,
+    <span class="ident">RawDescriptor</span>, <span class="ident">WatchingEvents</span>,
+};
 <span class="kw">use</span> <span class="ident">futures::task::noop_waker</span>;
 <span class="kw">use</span> <span class="ident">pin_utils::pin_mut</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -913,10 +939,17 @@
     <span class="ident">blocking_pool</span>: <span class="ident">BlockingPool</span>,
     <span class="ident">state</span>: <span class="ident">AtomicI32</span>,
     <span class="ident">notify</span>: <span class="ident">Event</span>,
+    <span class="comment">// Descriptor of the original event that was cloned to create notify.</span>
+    <span class="comment">// This is only needed for the AsRawDescriptors implementation.</span>
+    <span class="ident">notify_dup</span>: <span class="ident">RawDescriptor</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">RawExecutor</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">notify</span>: <span class="ident">Event</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">notify</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="comment">// Save the original descriptor before cloning. This descriptor will be used when creating</span>
+        <span class="comment">// the notify task, so we need to preserve it for AsRawDescriptors.</span>
+        <span class="kw">let</span> <span class="ident">notify_dup</span> <span class="op">=</span> <span class="ident">notify</span>.<span class="ident">as_raw_descriptor</span>();
+        <span class="kw">let</span> <span class="ident">notify</span> <span class="op">=</span> <span class="ident">notify</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">RawExecutor</span> {
             <span class="ident">queue</span>: <span class="ident">RunnableQueue::new</span>(),
             <span class="ident">poll_ctx</span>: <span class="ident">EpollContext::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreatingContext</span>)<span class="question-mark">?</span>,
@@ -924,6 +957,7 @@
             <span class="ident">blocking_pool</span>: <span class="ident">Default::default</span>(),
             <span class="ident">state</span>: <span class="ident">AtomicI32::new</span>(<span class="ident">PROCESSING</span>),
             <span class="ident">notify</span>,
+            <span class="ident">notify_dup</span>,
         })
     }
 
@@ -1087,6 +1121,16 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">AsRawDescriptors</span> <span class="kw">for</span> <span class="ident">RawExecutor</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
+        <span class="macro">vec!</span>[
+            <span class="self">self</span>.<span class="ident">poll_ctx</span>.<span class="ident">as_raw_descriptor</span>(),
+            <span class="self">self</span>.<span class="ident">notify</span>.<span class="ident">as_raw_descriptor</span>(),
+            <span class="self">self</span>.<span class="ident">notify_dup</span>,
+        ]
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">WeakWake</span> <span class="kw">for</span> <span class="ident">RawExecutor</span> {
     <span class="kw">fn</span> <span class="ident">wake_by_ref</span>(<span class="ident">weak_self</span>: <span class="kw-2">&amp;</span><span class="ident">Weak</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">arc_self</span>) <span class="op">=</span> <span class="ident">weak_self</span>.<span class="ident">upgrade</span>() {
@@ -1136,11 +1180,7 @@
 <span class="kw">impl</span> <span class="ident">FdExecutor</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FdExecutor</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">notify</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">notify</span>
-            .<span class="ident">try_clone</span>()
-            .<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)
-            .<span class="ident">and_then</span>(<span class="ident">RawExecutor::new</span>)
-            .<span class="ident">map</span>(<span class="ident">Arc::new</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">RawExecutor::new</span>(<span class="kw-2">&amp;</span><span class="ident">notify</span>).<span class="ident">map</span>(<span class="ident">Arc::new</span>)<span class="question-mark">?</span>;
 
         <span class="ident">raw</span>.<span class="ident">spawn</span>(<span class="ident">notify_task</span>(<span class="ident">notify</span>, <span class="ident">Arc::downgrade</span>(<span class="kw-2">&amp;</span><span class="ident">raw</span>)))
             .<span class="ident">detach</span>();
@@ -1192,6 +1232,12 @@
             <span class="ident">source</span>: <span class="ident">f</span>,
             <span class="ident">ex</span>: <span class="ident">Arc::downgrade</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">raw</span>),
         })
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">AsRawDescriptors</span> <span class="kw">for</span> <span class="ident">FdExecutor</span> {
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">raw</span>.<span class="ident">as_raw_descriptors</span>()
     }
 }
 
