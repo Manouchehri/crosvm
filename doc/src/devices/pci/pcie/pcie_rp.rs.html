@@ -514,25 +514,11 @@
 <span id="513">513</span>
 <span id="514">514</span>
 <span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
-<span id="529">529</span>
-<span id="530">530</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
+<span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
@@ -571,8 +557,8 @@
     <span class="ident">hp_interrupt_pending</span>: <span class="ident">bool</span>,
     <span class="ident">pme_pending_request_id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="ident">bus_range</span>: <span class="ident">PciBridgeBusRange</span>,
-    <span class="ident">downstream_device</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PciAddress</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HostHotPlugKey</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-    <span class="ident">removed_downstream</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
+    <span class="ident">downstream_devices</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">PciAddress</span>, <span class="ident">HostHotPlugKey</span><span class="op">&gt;</span>,
+    <span class="ident">removed_downstream</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="ident">pcie_host</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PcieHostRootPort</span><span class="op">&gt;</span>,
     <span class="ident">prepare_hotplug</span>: <span class="ident">bool</span>,
 }
@@ -602,8 +588,8 @@
             <span class="ident">hp_interrupt_pending</span>: <span class="bool-val">false</span>,
             <span class="ident">pme_pending_request_id</span>: <span class="prelude-val">None</span>,
             <span class="ident">bus_range</span>,
-            <span class="ident">downstream_device</span>: <span class="prelude-val">None</span>,
-            <span class="ident">removed_downstream</span>: <span class="prelude-val">None</span>,
+            <span class="ident">downstream_devices</span>: <span class="ident">BTreeMap::new</span>(),
+            <span class="ident">removed_downstream</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">pcie_host</span>: <span class="prelude-val">None</span>,
             <span class="ident">prepare_hotplug</span>: <span class="bool-val">false</span>,
         }
@@ -637,8 +623,8 @@
             <span class="ident">hp_interrupt_pending</span>: <span class="bool-val">false</span>,
             <span class="ident">pme_pending_request_id</span>: <span class="prelude-val">None</span>,
             <span class="ident">bus_range</span>,
-            <span class="ident">downstream_device</span>: <span class="prelude-val">None</span>,
-            <span class="ident">removed_downstream</span>: <span class="prelude-val">None</span>,
+            <span class="ident">downstream_devices</span>: <span class="ident">BTreeMap::new</span>(),
+            <span class="ident">removed_downstream</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">pcie_host</span>: <span class="prelude-val">Some</span>(<span class="ident">pcie_host</span>),
             <span class="ident">prepare_hotplug</span>: <span class="bool-val">false</span>,
         })
@@ -662,7 +648,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">write_pcie_cap</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="self">self</span>.<span class="ident">removed_downstream</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="self">self</span>.<span class="ident">removed_downstream</span>.<span class="ident">clear</span>();
         <span class="kw">match</span> <span class="ident">offset</span> {
             <span class="ident">PCIE_SLTCTL_OFFSET</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">u16::from_slice</span>(<span class="ident">data</span>) {
@@ -684,10 +670,10 @@
                     <span class="op">&amp;&amp;</span> (<span class="ident">value</span> <span class="op">&amp;</span> <span class="ident">PCIE_SLTCTL_PIC_OFF</span> <span class="op">==</span> <span class="ident">PCIE_SLTCTL_PIC_OFF</span>)
                     <span class="op">&amp;&amp;</span> (<span class="ident">old_control</span> <span class="op">&amp;</span> <span class="ident">PCIE_SLTCTL_PIC_OFF</span> <span class="op">!</span><span class="op">=</span> <span class="ident">PCIE_SLTCTL_PIC_OFF</span>)
                 {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">guest_pci_addr</span>, <span class="kw">_</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">downstream_device</span> {
-                        <span class="self">self</span>.<span class="ident">removed_downstream</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">guest_pci_addr</span>);
-                        <span class="self">self</span>.<span class="ident">downstream_device</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+                    <span class="kw">for</span> (<span class="ident">guest_pci_addr</span>, <span class="kw">_</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">iter</span>() {
+                        <span class="self">self</span>.<span class="ident">removed_downstream</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">guest_pci_addr</span>);
                     }
+                    <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">clear</span>();
                     <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">&amp;=</span> <span class="op">!</span><span class="ident">PCIE_SLTSTA_PDS</span>;
                     <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">|</span><span class="op">=</span> <span class="ident">PCIE_SLTSTA_PDC</span>;
                     <span class="self">self</span>.<span class="ident">trigger_hp_interrupt</span>();
@@ -948,12 +934,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">get_removed_devices</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">removed_devices</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">removed_downstream</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">removed_downstream</span> {
-            <span class="ident">removed_devices</span>.<span class="ident">push</span>(<span class="ident">removed_downstream</span>);
-        }
-
-        <span class="ident">removed_devices</span>
+        <span class="self">self</span>.<span class="ident">removed_downstream</span>.<span class="ident">clone</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">hotplug_implemented</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
@@ -971,13 +952,8 @@
 
 <span class="kw">impl</span> <span class="ident">HotPlugBus</span> <span class="kw">for</span> <span class="ident">PcieRootPort</span> {
     <span class="kw">fn</span> <span class="ident">hot_plug</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">PciAddress</span>) {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">downstream_device</span> {
-            <span class="prelude-val">Some</span>((<span class="ident">guest_addr</span>, <span class="kw">_</span>)) =&gt; {
-                <span class="kw">if</span> <span class="ident">guest_addr</span> <span class="op">!</span><span class="op">=</span> <span class="ident">addr</span> {
-                    <span class="kw">return</span>;
-                }
-            }
-            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>).<span class="ident">is_none</span>() {
+            <span class="kw">return</span>;
         }
 
         <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">|</span> <span class="ident">PCIE_SLTSTA_PDS</span> <span class="op">|</span> <span class="ident">PCIE_SLTSTA_PDC</span> <span class="op">|</span> <span class="ident">PCIE_SLTSTA_ABP</span>;
@@ -985,13 +961,8 @@
     }
 
     <span class="kw">fn</span> <span class="ident">hot_unplug</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">PciAddress</span>) {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">downstream_device</span> {
-            <span class="prelude-val">Some</span>((<span class="ident">guest_addr</span>, <span class="kw">_</span>)) =&gt; {
-                <span class="kw">if</span> <span class="ident">guest_addr</span> <span class="op">!</span><span class="op">=</span> <span class="ident">addr</span> {
-                    <span class="kw">return</span>;
-                }
-            }
-            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>).<span class="ident">is_none</span>() {
+            <span class="kw">return</span>;
         }
 
         <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_status</span> <span class="op">|</span> <span class="ident">PCIE_SLTSTA_PDC</span> <span class="op">|</span> <span class="ident">PCIE_SLTSTA_ABP</span>;
@@ -1005,10 +976,9 @@
     <span class="kw">fn</span> <span class="ident">is_match</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">host_addr</span>: <span class="ident">PciAddress</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slot_control</span><span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">downstream_device</span>.<span class="ident">is_none</span>()
-            <span class="op">&amp;&amp;</span> ((<span class="ident">host_addr</span>.<span class="ident">bus</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">bus_range</span>.<span class="ident">secondary</span>
-                <span class="op">&amp;&amp;</span> <span class="ident">host_addr</span>.<span class="ident">bus</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">bus_range</span>.<span class="ident">subordinate</span>)
-                <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">pcie_host</span>.<span class="ident">is_none</span>())
+        <span class="kw">if</span> (<span class="ident">host_addr</span>.<span class="ident">bus</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">bus_range</span>.<span class="ident">secondary</span>
+            <span class="op">&amp;&amp;</span> <span class="ident">host_addr</span>.<span class="ident">bus</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">bus_range</span>.<span class="ident">subordinate</span>)
+            <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">pcie_host</span>.<span class="ident">is_none</span>()
         {
             <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">bus_range</span>.<span class="ident">secondary</span>)
         } <span class="kw">else</span> {
@@ -1021,11 +991,11 @@
             <span class="kw">return</span>;
         }
 
-        <span class="self">self</span>.<span class="ident">downstream_device</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">guest_addr</span>, <span class="prelude-val">Some</span>(<span class="ident">host_key</span>)))
+        <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">insert</span>(<span class="ident">guest_addr</span>, <span class="ident">host_key</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">get_hotplug_device</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">host_key</span>: <span class="ident">HostHotPlugKey</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">guest_address</span>, <span class="prelude-val">Some</span>(<span class="ident">host_info</span>))) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">downstream_device</span> {
+        <span class="kw">for</span> (<span class="ident">guest_address</span>, <span class="ident">host_info</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">downstream_devices</span>.<span class="ident">iter</span>() {
             <span class="kw">match</span> <span class="ident">host_info</span> {
                 <span class="ident">HostHotPlugKey::Vfio</span> { <span class="ident">host_addr</span> } =&gt; {
                     <span class="kw">let</span> <span class="ident">saved_addr</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">host_addr</span>;

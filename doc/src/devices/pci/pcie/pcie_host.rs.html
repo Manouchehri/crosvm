@@ -461,6 +461,13 @@
 <span id="460">460</span>
 <span id="461">461</span>
 <span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -551,8 +558,8 @@
     }
 }
 
-<span class="comment">// Find the added pcie endpoint device</span>
-<span class="kw">fn</span> <span class="ident">visit_children</span>(<span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+<span class="comment">// Find all the added pcie endpoint devices</span>
+<span class="kw">fn</span> <span class="ident">visit_children</span>(<span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">children</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="comment">// Each pci device has a sysfs directory</span>
     <span class="kw">if</span> <span class="op">!</span><span class="ident">dir</span>.<span class="ident">is_dir</span>() {
         <span class="macro">bail!</span>(<span class="string">&quot;{} isn&#39;t directory&quot;</span>, <span class="ident">dir</span>.<span class="ident">display</span>());
@@ -563,7 +570,8 @@
         .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to read {}&quot;</span>, <span class="ident">class_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
     <span class="comment">// If the device isn&#39;t pci bridge, it is the target pcie endpoint device</span>
     <span class="kw">if</span> <span class="op">!</span><span class="ident">class_id</span>.<span class="ident">starts_with</span>(<span class="string">&quot;0x0604&quot;</span>.<span class="ident">as_bytes</span>()) {
-        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">dir</span>.<span class="ident">to_path_buf</span>());
+        <span class="ident">children</span>.<span class="ident">push</span>(<span class="ident">dir</span>.<span class="ident">to_path_buf</span>());
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
     }
 
     <span class="comment">// Loop device sysfs subdirectory</span>
@@ -589,15 +597,9 @@
             <span class="kw">continue</span>;
         }
         <span class="kw">let</span> <span class="ident">child_path</span> <span class="op">=</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="ident">name</span>);
-        <span class="kw">match</span> <span class="ident">visit_children</span>(<span class="ident">child_path</span>.<span class="ident">as_path</span>()) {
-            <span class="prelude-val">Ok</span>(<span class="ident">child</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">child</span>),
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
-        }
+        <span class="ident">visit_children</span>(<span class="ident">child_path</span>.<span class="ident">as_path</span>(), <span class="ident">children</span>)<span class="question-mark">?</span>;
     }
-    <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(
-        <span class="string">&quot;pcie child endpoint device isn&#39;t exist in {}&quot;</span>,
-        <span class="ident">dir</span>.<span class="ident">display</span>()
-    ))
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">struct</span> <span class="ident">HotplugWorker</span> {
@@ -624,49 +626,61 @@
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
 
-        <span class="comment">// Probe the new added pcied endpoint device</span>
-        <span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">visit_children</span>(<span class="ident">host_sysfs</span>.<span class="ident">as_path</span>())<span class="question-mark">?</span>;
+        <span class="comment">// Probe the new added pcie endpoint devices</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">children</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="ident">visit_children</span>(<span class="ident">host_sysfs</span>.<span class="ident">as_path</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">children</span>)<span class="question-mark">?</span>;
 
-        <span class="comment">// In order to bind device to vfio-pci driver, get device VID and DID</span>
-        <span class="kw">let</span> <span class="ident">vendor_path</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">join</span>(<span class="string">&quot;vendor&quot;</span>);
-        <span class="kw">let</span> <span class="ident">vendor_id</span> <span class="op">=</span> <span class="ident">read</span>(<span class="ident">vendor_path</span>.<span class="ident">as_path</span>())
-            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to read {}&quot;</span>, <span class="ident">vendor_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
-        <span class="comment">// Remove the first two elements 0x</span>
-        <span class="kw">let</span> <span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;0x&quot;</span>;
-        <span class="kw">let</span> <span class="ident">vendor</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vendor_id</span>.<span class="ident">strip_prefix</span>(<span class="ident">prefix</span>.<span class="ident">as_bytes</span>()) {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>.<span class="ident">to_vec</span>(),
-            <span class="prelude-val">None</span> =&gt; <span class="ident">vendor_id</span>,
-        };
-        <span class="kw">let</span> <span class="ident">device_path</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">join</span>(<span class="string">&quot;device&quot;</span>);
-        <span class="kw">let</span> <span class="ident">device_id</span> <span class="op">=</span> <span class="ident">read</span>(<span class="ident">device_path</span>.<span class="ident">as_path</span>())
-            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to read {}&quot;</span>, <span class="ident">device_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
-        <span class="comment">// Remove the first two elements 0x</span>
-        <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">device_id</span>.<span class="ident">strip_prefix</span>(<span class="ident">prefix</span>.<span class="ident">as_bytes</span>()) {
-            <span class="prelude-val">Some</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">to_vec</span>(),
-            <span class="prelude-val">None</span> =&gt; <span class="ident">device_id</span>,
-        };
-        <span class="kw">let</span> <span class="ident">new_id</span> <span class="op">=</span> <span class="macro">vec!</span>[
-            <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">vendor</span>),
-            <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">device</span>),
-        ]
-        .<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
-        <span class="ident">write</span>(<span class="string">&quot;/sys/bus/pci/drivers/vfio-pci/new_id&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">new_id</span>)
-            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to write {} into vfio-pci/new_id&quot;</span>, <span class="ident">new_id</span>))<span class="question-mark">?</span>;
+        <span class="kw">for</span> <span class="ident">child</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">children</span> {
+            <span class="comment">// In order to bind device to vfio-pci driver, get device VID and DID</span>
+            <span class="kw">let</span> <span class="ident">vendor_path</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">join</span>(<span class="string">&quot;vendor&quot;</span>);
+            <span class="kw">let</span> <span class="ident">vendor_id</span> <span class="op">=</span> <span class="ident">read</span>(<span class="ident">vendor_path</span>.<span class="ident">as_path</span>())
+                .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to read {}&quot;</span>, <span class="ident">vendor_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
+            <span class="comment">// Remove the first two elements 0x</span>
+            <span class="kw">let</span> <span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;0x&quot;</span>;
+            <span class="kw">let</span> <span class="ident">vendor</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vendor_id</span>.<span class="ident">strip_prefix</span>(<span class="ident">prefix</span>.<span class="ident">as_bytes</span>()) {
+                <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>.<span class="ident">to_vec</span>(),
+                <span class="prelude-val">None</span> =&gt; <span class="ident">vendor_id</span>,
+            };
+            <span class="kw">let</span> <span class="ident">device_path</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">join</span>(<span class="string">&quot;device&quot;</span>);
+            <span class="kw">let</span> <span class="ident">device_id</span> <span class="op">=</span> <span class="ident">read</span>(<span class="ident">device_path</span>.<span class="ident">as_path</span>())
+                .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to read {}&quot;</span>, <span class="ident">device_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
+            <span class="comment">// Remove the first two elements 0x</span>
+            <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">device_id</span>.<span class="ident">strip_prefix</span>(<span class="ident">prefix</span>.<span class="ident">as_bytes</span>()) {
+                <span class="prelude-val">Some</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">to_vec</span>(),
+                <span class="prelude-val">None</span> =&gt; <span class="ident">device_id</span>,
+            };
+            <span class="kw">let</span> <span class="ident">new_id</span> <span class="op">=</span> <span class="macro">vec!</span>[
+                <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">vendor</span>),
+                <span class="ident">String::from_utf8_lossy</span>(<span class="kw-2">&amp;</span><span class="ident">device</span>),
+            ]
+            .<span class="ident">join</span>(<span class="string">&quot; &quot;</span>);
+            <span class="kw">if</span> <span class="ident">Path::new</span>(<span class="string">&quot;/sys/bus/pci/drivers/vfio-pci-pm/new_id&quot;</span>).<span class="ident">exists</span>() {
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">write</span>(<span class="string">&quot;/sys/bus/pci/drivers/vfio-pci-pm/new_id&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">new_id</span>);
+            }
+            <span class="comment">// This is normal - either the kernel doesn&#39;t support vfio-pci-pm driver,</span>
+            <span class="comment">// or the device failed to attach to vfio-pci-pm driver (most likely due to</span>
+            <span class="comment">// lack of power management capability).</span>
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">child</span>.<span class="ident">join</span>(<span class="string">&quot;driver/unbind&quot;</span>).<span class="ident">exists</span>() {
+                <span class="ident">write</span>(<span class="string">&quot;/sys/bus/pci/drivers/vfio-pci/new_id&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">new_id</span>)
+                    .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to write {} into vfio-pci/new_id&quot;</span>, <span class="ident">new_id</span>))<span class="question-mark">?</span>;
+            }
 
-        <span class="comment">// Request to hotplug the new added pcie device into guest</span>
-        <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VmRequest::VfioCommand</span> {
-            <span class="ident">vfio_path</span>: <span class="ident">child</span>.<span class="ident">clone</span>(),
-            <span class="ident">add</span>: <span class="bool-val">true</span>,
-        };
-        <span class="ident">vm_socket</span>
-            .<span class="ident">lock</span>()
-            .<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>)
-            .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to send hotplug request for {}&quot;</span>, <span class="ident">child</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
-        <span class="ident">vm_socket</span>.<span class="ident">lock</span>().<span class="ident">recv</span>::<span class="op">&lt;</span><span class="ident">VmResponse</span><span class="op">&gt;</span>().<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="macro">format!</span>(<span class="string">&quot;failed to receive hotplug response for {}&quot;</span>, <span class="ident">child</span>.<span class="ident">display</span>())
-        })<span class="question-mark">?</span>;
+            <span class="comment">// Request to hotplug the new added pcie device into guest</span>
+            <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VmRequest::VfioCommand</span> {
+                <span class="ident">vfio_path</span>: <span class="ident">child</span>.<span class="ident">clone</span>(),
+                <span class="ident">add</span>: <span class="bool-val">true</span>,
+            };
+            <span class="ident">vm_socket</span>.<span class="ident">lock</span>().<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>).<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="macro">format!</span>(<span class="string">&quot;failed to send hotplug request for {}&quot;</span>, <span class="ident">child</span>.<span class="ident">display</span>())
+            })<span class="question-mark">?</span>;
+            <span class="ident">vm_socket</span>.<span class="ident">lock</span>().<span class="ident">recv</span>::<span class="op">&lt;</span><span class="ident">VmResponse</span><span class="op">&gt;</span>().<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> {
+                <span class="macro">format!</span>(<span class="string">&quot;failed to receive hotplug response for {}&quot;</span>, <span class="ident">child</span>.<span class="ident">display</span>())
+            })<span class="question-mark">?</span>;
+        }
 
-        <span class="kw-2">*</span><span class="ident">child_exist</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">children</span>.<span class="ident">is_empty</span>() {
+            <span class="kw-2">*</span><span class="ident">child_exist</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        }
 
         <span class="prelude-val">Ok</span>(())
     }
