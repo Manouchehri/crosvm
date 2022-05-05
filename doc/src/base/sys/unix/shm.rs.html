@@ -497,14 +497,6 @@
 <span id="496">496</span>
 <span id="497">497</span>
 <span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -515,7 +507,6 @@
     <span class="ident">io</span>::{
         <span class="ident">Read</span>, <span class="ident">Seek</span>, <span class="ident">SeekFrom</span>, <span class="ident">Write</span>, {<span class="self">self</span>},
     },
-    <span class="ident">os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">IntoRawFd</span>, <span class="ident">RawFd</span>},
 };
 
 <span class="kw">use</span> <span class="ident">libc</span>::{
@@ -526,8 +517,8 @@
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::SharedMemory</span> <span class="kw">as</span> <span class="ident">CrateSharedMemory</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SafeDescriptor</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">FromRawDescriptor</span>, <span class="ident">SharedMemory</span> <span class="kw">as</span> <span class="ident">CrateSharedMemory</span>};
 
 <span class="doccomment">/// A shared memory file descriptor and its size.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
@@ -630,13 +621,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that the given name may not have NUL characters anywhere in it, or this will return an</span>
     <span class="doccomment">/// error.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">named</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">CString::new</span>(<span class="ident">name</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))<span class="question-mark">?</span>))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">named</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">T</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
+        <span class="ident"><span class="self">Self</span>::new</span>(
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">CString::new</span>(<span class="ident">name</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))<span class="question-mark">?</span>),
+            <span class="ident">size</span>,
+        )
     }
 
     <span class="doccomment">/// Convenience function for `SharedMemory::new` that has an arbitrary and unspecified name.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">anon</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="prelude-val">None</span>)
+        <span class="ident"><span class="self">Self</span>::new</span>(<span class="prelude-val">None</span>, <span class="number">0</span>)
     }
 
     <span class="doccomment">/// Creates a new shared memory file descriptor with zero size.</span>
@@ -645,7 +639,7 @@
     <span class="doccomment">/// debugging. The name does not need to be unique.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The file descriptor is opened with the close on exec flag and allows memfd sealing.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CStr</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CStr</span><span class="op">&gt;</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">shm_name</span> <span class="op">=</span> <span class="ident">name</span>
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">as_ptr</span>())
             .<span class="ident">unwrap_or</span>(<span class="string">b&quot;/crosvm_shm\0&quot;</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">c_char</span>);
@@ -656,9 +650,11 @@
             <span class="kw">return</span> <span class="ident">errno_result</span>();
         }
 
-        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">File::from_raw_fd</span>(<span class="ident">fd</span>) };
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">fd</span>) };
 
-        <span class="prelude-val">Ok</span>(<span class="ident">SharedMemory</span> { <span class="ident">fd</span>: <span class="ident">file</span>, <span class="ident">size</span>: <span class="number">0</span> })
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory</span> { <span class="ident">fd</span>: <span class="ident">file</span>, <span class="ident">size</span>: <span class="number">0</span> };
+        <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="ident">size</span>)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="ident">shm</span>)
     }
 
     <span class="doccomment">/// Creates a SharedMemory instance from a SafeDescriptor owning a reference to a</span>
@@ -668,7 +664,7 @@
         <span class="ident">descriptor</span>: <span class="ident">SafeDescriptor</span>,
         <span class="ident">size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">File::from_raw_fd</span>(<span class="ident">descriptor</span>.<span class="ident">into_raw_descriptor</span>()) };
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">into_raw_descriptor</span>()) };
         <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">size</span>.<span class="ident">unwrap_or</span>(<span class="ident">file</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::End</span>(<span class="number">0</span>))<span class="question-mark">?</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">SharedMemory</span> { <span class="ident">fd</span>: <span class="ident">file</span>, <span class="ident">size</span> })
     }
@@ -689,7 +685,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This may fail if this instance was not constructed from a memfd.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_seals</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemfdSeals</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">fcntl</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(), <span class="ident">F_GET_SEALS</span>) };
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">fcntl</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(), <span class="ident">F_GET_SEALS</span>) };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="ident">errno_result</span>();
         }
@@ -701,7 +697,7 @@
     <span class="doccomment">/// This may fail if this instance was not constructed from a memfd with sealing allowed or if</span>
     <span class="doccomment">/// the seal seal (`F_SEAL_SEAL`) bit was already added.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_seals</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">seals</span>: <span class="ident">MemfdSeals</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">fcntl</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(), <span class="ident">F_ADD_SEALS</span>, <span class="ident">seals</span>) };
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">fcntl</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(), <span class="ident">F_ADD_SEALS</span>, <span class="ident">seals</span>) };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="ident">errno_result</span>();
         }
@@ -721,7 +717,7 @@
     <span class="doccomment">/// Note that if some process has already mapped this shared memory and the new size is smaller,</span>
     <span class="doccomment">/// that process may get signaled with SIGBUS if they access any page past the new size.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_size</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ftruncate64</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>(), <span class="ident">size</span> <span class="kw">as</span> <span class="ident">off64_t</span>) };
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ftruncate64</span>(<span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>(), <span class="ident">size</span> <span class="kw">as</span> <span class="ident">off64_t</span>) };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="ident">errno_result</span>();
         }
@@ -735,7 +731,7 @@
     <span class="doccomment">/// results are undefined. Because this returns a `String`, the name&#39;s bytes are interpreted as</span>
     <span class="doccomment">/// utf-8.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">fd_path</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/proc/self/fd/{}&quot;</span>, <span class="self">self</span>.<span class="ident">as_raw_fd</span>());
+        <span class="kw">let</span> <span class="ident">fd_path</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;/proc/self/fd/{}&quot;</span>, <span class="self">self</span>.<span class="ident">as_raw_descriptor</span>());
         <span class="kw">let</span> <span class="ident">link_name</span> <span class="op">=</span> <span class="ident">read_link</span>(<span class="ident">fd_path</span>)<span class="question-mark">?</span>;
         <span class="ident">link_name</span>
             .<span class="ident">to_str</span>()
@@ -792,27 +788,15 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="ident">SharedMemory</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>()
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">AsRawFd</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">SharedMemory</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_fd</span>()
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">IntoRawFd</span> <span class="kw">for</span> <span class="ident">SharedMemory</span> {
-    <span class="kw">fn</span> <span class="ident">into_raw_fd</span>(<span class="self">self</span>) -&gt; <span class="ident">RawFd</span> {
-        <span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">into_raw_fd</span>()
-    }
-}
-
 <span class="kw">impl</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">SharedMemory</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
         <span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>()
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">SharedMemory</span> {
+    <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">fd</span>.<span class="ident">into_raw_descriptor</span>()
     }
 }
 
@@ -875,7 +859,7 @@
             <span class="kw">return</span>;
         }
         <span class="kw">const</span> <span class="ident">TEST_NAME</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;Name McCool Person&quot;</span>;
-        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::named</span>(<span class="ident">TEST_NAME</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::named</span>(<span class="ident">TEST_NAME</span>, <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">read_name</span>(), <span class="prelude-val">Ok</span>(<span class="ident">TEST_NAME</span>.<span class="ident">to_owned</span>()));
     }
 
@@ -935,7 +919,7 @@
         }
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;very unique name&quot;</span>;
         <span class="kw">let</span> <span class="ident">cname</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">name</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">cname</span>)).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">cname</span>), <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">read_name</span>(), <span class="prelude-val">Ok</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>()));
     }
 
