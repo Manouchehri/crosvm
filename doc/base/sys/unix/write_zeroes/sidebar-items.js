@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["PunchHole","A trait for deallocating space in a file."],["WriteZeroesAt","A trait for writing zeroes to an arbitrary position in a file."]]});
+initSidebarItems({"fn":[["file_punch_hole",""],["file_write_zeroes_at",""]]});

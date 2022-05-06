@@ -764,7 +764,7 @@
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap::Error</span> <span class="kw">as</span> <span class="ident">MmapError</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">signalfd::Error</span> <span class="kw">as</span> <span class="ident">SignalFdError</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">write_zeroes</span>::{<span class="ident">PunchHole</span>, <span class="ident">WriteZeroesAt</span>};
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">write_zeroes</span>::{<span class="ident">file_punch_hole</span>, <span class="ident">file_write_zeroes_at</span>};
 
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">cell::Cell</span>,
