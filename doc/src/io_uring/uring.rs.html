@@ -1576,6 +1576,28 @@
 <span id="1575">1575</span>
 <span id="1576">1576</span>
 <span id="1577">1577</span>
+<span id="1578">1578</span>
+<span id="1579">1579</span>
+<span id="1580">1580</span>
+<span id="1581">1581</span>
+<span id="1582">1582</span>
+<span id="1583">1583</span>
+<span id="1584">1584</span>
+<span id="1585">1585</span>
+<span id="1586">1586</span>
+<span id="1587">1587</span>
+<span id="1588">1588</span>
+<span id="1589">1589</span>
+<span id="1590">1590</span>
+<span id="1591">1591</span>
+<span id="1592">1592</span>
+<span id="1593">1593</span>
+<span id="1594">1594</span>
+<span id="1595">1595</span>
+<span id="1596">1596</span>
+<span id="1597">1597</span>
+<span id="1598">1598</span>
+<span id="1599">1599</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2143,6 +2165,28 @@
 
             <span class="ident">sqe</span>.<span class="ident">set_addr</span>(<span class="number">0</span>);
             <span class="ident">sqe</span>.<span class="ident">len</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="ident">sqe</span>.<span class="ident">set_off</span>(<span class="number">0</span>);
+            <span class="ident">sqe</span>.<span class="ident">set_buf_index</span>(<span class="number">0</span>);
+            <span class="ident">sqe</span>.<span class="ident">ioprio</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="ident">sqe</span>.<span class="ident">flags</span> <span class="op">=</span> <span class="number">0</span>;
+        })
+    }
+
+    <span class="doccomment">/// Attempt to cancel an already issued request. addr must contain the user_data field of the</span>
+    <span class="doccomment">/// request that should be cancelled. The cancellation request will complete with one of the</span>
+    <span class="doccomment">/// following results codes. If found, the res field of the cqe will contain 0. If not found,</span>
+    <span class="doccomment">/// res will contain -ENOENT. If found and attempted cancelled, the res field will contain</span>
+    <span class="doccomment">/// -EALREADY. In this case, the request may or may not terminate. In general, requests that</span>
+    <span class="doccomment">/// are interruptible (like socket IO) will get cancelled, while disk IO requests cannot be</span>
+    <span class="doccomment">/// cancelled if already started.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">async_cancel</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">UserData</span>, <span class="ident">user_data</span>: <span class="ident">UserData</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">submit_ring</span>.<span class="ident">lock</span>().<span class="ident">prep_next_sqe</span>(<span class="op">|</span><span class="ident">sqe</span>, <span class="ident">_iovec</span><span class="op">|</span> {
+            <span class="ident">sqe</span>.<span class="ident">opcode</span> <span class="op">=</span> <span class="ident">IORING_OP_ASYNC_CANCEL</span> <span class="kw">as</span> <span class="ident">u8</span>;
+            <span class="ident">sqe</span>.<span class="ident">user_data</span> <span class="op">=</span> <span class="ident">user_data</span>;
+            <span class="ident">sqe</span>.<span class="ident">set_addr</span>(<span class="ident">addr</span>);
+
+            <span class="ident">sqe</span>.<span class="ident">len</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="ident">sqe</span>.<span class="ident">fd</span> <span class="op">=</span> <span class="number">0</span>;
             <span class="ident">sqe</span>.<span class="ident">set_off</span>(<span class="number">0</span>);
             <span class="ident">sqe</span>.<span class="ident">set_buf_index</span>(<span class="number">0</span>);
             <span class="ident">sqe</span>.<span class="ident">ioprio</span> <span class="op">=</span> <span class="number">0</span>;
