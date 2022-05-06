@@ -155,6 +155,30 @@
 <span id="154">154</span>
 <span id="155">155</span>
 <span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -201,24 +225,48 @@
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// # use base::{</span>
-<span class="doccomment">///     Result, Event, WaitContext,</span>
-<span class="doccomment">/// };</span>
-<span class="doccomment">/// # fn test() -&gt; Result&lt;()&gt; {</span>
-<span class="doccomment">///     let evt1 = Event::new()?;</span>
-<span class="doccomment">///     let evt2 = Event::new()?;</span>
-<span class="doccomment">///     evt2.write(1)?;</span>
+<span class="doccomment">/// use base::{Event, PollToken, Result, WaitContext};</span>
 <span class="doccomment">///</span>
-<span class="doccomment">///     let ctx: WaitContext&lt;u32&gt; = WaitContext::new()?;</span>
-<span class="doccomment">///     ctx.add(&amp;evt1, 1)?;</span>
-<span class="doccomment">///     ctx.add(&amp;evt2, 2)?;</span>
+<span class="doccomment">/// #[derive(PollToken, Copy, Clone, Debug, PartialEq)]</span>
+<span class="doccomment">/// enum ExampleToken {</span>
+<span class="doccomment">///    SomeEvent(u32),</span>
+<span class="doccomment">///    AnotherEvent,</span>
+<span class="doccomment">/// }</span>
 <span class="doccomment">///</span>
-<span class="doccomment">///     let events = ctx.wait()?;</span>
-<span class="doccomment">///     let tokens: Vec&lt;u32&gt; = events.iter().filter(|e| e.is_readable)</span>
-<span class="doccomment">///         .map(|e| e.token).collect();</span>
-<span class="doccomment">///     assert_eq!(tokens, [2]);</span>
-<span class="doccomment">/// #   Ok(())</span>
-<span class="doccomment">/// # }</span>
+<span class="doccomment">/// let evt1 = Event::new()?;</span>
+<span class="doccomment">/// let evt2 = Event::new()?;</span>
+<span class="doccomment">/// let another_evt = Event::new()?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let ctx: WaitContext&lt;ExampleToken&gt; = WaitContext::build_with(&amp;[</span>
+<span class="doccomment">///     (&amp;evt1, ExampleToken::SomeEvent(1)),</span>
+<span class="doccomment">///     (&amp;evt2, ExampleToken::SomeEvent(2)),</span>
+<span class="doccomment">///     (&amp;another_evt, ExampleToken::AnotherEvent),</span>
+<span class="doccomment">/// ])?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Trigger one of the `SomeEvent` events.</span>
+<span class="doccomment">/// evt2.write(1)?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Wait for an event to fire. `wait()` will return immediately in this example because `evt2`</span>
+<span class="doccomment">/// // has already been triggered, but in normal use, `wait()` will block until at least one event</span>
+<span class="doccomment">/// // is signaled by another thread or process.</span>
+<span class="doccomment">/// let events = ctx.wait()?;</span>
+<span class="doccomment">/// let tokens: Vec&lt;ExampleToken&gt; = events.iter().filter(|e| e.is_readable)</span>
+<span class="doccomment">///     .map(|e| e.token).collect();</span>
+<span class="doccomment">/// assert_eq!(tokens, [ExampleToken::SomeEvent(2)]);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Reset evt2 so it doesn&#39;t trigger again in the next `wait()` call.</span>
+<span class="doccomment">/// let _ = evt2.read()?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// // Trigger a different event.</span>
+<span class="doccomment">/// another_evt.write(1)?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let events = ctx.wait()?;</span>
+<span class="doccomment">/// let tokens: Vec&lt;ExampleToken&gt; = events.iter().filter(|e| e.is_readable)</span>
+<span class="doccomment">///     .map(|e| e.token).collect();</span>
+<span class="doccomment">/// assert_eq!(tokens, [ExampleToken::AnotherEvent]);</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let _ = another_evt.read()?;</span>
+<span class="doccomment">/// # Ok::&lt;(), base::Error&gt;(())</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span>(<span class="ident">EventContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 

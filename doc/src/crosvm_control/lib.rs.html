@@ -356,13 +356,17 @@
 <span id="355">355</span>
 <span id="356">356</span>
 <span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
-<span class="comment">//</span>
-<span class="comment">// Provides parts of crosvm as a library to communicate with running crosvm instances.</span>
-<span class="comment">// Usually you would need to invoke crosvm with subcommands and you&#39;d get the result on</span>
-<span class="comment">// stdout.</span>
+
+<span class="doccomment">//! Provides parts of crosvm as a library to communicate with running crosvm instances.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This crate is a programmatic alternative to invoking crosvm with subcommands that produce the</span>
+<span class="doccomment">//! result on stdout.</span>
+
 <span class="kw">use</span> <span class="ident">std::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 <span class="kw">use</span> <span class="ident">std::ffi::CStr</span>;
 <span class="kw">use</span> <span class="ident">std::panic::catch_unwind</span>;

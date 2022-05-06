@@ -983,7 +983,7 @@
     <span class="doccomment">///     for the memory write transaction; different MSI-X vectors have</span>
     <span class="doccomment">///     different Message Address values</span>
     <span class="doccomment">/// Message Data: the contents of this field specifies the data driven</span>
-    <span class="doccomment">///     on AD[31::00] during the memory write transaction&#39;s data phase.</span>
+    <span class="doccomment">///     on AD\[31::00\] during the memory write transaction&#39;s data phase.</span>
     <span class="doccomment">/// Vector Control: only bit 0 (Mask Bit) is not reserved: when this bit</span>
     <span class="doccomment">///     is set, the function is prohibited from sending a message using</span>
     <span class="doccomment">///     this MSI-X Table entry.</span>
@@ -1078,7 +1078,7 @@
     <span class="doccomment">///  * &#39;offset&#39; - the offset within the PBA entries</span>
     <span class="doccomment">///  * &#39;data&#39; - used to store the read results</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Pending Bits[63::00]: For each Pending Bit that is set, the function</span>
+    <span class="doccomment">/// Pending Bits\[63::00\]: For each Pending Bit that is set, the function</span>
     <span class="doccomment">/// has a pending message for the associated MSI-X Table entry.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_pba_entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
         <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">usize</span> <span class="op">=</span> (<span class="ident">offset</span> <span class="op">/</span> <span class="ident">MSIX_PBA_ENTRIES_MODULO</span>) <span class="kw">as</span> <span class="ident">usize</span>;
