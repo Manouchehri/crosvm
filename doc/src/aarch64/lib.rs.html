@@ -741,7 +741,7 @@
     <span class="ident">AARCH64_PHYS_MEM_START</span> <span class="op">-</span> <span class="ident">AARCH64_PROTECTED_VM_FW_MAX_SIZE</span>;
 
 <span class="kw">const</span> <span class="ident">AARCH64_PVTIME_IPA_MAX_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x10000</span>;
-<span class="kw">const</span> <span class="ident">AARCH64_PVTIME_IPA_START</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">AARCH64_PROTECTED_VM_FW_START</span> <span class="op">-</span> <span class="ident">AARCH64_PVTIME_IPA_MAX_SIZE</span>;
+<span class="kw">const</span> <span class="ident">AARCH64_PVTIME_IPA_START</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">AARCH64_MMIO_BASE</span> <span class="op">-</span> <span class="ident">AARCH64_PVTIME_IPA_MAX_SIZE</span>;
 <span class="kw">const</span> <span class="ident">AARCH64_PVTIME_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">64</span>;
 
 <span class="comment">// These constants indicate the placement of the GIC registers in the physical</span>
