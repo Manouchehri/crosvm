@@ -809,6 +809,26 @@
 <span id="808">808</span>
 <span id="809">809</span>
 <span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -831,9 +851,18 @@
 <span class="kw">use</span> <span class="ident">log::warn</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">EventType</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 
 <span class="kw">const</span> <span class="ident">POLL_CONTEXT_MAX_EVENTS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">16</span>;
+
+<span class="kw">fn</span> <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>: <span class="ident">EventType</span>) -&gt; <span class="ident">WatchingEvents</span> {
+    <span class="kw">match</span> <span class="ident">event_type</span> {
+        <span class="ident">EventType::None</span> =&gt; <span class="ident">WatchingEvents::empty</span>(),
+        <span class="ident">EventType::Read</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(),
+        <span class="ident">EventType::Write</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_write</span>(),
+        <span class="ident">EventType::ReadWrite</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>().<span class="ident">set_write</span>(),
+    }
+}
 
 <span class="doccomment">/// EpollEvents wraps raw epoll_events, it should only be used with EpollContext.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EpollEvents</span>(<span class="ident">RefCell</span><span class="op">&lt;</span>[<span class="ident">epoll_event</span>; <span class="ident">POLL_CONTEXT_MAX_EVENTS</span>]<span class="op">&gt;</span>);
@@ -1387,13 +1416,23 @@
         <span class="self">self</span>.<span class="ident">add_fd_with_events</span>(<span class="ident">fd</span>, <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(), <span class="ident">token</span>)
     }
 
-    <span class="doccomment">/// Adds the given `fd` to this context, watching for the specified events and associates the</span>
-    <span class="doccomment">/// given &#39;token&#39; with those events.</span>
+    <span class="doccomment">/// Adds the given `descriptor` to this context, watching for the specified events and</span>
+    <span class="doccomment">/// associates the given &#39;token&#39; with those events.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// A `fd` can only be added once and does not need to be kept open. If the `fd` is dropped and</span>
-    <span class="doccomment">/// there were no duplicated file descriptors (i.e. adding the same descriptor with a different</span>
-    <span class="doccomment">/// FD number) added to this context, events will not be reported by `wait` anymore.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_fd_with_events</span>(
+    <span class="doccomment">/// A `descriptor` can only be added once and does not need to be kept open. If the `descriptor`</span>
+    <span class="doccomment">/// is dropped and there were no duplicated file descriptors (i.e. adding the same descriptor</span>
+    <span class="doccomment">/// with a different FD number) added to this context, events will not be reported by `wait`</span>
+    <span class="doccomment">/// anymore.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_for_event</span>(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        <span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
+        <span class="ident">event_type</span>: <span class="ident">EventType</span>,
+        <span class="ident">token</span>: <span class="ident">T</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">add_fd_with_events</span>(<span class="ident">descriptor</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">add_fd_with_events</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
         <span class="ident">events</span>: <span class="ident">WatchingEvents</span>,
@@ -1406,9 +1445,10 @@
     }
 
     <span class="doccomment">/// If `fd` was previously added to this context, the watched events will be replaced with</span>
-    <span class="doccomment">/// `events` and the token associated with it will be replaced with the given `token`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">events</span>: <span class="ident">WatchingEvents</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">modify</span>(<span class="ident">fd</span>, <span class="ident">events</span>, <span class="ident">token</span>)
+    <span class="doccomment">/// `event_type` and the token associated with it will be replaced with the given `token`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">modify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>, <span class="ident">event_type</span>: <span class="ident">EventType</span>, <span class="ident">token</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">epoll_ctx</span>
+            .<span class="ident">modify</span>(<span class="ident">fd</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
     }
 
     <span class="doccomment">/// Deletes the given `fd` from this context.</span>

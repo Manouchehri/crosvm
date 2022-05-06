@@ -86,6 +86,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">syslog</span>;
 <span class="kw">mod</span> <span class="ident">timer</span>;
 <span class="kw">mod</span> <span class="ident">tube</span>;
+<span class="kw">mod</span> <span class="ident">wait_context</span>;
 <span class="kw">mod</span> <span class="ident">write_zeroes</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sys</span>;
@@ -106,18 +107,17 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">shm::SharedMemory</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">timer</span>::{<span class="ident">FakeTimer</span>, <span class="ident">Timer</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tube</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">TubeError</span>, <span class="ident">RecvTube</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">TubeResult</span>, <span class="ident">SendTube</span>, <span class="ident">Tube</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wait_context</span>::{<span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">TriggeredEvent</span>, <span class="ident">WaitContext</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">write_zeroes</span>::{<span class="ident">PunchHole</span>, <span class="ident">WriteZeroesAt</span>};
 
 <span class="macro">cfg_if::cfg_if!</span> {
      <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">wait_context</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::unix</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">unix::net</span>::<span class="kw-2">*</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">Unix</span> <span class="kw">as</span> <span class="ident">MemoryMappingUnix</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wait_context</span>::{<span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">TriggeredEvent</span>, <span class="ident">WaitContext</span>};
      } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::MemoryMappingBuilderWindows</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::EventExt</span>;

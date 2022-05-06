@@ -168,17 +168,6 @@
 <span id="167">167</span>
 <span id="168">168</span>
 <span id="169">169</span>
-<span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
-<span id="176">176</span>
-<span id="177">177</span>
-<span id="178">178</span>
-<span id="179">179</span>
-<span id="180">180</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -187,7 +176,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor::AsRawDescriptor</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">platform</span>::{<span class="ident">EventContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>},
+    <span class="ident">platform</span>::{<span class="ident">EventContext</span>, <span class="ident">PollToken</span>},
     <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
@@ -295,8 +284,7 @@
         <span class="ident">event_type</span>: <span class="ident">EventType</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>
-            .<span class="ident">add_fd_with_events</span>(<span class="ident">descriptor</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">add_for_event</span>(<span class="ident">descriptor</span>, <span class="ident">event_type</span>, <span class="ident">token</span>)
     }
 
     <span class="doccomment">/// Adds multiple triggers to the WaitContext.</span>
@@ -315,8 +303,7 @@
         <span class="ident">event_type</span>: <span class="ident">EventType</span>,
         <span class="ident">token</span>: <span class="ident">T</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>
-            .<span class="ident">modify</span>(<span class="ident">descriptor</span>, <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>), <span class="ident">token</span>)
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">modify</span>(<span class="ident">descriptor</span>, <span class="ident">event_type</span>, <span class="ident">token</span>)
     }
 
     <span class="doccomment">/// Removes the given handle from triggers registered in the WaitContext if</span>
@@ -348,15 +335,6 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_descriptor</span>()
-    }
-}
-
-<span class="kw">fn</span> <span class="ident">convert_to_watching_events</span>(<span class="ident">event_type</span>: <span class="ident">EventType</span>) -&gt; <span class="ident">WatchingEvents</span> {
-    <span class="kw">match</span> <span class="ident">event_type</span> {
-        <span class="ident">EventType::None</span> =&gt; <span class="ident">WatchingEvents::empty</span>(),
-        <span class="ident">EventType::Read</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(),
-        <span class="ident">EventType::Write</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_write</span>(),
-        <span class="ident">EventType::ReadWrite</span> =&gt; <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>().<span class="ident">set_write</span>(),
     }
 }
 </code></pre></div>
