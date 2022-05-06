@@ -1410,6 +1410,11 @@
 <span id="1409">1409</span>
 <span id="1410">1410</span>
 <span id="1411">1411</span>
+<span id="1412">1412</span>
+<span id="1413">1413</span>
+<span id="1414">1414</span>
+<span id="1415">1415</span>
+<span id="1416">1416</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2403,7 +2408,11 @@
     <span class="doccomment">/// Command to set battery.</span>
     <span class="ident">BatCommand</span>(<span class="ident">BatteryType</span>, <span class="ident">BatControlCommand</span>),
     <span class="doccomment">/// Command to add/remove vfio pci device</span>
-    <span class="ident">VfioCommand</span> { <span class="ident">vfio_path</span>: <span class="ident">PathBuf</span>, <span class="ident">add</span>: <span class="ident">bool</span> },
+    <span class="ident">VfioCommand</span> {
+        <span class="ident">vfio_path</span>: <span class="ident">PathBuf</span>,
+        <span class="ident">add</span>: <span class="ident">bool</span>,
+        <span class="ident">hp_interrupt</span>: <span class="ident">bool</span>,
+    },
 }
 
 <span class="kw">fn</span> <span class="ident">map_descriptor</span>(
@@ -2630,6 +2639,7 @@
             <span class="ident">VmRequest::VfioCommand</span> {
                 <span class="ident">vfio_path</span>: <span class="kw">_</span>,
                 <span class="ident">add</span>: <span class="kw">_</span>,
+                <span class="ident">hp_interrupt</span>: <span class="kw">_</span>,
             } =&gt; <span class="ident">VmResponse::Ok</span>,
         }
     }
