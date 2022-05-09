@@ -257,7 +257,7 @@
 <span class="doccomment">/// let _ = another_evt.read()?;</span>
 <span class="doccomment">/// # Ok::&lt;(), base::Error&gt;(())</span>
 <span class="doccomment">/// ```</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span>(<span class="ident">EventContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">EventContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates a new WaitContext.</span>
