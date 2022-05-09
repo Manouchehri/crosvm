@@ -65,6 +65,11 @@
 <span id="64">64</span>
 <span id="65">65</span>
 <span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -77,15 +82,10 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_io_nr</span>, <span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_iowr_nr</span>};
 
-<span class="comment">// generated with bindgen /usr/include/linux/vhost.h --no-unstable-rust --constified-enum &#39;*&#39; --with-derive-default</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vhost</span>;
-<span class="comment">// generated with bindgen /usr/include/linux/virtio_net.h --no-unstable-rust --constified-enum &#39;*&#39; --with-derive-default</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">virtio_config</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">virtio_net</span>;
-<span class="comment">// generated with bindgen /usr/include/linux/virtio_ring.h --no-unstable-rust --constified-enum &#39;*&#39; --with-derive-default</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">virtio_ring</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vhost</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio_net</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio_ring</span>::<span class="kw-2">*</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VHOST</span>: <span class="ident">::std::os::raw::c_uint</span> <span class="op">=</span> <span class="number">0xaf</span>;
 
@@ -93,19 +93,29 @@
 <span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_FEATURES</span>, <span class="ident">VHOST</span>, <span class="number">0x00</span>, <span class="ident">::std::os::raw::c_ulonglong</span>);
 <span class="macro">ioctl_io_nr!</span>(<span class="ident">VHOST_SET_OWNER</span>, <span class="ident">VHOST</span>, <span class="number">0x01</span>);
 <span class="macro">ioctl_io_nr!</span>(<span class="ident">VHOST_RESET_OWNER</span>, <span class="ident">VHOST</span>, <span class="number">0x02</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_MEM_TABLE</span>, <span class="ident">VHOST</span>, <span class="number">0x03</span>, <span class="ident">vhost_memory</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_MEM_TABLE</span>, <span class="ident">VHOST</span>, <span class="number">0x03</span>, <span class="ident">vhost::vhost_memory</span>);
 <span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_LOG_BASE</span>, <span class="ident">VHOST</span>, <span class="number">0x04</span>, <span class="ident">::std::os::raw::c_ulonglong</span>);
 <span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_LOG_FD</span>, <span class="ident">VHOST</span>, <span class="number">0x07</span>, <span class="ident">::std::os::raw::c_int</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_NUM</span>, <span class="ident">VHOST</span>, <span class="number">0x10</span>, <span class="ident">vhost_vring_state</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_ADDR</span>, <span class="ident">VHOST</span>, <span class="number">0x11</span>, <span class="ident">vhost_vring_addr</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_BASE</span>, <span class="ident">VHOST</span>, <span class="number">0x12</span>, <span class="ident">vhost_vring_state</span>);
-<span class="macro">ioctl_iowr_nr!</span>(<span class="ident">VHOST_GET_VRING_BASE</span>, <span class="ident">VHOST</span>, <span class="number">0x12</span>, <span class="ident">vhost_vring_state</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_KICK</span>, <span class="ident">VHOST</span>, <span class="number">0x20</span>, <span class="ident">vhost_vring_file</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_CALL</span>, <span class="ident">VHOST</span>, <span class="number">0x21</span>, <span class="ident">vhost_vring_file</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_ERR</span>, <span class="ident">VHOST</span>, <span class="number">0x22</span>, <span class="ident">vhost_vring_file</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_NET_SET_BACKEND</span>, <span class="ident">VHOST</span>, <span class="number">0x30</span>, <span class="ident">vhost_vring_file</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SCSI_SET_ENDPOINT</span>, <span class="ident">VHOST</span>, <span class="number">0x40</span>, <span class="ident">vhost_scsi_target</span>);
-<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SCSI_CLEAR_ENDPOINT</span>, <span class="ident">VHOST</span>, <span class="number">0x41</span>, <span class="ident">vhost_scsi_target</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_NUM</span>, <span class="ident">VHOST</span>, <span class="number">0x10</span>, <span class="ident">vhost::vhost_vring_state</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_ADDR</span>, <span class="ident">VHOST</span>, <span class="number">0x11</span>, <span class="ident">vhost::vhost_vring_addr</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_BASE</span>, <span class="ident">VHOST</span>, <span class="number">0x12</span>, <span class="ident">vhost::vhost_vring_state</span>);
+<span class="macro">ioctl_iowr_nr!</span>(<span class="ident">VHOST_GET_VRING_BASE</span>, <span class="ident">VHOST</span>, <span class="number">0x12</span>, <span class="ident">vhost::vhost_vring_state</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_KICK</span>, <span class="ident">VHOST</span>, <span class="number">0x20</span>, <span class="ident">vhost::vhost_vring_file</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_CALL</span>, <span class="ident">VHOST</span>, <span class="number">0x21</span>, <span class="ident">vhost::vhost_vring_file</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_SET_VRING_ERR</span>, <span class="ident">VHOST</span>, <span class="number">0x22</span>, <span class="ident">vhost::vhost_vring_file</span>);
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">VHOST_NET_SET_BACKEND</span>, <span class="ident">VHOST</span>, <span class="number">0x30</span>, <span class="ident">vhost::vhost_vring_file</span>);
+<span class="macro">ioctl_iow_nr!</span>(
+    <span class="ident">VHOST_SCSI_SET_ENDPOINT</span>,
+    <span class="ident">VHOST</span>,
+    <span class="number">0x40</span>,
+    <span class="ident">vhost::vhost_scsi_target</span>
+);
+<span class="macro">ioctl_iow_nr!</span>(
+    <span class="ident">VHOST_SCSI_CLEAR_ENDPOINT</span>,
+    <span class="ident">VHOST</span>,
+    <span class="number">0x41</span>,
+    <span class="ident">vhost::vhost_scsi_target</span>
+);
 <span class="macro">ioctl_iow_nr!</span>(
     <span class="ident">VHOST_SCSI_GET_ABI_VERSION</span>,
     <span class="ident">VHOST</span>,

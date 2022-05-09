@@ -159,6 +159,7 @@
 <span id="158">158</span>
 <span id="159">159</span>
 <span id="160">160</span>
+<span id="161">161</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -167,6 +168,7 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">data_model::Le64</span>;
+<span class="kw">use</span> <span class="ident">virtio_sys</span>::{<span class="ident">vhost</span>, <span class="ident">virtio_config</span>, <span class="ident">virtio_ring</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::{<span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>};
 
@@ -193,11 +195,11 @@
         <span class="kw">let</span> <span class="ident">allow_features</span> <span class="op">=</span> <span class="ident">init_features</span>
             <span class="op">|</span> <span class="ident">base_features</span>
             <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">VIRTIO_F_VERSION_1</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_sys::vhost::VIRTIO_RING_F_INDIRECT_DESC</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_sys::vhost::VIRTIO_RING_F_EVENT_IDX</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_sys::vhost::VIRTIO_F_NOTIFY_ON_EMPTY</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_sys::vhost::VHOST_F_LOG_ALL</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_sys::vhost::VIRTIO_F_ANY_LAYOUT</span>;
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_ring::VIRTIO_RING_F_INDIRECT_DESC</span>
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_ring::VIRTIO_RING_F_EVENT_IDX</span>
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_config::VIRTIO_F_NOTIFY_ON_EMPTY</span>
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">vhost::VHOST_F_LOG_ALL</span>
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_config::VIRTIO_F_ANY_LAYOUT</span>;
         <span class="kw">let</span> <span class="ident">allow_protocol_features</span> <span class="op">=</span>
             <span class="ident">VhostUserProtocolFeatures::MQ</span> <span class="op">|</span> <span class="ident">VhostUserProtocolFeatures::CONFIG</span>;
 

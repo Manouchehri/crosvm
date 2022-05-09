@@ -531,7 +531,7 @@
 <span class="kw">use</span> <span class="ident">memoffset::offset_of</span>;
 <span class="kw">use</span> <span class="ident">resources::Alloc</span>;
 <span class="kw">use</span> <span class="ident">vfio_sys</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">virtio_sys::vhost::VIRTIO_F_VERSION_1</span>;
+<span class="kw">use</span> <span class="ident">virtio_sys::virtio_config</span>::{<span class="self">self</span>, <span class="ident">VIRTIO_F_VERSION_1</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">MsixCap</span>, <span class="ident">PciAddress</span>, <span class="ident">PciCapabilityID</span>, <span class="ident">CAPABILITY_LIST_HEAD_OFFSET</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioPciConfig</span>, <span class="ident">VfioRegionAddr</span>};
@@ -970,8 +970,8 @@
         }
 
         <span class="self">self</span>.<span class="ident">set_status</span>(
-            (<span class="ident">virtio_sys::vhost::VIRTIO_CONFIG_S_ACKNOWLEDGE</span>
-                <span class="op">|</span> <span class="ident">virtio_sys::vhost::VIRTIO_CONFIG_S_DRIVER</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+            (<span class="ident">virtio_config::VIRTIO_CONFIG_S_ACKNOWLEDGE</span> <span class="op">|</span> <span class="ident">virtio_config::VIRTIO_CONFIG_S_DRIVER</span>)
+                <span class="kw">as</span> <span class="ident">u8</span>,
         );
 
         <span class="comment">// TODO(b/207364742): Support VIRTIO_RING_F_EVENT_IDX.</span>
@@ -985,7 +985,7 @@
                 <span class="ident">enabled_features</span>
             );
         };
-        <span class="self">self</span>.<span class="ident">set_status</span>(<span class="ident">virtio_sys::vhost::VIRTIO_CONFIG_S_FEATURES_OK</span> <span class="kw">as</span> <span class="ident">u8</span>);
+        <span class="self">self</span>.<span class="ident">set_status</span>(<span class="ident">virtio_config::VIRTIO_CONFIG_S_FEATURES_OK</span> <span class="kw">as</span> <span class="ident">u8</span>);
 
         <span class="comment">// Initialize Virtqueues</span>
         <span class="kw">let</span> (<span class="ident">queues</span>, <span class="ident">queue_notifiers</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_queues</span>()<span class="question-mark">?</span>;
@@ -996,7 +996,7 @@
         <span class="self">self</span>.<span class="ident">irqs</span> <span class="op">=</span> <span class="ident">irqs</span>;
         <span class="self">self</span>.<span class="ident">notification_evts</span> <span class="op">=</span> <span class="ident">notification_evts</span>;
 
-        <span class="self">self</span>.<span class="ident">set_status</span>(<span class="ident">virtio_sys::vhost::VIRTIO_CONFIG_S_DRIVER_OK</span> <span class="kw">as</span> <span class="ident">u8</span>);
+        <span class="self">self</span>.<span class="ident">set_status</span>(<span class="ident">virtio_config::VIRTIO_CONFIG_S_DRIVER_OK</span> <span class="kw">as</span> <span class="ident">u8</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
