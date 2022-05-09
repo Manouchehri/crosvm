@@ -408,7 +408,7 @@
                 <span class="ident">entry</span>.<span class="ident">ecx</span> <span class="op">&amp;=</span> <span class="op">!</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">ECX_EPB_SHIFT</span>);
 
                 <span class="comment">// Set ITMT related features.</span>
-                <span class="kw">if</span> <span class="ident">itmt</span> {
+                <span class="kw">if</span> <span class="ident">host_cpu_topology</span> <span class="op">|</span><span class="op">|</span> <span class="ident">itmt</span> {
                     <span class="comment">// Safe because we pass 6 for this call and the host</span>
                     <span class="comment">// supports the `cpuid` instruction</span>
                     <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">__cpuid</span>(<span class="ident">entry</span>.<span class="ident">function</span>) };
