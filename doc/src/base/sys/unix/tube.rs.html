@@ -145,6 +145,12 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -160,7 +166,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">platform</span>::{<span class="ident">deserialize_with_descriptors</span>, <span class="ident">SerializeDescriptors</span>},
     <span class="ident">tube</span>::{<span class="ident">Error</span>, <span class="ident">RecvTube</span>, <span class="prelude-ty">Result</span>, <span class="ident">SendTube</span>},
-    <span class="ident">RawDescriptor</span>, <span class="ident">ReadNotifier</span>, <span class="ident">ScmSocket</span>, <span class="ident">UnixSeqpacket</span>, <span class="ident">UnsyncMarker</span>,
+    <span class="ident">CloseNotifier</span>, <span class="ident">RawDescriptor</span>, <span class="ident">ReadNotifier</span>, <span class="ident">ScmSocket</span>, <span class="ident">UnixSeqpacket</span>, <span class="ident">UnsyncMarker</span>,
 };
 
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">de::DeserializeOwned</span>, <span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
@@ -264,6 +270,12 @@
 <span class="kw">impl</span> <span class="ident">ReadNotifier</span> <span class="kw">for</span> <span class="ident">Tube</span> {
     <span class="kw">fn</span> <span class="ident">get_read_notifier</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">socket</span>
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">CloseNotifier</span> <span class="kw">for</span> <span class="ident">Tube</span> {
+    <span class="kw">fn</span> <span class="ident">get_close_notifier</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span> {
+        <span class="self">self</span>.<span class="ident">socket</span>.<span class="ident">get_close_notifier</span>()
     }
 }
 
