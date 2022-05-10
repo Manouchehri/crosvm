@@ -1948,7 +1948,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::resource_bridge</span>::{
     <span class="ident">get_resource_info</span>, <span class="ident">BufferInfo</span>, <span class="ident">ResourceBridgeError</span>, <span class="ident">ResourceInfo</span>, <span class="ident">ResourceRequest</span>,
 };
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>, <span class="ident">VirtioDevice</span>, <span class="ident">Writer</span>, <span class="ident">TYPE_WL</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>, <span class="ident">VirtioDevice</span>, <span class="ident">Writer</span>};
 <span class="kw">use</span> <span class="ident">vm_control</span>::{<span class="ident">MemSlot</span>, <span class="ident">VmMemoryDestination</span>, <span class="ident">VmMemoryRequest</span>, <span class="ident">VmMemoryResponse</span>, <span class="ident">VmMemorySource</span>};
 
 <span class="kw">const</span> <span class="ident">VIRTWL_SEND_MAX_ALLOCS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">28</span>;
@@ -3677,8 +3677,8 @@
         <span class="ident">keep_rds</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
-        <span class="ident">TYPE_WL</span>
+    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceType</span> {
+        <span class="ident">DeviceType::Wl</span>
     }
 
     <span class="kw">fn</span> <span class="ident">queue_max_sizes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {

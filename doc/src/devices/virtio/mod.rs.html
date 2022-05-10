@@ -171,6 +171,9 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -237,38 +240,10 @@
 
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">virtio_sys::virtio_config</span>::{<span class="ident">VIRTIO_F_ACCESS_PLATFORM</span>, <span class="ident">VIRTIO_F_VERSION_1</span>};
+<span class="kw">use</span> <span class="ident">virtio_sys::virtio_ids</span>;
 <span class="kw">use</span> <span class="ident">virtio_sys::virtio_ring::VIRTIO_RING_F_EVENT_IDX</span>;
 
 <span class="kw">const</span> <span class="ident">DEVICE_RESET</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0</span>;
-
-<span class="comment">// Types taken from linux/virtio_ids.h</span>
-<span class="kw">const</span> <span class="ident">TYPE_NET</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span>;
-<span class="kw">const</span> <span class="ident">TYPE_BLOCK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">2</span>;
-<span class="kw">const</span> <span class="ident">TYPE_CONSOLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">3</span>;
-<span class="kw">const</span> <span class="ident">TYPE_RNG</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">4</span>;
-<span class="kw">const</span> <span class="ident">TYPE_BALLOON</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">5</span>;
-<span class="kw">const</span> <span class="ident">TYPE_RPMSG</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">7</span>;
-<span class="kw">const</span> <span class="ident">TYPE_SCSI</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">8</span>;
-<span class="kw">const</span> <span class="ident">TYPE_9P</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">9</span>;
-<span class="kw">const</span> <span class="ident">TYPE_RPROC_SERIAL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">11</span>;
-<span class="kw">const</span> <span class="ident">TYPE_CAIF</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">12</span>;
-<span class="kw">const</span> <span class="ident">TYPE_GPU</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">16</span>;
-<span class="kw">const</span> <span class="ident">TYPE_INPUT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">18</span>;
-<span class="kw">const</span> <span class="ident">TYPE_VSOCK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">19</span>;
-<span class="kw">const</span> <span class="ident">TYPE_CRYPTO</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">20</span>;
-<span class="kw">const</span> <span class="ident">TYPE_IOMMU</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">23</span>;
-<span class="kw">const</span> <span class="ident">TYPE_SOUND</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">25</span>;
-<span class="kw">const</span> <span class="ident">TYPE_FS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">26</span>;
-<span class="kw">const</span> <span class="ident">TYPE_PMEM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">27</span>;
-<span class="kw">const</span> <span class="ident">TYPE_MAC80211_HWSIM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">29</span>;
-<span class="kw">const</span> <span class="ident">TYPE_VIDEO_ENC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">30</span>;
-<span class="kw">const</span> <span class="ident">TYPE_VIDEO_DEC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">31</span>;
-<span class="comment">// Additional types invented by crosvm</span>
-<span class="kw">const</span> <span class="ident">MAX_VIRTIO_DEVICE_ID</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">63</span>;
-<span class="kw">const</span> <span class="ident">TYPE_WL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">MAX_VIRTIO_DEVICE_ID</span>;
-<span class="kw">const</span> <span class="ident">TYPE_TPM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">MAX_VIRTIO_DEVICE_ID</span> <span class="op">-</span> <span class="number">1</span>;
-<span class="comment">// TODO(abhishekbh): Fix this after this device is accepted upstream.</span>
-<span class="kw">const</span> <span class="ident">TYPE_VHOST_USER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">MAX_VIRTIO_DEVICE_ID</span> <span class="op">-</span> <span class="number">2</span>;
 
 <span class="kw">const</span> <span class="ident">INTERRUPT_STATUS_USED_RING</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1</span>;
 <span class="kw">const</span> <span class="ident">INTERRUPT_STATUS_CONFIG_CHANGED</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x2</span>;
@@ -279,34 +254,65 @@
 <span class="doccomment">/// queue events.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NOTIFY_REG_OFFSET</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x50</span>;
 
-<span class="doccomment">/// Returns a string representation of the given virtio device type number.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">type_to_str</span>(<span class="ident">type_</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
-    <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">type_</span> {
-        <span class="ident">TYPE_NET</span> =&gt; <span class="string">&quot;net&quot;</span>,
-        <span class="ident">TYPE_BLOCK</span> =&gt; <span class="string">&quot;block&quot;</span>,
-        <span class="ident">TYPE_CONSOLE</span> =&gt; <span class="string">&quot;console&quot;</span>,
-        <span class="ident">TYPE_RNG</span> =&gt; <span class="string">&quot;rng&quot;</span>,
-        <span class="ident">TYPE_BALLOON</span> =&gt; <span class="string">&quot;balloon&quot;</span>,
-        <span class="ident">TYPE_RPMSG</span> =&gt; <span class="string">&quot;rpmsg&quot;</span>,
-        <span class="ident">TYPE_SCSI</span> =&gt; <span class="string">&quot;scsi&quot;</span>,
-        <span class="ident">TYPE_9P</span> =&gt; <span class="string">&quot;9p&quot;</span>,
-        <span class="ident">TYPE_RPROC_SERIAL</span> =&gt; <span class="string">&quot;rproc-serial&quot;</span>,
-        <span class="ident">TYPE_CAIF</span> =&gt; <span class="string">&quot;caif&quot;</span>,
-        <span class="ident">TYPE_INPUT</span> =&gt; <span class="string">&quot;input&quot;</span>,
-        <span class="ident">TYPE_GPU</span> =&gt; <span class="string">&quot;gpu&quot;</span>,
-        <span class="ident">TYPE_VSOCK</span> =&gt; <span class="string">&quot;vsock&quot;</span>,
-        <span class="ident">TYPE_CRYPTO</span> =&gt; <span class="string">&quot;crypto&quot;</span>,
-        <span class="ident">TYPE_IOMMU</span> =&gt; <span class="string">&quot;iommu&quot;</span>,
-        <span class="ident">TYPE_VHOST_USER</span> =&gt; <span class="string">&quot;vhost-user&quot;</span>,
-        <span class="ident">TYPE_SOUND</span> =&gt; <span class="string">&quot;snd&quot;</span>,
-        <span class="ident">TYPE_FS</span> =&gt; <span class="string">&quot;fs&quot;</span>,
-        <span class="ident">TYPE_PMEM</span> =&gt; <span class="string">&quot;pmem&quot;</span>,
-        <span class="ident">TYPE_WL</span> =&gt; <span class="string">&quot;wl&quot;</span>,
-        <span class="ident">TYPE_TPM</span> =&gt; <span class="string">&quot;tpm&quot;</span>,
-        <span class="ident">TYPE_VIDEO_DEC</span> =&gt; <span class="string">&quot;video-decoder&quot;</span>,
-        <span class="ident">TYPE_VIDEO_ENC</span> =&gt; <span class="string">&quot;video-encoder&quot;</span>,
-        <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
-    })
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u32</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">DeviceType</span> {
+    <span class="ident">Net</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_NET</span>,
+    <span class="ident">Block</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_BLOCK</span>,
+    <span class="ident">Console</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_CONSOLE</span>,
+    <span class="ident">Rng</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_RNG</span>,
+    <span class="ident">Balloon</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_BALLOON</span>,
+    <span class="ident">Rpmsg</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_RPMSG</span>,
+    <span class="ident">Scsi</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_SCSI</span>,
+    <span class="ident">P9</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_9P</span>,
+    <span class="ident">RprocSerial</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_RPROC_SERIAL</span>,
+    <span class="ident">Caif</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_CAIF</span>,
+    <span class="ident">Gpu</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_GPU</span>,
+    <span class="ident">Input</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_INPUT</span>,
+    <span class="ident">Vsock</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_VSOCK</span>,
+    <span class="ident">Crypto</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_CRYPTO</span>,
+    <span class="ident">Iommu</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_IOMMU</span>,
+    <span class="ident">Sound</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_SOUND</span>,
+    <span class="ident">Fs</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_FS</span>,
+    <span class="ident">Pmem</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_PMEM</span>,
+    <span class="ident">Mac80211HwSim</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_MAC80211_HWSIM</span>,
+    <span class="ident">VideoEnc</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_VIDEO_ENC</span>,
+    <span class="ident">VideoDec</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_VIDEO_DEC</span>,
+    <span class="ident">Wl</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_WL</span>,
+    <span class="ident">Tpm</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_TPM</span>,
+    <span class="ident">VhostUser</span> <span class="op">=</span> <span class="ident">virtio_ids::VIRTIO_ID_VHOST_USER</span>,
+}
+
+<span class="doccomment">/// Prints a string representation of the given virtio device type.</span>
+<span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">DeviceType</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::fmt::Result</span> {
+        <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span> {
+            <span class="ident">DeviceType::Net</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;net&quot;</span>),
+            <span class="ident">DeviceType::Block</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;block&quot;</span>),
+            <span class="ident">DeviceType::Console</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;console&quot;</span>),
+            <span class="ident">DeviceType::Rng</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;rng&quot;</span>),
+            <span class="ident">DeviceType::Balloon</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;balloon&quot;</span>),
+            <span class="ident">DeviceType::Rpmsg</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;rpmsg&quot;</span>),
+            <span class="ident">DeviceType::Scsi</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;scsi&quot;</span>),
+            <span class="ident">DeviceType::P9</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;9p&quot;</span>),
+            <span class="ident">DeviceType::RprocSerial</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;rproc-serial&quot;</span>),
+            <span class="ident">DeviceType::Caif</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;caif&quot;</span>),
+            <span class="ident">DeviceType::Input</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;input&quot;</span>),
+            <span class="ident">DeviceType::Gpu</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;gpu&quot;</span>),
+            <span class="ident">DeviceType::Vsock</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;vsock&quot;</span>),
+            <span class="ident">DeviceType::Crypto</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;crypto&quot;</span>),
+            <span class="ident">DeviceType::Iommu</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;iommu&quot;</span>),
+            <span class="ident">DeviceType::VhostUser</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;vhost-user&quot;</span>),
+            <span class="ident">DeviceType::Sound</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;snd&quot;</span>),
+            <span class="ident">DeviceType::Fs</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;fs&quot;</span>),
+            <span class="ident">DeviceType::Pmem</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;pmem&quot;</span>),
+            <span class="ident">DeviceType::Wl</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;wl&quot;</span>),
+            <span class="ident">DeviceType::Tpm</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;tpm&quot;</span>),
+            <span class="ident">DeviceType::VideoDec</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;video-decoder&quot;</span>),
+            <span class="ident">DeviceType::VideoEnc</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;video-encoder&quot;</span>),
+            <span class="ident">t</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unknown-{}&quot;</span>, <span class="ident">t</span>),
+        }
+    }
 }
 
 <span class="doccomment">/// Copy virtio device configuration data from a subslice of `src` to a subslice of `dst`.</span>

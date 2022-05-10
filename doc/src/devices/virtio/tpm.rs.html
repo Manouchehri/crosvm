@@ -302,8 +302,8 @@
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{
-    <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>, <span class="ident">VirtioDevice</span>,
-    <span class="ident">Writer</span>, <span class="ident">TYPE_TPM</span>,
+    <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>,
+    <span class="ident">VirtioDevice</span>, <span class="ident">Writer</span>,
 };
 
 <span class="comment">// A single queue of size 2. The guest kernel driver will enqueue a single</span>
@@ -482,8 +482,8 @@
         <span class="ident">Vec::new</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
-        <span class="ident">TYPE_TPM</span>
+    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceType</span> {
+        <span class="ident">DeviceType::Tpm</span>
     }
 
     <span class="kw">fn</span> <span class="ident">queue_max_sizes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {

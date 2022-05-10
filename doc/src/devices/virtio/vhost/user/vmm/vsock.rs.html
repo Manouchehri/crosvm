@@ -152,14 +152,6 @@
 <span id="151">151</span>
 <span id="152">152</span>
 <span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
-<span id="160">160</span>
-<span id="161">161</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -168,7 +160,6 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">data_model::Le64</span>;
-<span class="kw">use</span> <span class="ident">virtio_sys</span>::{<span class="ident">vhost</span>, <span class="ident">virtio_config</span>, <span class="ident">virtio_ring</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::{<span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>};
 
@@ -177,7 +168,7 @@
         <span class="ident">user::vmm</span>::{<span class="ident">handler::VhostUserHandler</span>, <span class="ident">worker::Worker</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>},
         <span class="ident">vsock</span>,
     },
-    <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">VirtioDevice</span>, <span class="ident">TYPE_VSOCK</span>, <span class="ident">VIRTIO_F_VERSION_1</span>,
+    <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">VirtioDevice</span>,
 };
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Vsock</span> {
@@ -192,14 +183,7 @@
         <span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">UnixStream::connect</span>(<span class="ident">socket_path</span>).<span class="ident">map_err</span>(<span class="ident">Error::SocketConnect</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">init_features</span> <span class="op">=</span> <span class="ident">VhostUserVirtioFeatures::PROTOCOL_FEATURES</span>.<span class="ident">bits</span>();
-        <span class="kw">let</span> <span class="ident">allow_features</span> <span class="op">=</span> <span class="ident">init_features</span>
-            <span class="op">|</span> <span class="ident">base_features</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">VIRTIO_F_VERSION_1</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_ring::VIRTIO_RING_F_INDIRECT_DESC</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_ring::VIRTIO_RING_F_EVENT_IDX</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_config::VIRTIO_F_NOTIFY_ON_EMPTY</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">vhost::VHOST_F_LOG_ALL</span>
-            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_config::VIRTIO_F_ANY_LAYOUT</span>;
+        <span class="kw">let</span> <span class="ident">allow_features</span> <span class="op">=</span> <span class="ident">init_features</span> <span class="op">|</span> <span class="ident">base_features</span>;
         <span class="kw">let</span> <span class="ident">allow_protocol_features</span> <span class="op">=</span>
             <span class="ident">VhostUserProtocolFeatures::MQ</span> <span class="op">|</span> <span class="ident">VhostUserProtocolFeatures::CONFIG</span>;
 
@@ -249,8 +233,8 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
-        <span class="ident">TYPE_VSOCK</span>
+    <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceType</span> {
+        <span class="ident">DeviceType::Vsock</span>
     }
 
     <span class="kw">fn</span> <span class="ident">queue_max_sizes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
