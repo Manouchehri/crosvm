@@ -4574,28 +4574,6 @@
 <span id="4573">4573</span>
 <span id="4574">4574</span>
 <span id="4575">4575</span>
-<span id="4576">4576</span>
-<span id="4577">4577</span>
-<span id="4578">4578</span>
-<span id="4579">4579</span>
-<span id="4580">4580</span>
-<span id="4581">4581</span>
-<span id="4582">4582</span>
-<span id="4583">4583</span>
-<span id="4584">4584</span>
-<span id="4585">4585</span>
-<span id="4586">4586</span>
-<span id="4587">4587</span>
-<span id="4588">4588</span>
-<span id="4589">4589</span>
-<span id="4590">4590</span>
-<span id="4591">4591</span>
-<span id="4592">4592</span>
-<span id="4593">4593</span>
-<span id="4594">4594</span>
-<span id="4595">4595</span>
-<span id="4596">4596</span>
-<span id="4597">4597</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -5323,13 +5301,6 @@
                 }
             },
             <span class="string">&quot;action&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
-                <span class="comment">// Compatible with the original command line format.</span>
-                <span class="comment">// TODO(b:225375705): Deprecate the old cmd format in the future.</span>
-                <span class="string">&quot;r0&quot;</span> =&gt; {
-                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                    <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>);
-                    <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>;
-                }
                 <span class="string">&quot;pass&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
                 <span class="string">&quot;emu&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
                 <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad action&quot;</span>))),
@@ -6834,14 +6805,11 @@
         }
         <span class="string">&quot;userspace-msr&quot;</span> =&gt; {
             <span class="kw">let</span> (<span class="ident">index</span>, <span class="ident">msr_config</span>) <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
-            <span class="comment">// TODO(b:225375705): MSR configuration must be unique in the future.</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">old_config</span>) <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">msr_config</span>.<span class="ident">clone</span>()) {
-                <span class="kw">if</span> <span class="ident">old_config</span> <span class="op">!</span><span class="op">=</span> <span class="ident">msr_config</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
-                        <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
-                        <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;Same msr must has the same configuration&quot;</span>),
-                    });
-                }
+            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">insert</span>(<span class="ident">index</span>, <span class="ident">msr_config</span>).<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;msr must be unique&quot;</span>),
+                });
             }
         }
         <span class="string">&quot;itmt&quot;</span> =&gt; {
@@ -7578,7 +7546,7 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
           <span class="ident">Argument::flag</span>(<span class="string">&quot;host-cpu-topology&quot;</span>, <span class="string">&quot;Use mirror cpu topology of Host for Guest VM, also copy some cpu feature to Guest VM.&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-          <span class="ident">Argument::flag</span>(<span class="string">&quot;itmt&quot;</span>, <span class="string">&quot;Enable ITMT scheduling feature.&quot;</span>),
+          <span class="ident">Argument::flag</span>(<span class="string">&quot;itmt&quot;</span>, <span class="string">&quot;Allow to enable ITMT scheduling feature in VM. The success of enabling depends on HWP and ACPI CPPC support on hardware.&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;privileged-vm&quot;</span>, <span class="string">&quot;Grant this Guest VM certian privileges to manage Host resources, such as power management.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;stub-pci-device&quot;</span>, <span class="string">&quot;DOMAIN:BUS:DEVICE.FUNCTION[,vendor=NUM][,device=NUM][,class=NUM][,subsystem_vendor=NUM][,subsystem_device=NUM][,revision=NUM]&quot;</span>, <span class="string">&quot;Comma-separated key=value pairs for setting up a stub PCI device that just enumerates. The first option in the list must specify a PCI address to claim.
                               Optional further parameters
@@ -9171,18 +9139,6 @@ with a &#39;--backing_file&#39;.&quot;</span>
             <span class="ident">MsrAction::MsrEmulate</span>
         );
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromRunningCPU</span>);
-
-        <span class="comment">// Compatible with the original command line format.</span>
-        <span class="comment">// TODO(b:225375705): Deprecate the old cmd format in the future.</span>
-        <span class="kw">let</span> (<span class="ident">old_index</span>, <span class="ident">old_cfg</span>) <span class="op">=</span> <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=r0&quot;</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">old_index</span>, <span class="number">0x10</span>);
-        <span class="macro">assert!</span>(<span class="ident">old_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="kw-2">*</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">MsrAction::MsrPassthrough</span>
-        );
-        <span class="macro">assert_eq!</span>(<span class="ident">old_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromCPU0</span>);
 
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=none&quot;</span>).<span class="ident">is_err</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=pass&quot;</span>).<span class="ident">is_err</span>());

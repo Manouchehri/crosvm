@@ -1780,7 +1780,7 @@
 <span class="doccomment">/// Read and write permissions setting</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Wrap read_allow and write_allow to store them in MsrHandlers level.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrRWType</span> {
     <span class="kw">pub</span> <span class="ident">read_allow</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">write_allow</span>: <span class="ident">bool</span>,
@@ -1834,7 +1834,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// MsrConfig will be collected with its corresponding MSR&#39;s index.</span>
 <span class="doccomment">/// eg, (msr_index, msr_config)</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrConfig</span> {
     <span class="doccomment">/// If support RDMSR/WRMSR emulation in crosvm?</span>
     <span class="kw">pub</span> <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,

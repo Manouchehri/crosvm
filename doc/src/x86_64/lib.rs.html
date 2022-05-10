@@ -1724,8 +1724,6 @@
 <span id="1723">1723</span>
 <span id="1724">1724</span>
 <span id="1725">1725</span>
-<span id="1726">1726</span>
-<span id="1727">1727</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3245,9 +3243,7 @@
                     <span class="ident">write_allow</span>: <span class="bool-val">false</span>,
                 },
                 <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
-                <span class="comment">// Compatible with the configuration in initramfs.</span>
-                <span class="comment">// TODO(b:225375705): Change to `RWFromRunningCPU` in the future.</span>
-                <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromCPU0</span>,
+                <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
             },
         )
         .<span class="ident">is_some</span>()
