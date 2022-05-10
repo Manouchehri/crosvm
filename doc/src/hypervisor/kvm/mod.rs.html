@@ -2553,7 +2553,7 @@
         <span class="comment">// kernel told us how large it was.</span>
         <span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span>(<span class="self">self</span>.<span class="ident">run_mmap</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">kvm_run</span>) };
         <span class="comment">// Verify that the handler is called in the right context.</span>
-        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_HYPERV_HCALL</span>);
+        <span class="macro">assert!</span>(<span class="ident">run</span>.<span class="ident">exit_reason</span> <span class="op">==</span> <span class="ident">KVM_EXIT_HYPERV</span>);
         <span class="comment">// Safe because the exit_reason (which comes from the kernel) told us which</span>
         <span class="comment">// union field to use.</span>
         <span class="kw">let</span> <span class="ident">hyperv</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;mut</span> <span class="ident">run</span>.<span class="ident">__bindgen_anon_1</span>.<span class="ident">hyperv</span> };
