@@ -438,107 +438,18 @@
 <span id="437">437</span>
 <span id="438">438</span>
 <span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
-<span id="502">502</span>
-<span id="503">503</span>
-<span id="504">504</span>
-<span id="505">505</span>
-<span id="506">506</span>
-<span id="507">507</span>
-<span id="508">508</span>
-<span id="509">509</span>
-<span id="510">510</span>
-<span id="511">511</span>
-<span id="512">512</span>
-<span id="513">513</span>
-<span id="514">514</span>
-<span id="515">515</span>
-<span id="516">516</span>
-<span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
-<span id="523">523</span>
-<span id="524">524</span>
-<span id="525">525</span>
-<span id="526">526</span>
-<span id="527">527</span>
-<span id="528">528</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
-<span class="kw">use</span> <span class="ident">std::cmp</span>::{<span class="ident">max</span>, <span class="ident">min</span>, <span class="ident">Ordering</span>};
+<span class="kw">use</span> <span class="ident">std::cmp</span>::{<span class="ident">max</span>, <span class="ident">min</span>};
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::msix</span>::{<span class="ident">MsixCap</span>, <span class="ident">MsixConfig</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::msi</span>::{<span class="ident">MsiCap</span>, <span class="ident">MsiConfig</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{<span class="ident">PciBridgeSubclass</span>, <span class="ident">PciSubclass</span>, <span class="ident">CLASS_REG</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciClassCode</span>,
-    <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
+    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>,
+    <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::PciInterruptPin</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
@@ -548,9 +459,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pcie_device::PcieDevice</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
-<span class="kw">const</span> <span class="ident">BR_MSIX_TABLE_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x0</span>;
-<span class="kw">const</span> <span class="ident">BR_MSIX_PBA_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x100</span>;
-<span class="kw">const</span> <span class="ident">PCI_BRIDGE_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_BUS_NUMBER_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x6</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_MEM_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x8</span>;
 <span class="comment">// bit[15:4] is memory base[31:20] and alignment to 1MB</span>
@@ -584,21 +492,22 @@
     <span class="ident">config</span>: <span class="ident">PciConfiguration</span>,
     <span class="ident">pci_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="ident">bus_range</span>: <span class="ident">PciBridgeBusRange</span>,
-    <span class="ident">setting_bar</span>: <span class="ident">u8</span>,
-    <span class="ident">msix_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsixConfig</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="ident">msi_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsiConfig</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">msi_cap_offset</span>: <span class="ident">u32</span>,
     <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">PciBridge</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">device</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">PcieDevice</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">msi_device_tube</span>: <span class="ident">Tube</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">device_id</span> <span class="op">=</span> <span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">get_device_id</span>();
-        <span class="kw">let</span> <span class="ident">msix_config</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">MsixConfig::new</span>(
-            <span class="number">1</span>,
+        <span class="kw">let</span> <span class="ident">msi_config</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">MsiConfig::new</span>(
+            <span class="bool-val">true</span>,
+            <span class="bool-val">false</span>,
             <span class="ident">msi_device_tube</span>,
             (<span class="ident">PCI_VENDOR_ID_INTEL</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">|</span> (<span class="ident">device_id</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>,
             <span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">debug_label</span>(),
         )));
+
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">PciConfiguration::new</span>(
             <span class="ident">PCI_VENDOR_ID_INTEL</span>,
             <span class="ident">device_id</span>,
@@ -610,7 +519,12 @@
             <span class="number">0</span>,
             <span class="number">0</span>,
         );
-
+        <span class="kw">let</span> <span class="ident">msi_cap</span> <span class="op">=</span> <span class="ident">MsiCap::new</span>(<span class="bool-val">true</span>, <span class="bool-val">false</span>);
+        <span class="kw">let</span> <span class="ident">msi_cap_reg</span> <span class="op">=</span> <span class="ident">config</span>
+            .<span class="ident">add_capability</span>(<span class="kw-2">&amp;</span><span class="ident">msi_cap</span>)
+            .<span class="ident">map_err</span>(<span class="ident">PciDeviceError::CapabilitiesSetup</span>)
+            .<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">msi_cap_offset</span> <span class="op">=</span> <span class="ident">msi_cap_reg</span> <span class="kw">as</span> <span class="ident">u32</span>;
         <span class="kw">let</span> <span class="ident">bus_range</span> <span class="op">=</span> <span class="ident">device</span>
             .<span class="ident">lock</span>()
             .<span class="ident">get_bus_range</span>()
@@ -628,9 +542,8 @@
             <span class="ident">config</span>,
             <span class="ident">pci_address</span>: <span class="prelude-val">None</span>,
             <span class="ident">bus_range</span>,
-            <span class="ident">setting_bar</span>: <span class="number">0</span>,
-            <span class="ident">msix_config</span>,
-            <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-val">None</span>,
+            <span class="ident">msi_config</span>,
+            <span class="ident">msi_cap_offset</span>,
             <span class="ident">interrupt_evt</span>: <span class="prelude-val">None</span>,
         }
     }
@@ -718,7 +631,7 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">interrupt_evt</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt_evt</span> {
             <span class="ident">rds</span>.<span class="ident">extend</span>(<span class="ident">interrupt_evt</span>.<span class="ident">as_raw_descriptors</span>());
         }
-        <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">get_msi_socket</span>();
+        <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msi_config</span>.<span class="ident">lock</span>().<span class="ident">get_msi_socket</span>();
         <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">descriptor</span>);
         <span class="ident">rds</span>
     }
@@ -729,8 +642,8 @@
         <span class="ident">irq_num</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">PciInterruptPin</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">interrupt_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">irq_evt</span>.<span class="ident">try_clone</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>);
-        <span class="kw">let</span> <span class="ident">msix_config_clone</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">clone</span>();
-        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">clone_interrupt</span>(<span class="ident">msix_config_clone</span>);
+        <span class="kw">let</span> <span class="ident">msi_config_clone</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msi_config</span>.<span class="ident">clone</span>();
+        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">clone_interrupt</span>(<span class="ident">msi_config_clone</span>);
 
         <span class="kw">let</span> <span class="ident">gsi</span> <span class="op">=</span> <span class="ident">irq_num</span><span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">pin</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pci_address</span>.<span class="ident">map_or</span>(
@@ -740,69 +653,6 @@
         <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">set_irq</span>(<span class="ident">gsi</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">pin</span>);
 
         <span class="prelude-val">Some</span>((<span class="ident">gsi</span>, <span class="ident">pin</span>))
-    }
-
-    <span class="kw">fn</span> <span class="ident">allocate_io_bars</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
-    ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BarRange</span><span class="op">&gt;</span>, <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">address</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">pci_address</span>
-            .<span class="ident">expect</span>(<span class="string">&quot;allocate_address must be called prior to allocate_io_bars&quot;</span>);
-        <span class="comment">// Pci bridge need one bar for msix</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BarRange</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">let</span> <span class="ident">bar_addr</span> <span class="op">=</span> <span class="ident">resources</span>
-            .<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::Low</span>)
-            .<span class="ident">allocate_with_align</span>(
-                <span class="ident">PCI_BRIDGE_BAR_SIZE</span>,
-                <span class="ident">Alloc::PciBar</span> {
-                    <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
-                    <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
-                    <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-                    <span class="ident">bar</span>: <span class="number">0</span>,
-                },
-                <span class="string">&quot;pcie_rootport_bar&quot;</span>.<span class="ident">to_string</span>(),
-                <span class="ident">PCI_BRIDGE_BAR_SIZE</span>,
-            )
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoAllocationFailed</span>(<span class="ident">PCI_BRIDGE_BAR_SIZE</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">PciBarConfiguration::new</span>(
-            <span class="number">0</span>,
-            <span class="ident">PCI_BRIDGE_BAR_SIZE</span>,
-            <span class="ident">PciBarRegionType::Memory32BitRegion</span>,
-            <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,
-        )
-        .<span class="ident">set_address</span>(<span class="ident">bar_addr</span>);
-        <span class="self">self</span>.<span class="ident">setting_bar</span> <span class="op">=</span>
-            <span class="self">self</span>.<span class="ident">config</span>
-                .<span class="ident">add_pci_bar</span>(<span class="ident">config</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoRegistrationFailed</span>(<span class="ident">bar_addr</span>, <span class="ident">e</span>))<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">u8</span>;
-        <span class="ident">ranges</span>.<span class="ident">push</span>(<span class="ident">BarRange</span> {
-            <span class="ident">addr</span>: <span class="ident">bar_addr</span>,
-            <span class="ident">size</span>: <span class="ident">PCI_BRIDGE_BAR_SIZE</span>,
-            <span class="ident">prefetchable</span>: <span class="bool-val">false</span>,
-        });
-
-        <span class="kw">let</span> <span class="ident">msix_cap</span> <span class="op">=</span> <span class="ident">MsixCap::new</span>(
-            <span class="self">self</span>.<span class="ident">setting_bar</span>,
-            <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">num_vectors</span>(),
-            <span class="ident">BR_MSIX_TABLE_OFFSET</span> <span class="kw">as</span> <span class="ident">u32</span>,
-            <span class="self">self</span>.<span class="ident">setting_bar</span>,
-            <span class="ident">BR_MSIX_PBA_OFFSET</span> <span class="kw">as</span> <span class="ident">u32</span>,
-        );
-        <span class="kw">let</span> <span class="ident">msix_cap_reg</span> <span class="op">=</span> <span class="self">self</span>
-            .<span class="ident">config</span>
-            .<span class="ident">add_capability</span>(<span class="kw-2">&amp;</span><span class="ident">msix_cap</span>)
-            .<span class="ident">map_err</span>(<span class="ident">PciDeviceError::CapabilitiesSetup</span>)<span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">msix_cap_reg_idx</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">msix_cap_reg</span> <span class="op">/</span> <span class="number">4</span>);
-
-        <span class="prelude-val">Ok</span>(<span class="ident">ranges</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">allocate_device_bars</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">_resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
-    ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BarRange</span><span class="op">&gt;</span>, <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
@@ -831,24 +681,29 @@
 
     <span class="kw">fn</span> <span class="ident">read_config_register</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg_idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">read_reg</span>(<span class="ident">reg_idx</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msix_cap_reg_idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_cap_reg_idx</span> {
-            <span class="kw">if</span> <span class="ident">msix_cap_reg_idx</span> <span class="op">==</span> <span class="ident">reg_idx</span> {
-                <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">read_msix_capability</span>(<span class="ident">data</span>);
-                <span class="kw">return</span> <span class="ident">data</span>;
-            }
-        }
 
+        <span class="kw">let</span> <span class="ident">reg_offset</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">reg_idx</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="number">4</span>;
+
+        <span class="kw">let</span> <span class="ident">locked_msi_config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msi_config</span>.<span class="ident">lock</span>();
+        <span class="kw">if</span> <span class="ident">locked_msi_config</span>.<span class="ident">is_msi_reg</span>(<span class="self">self</span>.<span class="ident">msi_cap_offset</span>, <span class="ident">reg_offset</span>, <span class="number">0</span>) {
+            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">reg_offset</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">msi_cap_offset</span>;
+            <span class="ident">data</span> <span class="op">=</span> <span class="ident">locked_msi_config</span>.<span class="ident">read_msi_capability</span>(<span class="ident">offset</span>, <span class="ident">data</span>);
+            <span class="kw">return</span> <span class="ident">data</span>;
+        }
+        <span class="ident">std::mem::drop</span>(<span class="ident">locked_msi_config</span>);
         <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">read_config</span>(<span class="ident">reg_idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">data</span>);
         <span class="ident">data</span>
     }
 
     <span class="kw">fn</span> <span class="ident">write_config_register</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">reg_idx</span>: <span class="ident">usize</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msix_cap_reg_idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">msix_cap_reg_idx</span> {
-            <span class="kw">if</span> <span class="ident">msix_cap_reg_idx</span> <span class="op">==</span> <span class="ident">reg_idx</span> {
-                <span class="self">self</span>.<span class="ident">msix_config</span>.<span class="ident">lock</span>().<span class="ident">write_msix_capability</span>(<span class="ident">offset</span>, <span class="ident">data</span>);
-            }
-        }
+        <span class="kw">let</span> <span class="ident">reg_offset</span> <span class="op">=</span> <span class="ident">reg_idx</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="number">4</span>;
 
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">locked_msi_config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">msi_config</span>.<span class="ident">lock</span>();
+        <span class="kw">if</span> <span class="ident">locked_msi_config</span>.<span class="ident">is_msi_reg</span>(<span class="self">self</span>.<span class="ident">msi_cap_offset</span>, <span class="ident">reg_offset</span>, <span class="ident">data</span>.<span class="ident">len</span>()) {
+            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">reg_offset</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">+</span> <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">msi_cap_offset</span>;
+            <span class="ident">locked_msi_config</span>.<span class="ident">write_msi_capability</span>(<span class="ident">offset</span>, <span class="ident">data</span>);
+        }
+        <span class="ident">std::mem::drop</span>(<span class="ident">locked_msi_config</span>);
         <span class="comment">// Suppose kernel won&#39;t modify primary/secondary/subordinate bus number,</span>
         <span class="comment">// if it indeed modify, print a warning</span>
         <span class="kw">if</span> <span class="ident">reg_idx</span> <span class="op">==</span> <span class="ident">BR_BUS_NUMBER_REG</span> {
@@ -889,42 +744,9 @@
         (<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">config</span>).<span class="ident">write_reg</span>(<span class="ident">reg_idx</span>, <span class="ident">offset</span>, <span class="ident">data</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
-        <span class="comment">// The driver is only allowed to do aligned, properly sized access.</span>
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">setting_bar</span> <span class="kw">as</span> <span class="ident">usize</span>);
-        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar0</span>;
-        <span class="kw">match</span> <span class="ident">offset</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">BR_MSIX_PBA_OFFSET</span>) {
-            <span class="ident">Ordering::Less</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">msix_config</span>
-                    .<span class="ident">lock</span>()
-                    .<span class="ident">read_msix_table</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">BR_MSIX_TABLE_OFFSET</span>, <span class="ident">data</span>);
-            }
-            <span class="ident">Ordering::Equal</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">msix_config</span>
-                    .<span class="ident">lock</span>()
-                    .<span class="ident">read_pba_entries</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">BR_MSIX_PBA_OFFSET</span>, <span class="ident">data</span>);
-            }
-            <span class="ident">Ordering::Greater</span> =&gt; (),
-        }
-    }
+    <span class="kw">fn</span> <span class="ident">read_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_addr</span>: <span class="ident">u64</span>, <span class="ident">_data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {}
 
-    <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">setting_bar</span> <span class="kw">as</span> <span class="ident">usize</span>);
-        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar0</span>;
-        <span class="kw">match</span> <span class="ident">offset</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">BR_MSIX_PBA_OFFSET</span>) {
-            <span class="ident">Ordering::Less</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">msix_config</span>
-                    .<span class="ident">lock</span>()
-                    .<span class="ident">write_msix_table</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">BR_MSIX_TABLE_OFFSET</span>, <span class="ident">data</span>);
-            }
-            <span class="ident">Ordering::Equal</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">msix_config</span>
-                    .<span class="ident">lock</span>()
-                    .<span class="ident">write_pba_entries</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">BR_MSIX_PBA_OFFSET</span>, <span class="ident">data</span>);
-            }
-            <span class="ident">Ordering::Greater</span> =&gt; (),
-        }
-    }
+    <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_addr</span>: <span class="ident">u64</span>, <span class="ident">_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {}
 
     <span class="kw">fn</span> <span class="ident">get_removed_children_devices</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">get_removed_devices</span>()
