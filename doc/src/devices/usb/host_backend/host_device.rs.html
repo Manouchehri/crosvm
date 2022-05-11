@@ -588,6 +588,15 @@
 <span id="587">587</span>
 <span id="588">588</span>
 <span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -636,6 +645,7 @@
     <span class="ident">claimed_interfaces</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">control_request_setup</span>: <span class="ident">UsbRequestSetup</span>,
     <span class="ident">executed</span>: <span class="ident">bool</span>,
+    <span class="ident">initialized</span>: <span class="ident">bool</span>,
     <span class="ident">job_queue</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncJobQueue</span><span class="op">&gt;</span>,
 }
 
@@ -661,6 +671,7 @@
             <span class="ident">claimed_interfaces</span>: <span class="macro">vec!</span>[],
             <span class="ident">control_request_setup</span>: <span class="ident">UsbRequestSetup::new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>),
             <span class="ident">executed</span>: <span class="bool-val">false</span>,
+            <span class="ident">initialized</span>: <span class="bool-val">false</span>,
             <span class="ident">job_queue</span>,
         };
 
@@ -942,7 +953,14 @@
                 <span class="prelude-val">None</span>
             }
         };
-        <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="ident">config</span>) <span class="op">!</span><span class="op">=</span> <span class="ident">cur_config</span> {
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">need_set_config</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">initialized</span> {
+            <span class="ident">need_set_config</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">config</span>) <span class="op">!</span><span class="op">=</span> <span class="ident">cur_config</span>;
+            <span class="self">self</span>.<span class="ident">initialized</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        }
+
+        <span class="kw">if</span> <span class="ident">need_set_config</span> {
             <span class="self">self</span>.<span class="ident">device</span>
                 .<span class="ident">lock</span>()
                 .<span class="ident">set_active_configuration</span>(<span class="ident">config</span>)
