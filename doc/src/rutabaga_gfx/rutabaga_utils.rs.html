@@ -590,6 +590,24 @@
 <span id="589">589</span>
 <span id="590">590</span>
 <span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -882,14 +900,14 @@
 
 <span class="doccomment">/// Flags for virglrenderer.  Copied from virglrenderer bindings.</span>
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_EGL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">0</span>;
-<span class="kw">const</span> <span class="ident">VIRGLRENDERER_THREAD_SYNC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VIRGLRENDERER_THREAD_SYNC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_GLX</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_SURFACELESS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_GLES</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_EXTERNAL_BLOB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_VENUS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">6</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_NO_VIRGL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>;
-<span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_RENDER_SERVER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>;
 
 <span class="doccomment">/// virglrenderer flag struct.</span>
@@ -905,6 +923,12 @@
             .<span class="ident">use_surfaceless</span>(<span class="bool-val">true</span>)
             .<span class="ident">use_gles</span>(<span class="bool-val">true</span>)
             .<span class="ident">use_render_server</span>(<span class="bool-val">false</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">VirglRendererFlags</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">flags</span>: <span class="ident">VirglRendererFlags</span>) -&gt; <span class="ident">u32</span> {
+        <span class="ident">flags</span>.<span class="number">0</span>
     }
 }
 
@@ -988,6 +1012,7 @@
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>;
 
 <span class="doccomment">/// gfxstream flag struct.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
@@ -1040,6 +1065,17 @@
     <span class="doccomment">/// Use ANGLE as the guest GLES driver.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_guest_angle</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
         <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>, <span class="ident">v</span>)
+    }
+
+    <span class="doccomment">/// Use async fence completion callback.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_async_fence_cb</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
+        <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>, <span class="ident">v</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">GfxstreamFlags</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">flags</span>: <span class="ident">GfxstreamFlags</span>) -&gt; <span class="ident">u32</span> {
+        <span class="ident">flags</span>.<span class="number">0</span>
     }
 }
 

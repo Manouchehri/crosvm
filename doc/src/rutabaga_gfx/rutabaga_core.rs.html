@@ -849,6 +849,45 @@
 <span id="848">848</span>
 <span id="849">849</span>
 <span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -925,6 +964,15 @@
     <span class="doccomment">/// Implementations must return the last completed fence_id.</span>
     <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="number">0</span>
+    }
+
+    <span class="doccomment">/// Used only by VirglRenderer to poll when its poll_descriptor is signaled.</span>
+    <span class="kw">fn</span> <span class="ident">event_poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {}
+
+    <span class="doccomment">/// Used only by VirglRenderer to return a poll_descriptor that is signaled when a poll() is</span>
+    <span class="doccomment">/// necessary.</span>
+    <span class="kw">fn</span> <span class="ident">poll_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SafeDescriptor</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
     }
 
     <span class="doccomment">/// Implementations must create a resource with the given metadata.  For 2D rutabaga components,</span>
@@ -1071,6 +1119,7 @@
     <span class="ident">default_component</span>: <span class="ident">RutabagaComponentType</span>,
     <span class="ident">capset_info</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RutabagaCapsetInfo</span><span class="op">&gt;</span>,
     <span class="ident">fence_handler</span>: <span class="ident">RutabagaFenceHandler</span>,
+    <span class="kw">pub</span> <span class="ident">use_timer_based_fence_polling</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Rutabaga</span> {
@@ -1181,6 +1230,20 @@
             }
         }
         <span class="ident">completed_fences</span>
+    }
+
+    <span class="doccomment">/// Polls the default rutabaga component.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">component</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">components</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">default_component</span>) {
+            <span class="ident">component</span>.<span class="ident">event_poll</span>();
+        }
+    }
+
+    <span class="doccomment">/// Returns a pollable descriptor for the default rutabaga component. In practice, it is only</span>
+    <span class="doccomment">/// not None if the default component is virglrenderer.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SafeDescriptor</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">component</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">components</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">default_component</span>).<span class="ident">or</span>(<span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+        <span class="ident">component</span>.<span class="ident">poll_descriptor</span>()
     }
 
     <span class="doccomment">/// Creates a resource with the `resource_create_3d` metadata.</span>
@@ -1616,6 +1679,11 @@
             ));
         }
 
+        <span class="comment">// If any component sets this to true, timer-based wakeup is activated. Async fence</span>
+        <span class="comment">// handling will continue to work but worker wakeups will otherwise be avoided if no</span>
+        <span class="comment">// components need the timer-based approach.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">use_timer_based_fence_polling</span> <span class="op">=</span> <span class="bool-val">false</span>;
+
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">default_component</span> <span class="op">==</span> <span class="ident">RutabagaComponentType::Rutabaga2D</span> {
             <span class="kw">let</span> <span class="ident">rutabaga_2d</span> <span class="op">=</span> <span class="ident">Rutabaga2D::init</span>(<span class="ident">fence_handler</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
             <span class="ident">rutabaga_components</span>.<span class="ident">insert</span>(<span class="ident">RutabagaComponentType::Rutabaga2D</span>, <span class="ident">rutabaga_2d</span>);
@@ -1627,6 +1695,10 @@
                         .<span class="ident">ok_or</span>(<span class="ident">RutabagaError::InvalidRutabagaBuild</span>(
                             <span class="string">&quot;missing virgl renderer flags&quot;</span>,
                         ))<span class="question-mark">?</span>;
+
+                <span class="kw">if</span> (<span class="ident">u32::from</span>(<span class="ident">virglrenderer_flags</span>) <span class="op">&amp;</span> <span class="ident">VIRGLRENDERER_USE_ASYNC_FENCE_CB</span>) <span class="op">==</span> <span class="number">0</span> {
+                    <span class="ident">use_timer_based_fence_polling</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                }
 
                 <span class="kw">let</span> <span class="ident">virgl</span> <span class="op">=</span> <span class="ident">VirglRenderer::init</span>(
                     <span class="ident">virglrenderer_flags</span>,
@@ -1672,6 +1744,11 @@
                     <span class="ident">gfxstream_flags</span>,
                     <span class="ident">fence_handler</span>.<span class="ident">clone</span>(),
                 )<span class="question-mark">?</span>;
+
+                <span class="kw">if</span> (<span class="ident">u32::from</span>(<span class="ident">gfxstream_flags</span>) <span class="op">&amp;</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>) <span class="op">==</span> <span class="number">0</span> {
+                    <span class="ident">use_timer_based_fence_polling</span> <span class="op">=</span> <span class="bool-val">true</span>;
+                }
+
                 <span class="ident">rutabaga_components</span>.<span class="ident">insert</span>(<span class="ident">RutabagaComponentType::Gfxstream</span>, <span class="ident">gfxstream</span>);
 
                 <span class="ident">rutabaga_capsets</span>.<span class="ident">push</span>(<span class="ident">RutabagaCapsetInfo</span> {
@@ -1696,6 +1773,7 @@
             <span class="ident">default_component</span>: <span class="self">self</span>.<span class="ident">default_component</span>,
             <span class="ident">capset_info</span>: <span class="ident">rutabaga_capsets</span>,
             <span class="ident">fence_handler</span>,
+            <span class="ident">use_timer_based_fence_polling</span>,
         })
     }
 }
