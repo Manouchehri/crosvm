@@ -260,6 +260,9 @@
 <span id="259">259</span>
 <span id="260">260</span>
 <span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -274,7 +277,7 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">Event</span>};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">EventAsync</span>, <span class="ident">Executor</span>};
 <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">pin_mut</span>, <span class="ident">select</span>, <span class="ident">FutureExt</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
@@ -497,6 +500,13 @@
                     .<span class="ident">recv</span>()
                     .<span class="ident">context</span>(<span class="string">&quot;failed to receive data&quot;</span>)
                     .<span class="ident">map_err</span>(<span class="ident">RecvIntoBufsError::Fatal</span>)<span class="question-mark">?</span>;
+
+                <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
+                    <span class="comment">// TODO(b/216407443): We should change `self.state` and exit gracefully.</span>
+                    <span class="macro">info!</span>(<span class="string">&quot;VVU connection is closed&quot;</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">RecvIntoBufsError::Disconnect</span>);
+                }
+
                 <span class="ident">rxq_buf</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">data</span>);
                 <span class="comment">// Decrement the event counter as we received one buffer.</span>
                 <span class="self">self</span>.<span class="ident">rxq_evt</span>
@@ -514,10 +524,6 @@
             <span class="ident">rxq_notifier</span>.<span class="ident">lock</span>().<span class="ident">notify</span>(<span class="ident">vfio</span>, <span class="ident">QueueType::Rx</span> <span class="kw">as</span> <span class="ident">u16</span>);
         }
 
-        <span class="kw">if</span> <span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="comment">// TODO(b/216407443): We should change `self.state` and exit gracefully.</span>
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">RecvIntoBufsError::Disconnect</span>);
-        }
         <span class="prelude-val">Ok</span>(<span class="ident">size</span>)
     }
 }
