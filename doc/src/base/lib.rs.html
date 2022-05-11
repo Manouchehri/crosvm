@@ -132,6 +132,17 @@
 <span id="131">131</span>
 <span id="132">132</span>
 <span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -248,6 +259,8 @@
     <span class="ident">SerializeDescriptors</span>, <span class="ident">UnsyncMarker</span>,
 };
 
+<span class="kw">use</span> <span class="ident">uuid::Uuid</span>;
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">file_punch_hole</span>, <span class="ident">file_write_zeroes_at</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">get_cpu_affinity</span>, <span class="ident">set_cpu_affinity</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">with_as_descriptor</span>, <span class="ident">with_raw_descriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">INVALID_DESCRIPTOR</span>};
@@ -265,6 +278,15 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">MappedRegion</span>, <span class="ident">MemoryMappingArena</span>, <span class="ident">MmapError</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">trace</span>, <span class="ident">warn</span>};
+
+<span class="doccomment">/// Creates a UUID.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_uuid</span>() -&gt; <span class="ident">String</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Uuid::encode_buffer</span>();
+    <span class="ident">Uuid::new_v4</span>()
+        .<span class="ident">to_hyphenated</span>()
+        .<span class="ident">encode_lower</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>)
+        .<span class="ident">to_owned</span>()
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="base" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
 </body></html>
