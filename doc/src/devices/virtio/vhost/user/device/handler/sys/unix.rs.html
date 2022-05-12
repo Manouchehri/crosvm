@@ -407,18 +407,6 @@
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioRegionAddr</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::interrupt::SignalableInterrupt</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{
-    <span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">GuestAddress</span>, <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>, <span class="ident">MemoryRegion</span>,
-    <span class="ident">VhostUserBackend</span>,
-};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu</span>::{
-    <span class="ident">device::VvuDevice</span>,
-    <span class="ident">doorbell::DoorbellRegion</span>,
-    <span class="ident">pci</span>::{<span class="ident">VvuPciCaps</span>, <span class="ident">VvuPciDevice</span>},
-};
-
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>};
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
@@ -434,6 +422,18 @@
     <span class="ident">message</span>::{<span class="ident">MasterReq</span>, <span class="ident">VhostUserMemoryRegion</span>},
     <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>, <span class="ident">Protocol</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">VhostResult</span>, <span class="ident">SlaveListener</span>, <span class="ident">SlaveReqHandler</span>,
     <span class="ident">VhostUserSlaveReqHandler</span>,
+};
+
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioRegionAddr</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::interrupt::SignalableInterrupt</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{
+    <span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">GuestAddress</span>, <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>, <span class="ident">MemoryRegion</span>,
+    <span class="ident">VhostUserBackend</span>,
+};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu</span>::{
+    <span class="ident">device::VvuDevice</span>,
+    <span class="ident">doorbell::DoorbellRegion</span>,
+    <span class="ident">pci</span>::{<span class="ident">VvuPciCaps</span>, <span class="ident">VvuPciDevice</span>},
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">HandlerTypeSys</span> {
