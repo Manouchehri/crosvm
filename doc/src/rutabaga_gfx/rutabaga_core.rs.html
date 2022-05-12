@@ -888,6 +888,7 @@
 <span id="887">887</span>
 <span id="888">888</span>
 <span id="889">889</span>
+<span id="890">890</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1682,6 +1683,7 @@
         <span class="comment">// If any component sets this to true, timer-based wakeup is activated. Async fence</span>
         <span class="comment">// handling will continue to work but worker wakeups will otherwise be avoided if no</span>
         <span class="comment">// components need the timer-based approach.</span>
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">use_timer_based_fence_polling</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">default_component</span> <span class="op">==</span> <span class="ident">RutabagaComponentType::Rutabaga2D</span> {
