@@ -605,6 +605,7 @@
 <span id="604">604</span>
 <span id="605">605</span>
 <span id="606">606</span>
+<span id="607">607</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -959,86 +960,103 @@
 }
 
 <span class="doccomment">/// Aggregate of all configurable options for a running VM.</span>
+<span class="attribute">#[<span class="ident">remain::sorted</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
-    <span class="kw">pub</span> <span class="ident">kvm_device_path</span>: <span class="ident">PathBuf</span>,
-    <span class="kw">pub</span> <span class="ident">vhost_vsock_device</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vhost_net_device_path</span>: <span class="ident">PathBuf</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_cgroup_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">ac97_parameters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Ac97Parameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">acpi_tables</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">android_fstab</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">balloon</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">balloon_bias</span>: <span class="ident">i64</span>,
+    <span class="kw">pub</span> <span class="ident">balloon_control</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">battery_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BatteryType</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">coiommu_param</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">devices::CoIommuParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">u32</span><span class="op">&gt;</span>, <span class="comment">// CPU index -&gt; capacity</span>
-    <span class="kw">pub</span> <span class="ident">per_vm_core_scheduling</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CrasSndParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Must be `Some` iff `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
-    <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">memory_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">executable_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Executable</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">android_fstab</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">initrd_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">jail_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">jail_enabled</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">balloon_control</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">plugin_root</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">plugin_mounts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BindMount</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">plugin_gid_maps</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GidMap</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_edge_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_gpe</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_level_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_mmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_pmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">direct_wake_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">disks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DiskOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">pmem_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DiskOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">host_ip</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">netmask</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">mac_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net_util::MacAddress</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">net_vq_pairs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vhost_net</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">tap_fd</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">tap_name</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">cid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">wayland_socket_paths</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">x_display</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">shared_dirs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SharedDir</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">display_window_keyboard</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">display_window_mouse</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">executable_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Executable</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">file_backed_mappings</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FileBackedMappingParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">gdb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">gpu_parameters</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GpuParameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">gpu_render_server_parameters</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GpuRenderServerParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">host_ip</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">init_memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">initrd_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">jail_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">jail_enabled</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">kvm_device_path</span>: <span class="ident">PathBuf</span>,
+    <span class="kw">pub</span> <span class="ident">mac_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net_util::MacAddress</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">memory_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">net_vq_pairs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">netmask</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">pcie_rp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HostPcieRootPortParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">per_vm_core_scheduling</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">plugin_gid_maps</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GidMap</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">plugin_mounts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BindMount</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">plugin_root</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">pmem_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DiskOption</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Must be `Some` iff `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
+    <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">rng</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">SerialHardware</span>, <span class="ident">u8</span>), <span class="ident">SerialParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">shared_dirs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SharedDir</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">software_tpm</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">display_window_keyboard</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">display_window_mouse</span>: <span class="ident">bool</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">ac97_parameters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Ac97Parameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">sound</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">SerialHardware</span>, <span class="ident">u8</span>), <span class="ident">SerialParameters</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">syslog_tag</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">usb</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_trackpad</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_mice</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_keyboard</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">virtio_input_evdevs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">split_irqchip</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">stub_pci_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StubPciParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">syslog_tag</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">tap_fd</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">tap_name</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">task_profiles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">usb</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_cgroup_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vfio</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VfioCommand</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">video_dec</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VideoBackendType</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">video_enc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VideoBackendType</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">acpi_tables</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
-    <span class="kw">pub</span> <span class="ident">battery_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BatteryType</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">gdb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">balloon</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">balloon_bias</span>: <span class="ident">i64</span>,
+    <span class="kw">pub</span> <span class="ident">vhost_net</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">vhost_net_device_path</span>: <span class="ident">PathBuf</span>,
     <span class="kw">pub</span> <span class="ident">vhost_user_blk</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vhost_user_console</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vhost_user_fs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserFsOption</span><span class="op">&gt;</span>,
@@ -1049,37 +1067,21 @@
     <span class="kw">pub</span> <span class="ident">vhost_user_snd</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vhost_user_vsock</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vhost_user_wl</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostUserWlOption</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_pmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_mmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_level_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_edge_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_wake_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">direct_gpe</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">stub_pci_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StubPciParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vhost_vsock_device</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">video_dec</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VideoBackendType</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">video_enc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VideoBackendType</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_input_evdevs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_keyboard</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_mice</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">virtio_trackpad</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vvu_proxy</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VvuOption</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">coiommu_param</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">devices::CoIommuParameters</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">file_backed_mappings</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FileBackedMappingParameters</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">init_memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">pcie_rp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HostPcieRootPortParameters</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">rng</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">task_profiles</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">wayland_socket_paths</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">x_display</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Config</span> {
