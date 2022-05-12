@@ -160,14 +160,6 @@
 <span id="159">159</span>
 <span id="160">160</span>
 <span id="161">161</span>
-<span id="162">162</span>
-<span id="163">163</span>
-<span id="164">164</span>
-<span id="165">165</span>
-<span id="166">166</span>
-<span id="167">167</span>
-<span id="168">168</span>
-<span id="169">169</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -316,19 +308,11 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">TriggeredEvent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>; <span class="number">16</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">wait_timeout</span>(<span class="ident">Duration::new</span>(<span class="ident">i64::MAX</span> <span class="kw">as</span> <span class="ident">u64</span>, <span class="number">0</span>))
     }
+
     <span class="doccomment">/// Waits for one or more of the registered triggers to become signaled, failing if no triggers</span>
     <span class="doccomment">/// are signaled before the designated timeout has elapsed.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait_timeout</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">TriggeredEvent</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>; <span class="number">16</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">wait_timeout</span>(<span class="ident">timeout</span>)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">events</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">event</span><span class="op">|</span> <span class="ident">TriggeredEvent</span> {
-                <span class="ident">token</span>: <span class="ident">event</span>.<span class="ident">token</span>(),
-                <span class="ident">is_readable</span>: <span class="ident">event</span>.<span class="ident">readable</span>(),
-                <span class="ident">is_writable</span>: <span class="ident">event</span>.<span class="ident">writable</span>(),
-                <span class="ident">is_hungup</span>: <span class="ident">event</span>.<span class="ident">hungup</span>(),
-            })
-            .<span class="ident">collect</span>())
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">wait_timeout</span>(<span class="ident">timeout</span>)
     }
 }
 
