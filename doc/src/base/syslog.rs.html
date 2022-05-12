@@ -796,6 +796,7 @@
 <span id="795">795</span>
 <span id="796">796</span>
 <span id="797">797</span>
+<span id="798">798</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1243,6 +1244,7 @@
     <span class="ident">fds</span>.<span class="ident">extend</span>(<span class="ident">state</span>.<span class="ident">file</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">as_raw_descriptor</span>()));
 }
 
+<span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">CHRONO_TIMESTAMP_FIXED_FMT</span> {
     () =&gt; {
         <span class="string">&quot;%F %T%.9f&quot;</span>
