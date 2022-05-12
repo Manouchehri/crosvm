@@ -672,6 +672,8 @@
 <span id="671">671</span>
 <span id="672">672</span>
 <span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1236,16 +1238,6 @@
             <span class="comment">// anything happens before we get to writing the final event.</span>
             <span class="kw">let</span> <span class="ident">scoped_exit_evt</span> <span class="op">=</span> <span class="ident">ScopedEvent::from</span>(<span class="ident">exit_evt</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_handlers</span> <span class="op">=</span> <span class="ident">MsrHandlers::new</span>();
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">userspace_msr</span>.<span class="ident">is_empty</span>() {
-                <span class="ident">userspace_msr</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">msr_config</span>)<span class="op">|</span> {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">msr_handlers</span>.<span class="ident">add_handler</span>(<span class="kw-2">*</span><span class="ident">index</span>, <span class="ident">msr_config</span>.<span class="ident">clone</span>(), <span class="ident">cpu_id</span>) {
-                        <span class="macro">error!</span>(<span class="string">&quot;failed to add msr handler {}: {:#}&quot;</span>, <span class="ident">cpu_id</span>, <span class="ident">e</span>);
-                        <span class="kw">return</span>;
-                    };
-                });
-            }
-
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
             <span class="kw">let</span> <span class="ident">guest_mem</span> <span class="op">=</span> <span class="ident">vm</span>.<span class="ident">get_memory</span>().<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">runnable_vcpu</span> <span class="op">=</span> <span class="ident">runnable_vcpu</span>(
@@ -1265,6 +1257,18 @@
                 <span class="ident">itmt</span>,
                 <span class="ident">vcpu_cgroup_tasks_file</span>,
             );
+
+            <span class="comment">// Add MSR handlers after CPU affinity setting.</span>
+            <span class="comment">// This avoids redundant MSR file fd creation.</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_handlers</span> <span class="op">=</span> <span class="ident">MsrHandlers::new</span>();
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">userspace_msr</span>.<span class="ident">is_empty</span>() {
+                <span class="ident">userspace_msr</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">index</span>, <span class="ident">msr_config</span>)<span class="op">|</span> {
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">msr_handlers</span>.<span class="ident">add_handler</span>(<span class="kw-2">*</span><span class="ident">index</span>, <span class="ident">msr_config</span>.<span class="ident">clone</span>(), <span class="ident">cpu_id</span>) {
+                        <span class="macro">error!</span>(<span class="string">&quot;failed to add msr handler {}: {:#}&quot;</span>, <span class="ident">cpu_id</span>, <span class="ident">e</span>);
+                        <span class="kw">return</span>;
+                    };
+                });
+            }
 
             <span class="ident">start_barrier</span>.<span class="ident">wait</span>();
 
