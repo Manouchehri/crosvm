@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["PeriodicLogger","A logging struct meant for use in tracking and periodically logging a single metric. The metric is aggregated over the designated time period. Intended for use with high-frequency metrics."]]});

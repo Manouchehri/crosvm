@@ -23,7 +23,6 @@ sourcesIndex["kvm"] = {"name":"","files":["cap.rs","lib.rs"]};
 sourcesIndex["kvm_sys"] = {"name":"","dirs":[{"name":"x86","files":["bindings.rs"]}],"files":["lib.rs"]};
 sourcesIndex["libvda"] = {"name":"","dirs":[{"name":"decode","files":["bindings.rs","event.rs","format.rs","mod.rs","session.rs","vda_instance.rs"]},{"name":"encode","files":["bindings.rs","event.rs","format.rs","mod.rs","session.rs","vea_instance.rs"]}],"files":["bindings.rs","error.rs","format.rs","lib.rs"]};
 sourcesIndex["linux_input_sys"] = {"name":"","files":["lib.rs"]};
-sourcesIndex["metrics"] = {"name":"","dirs":[{"name":"noop","files":["client.rs","mod.rs","periodic_logger.rs","request_handler.rs"]}],"files":["controller.rs","event_types.rs","lib.rs","metrics_cleanup.rs","metrics_requests.rs","sys.rs"]};
 sourcesIndex["net_sys"] = {"name":"","files":["if_tun.rs","iff.rs","lib.rs","sockios.rs"]};
 sourcesIndex["net_util"] = {"name":"","dirs":[{"name":"sys","dirs":[{"name":"unix","files":["tap.rs"]}],"files":["unix.rs"]}],"files":["lib.rs","sys.rs"]};
 sourcesIndex["power_monitor"] = {"name":"","files":["lib.rs"]};

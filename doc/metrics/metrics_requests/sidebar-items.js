@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["MetricsRequest",""]],"struct":[["EventWithSerializedDetails",""],["LogDescriptor",""],["LogHighFrequencyDescriptorMetric",""],["LogMetric",""]]});
