@@ -1724,6 +1724,64 @@
 <span id="1723">1723</span>
 <span id="1724">1724</span>
 <span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
+<span id="1729">1729</span>
+<span id="1730">1730</span>
+<span id="1731">1731</span>
+<span id="1732">1732</span>
+<span id="1733">1733</span>
+<span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
+<span id="1750">1750</span>
+<span id="1751">1751</span>
+<span id="1752">1752</span>
+<span id="1753">1753</span>
+<span id="1754">1754</span>
+<span id="1755">1755</span>
+<span id="1756">1756</span>
+<span id="1757">1757</span>
+<span id="1758">1758</span>
+<span id="1759">1759</span>
+<span id="1760">1760</span>
+<span id="1761">1761</span>
+<span id="1762">1762</span>
+<span id="1763">1763</span>
+<span id="1764">1764</span>
+<span id="1765">1765</span>
+<span id="1766">1766</span>
+<span id="1767">1767</span>
+<span id="1768">1768</span>
+<span id="1769">1769</span>
+<span id="1770">1770</span>
+<span id="1771">1771</span>
+<span id="1772">1772</span>
+<span id="1773">1773</span>
+<span id="1774">1774</span>
+<span id="1775">1775</span>
+<span id="1776">1776</span>
+<span id="1777">1777</span>
+<span id="1778">1778</span>
+<span id="1779">1779</span>
+<span id="1780">1780</span>
+<span id="1781">1781</span>
+<span id="1782">1782</span>
+<span id="1783">1783</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1775,6 +1833,7 @@
 <span class="kw">mod</span> <span class="ident">regs</span>;
 <span class="kw">mod</span> <span class="ident">smbios</span>;
 
+<span class="kw">use</span> <span class="ident">once_cell::sync::OnceCell</span>;
 <span class="kw">use</span> <span class="ident">std::arch::x86_64::__cpuid</span>;
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
@@ -1885,6 +1944,8 @@
     <span class="ident">RegisterIrqfd</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;error registering virtual socket device: {0}&quot;</span>)]</span>
     <span class="ident">RegisterVsock</span>(<span class="ident">arch::DeviceRegistrationError</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;error reserved pcie config mmio&quot;</span>)]</span>
+    <span class="ident">ReservePcieCfgMmio</span>(<span class="ident">resources::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to set a hardware breakpoint: {0}&quot;</span>)]</span>
     <span class="ident">SetHwBreakpoint</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to set interrupts: {0}&quot;</span>)]</span>
@@ -1934,29 +1995,10 @@
 <span class="kw">const</span> <span class="ident">GB</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">30</span>;
 
 <span class="kw">const</span> <span class="ident">BOOT_STACK_POINTER</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x8000</span>;
-<span class="comment">// Make sure it align to 256MB for MTRR convenient</span>
-<span class="kw">const</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>) {
-    <span class="comment">// Allow space for identity mapping coreboot memory regions on the host</span>
-    <span class="comment">// which is found at around 7a00_0000 (little bit before 2GB)</span>
-    <span class="comment">//</span>
-    <span class="comment">// TODO(b/188011323): stop hardcoding sizes and addresses here and instead</span>
-    <span class="comment">// determine the memory map from how the VM has been configured via the</span>
-    <span class="comment">// command line.</span>
-    <span class="number">2560</span> <span class="op">*</span> <span class="ident">MB</span>
-} <span class="kw">else</span> {
-    <span class="number">768</span> <span class="op">*</span> <span class="ident">MB</span>
-};
 <span class="kw">const</span> <span class="ident">START_OF_RAM_32BITS</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>) { <span class="number">0x1000</span> } <span class="kw">else</span> { <span class="number">0</span> };
 <span class="kw">const</span> <span class="ident">FIRST_ADDR_PAST_32BITS</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>;
-<span class="comment">// Reserved memory for nand_bios/LAPIC/IOAPIC/HPET/.....</span>
-<span class="kw">const</span> <span class="ident">RESERVED_MEM_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x800_0000</span>;
-<span class="comment">// Reserve 64MB for pcie enhanced configuration</span>
-<span class="kw">const</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x400_0000</span>;
-<span class="kw">const</span> <span class="ident">PCIE_CFG_MMIO_START</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span> <span class="op">-</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>;
 <span class="comment">// Reserve memory region for pcie virtual configuration</span>
-<span class="kw">const</span> <span class="ident">PCIE_VCFG_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>;
-<span class="kw">const</span> <span class="ident">END_ADDR_BEFORE_32BITS</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>;
-<span class="kw">const</span> <span class="ident">PCI_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span> <span class="op">-</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>;
+<span class="kw">const</span> <span class="ident">PCIE_VCFG_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x400_0000</span>;
 <span class="comment">// Linux (with 4-level paging) has a physical memory limit of 46 bits (64 TiB).</span>
 <span class="kw">const</span> <span class="ident">HIGH_MMIO_MAX_END</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1u64</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">46</span>;
 <span class="kw">const</span> <span class="ident">KERNEL_64BIT_ENTRY_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x200</span>;
@@ -1978,6 +2020,61 @@
 <span class="comment">// The CMOS RTC uses IRQ 8; start allocating IRQs at 9.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">X86_64_IRQ_BASE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">9</span>;
 <span class="kw">const</span> <span class="ident">ACPI_HI_RSDP_WINDOW_BASE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x000E_0000</span>;
+
+<span class="comment">// Memory layout below 4G</span>
+<span class="kw">struct</span> <span class="ident">LowMemoryLayout</span> {
+    <span class="comment">// the pci mmio start address below 4G</span>
+    <span class="ident">pci_start</span>: <span class="ident">u64</span>,
+    <span class="comment">// the pci mmio size below 4G</span>
+    <span class="ident">pci_size</span>: <span class="ident">u64</span>,
+    <span class="comment">// the pcie cfg mmio start address</span>
+    <span class="ident">pcie_cfg_mmio_start</span>: <span class="ident">u64</span>,
+    <span class="comment">// the pcie cfg mmio size</span>
+    <span class="ident">pcie_cfg_mmio_size</span>: <span class="ident">u64</span>,
+}
+
+<span class="kw">static</span> <span class="ident">LOW_MEMORY_LAYOUT</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">LowMemoryLayout</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
+
+<span class="kw">fn</span> <span class="ident">init_low_memory_layout</span>() {
+    <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get_or_init</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="comment">// Make sure it align to 256MB for MTRR convenient</span>
+        <span class="kw">const</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>) {
+            <span class="comment">// Allow space for identity mapping coreboot memory regions on the host</span>
+            <span class="comment">// which is found at around 7a00_0000 (little bit before 2GB)</span>
+            <span class="comment">//</span>
+            <span class="comment">// TODO(b/188011323): stop hardcoding sizes and addresses here and instead</span>
+            <span class="comment">// determine the memory map from how the VM has been configured via the</span>
+            <span class="comment">// command line.</span>
+            <span class="number">2560</span> <span class="op">*</span> <span class="ident">MB</span>
+        } <span class="kw">else</span> {
+            <span class="number">768</span> <span class="op">*</span> <span class="ident">MB</span>
+        };
+        <span class="comment">// Reserved memory for nand_bios/LAPIC/IOAPIC/HPET/.....</span>
+        <span class="kw">const</span> <span class="ident">RESERVED_MEM_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x800_0000</span>;
+        <span class="comment">// Reserve 64MB for pcie enhanced configuration</span>
+        <span class="kw">const</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x400_0000</span>;
+
+        <span class="ident">LowMemoryLayout</span> {
+            <span class="ident">pci_start</span>: <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>,
+            <span class="ident">pci_size</span>: <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span>,
+            <span class="ident">pcie_cfg_mmio_start</span>: <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span> <span class="op">-</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
+            <span class="ident">pcie_cfg_mmio_size</span>: <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
+        }
+    });
+}
+
+<span class="kw">fn</span> <span class="ident">read_pci_start_before_32bit</span>() -&gt; <span class="ident">u64</span> {
+    <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get</span>().<span class="ident">unwrap</span>().<span class="ident">pci_start</span>
+}
+<span class="kw">fn</span> <span class="ident">read_pci_size_before_32bit</span>() -&gt; <span class="ident">u64</span> {
+    <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get</span>().<span class="ident">unwrap</span>().<span class="ident">pci_size</span>
+}
+<span class="kw">fn</span> <span class="ident">read_pcie_cfg_mmio_start</span>() -&gt; <span class="ident">u64</span> {
+    <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get</span>().<span class="ident">unwrap</span>().<span class="ident">pcie_cfg_mmio_start</span>
+}
+<span class="kw">fn</span> <span class="ident">read_pcie_cfg_mmio_size</span>() -&gt; <span class="ident">u64</span> {
+    <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get</span>().<span class="ident">unwrap</span>().<span class="ident">pcie_cfg_mmio_size</span>
+}
 
 <span class="doccomment">/// The x86 reset vector for i386+ and x86_64 puts the processor into an &quot;unreal mode&quot; where it</span>
 <span class="doccomment">/// can access the last 1 MB of the 32-bit address space in 16-bit mode, and starts the instruction</span>
@@ -2001,7 +2098,7 @@
     <span class="kw">const</span> <span class="ident">KERNEL_LOADER_OTHER</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0xff</span>;
     <span class="kw">const</span> <span class="ident">KERNEL_MIN_ALIGNMENT_BYTES</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x100_0000</span>; <span class="comment">// Must be non-zero.</span>
     <span class="kw">let</span> <span class="ident">first_addr_past_32bits</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">FIRST_ADDR_PAST_32BITS</span>);
-    <span class="kw">let</span> <span class="ident">end_32bit_gap_start</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">END_ADDR_BEFORE_32BITS</span>);
+    <span class="kw">let</span> <span class="ident">end_32bit_gap_start</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">read_pci_start_before_32bit</span>());
 
     <span class="ident">params</span>.<span class="ident">hdr</span>.<span class="ident">type_of_loader</span> <span class="op">=</span> <span class="ident">KERNEL_LOADER_OTHER</span>;
     <span class="ident">params</span>.<span class="ident">hdr</span>.<span class="ident">boot_flag</span> <span class="op">=</span> <span class="ident">KERNEL_BOOT_FLAG_MAGIC</span>;
@@ -2051,8 +2148,8 @@
 
     <span class="ident">add_e820_entry</span>(
         <span class="kw-2">&amp;mut</span> <span class="ident">params</span>,
-        <span class="ident">PCIE_CFG_MMIO_START</span>,
-        <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
+        <span class="ident">read_pcie_cfg_mmio_start</span>(),
+        <span class="ident">read_pcie_cfg_mmio_size</span>(),
         <span class="ident">E820Type::Reserved</span>,
     )<span class="question-mark">?</span>;
 
@@ -2101,8 +2198,10 @@
 <span class="kw">fn</span> <span class="ident">arch_memory_regions</span>(<span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">bios_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">GuestAddress</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">mem_start</span> <span class="op">=</span> <span class="ident">START_OF_RAM_32BITS</span>;
     <span class="kw">let</span> <span class="ident">mem_end</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">size</span> <span class="op">+</span> <span class="ident">mem_start</span>);
+
     <span class="kw">let</span> <span class="ident">first_addr_past_32bits</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">FIRST_ADDR_PAST_32BITS</span>);
-    <span class="kw">let</span> <span class="ident">end_32bit_gap_start</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">END_ADDR_BEFORE_32BITS</span>);
+    <span class="kw">let</span> <span class="ident">end_32bit_gap_start</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">read_pci_start_before_32bit</span>());
+
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">if</span> <span class="ident">mem_end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">end_32bit_gap_start</span> {
         <span class="ident">regions</span>.<span class="ident">push</span>((<span class="ident">GuestAddress</span>(<span class="ident">mem_start</span>), <span class="ident">size</span>));
@@ -2132,6 +2231,8 @@
     <span class="kw">fn</span> <span class="ident">guest_memory_layout</span>(
         <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">VmComponents</span>,
     ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">GuestAddress</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+        <span class="ident">init_low_memory_layout</span>();
+
         <span class="kw">let</span> <span class="ident">bios_size</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">vm_image</span> {
             <span class="ident">VmImage::Bios</span>(<span class="ident">bios_file</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">bios_file</span>.<span class="ident">metadata</span>().<span class="ident">map_err</span>(<span class="ident">Error::LoadBios</span>)<span class="question-mark">?</span>.<span class="ident">len</span>()),
             <span class="ident">VmImage::Kernel</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
@@ -2149,8 +2250,8 @@
                 <span class="ident">size</span>: <span class="number">0x4000</span>,
             }),
             <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                <span class="ident">base</span>: <span class="ident">END_ADDR_BEFORE_32BITS</span>,
-                <span class="ident">size</span>: <span class="ident">PCI_MMIO_SIZE</span>,
+                <span class="ident">base</span>: <span class="ident">read_pci_start_before_32bit</span>(),
+                <span class="ident">size</span>: <span class="ident">read_pci_size_before_32bit</span>(),
             },
             <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
                 <span class="ident">base</span>: <span class="ident">high_mmio_start</span>,
@@ -2195,6 +2296,12 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mptable</span> <span class="op">=</span> <span class="bool-val">true</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sci_irq</span> <span class="op">=</span> <span class="ident">X86_64_SCI_IRQ</span>;
 
+        <span class="comment">// punch pcie config mmio from pci low mmio, so that it couldn&#39;t be</span>
+        <span class="comment">// allocated to any device.</span>
+        <span class="ident">system_allocator</span>
+            .<span class="ident">reserve_mmio</span>(<span class="ident">read_pcie_cfg_mmio_start</span>(), <span class="ident">read_pcie_cfg_mmio_size</span>())
+            .<span class="ident">map_err</span>(<span class="ident">Error::ReservePcieCfgMmio</span>)<span class="question-mark">?</span>;
+
         <span class="kw">for</span> <span class="ident">sdt</span> <span class="kw">in</span> <span class="ident">components</span>.<span class="ident">acpi_sdts</span>.<span class="ident">iter</span>() {
             <span class="kw">if</span> <span class="ident">sdt</span>.<span class="ident">is_signature</span>(<span class="string">b&quot;DSDT&quot;</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">sdt</span>.<span class="ident">is_signature</span>(<span class="string">b&quot;APIC&quot;</span>) {
                 <span class="ident">noirq</span> <span class="op">=</span> <span class="bool-val">false</span>;
@@ -2232,7 +2339,7 @@
         .<span class="ident">map_err</span>(<span class="ident">Error::CreatePciRoot</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">pci</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">pci</span>));
-        <span class="ident">pci</span>.<span class="ident">lock</span>().<span class="ident">enable_pcie_cfg_mmio</span>(<span class="ident">PCIE_CFG_MMIO_START</span>);
+        <span class="ident">pci</span>.<span class="ident">lock</span>().<span class="ident">enable_pcie_cfg_mmio</span>(<span class="ident">read_pcie_cfg_mmio_start</span>());
         <span class="kw">let</span> <span class="ident">pci_cfg</span> <span class="op">=</span> <span class="ident">PciConfigIo::new</span>(
             <span class="ident">pci</span>.<span class="ident">clone</span>(),
             <span class="ident">reset_evt</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)<span class="question-mark">?</span>,
@@ -2242,7 +2349,11 @@
 
         <span class="kw">let</span> <span class="ident">pcie_cfg_mmio</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">PciConfigMmio::new</span>(<span class="ident">pci</span>.<span class="ident">clone</span>(), <span class="number">12</span>)));
         <span class="ident">mmio_bus</span>
-            .<span class="ident">insert</span>(<span class="ident">pcie_cfg_mmio</span>, <span class="ident">PCIE_CFG_MMIO_START</span>, <span class="ident">PCIE_CFG_MMIO_SIZE</span>)
+            .<span class="ident">insert</span>(
+                <span class="ident">pcie_cfg_mmio</span>,
+                <span class="ident">read_pcie_cfg_mmio_start</span>(),
+                <span class="ident">read_pcie_cfg_mmio_size</span>(),
+            )
             .<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">pcie_vcfg_mmio</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">PciVirtualConfigMmio::new</span>(<span class="ident">pci</span>.<span class="ident">clone</span>(), <span class="number">12</span>)));
@@ -2276,7 +2387,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resume_notify_devices</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
         <span class="comment">// each bus occupy 1MB mmio for pcie enhanced configuration</span>
-        <span class="kw">let</span> <span class="ident">max_bus</span> <span class="op">=</span> ((<span class="ident">PCIE_CFG_MMIO_SIZE</span> <span class="op">/</span> <span class="number">0x100000</span>) <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+        <span class="kw">let</span> <span class="ident">max_bus</span> <span class="op">=</span> ((<span class="ident">read_pcie_cfg_mmio_size</span>() <span class="op">/</span> <span class="number">0x100000</span>) <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
 
         <span class="kw">let</span> (<span class="ident">acpi_dev_resource</span>, <span class="ident">bat_control</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::setup_acpi_devices</span>(
             <span class="kw-2">&amp;</span><span class="ident">mem</span>,
@@ -2331,7 +2442,7 @@
             <span class="ident">host_cpus</span>,
             <span class="ident">vcpu_ids</span>,
             <span class="kw-2">&amp;</span><span class="ident">pci_irqs</span>,
-            <span class="ident">PCIE_CFG_MMIO_START</span>,
+            <span class="ident">read_pcie_cfg_mmio_start</span>(),
             <span class="ident">max_bus</span>,
             <span class="ident">components</span>.<span class="ident">force_s2idle</span>,
         )
@@ -2436,7 +2547,7 @@
 
         <span class="kw">let</span> <span class="ident">guest_mem</span> <span class="op">=</span> <span class="ident">vm</span>.<span class="ident">get_memory</span>();
         <span class="kw">let</span> <span class="ident">kernel_load_addr</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="ident">KERNEL_START_OFFSET</span>);
-        <span class="ident">regs::setup_msrs</span>(<span class="ident">vm</span>, <span class="ident">vcpu</span>, <span class="ident">END_ADDR_BEFORE_32BITS</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetupMsrs</span>)<span class="question-mark">?</span>;
+        <span class="ident">regs::setup_msrs</span>(<span class="ident">vm</span>, <span class="ident">vcpu</span>, <span class="ident">read_pci_start_before_32bit</span>()).<span class="ident">map_err</span>(<span class="ident">Error::SetupMsrs</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">kernel_end</span> <span class="op">=</span> <span class="ident">guest_mem</span>
             .<span class="ident">checked_offset</span>(<span class="ident">kernel_load_addr</span>, <span class="ident">KERNEL_64BIT_ENTRY_OFFSET</span>)
             .<span class="ident">ok_or</span>(<span class="ident">Error::KernelOffsetPastEnd</span>)<span class="question-mark">?</span>;
@@ -3346,8 +3457,15 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
+    <span class="kw">const</span> <span class="ident">TEST_MEMORY_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">2</span> <span class="op">*</span> <span class="ident">GB</span>;
+
+    <span class="kw">fn</span> <span class="ident">setup</span>() {
+        <span class="ident">init_low_memory_layout</span>();
+    }
+
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_lt_4gb_nobios</span>() {
+        <span class="ident">setup</span>();
         <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="number">512</span> <span class="op">*</span> <span class="ident">MB</span>, <span class="comment">/* bios_size */</span> <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">GuestAddress</span>(<span class="ident">START_OF_RAM_32BITS</span>), <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">0</span>);
@@ -3356,6 +3474,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_gt_4gb_nobios</span>() {
+        <span class="ident">setup</span>();
         <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">+</span> <span class="number">0x8000</span>;
         <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="ident">size</span>, <span class="comment">/* bios_size */</span> <span class="prelude-val">None</span>);
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
@@ -3366,6 +3485,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_lt_4gb_bios</span>() {
+        <span class="ident">setup</span>();
         <span class="kw">let</span> <span class="ident">bios_len</span> <span class="op">=</span> <span class="number">1</span> <span class="op">*</span> <span class="ident">MB</span>;
         <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="number">512</span> <span class="op">*</span> <span class="ident">MB</span>, <span class="prelude-val">Some</span>(<span class="ident">bios_len</span>));
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
@@ -3380,6 +3500,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_gt_4gb_bios</span>() {
+        <span class="ident">setup</span>();
         <span class="kw">let</span> <span class="ident">bios_len</span> <span class="op">=</span> <span class="number">1</span> <span class="op">*</span> <span class="ident">MB</span>;
         <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">+</span> <span class="number">0x8000</span>, <span class="prelude-val">Some</span>(<span class="ident">bios_len</span>));
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
@@ -3394,34 +3515,27 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_eq_4gb_nobios</span>() {
+        <span class="ident">setup</span>();
         <span class="comment">// Test with exact size of 4GB - the overhead.</span>
         <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(
-            <span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>,
+            <span class="ident">TEST_MEMORY_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>,
             <span class="comment">/* bios_size */</span> <span class="prelude-val">None</span>,
         );
         <span class="macro">dbg!</span>(<span class="kw-2">&amp;</span><span class="ident">regions</span>);
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">GuestAddress</span>(<span class="ident">START_OF_RAM_32BITS</span>), <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>,
-            <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">1</span>
-        );
+        <span class="macro">assert_eq!</span>(<span class="ident">TEST_MEMORY_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>, <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">1</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">regions_eq_4gb_bios</span>() {
+        <span class="ident">setup</span>();
         <span class="comment">// Test with exact size of 4GB - the overhead.</span>
         <span class="kw">let</span> <span class="ident">bios_len</span> <span class="op">=</span> <span class="number">1</span> <span class="op">*</span> <span class="ident">MB</span>;
-        <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(
-            <span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>,
-            <span class="prelude-val">Some</span>(<span class="ident">bios_len</span>),
-        );
+        <span class="kw">let</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="ident">TEST_MEMORY_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>, <span class="prelude-val">Some</span>(<span class="ident">bios_len</span>));
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, <span class="ident">regions</span>.<span class="ident">len</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">GuestAddress</span>(<span class="ident">START_OF_RAM_32BITS</span>), <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="number">4</span> <span class="op">*</span> <span class="ident">GB</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>,
-            <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">1</span>
-        );
+        <span class="macro">assert_eq!</span>(<span class="ident">TEST_MEMORY_SIZE</span> <span class="op">-</span> <span class="ident">START_OF_RAM_32BITS</span>, <span class="ident">regions</span>[<span class="number">0</span>].<span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             <span class="ident">GuestAddress</span>(<span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">bios_len</span>),
             <span class="ident">regions</span>[<span class="number">1</span>].<span class="number">0</span>
@@ -3432,21 +3546,23 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">fn</span> <span class="ident">end_addr_before_32bits</span>() {
+        <span class="ident">setup</span>();
         <span class="comment">// On volteer, type16 (coreboot) region is at 0x00000000769f3000-0x0000000076ffffff.</span>
         <span class="comment">// On brya, type16 region is at 0x0000000076876000-0x00000000803fffff</span>
         <span class="kw">let</span> <span class="ident">brya_type16_address</span> <span class="op">=</span> <span class="number">0x7687_6000</span>;
         <span class="macro">assert!</span>(
-            <span class="ident">END_ADDR_BEFORE_32BITS</span> <span class="op">&lt;</span> <span class="ident">brya_type16_address</span>,
+            <span class="ident">read_pci_start_before_32bit</span>() <span class="op">&lt;</span> <span class="ident">brya_type16_address</span>,
             <span class="string">&quot;{} &lt; {}&quot;</span>,
-            <span class="ident">END_ADDR_BEFORE_32BITS</span>,
+            <span class="ident">read_pci_start_before_32bit</span>(),
             <span class="ident">brya_type16_address</span>
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">check_32bit_gap_size_alignment</span>() {
-        <span class="comment">// 32bit gap memory is 256 MB aligned to be friendly for MTRR mappings.</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">%</span> (<span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>), <span class="number">0</span>);
+        <span class="ident">setup</span>();
+        <span class="comment">// pci_low_start is 256 MB aligned to be friendly for MTRR mappings.</span>
+        <span class="macro">assert_eq!</span>(<span class="ident">read_pci_start_before_32bit</span>() <span class="op">%</span> (<span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>), <span class="number">0</span>);
     }
 }
 </code></pre></div>
