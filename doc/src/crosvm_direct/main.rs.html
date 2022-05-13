@@ -4574,6 +4574,68 @@
 <span id="4573">4573</span>
 <span id="4574">4574</span>
 <span id="4575">4575</span>
+<span id="4576">4576</span>
+<span id="4577">4577</span>
+<span id="4578">4578</span>
+<span id="4579">4579</span>
+<span id="4580">4580</span>
+<span id="4581">4581</span>
+<span id="4582">4582</span>
+<span id="4583">4583</span>
+<span id="4584">4584</span>
+<span id="4585">4585</span>
+<span id="4586">4586</span>
+<span id="4587">4587</span>
+<span id="4588">4588</span>
+<span id="4589">4589</span>
+<span id="4590">4590</span>
+<span id="4591">4591</span>
+<span id="4592">4592</span>
+<span id="4593">4593</span>
+<span id="4594">4594</span>
+<span id="4595">4595</span>
+<span id="4596">4596</span>
+<span id="4597">4597</span>
+<span id="4598">4598</span>
+<span id="4599">4599</span>
+<span id="4600">4600</span>
+<span id="4601">4601</span>
+<span id="4602">4602</span>
+<span id="4603">4603</span>
+<span id="4604">4604</span>
+<span id="4605">4605</span>
+<span id="4606">4606</span>
+<span id="4607">4607</span>
+<span id="4608">4608</span>
+<span id="4609">4609</span>
+<span id="4610">4610</span>
+<span id="4611">4611</span>
+<span id="4612">4612</span>
+<span id="4613">4613</span>
+<span id="4614">4614</span>
+<span id="4615">4615</span>
+<span id="4616">4616</span>
+<span id="4617">4617</span>
+<span id="4618">4618</span>
+<span id="4619">4619</span>
+<span id="4620">4620</span>
+<span id="4621">4621</span>
+<span id="4622">4622</span>
+<span id="4623">4623</span>
+<span id="4624">4624</span>
+<span id="4625">4625</span>
+<span id="4626">4626</span>
+<span id="4627">4627</span>
+<span id="4628">4628</span>
+<span id="4629">4629</span>
+<span id="4630">4630</span>
+<span id="4631">4631</span>
+<span id="4632">4632</span>
+<span id="4633">4633</span>
+<span id="4634">4634</span>
+<span id="4635">4635</span>
+<span id="4636">4636</span>
+<span id="4637">4637</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4602,14 +4664,14 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">getpid</span>, <span class="ident">info</span>, <span class="ident">kill_process_group</span>, <span class="ident">pagesize</span>, <span class="ident">reap_child</span>, <span class="ident">syslog</span>, <span class="ident">warn</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">crosvm::platform::GpuRenderServerParameters</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">crosvm</span>::{<span class="ident">argument::parse_hex_or_decimal</span>, <span class="ident">DirectIoOption</span>, <span class="ident">HostPcieRootPortParameters</span>};
 <span class="kw">use</span> <span class="ident">crosvm</span>::{
-    <span class="ident">argument</span>::{<span class="self">self</span>, <span class="ident">print_help</span>, <span class="ident">set_arguments</span>, <span class="ident">Argument</span>},
+    <span class="ident">argument</span>::{<span class="self">self</span>, <span class="ident">parse_hex_or_decimal</span>, <span class="ident">print_help</span>, <span class="ident">set_arguments</span>, <span class="ident">Argument</span>},
     <span class="ident">platform</span>, <span class="ident">BindMount</span>, <span class="ident">Config</span>, <span class="ident">Executable</span>, <span class="ident">FileBackedMappingParameters</span>, <span class="ident">GidMap</span>, <span class="ident">SharedDir</span>,
     <span class="ident">TouchDeviceOption</span>, <span class="ident">VfioCommand</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>,
     <span class="ident">VvuOption</span>,
 };
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">crosvm</span>::{<span class="ident">DirectIoOption</span>, <span class="ident">HostPcieRootPortParameters</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
@@ -4640,6 +4702,8 @@
     <span class="ident">create_composite_disk</span>, <span class="ident">create_disk_file</span>, <span class="ident">create_zero_filler</span>, <span class="ident">ImagePartitionType</span>, <span class="ident">PartitionInfo</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident">resources::MemRegion</span>;
 <span class="kw">use</span> <span class="ident">serde_keyvalue::from_key_values</span>;
 <span class="kw">use</span> <span class="ident">uuid::Uuid</span>;
 <span class="kw">use</span> <span class="ident">vm_control</span>::{
@@ -4652,6 +4716,11 @@
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">x86_64::set_itmt_msr_config</span>;
+
+<span class="kw">const</span> <span class="ident">ONE_MB</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
+<span class="kw">const</span> <span class="ident">MB_ALIGNED</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">ONE_MB</span> <span class="op">-</span> <span class="number">1</span>;
+<span class="comment">// the max bus number is 256 and each bus occupy 1MB, so the max pcie cfg mmio size = 256M</span>
+<span class="kw">const</span> <span class="ident">MAX_PCIE_ECAM_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">ONE_MB</span> <span class="op">*</span> <span class="number">256</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;scudo&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">global_allocator</span>]</span>
@@ -7050,6 +7119,58 @@
                 <span class="ident">cfg</span>.<span class="ident">task_profiles</span>.<span class="ident">push</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>());
             }
         }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+        <span class="string">&quot;pcie-ecam&quot;</span> =&gt; {
+            <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">paras</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">split</span>(<span class="string">&#39;,&#39;</span>).<span class="ident">collect</span>();
+            <span class="kw">if</span> <span class="ident">paras</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">2</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                        <span class="string">&quot;pcie-ecam must have exactly 2 parameters: ecam_base,ecam_size&quot;</span>,
+                    ),
+                });
+            }
+            <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span>
+                <span class="ident">parse_hex_or_decimal</span>(<span class="ident">paras</span>[<span class="number">0</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pcie-ecam, the first parameter base should be integer&quot;</span>),
+                })<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">len</span> <span class="op">=</span>
+                <span class="ident">parse_hex_or_decimal</span>(<span class="ident">paras</span>[<span class="number">1</span>]).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                        <span class="string">&quot;pcie-ecam, the second parameter size should be integer&quot;</span>,
+                    ),
+                })<span class="question-mark">?</span>;
+
+            <span class="kw">if</span> (<span class="ident">base</span> <span class="op">&amp;</span> <span class="ident">MB_ALIGNED</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>) <span class="op">|</span><span class="op">|</span> (<span class="ident">len</span> <span class="op">&amp;</span> <span class="ident">MB_ALIGNED</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>) {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pcie-ecam, the base and len should be aligned to 1MB&quot;</span>),
+                });
+            }
+
+            <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="ident">MAX_PCIE_ECAM_SIZE</span> {
+                <span class="ident">len</span> <span class="op">=</span> <span class="ident">MAX_PCIE_ECAM_SIZE</span>;
+            }
+
+            <span class="kw">if</span> <span class="ident">base</span> <span class="op">+</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x1_0000_0000</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pcie-ecam, the end address couldn&#39;t beyond 4G&quot;</span>),
+                });
+            }
+
+            <span class="kw">if</span> <span class="ident">base</span> <span class="op">%</span> <span class="ident">len</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pcie-ecam, base should be multiple of len&quot;</span>),
+                });
+            }
+
+            <span class="ident">cfg</span>.<span class="ident">pcie_ecam</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> { <span class="ident">base</span>, <span class="ident">size</span>: <span class="ident">len</span> });
+        }
         <span class="string">&quot;help&quot;</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::PrintHelp</span>),
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     }
@@ -7606,6 +7727,9 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
                            incompatible with the default ranges calculated by crosvm.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;task-profiles&quot;</span>, <span class="string">&quot;NAME[,...]&quot;</span>, <span class="string">&quot;Comma-separated names of the task profiles to apply to all threads in crosvm including the vCPU threads.&quot;</span>),
+          <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+          <span class="ident">Argument::value</span>(<span class="string">&quot;pcie-ecam&quot;</span>, <span class="string">&quot;mmio_base,mmio_length&quot;</span>,
+                          <span class="string">&quot;Base and length for PCIE Enhanced Configuration Access Mechanism&quot;</span>),
           <span class="ident">Argument::short_flag</span>(<span class="string">&#39;h&#39;</span>, <span class="string">&quot;help&quot;</span>, <span class="string">&quot;Print help message.&quot;</span>)];
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="ident">Config::default</span>();

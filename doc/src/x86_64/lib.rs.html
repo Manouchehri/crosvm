@@ -1782,6 +1782,31 @@
 <span id="1781">1781</span>
 <span id="1782">1782</span>
 <span id="1783">1783</span>
+<span id="1784">1784</span>
+<span id="1785">1785</span>
+<span id="1786">1786</span>
+<span id="1787">1787</span>
+<span id="1788">1788</span>
+<span id="1789">1789</span>
+<span id="1790">1790</span>
+<span id="1791">1791</span>
+<span id="1792">1792</span>
+<span id="1793">1793</span>
+<span id="1794">1794</span>
+<span id="1795">1795</span>
+<span id="1796">1796</span>
+<span id="1797">1797</span>
+<span id="1798">1798</span>
+<span id="1799">1799</span>
+<span id="1800">1800</span>
+<span id="1801">1801</span>
+<span id="1802">1802</span>
+<span id="1803">1803</span>
+<span id="1804">1804</span>
+<span id="1805">1805</span>
+<span id="1806">1806</span>
+<span id="1807">1807</span>
+<span id="1808">1808</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2035,7 +2060,7 @@
 
 <span class="kw">static</span> <span class="ident">LOW_MEMORY_LAYOUT</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">LowMemoryLayout</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
 
-<span class="kw">fn</span> <span class="ident">init_low_memory_layout</span>() {
+<span class="kw">fn</span> <span class="ident">init_low_memory_layout</span>(<span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>) {
     <span class="ident">LOW_MEMORY_LAYOUT</span>.<span class="ident">get_or_init</span>(<span class="op">|</span><span class="op">|</span> {
         <span class="comment">// Make sure it align to 256MB for MTRR convenient</span>
         <span class="kw">const</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>) {
@@ -2054,11 +2079,23 @@
         <span class="comment">// Reserve 64MB for pcie enhanced configuration</span>
         <span class="kw">const</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x400_0000</span>;
 
+        <span class="kw">let</span> (<span class="ident">pcie_cfg_mmio_start</span>, <span class="ident">pcie_cfg_mmio_size</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pcie_mem</span>) <span class="op">=</span> <span class="ident">pcie_ecam</span> {
+            (<span class="ident">pcie_mem</span>.<span class="ident">base</span>, <span class="ident">pcie_mem</span>.<span class="ident">size</span>)
+        } <span class="kw">else</span> {
+            (
+                (<span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span> <span class="op">-</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>),
+                <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
+            )
+        };
+
+        <span class="kw">let</span> <span class="ident">pci_start</span> <span class="op">=</span> <span class="ident">pcie_cfg_mmio_start</span>.<span class="ident">min</span>(<span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>);
+        <span class="kw">let</span> <span class="ident">pci_size</span> <span class="op">=</span> <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">pci_start</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span>;
+
         <span class="ident">LowMemoryLayout</span> {
-            <span class="ident">pci_start</span>: <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">MEM_32BIT_GAP_SIZE</span>,
-            <span class="ident">pci_size</span>: <span class="ident">MEM_32BIT_GAP_SIZE</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span>,
-            <span class="ident">pcie_cfg_mmio_start</span>: <span class="ident">FIRST_ADDR_PAST_32BITS</span> <span class="op">-</span> <span class="ident">RESERVED_MEM_SIZE</span> <span class="op">-</span> <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
-            <span class="ident">pcie_cfg_mmio_size</span>: <span class="ident">PCIE_CFG_MMIO_SIZE</span>,
+            <span class="ident">pci_start</span>,
+            <span class="ident">pci_size</span>,
+            <span class="ident">pcie_cfg_mmio_start</span>,
+            <span class="ident">pcie_cfg_mmio_size</span>,
         }
     });
 }
@@ -2231,12 +2268,13 @@
     <span class="kw">fn</span> <span class="ident">guest_memory_layout</span>(
         <span class="ident">components</span>: <span class="kw-2">&amp;</span><span class="ident">VmComponents</span>,
     ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">GuestAddress</span>, <span class="ident">u64</span>)<span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
-        <span class="ident">init_low_memory_layout</span>();
+        <span class="ident">init_low_memory_layout</span>(<span class="ident">components</span>.<span class="ident">pcie_ecam</span>);
 
         <span class="kw">let</span> <span class="ident">bios_size</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">components</span>.<span class="ident">vm_image</span> {
             <span class="ident">VmImage::Bios</span>(<span class="ident">bios_file</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">bios_file</span>.<span class="ident">metadata</span>().<span class="ident">map_err</span>(<span class="ident">Error::LoadBios</span>)<span class="question-mark">?</span>.<span class="ident">len</span>()),
             <span class="ident">VmImage::Kernel</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         };
+
         <span class="prelude-val">Ok</span>(<span class="ident">arch_memory_regions</span>(<span class="ident">components</span>.<span class="ident">memory_size</span>, <span class="ident">bios_size</span>))
     }
 
@@ -2388,7 +2426,6 @@
 
         <span class="comment">// each bus occupy 1MB mmio for pcie enhanced configuration</span>
         <span class="kw">let</span> <span class="ident">max_bus</span> <span class="op">=</span> ((<span class="ident">read_pcie_cfg_mmio_size</span>() <span class="op">/</span> <span class="number">0x100000</span>) <span class="op">-</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
-
         <span class="kw">let</span> (<span class="ident">acpi_dev_resource</span>, <span class="ident">bat_control</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::setup_acpi_devices</span>(
             <span class="kw-2">&amp;</span><span class="ident">mem</span>,
             <span class="kw-2">&amp;</span><span class="ident">io_bus</span>,
@@ -3460,7 +3497,11 @@
     <span class="kw">const</span> <span class="ident">TEST_MEMORY_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">2</span> <span class="op">*</span> <span class="ident">GB</span>;
 
     <span class="kw">fn</span> <span class="ident">setup</span>() {
-        <span class="ident">init_low_memory_layout</span>();
+        <span class="kw">let</span> <span class="ident">pcie_ecam</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
+            <span class="ident">base</span>: <span class="number">3</span> <span class="op">*</span> <span class="ident">GB</span>,
+            <span class="ident">size</span>: <span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>,
+        });
+        <span class="ident">init_low_memory_layout</span>(<span class="ident">pcie_ecam</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -3541,6 +3582,15 @@
             <span class="ident">regions</span>[<span class="number">1</span>].<span class="number">0</span>
         );
         <span class="macro">assert_eq!</span>(<span class="ident">bios_len</span>, <span class="ident">regions</span>[<span class="number">1</span>].<span class="number">1</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">check_pci_mmio_layout</span>() {
+        <span class="ident">setup</span>();
+
+        <span class="macro">assert_eq!</span>(<span class="ident">read_pci_start_before_32bit</span>(), <span class="number">3</span> <span class="op">*</span> <span class="ident">GB</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">read_pcie_cfg_mmio_start</span>(), <span class="number">3</span> <span class="op">*</span> <span class="ident">GB</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">read_pcie_cfg_mmio_size</span>(), <span class="number">256</span> <span class="op">*</span> <span class="ident">MB</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>

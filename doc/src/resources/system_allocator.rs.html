@@ -447,7 +447,7 @@
 }
 
 <span class="doccomment">/// Region of memory.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemRegion</span> {
     <span class="kw">pub</span> <span class="ident">base</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">u64</span>,
