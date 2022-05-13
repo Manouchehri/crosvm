@@ -1977,7 +1977,7 @@
             )
         };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidRange</span>(<span class="ident">mem_offset</span>, <span class="ident">count</span>, <span class="self">self</span>.<span class="ident">size</span>()))
+            <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCallFailed</span>(<span class="ident"><span class="kw">super</span>::Error::last</span>()))
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(())
         }

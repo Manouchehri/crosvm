@@ -506,6 +506,25 @@
 <span id="505">505</span>
 <span id="506">506</span>
 <span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -667,6 +686,25 @@
 
     <span class="doccomment">/// Remove `size`-byte mapping starting at `offset`.</span>
     <span class="kw">fn</span> <span class="ident">remove_mapping</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">slot</span>: <span class="ident">u32</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Frees the given segment of guest memory to be reclaimed by the host OS.</span>
+    <span class="doccomment">/// This is intended for use with virtio-balloon, where a guest driver determines</span>
+    <span class="doccomment">/// unused ranges and requests they be freed. Use without the guest&#39;s knowledge is sure</span>
+    <span class="doccomment">/// to break something. As per virtio-balloon spec, the given address and size</span>
+    <span class="doccomment">/// are intended to be page-aligned.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">/// * `guest_address` - Address in the guest&#39;s &quot;physical&quot; memory to begin the unmapping</span>
+    <span class="doccomment">/// * `size` - The size of the region to unmap, in bytes</span>
+    <span class="kw">fn</span> <span class="ident">handle_deflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Reallocates memory and maps it to provide to the guest. This is intended to be used</span>
+    <span class="doccomment">/// exclusively in tandem with `handle_deflate`, and will return an `Err` Result otherwise.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">/// * `guest_address` - Address in the guest&#39;s &quot;physical&quot; memory to begin the mapping</span>
+    <span class="doccomment">/// * `size` - The size of the region to map, in bytes</span>
+    <span class="kw">fn</span> <span class="ident">handle_inflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A unique fingerprint for a particular `VcpuRunHandle`, used in `Vcpu` impls to ensure the</span>
