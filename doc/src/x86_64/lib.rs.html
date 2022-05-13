@@ -1796,17 +1796,6 @@
 <span id="1795">1795</span>
 <span id="1796">1796</span>
 <span id="1797">1797</span>
-<span id="1798">1798</span>
-<span id="1799">1799</span>
-<span id="1800">1800</span>
-<span id="1801">1801</span>
-<span id="1802">1802</span>
-<span id="1803">1803</span>
-<span id="1804">1804</span>
-<span id="1805">1805</span>
-<span id="1806">1806</span>
-<span id="1807">1807</span>
-<span id="1808">1808</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3103,13 +3092,6 @@
         <span class="ident">reset_evt</span>: <span class="ident">Event</span>,
         <span class="ident">mem_size</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">struct</span> <span class="ident">NoDevice</span>;
-        <span class="kw">impl</span> <span class="ident">devices::BusDevice</span> <span class="kw">for</span> <span class="ident">NoDevice</span> {
-            <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
-                <span class="string">&quot;no device&quot;</span>.<span class="ident">to_owned</span>()
-            }
-        }
-
         <span class="kw">let</span> <span class="ident">mem_regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="ident">mem_size</span>, <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">mem_below_4g</span> <span class="op">=</span> <span class="ident">mem_regions</span>
@@ -3132,7 +3114,6 @@
             )
             .<span class="ident">unwrap</span>();
 
-        <span class="kw">let</span> <span class="ident">nul_device</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">NoDevice</span>));
         <span class="kw">let</span> <span class="ident">i8042</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">devices::I8042Device::new</span>(
             <span class="ident">reset_evt</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)<span class="question-mark">?</span>,
         )));
@@ -3142,9 +3123,6 @@
         } <span class="kw">else</span> {
             <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">i8042</span>, <span class="number">0x061</span>, <span class="number">0x4</span>).<span class="ident">unwrap</span>();
         }
-
-        <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">nul_device</span>.<span class="ident">clone</span>(), <span class="number">0x0ed</span>, <span class="number">0x1</span>).<span class="ident">unwrap</span>(); <span class="comment">// most likely this one does nothing</span>
-        <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">nul_device</span>, <span class="number">0x0f0</span>, <span class="number">0x2</span>).<span class="ident">unwrap</span>(); <span class="comment">// ignore fpu</span>
 
         <span class="prelude-val">Ok</span>(())
     }
