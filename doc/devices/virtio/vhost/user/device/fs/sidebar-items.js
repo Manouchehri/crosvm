@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["default_gidmap",""],["default_uidmap",""],["handle_fs_queue",""],["jail_and_fork",""],["run_fs_device","Starts a vhost-user fs device. Returns an error if the given `args` is invalid or the device fails to run."]],"struct":[["FsBackend",""],["Options",""]]});
+initSidebarItems({"fn":[["handle_fs_queue",""],["run_fs_device",""]],"mod":[["sys",""]],"struct":[["FsBackend",""],["Options",""]]});
