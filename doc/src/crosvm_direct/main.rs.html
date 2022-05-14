@@ -4191,6 +4191,12 @@
 <span id="4190">4190</span>
 <span id="4191">4191</span>
 <span id="4192">4192</span>
+<span id="4193">4193</span>
+<span id="4194">4194</span>
+<span id="4195">4195</span>
+<span id="4196">4196</span>
+<span id="4197">4197</span>
+<span id="4198">4198</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -8259,8 +8265,10 @@ with a &#39;--backing_file&#39;.&quot;</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">parse_direct_io_options_valid</span>() {
-        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem@1,100-110&quot;</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">path</span>.<span class="ident">to_str</span>(), <span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem&quot;</span>));
+        <span class="comment">// Use /dev/zero here which is usually available on any systems,</span>
+        <span class="comment">// /dev/mem may not.</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero@1,100-110&quot;</span>)).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">path</span>.<span class="ident">to_str</span>(), <span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">ranges</span>[<span class="number">0</span>], <span class="ident">BusRange</span> { <span class="ident">base</span>: <span class="number">1</span>, <span class="ident">len</span>: <span class="number">1</span> });
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">ranges</span>[<span class="number">1</span>], <span class="ident">BusRange</span> { <span class="ident">base</span>: <span class="number">100</span>, <span class="ident">len</span>: <span class="number">11</span> });
     }
@@ -8268,8 +8276,10 @@ with a &#39;--backing_file&#39;.&quot;</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">parse_direct_io_options_hex</span>() {
-        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem@1,0x10,100-110,0x10-0x20&quot;</span>)).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">path</span>.<span class="ident">to_str</span>(), <span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem&quot;</span>));
+        <span class="comment">// Use /dev/zero here which is usually available on any systems,</span>
+        <span class="comment">// /dev/mem may not.</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero@1,0x10,100-110,0x10-0x20&quot;</span>)).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">path</span>.<span class="ident">to_str</span>(), <span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero&quot;</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">ranges</span>[<span class="number">0</span>], <span class="ident">BusRange</span> { <span class="ident">base</span>: <span class="number">1</span>, <span class="ident">len</span>: <span class="number">1</span> });
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">ranges</span>[<span class="number">1</span>], <span class="ident">BusRange</span> { <span class="ident">base</span>: <span class="number">0x10</span>, <span class="ident">len</span>: <span class="number">1</span> });
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">ranges</span>[<span class="number">2</span>], <span class="ident">BusRange</span> { <span class="ident">base</span>: <span class="number">100</span>, <span class="ident">len</span>: <span class="number">11</span> });
@@ -8285,12 +8295,14 @@ with a &#39;--backing_file&#39;.&quot;</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">parse_direct_io_options_invalid</span>() {
-        <span class="macro">assert!</span>(<span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem@0y10&quot;</span>))
+        <span class="comment">// Use /dev/zero here which is usually available on any systems,</span>
+        <span class="comment">// /dev/mem may not.</span>
+        <span class="macro">assert!</span>(<span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero@0y10&quot;</span>))
             .<span class="ident">unwrap_err</span>()
             .<span class="ident">to_string</span>()
             .<span class="ident">contains</span>(<span class="string">&quot;invalid base range value&quot;</span>));
 
-        <span class="macro">assert!</span>(<span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/mem@&quot;</span>))
+        <span class="macro">assert!</span>(<span class="ident">parse_direct_io_options</span>(<span class="prelude-val">Some</span>(<span class="string">&quot;/dev/zero@&quot;</span>))
             .<span class="ident">unwrap_err</span>()
             .<span class="ident">to_string</span>()
             .<span class="ident">contains</span>(<span class="string">&quot;invalid base range value&quot;</span>));
