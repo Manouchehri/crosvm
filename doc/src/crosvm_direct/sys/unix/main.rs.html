@@ -407,18 +407,129 @@
 <span id="406">406</span>
 <span id="407">407</span>
 <span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(
+    <span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>),
+    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>
+))]</span>
 <span class="kw">use</span> <span class="ident">std::str::FromStr</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">path::PathBuf</span>, <span class="ident">time::Duration</span>};
 
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="prelude-ty">Result</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device::run_gpu_device</span>;
+<span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device</span>::{
+    <span class="ident">run_console_device</span>, <span class="ident">run_fs_device</span>, <span class="ident">run_vsock_device</span>, <span class="ident">run_wl_device</span>,
+};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio</span>::{
     <span class="ident">snd::cras_backend::Error</span> <span class="kw">as</span> <span class="ident">CrasSndError</span>, <span class="ident">vhost::user::device::run_cras_snd_device</span>,
 };
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">devices::Ac97Backend</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">devices::Ac97Parameters</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::argument</span>::{<span class="self">self</span>, <span class="ident">Argument</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
@@ -813,6 +924,91 @@
         }
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     }
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">program_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">device_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">match</span> <span class="ident">device_name</span> {
+        <span class="string">&quot;console&quot;</span> =&gt; <span class="ident">run_console_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+        <span class="string">&quot;cras-snd&quot;</span> =&gt; <span class="ident">run_cras_snd_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="string">&quot;fs&quot;</span> =&gt; <span class="ident">run_fs_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
+        <span class="string">&quot;gpu&quot;</span> =&gt; <span class="ident">run_gpu_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="string">&quot;vsock&quot;</span> =&gt; <span class="ident">run_vsock_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="string">&quot;wl&quot;</span> =&gt; <span class="ident">run_wl_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;unknown device name: {}&quot;</span>, <span class="ident">device_name</span>)),
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check_ac97_backend</span>(
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span> <span class="ident">ac97_params</span>: <span class="kw-2">&amp;</span><span class="ident">Ac97Parameters</span>,
+) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="comment">// server is required for and exclusive to vios backend</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+    <span class="kw">match</span> <span class="ident">ac97_params</span>.<span class="ident">backend</span> {
+        <span class="ident">Ac97Backend::VIOS</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">ac97_params</span>.<span class="ident">vios_server_path</span>.<span class="ident">is_none</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
+                    <span class="string">&quot;server argument is required for VIOS backend&quot;</span>,
+                )));
+            }
+        }
+        <span class="kw">_</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">ac97_params</span>.<span class="ident">vios_server_path</span>.<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnexpectedValue</span>(<span class="ident">String::from</span>(
+                    <span class="string">&quot;server argument is exclusive to the VIOS backend&quot;</span>,
+                )));
+            }
+        }
+    }
+
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_ac97_options</span>(
+    <span class="ident">ac97_params</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Ac97Parameters</span>,
+    <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span> <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">match</span> <span class="ident">key</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+        <span class="string">&quot;client_type&quot;</span> =&gt; {
+            <span class="ident">ac97_params</span>
+                .<span class="ident">set_client_type</span>(<span class="ident">value</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_string</span>(),
+                    <span class="ident">expected</span>: <span class="ident">e</span>.<span class="ident">to_string</span>(),
+                })<span class="question-mark">?</span>;
+        }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+        <span class="string">&quot;socket_type&quot;</span> =&gt; {
+            <span class="ident">ac97_params</span>
+                .<span class="ident">set_socket_type</span>(<span class="ident">value</span>)
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_string</span>(),
+                    <span class="ident">expected</span>: <span class="ident">e</span>.<span class="ident">to_string</span>(),
+                })<span class="question-mark">?</span>;
+        }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>))]</span>
+        <span class="string">&quot;server&quot;</span> =&gt; {
+            <span class="ident">ac97_params</span>.<span class="ident">vios_server_path</span> <span class="op">=</span>
+                <span class="prelude-val">Some</span>(
+                    <span class="ident">PathBuf::from_str</span>(<span class="ident">value</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                        <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_string</span>(),
+                        <span class="ident">expected</span>: <span class="ident">e</span>.<span class="ident">to_string</span>(),
+                    })<span class="question-mark">?</span>,
+                );
+        }
+        <span class="kw">_</span> =&gt; {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(<span class="macro">format!</span>(
+                <span class="string">&quot;unknown ac97 parameter {}&quot;</span>,
+                <span class="ident">key</span>
+            )));
+        }
+    };
     <span class="prelude-val">Ok</span>(())
 }
 </code></pre></div>

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["get_arguments",""],["parse_gpu_render_server_options",""],["set_arguments",""]]});
+initSidebarItems({"fn":[["check_ac97_backend",""],["get_arguments",""],["parse_ac97_options",""],["parse_gpu_render_server_options",""],["set_arguments",""],["start_device",""]]});
