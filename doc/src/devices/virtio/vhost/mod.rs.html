@@ -108,6 +108,12 @@
 <span id="107">107</span>
 <span id="108">108</span>
 <span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -121,14 +127,20 @@
 <span class="kw">use</span> <span class="ident">vhost::Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>;
 
 <span class="kw">mod</span> <span class="ident">control_socket</span>;
-<span class="kw">mod</span> <span class="ident">net</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">user</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vsock</span>;
-<span class="kw">mod</span> <span class="ident">worker</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::control_socket</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::net::Net</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::vsock::Vsock</span>;
+
+<span class="macro">cfg_if::cfg_if!</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
+        <span class="kw">mod</span> <span class="ident">net</span>;
+        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vsock</span>;
+        <span class="kw">mod</span> <span class="ident">worker</span>;
+
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::net::Net</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::vsock::Vsock</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {}
+}
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>

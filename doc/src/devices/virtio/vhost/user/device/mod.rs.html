@@ -28,35 +28,59 @@
 <span id="27">27</span>
 <span id="28">28</span>
 <span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">mod</span> <span class="ident">block</span>;
-<span class="kw">mod</span> <span class="ident">console</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">cras_snd</span>;
-<span class="kw">mod</span> <span class="ident">fs</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">gpu</span>;
 <span class="kw">mod</span> <span class="ident">handler</span>;
-<span class="kw">mod</span> <span class="ident">net</span>;
-<span class="kw">mod</span> <span class="ident">vsock</span>;
-<span class="kw">mod</span> <span class="ident">vvu</span>;
-<span class="kw">mod</span> <span class="ident">wl</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">block::run_block_device</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">console::run_console_device</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cras_snd::run_cras_snd_device</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fs::run_fs_device</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gpu::run_gpu_device</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">all</span>(<span class="ident">windows</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>), <span class="ident">not</span>(<span class="ident">windows</span>)))]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::run_net_device</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vsock::run_vsock_device</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl::run_wl_device</span>;
+<span class="macro">cfg_if::cfg_if!</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
+        <span class="kw">mod</span> <span class="ident">gpu</span>;
+        <span class="kw">mod</span> <span class="ident">console</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+        <span class="kw">mod</span> <span class="ident">cras_snd</span>;
+        <span class="kw">mod</span> <span class="ident">fs</span>;
+        <span class="kw">mod</span> <span class="ident">net</span>;
+        <span class="kw">mod</span> <span class="ident">vsock</span>;
+        <span class="kw">mod</span> <span class="ident">vvu</span>;
+        <span class="kw">mod</span> <span class="ident">wl</span>;
+
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vsock::run_vsock_device</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl::run_wl_device</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">console::run_console_device</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cras_snd::run_cras_snd_device</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fs::run_fs_device</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::run_net_device</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gpu::run_gpu_device</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
+        <span class="kw">mod</span> <span class="ident">net</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::run_net_device</span>;
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::sys::windows::NetBackendConfig</span>;
+
+    }
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>
 </body></html>
