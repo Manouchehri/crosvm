@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["check_ac97_backend",""],["get_arguments",""],["parse_ac97_options",""],["parse_gpu_render_server_options",""],["set_arguments",""],["start_device",""]]});
+initSidebarItems({"fn":[["check_ac97_backend",""],["check_serial_params",""],["get_arguments",""],["is_gpu_backend_deprecated",""],["parse_ac97_options",""],["parse_gpu_render_server_options",""],["set_arguments",""],["start_device",""],["use_vulkan",""]]});

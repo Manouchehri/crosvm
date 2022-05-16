@@ -4152,51 +4152,6 @@
 <span id="4151">4151</span>
 <span id="4152">4152</span>
 <span id="4153">4153</span>
-<span id="4154">4154</span>
-<span id="4155">4155</span>
-<span id="4156">4156</span>
-<span id="4157">4157</span>
-<span id="4158">4158</span>
-<span id="4159">4159</span>
-<span id="4160">4160</span>
-<span id="4161">4161</span>
-<span id="4162">4162</span>
-<span id="4163">4163</span>
-<span id="4164">4164</span>
-<span id="4165">4165</span>
-<span id="4166">4166</span>
-<span id="4167">4167</span>
-<span id="4168">4168</span>
-<span id="4169">4169</span>
-<span id="4170">4170</span>
-<span id="4171">4171</span>
-<span id="4172">4172</span>
-<span id="4173">4173</span>
-<span id="4174">4174</span>
-<span id="4175">4175</span>
-<span id="4176">4176</span>
-<span id="4177">4177</span>
-<span id="4178">4178</span>
-<span id="4179">4179</span>
-<span id="4180">4180</span>
-<span id="4181">4181</span>
-<span id="4182">4182</span>
-<span id="4183">4183</span>
-<span id="4184">4184</span>
-<span id="4185">4185</span>
-<span id="4186">4186</span>
-<span id="4187">4187</span>
-<span id="4188">4188</span>
-<span id="4189">4189</span>
-<span id="4190">4190</span>
-<span id="4191">4191</span>
-<span id="4192">4192</span>
-<span id="4193">4193</span>
-<span id="4194">4194</span>
-<span id="4195">4195</span>
-<span id="4196">4196</span>
-<span id="4197">4197</span>
-<span id="4198">4198</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4457,10 +4412,28 @@
                 <span class="comment">// Preferred: Specifying --gpu,backend=&lt;mode&gt;</span>
                 <span class="string">&quot;backend&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">v</span> {
                     <span class="string">&quot;2d&quot;</span> <span class="op">|</span> <span class="string">&quot;2D&quot;</span> =&gt; {
-                        <span class="ident">gpu_params</span>.<span class="ident">mode</span> <span class="op">=</span> <span class="ident">GpuMode::Mode2D</span>;
+                        <span class="kw">if</span> <span class="ident">sys::is_gpu_backend_deprecated</span>(<span class="ident">v</span>) {
+                            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                                <span class="ident">value</span>: <span class="ident">v</span>.<span class="ident">to_string</span>(),
+                                <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                                    <span class="string">&quot;this backend type is deprecated, please use gfxstream.&quot;</span>,
+                                ),
+                            });
+                        } <span class="kw">else</span> {
+                            <span class="ident">gpu_params</span>.<span class="ident">mode</span> <span class="op">=</span> <span class="ident">GpuMode::Mode2D</span>;
+                        }
                     }
                     <span class="string">&quot;3d&quot;</span> <span class="op">|</span> <span class="string">&quot;3D&quot;</span> <span class="op">|</span> <span class="string">&quot;virglrenderer&quot;</span> =&gt; {
-                        <span class="ident">gpu_params</span>.<span class="ident">mode</span> <span class="op">=</span> <span class="ident">GpuMode::ModeVirglRenderer</span>;
+                        <span class="kw">if</span> <span class="ident">sys::is_gpu_backend_deprecated</span>(<span class="ident">v</span>) {
+                            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                                <span class="ident">value</span>: <span class="ident">v</span>.<span class="ident">to_string</span>(),
+                                <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                                    <span class="string">&quot;this backend type is deprecated, please use gfxstream.&quot;</span>,
+                                ),
+                            });
+                        } <span class="kw">else</span> {
+                            <span class="ident">gpu_params</span>.<span class="ident">mode</span> <span class="op">=</span> <span class="ident">GpuMode::ModeVirglRenderer</span>;
+                        }
                     }
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gfxstream&quot;</span>)]</span>
                     <span class="string">&quot;gfxstream&quot;</span> =&gt; {
@@ -4470,7 +4443,10 @@
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
                             <span class="ident">value</span>: <span class="ident">v</span>.<span class="ident">to_string</span>(),
                             <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gfxstream&quot;</span>)]</span>
                                 <span class="string">&quot;gpu parameter &#39;backend&#39; should be one of (2d|virglrenderer|gfxstream)&quot;</span>,
+                                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gfxstream&quot;</span>))]</span>
+                                <span class="string">&quot;gpu parameter &#39;backend&#39; should be one of (2d|3d)&quot;</span>,
                             ),
                         });
                     }
@@ -4659,7 +4635,7 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gfxstream&quot;</span>)]</span>
     {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">vulkan_specified</span> <span class="op">&amp;&amp;</span> <span class="ident">gpu_params</span>.<span class="ident">mode</span> <span class="op">==</span> <span class="ident">GpuMode::ModeGfxstream</span> {
-            <span class="ident">gpu_params</span>.<span class="ident">use_vulkan</span> <span class="op">=</span> <span class="bool-val">true</span>;
+            <span class="ident">gpu_params</span>.<span class="ident">use_vulkan</span> <span class="op">=</span> <span class="ident">sys::use_vulkan</span>();
         }
 
         <span class="kw">if</span> <span class="ident">syncfd_specified</span> <span class="op">|</span><span class="op">|</span> <span class="ident">angle_specified</span> {
@@ -5343,6 +5319,8 @@
         }
         <span class="string">&quot;serial&quot;</span> =&gt; {
             <span class="kw">let</span> <span class="ident">serial_params</span> <span class="op">=</span> <span class="ident">parse_serial_options</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
+            <span class="ident">sys::check_serial_params</span>(<span class="kw-2">&amp;</span><span class="ident">serial_params</span>)<span class="question-mark">?</span>;
+
             <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="ident">serial_params</span>.<span class="ident">num</span>;
             <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> (<span class="ident">serial_params</span>.<span class="ident">hardware</span>, <span class="ident">num</span>);
             <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">serial_parameters</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
@@ -5499,42 +5477,6 @@
                 },
             });
         }
-        <span class="string">&quot;netmask&quot;</span> =&gt; {
-            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">netmask</span>.<span class="ident">is_some</span>() {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
-                    <span class="string">&quot;`netmask` already given&quot;</span>.<span class="ident">to_owned</span>(),
-                ));
-            }
-            <span class="ident">cfg</span>.<span class="ident">netmask</span> <span class="op">=</span>
-                <span class="prelude-val">Some</span>(
-                    <span class="ident">value</span>
-                        .<span class="ident">unwrap</span>()
-                        .<span class="ident">parse</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
-                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
-                            <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;`netmask` needs to be in the form \&quot;x.x.x.x\&quot;&quot;</span>),
-                        })<span class="question-mark">?</span>,
-                )
-        }
-        <span class="string">&quot;mac&quot;</span> =&gt; {
-            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">mac_address</span>.<span class="ident">is_some</span>() {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
-                    <span class="string">&quot;`mac` already given&quot;</span>.<span class="ident">to_owned</span>(),
-                ));
-            }
-            <span class="ident">cfg</span>.<span class="ident">mac_address</span> <span class="op">=</span>
-                <span class="prelude-val">Some</span>(
-                    <span class="ident">value</span>
-                        .<span class="ident">unwrap</span>()
-                        .<span class="ident">parse</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
-                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
-                            <span class="ident">expected</span>: <span class="ident">String::from</span>(
-                                <span class="string">&quot;`mac` needs to be in the form \&quot;XX:XX:XX:XX:XX:XX\&quot;&quot;</span>,
-                            ),
-                        })<span class="question-mark">?</span>,
-                )
-        }
         <span class="string">&quot;net-vq-pairs&quot;</span> =&gt; {
             <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">net_vq_pairs</span>.<span class="ident">is_some</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
@@ -5663,34 +5605,6 @@
                         <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;this value for `cid` must be an unsigned integer&quot;</span>),
                     })<span class="question-mark">?</span>,
             );
-        }
-        <span class="string">&quot;seccomp-policy-dir&quot;</span> =&gt; {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>.<span class="ident">jail_config</span> {
-                <span class="comment">// `value` is Some because we are in this match so it&#39;s safe to unwrap.</span>
-                <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>());
-            }
-        }
-        <span class="string">&quot;seccomp-log-failures&quot;</span> =&gt; {
-            <span class="comment">// A side-effect of this flag is to force the use of .policy files</span>
-            <span class="comment">// instead of .bpf files (.bpf files are expected and assumed to be</span>
-            <span class="comment">// compiled to fail an unpermitted action with &quot;trap&quot;).</span>
-            <span class="comment">// Normally crosvm will first attempt to use a .bpf file, and if</span>
-            <span class="comment">// not present it will then try to use a .policy file.  It&#39;s up</span>
-            <span class="comment">// to the build to decide which of these files is present for</span>
-            <span class="comment">// crosvm to use (for CrOS the build will use .bpf files for</span>
-            <span class="comment">// x64 builds and .policy files for arm/arm64 builds).</span>
-            <span class="comment">//</span>
-            <span class="comment">// This flag will likely work as expected for builds that use</span>
-            <span class="comment">// .policy files.  For builds that only use .bpf files the initial</span>
-            <span class="comment">// result when using this flag is likely to be a file-not-found</span>
-            <span class="comment">// error (since the .policy files are not present).</span>
-            <span class="comment">// For .bpf builds you can either 1) manually add the .policy files,</span>
-            <span class="comment">// or 2) do not use this command-line parameter and instead</span>
-            <span class="comment">// temporarily change the build by passing &quot;log&quot; rather than</span>
-            <span class="comment">// &quot;trap&quot; as the &quot;--default-action&quot; to compile_seccomp_policy.py.</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>.<span class="ident">jail_config</span> {
-                <span class="ident">jail_config</span>.<span class="ident">seccomp_log_failures</span> <span class="op">=</span> <span class="bool-val">true</span>;
-            }
         }
         <span class="string">&quot;plugin&quot;</span> =&gt; {
             <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">executable_path</span>.<span class="ident">is_some</span>() {
@@ -6584,8 +6498,6 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;rw-pmem-device&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to a writable disk image.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;pmem-device&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to a disk image.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;pstore&quot;</span>, <span class="string">&quot;path=PATH,size=SIZE&quot;</span>, <span class="string">&quot;Path to pstore buffer backend file followed by size.&quot;</span>),
-          <span class="ident">Argument::value</span>(<span class="string">&quot;netmask&quot;</span>, <span class="string">&quot;NETMASK&quot;</span>, <span class="string">&quot;Netmask for VM subnet.&quot;</span>),
-          <span class="ident">Argument::value</span>(<span class="string">&quot;mac&quot;</span>, <span class="string">&quot;MAC&quot;</span>, <span class="string">&quot;MAC address for VM.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;net-vq-pairs&quot;</span>, <span class="string">&quot;N&quot;</span>, <span class="string">&quot;virtio net virtual queue paris. (default: 1)&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;ac97&quot;</span>,
@@ -6668,8 +6580,6 @@ There is a cost of slightly increased latency the first time the file is accesse
 
                               posix_acl=BOOL - Indicates whether the shared directory supports POSIX ACLs.  This should only be enabled when the underlying file system supports POSIX ACLs.  The default value for this option is \&quot;true\&quot;.
 &quot;</span>),
-          <span class="ident">Argument::value</span>(<span class="string">&quot;seccomp-policy-dir&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to seccomp .policy files.&quot;</span>),
-          <span class="ident">Argument::flag</span>(<span class="string">&quot;seccomp-log-failures&quot;</span>, <span class="string">&quot;Instead of seccomp filter failures being fatal, they will be logged instead.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;plugin&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Absolute path to plugin process to run under crosvm.&quot;</span>),
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>

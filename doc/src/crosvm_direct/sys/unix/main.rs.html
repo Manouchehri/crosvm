@@ -505,6 +505,90 @@
 <span id="504">504</span>
 <span id="505">505</span>
 <span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -530,6 +614,7 @@
 <span class="kw">use</span> <span class="ident">devices::Ac97Backend</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::Ac97Parameters</span>;
+<span class="kw">use</span> <span class="ident">devices::SerialParameters</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::argument</span>::{<span class="self">self</span>, <span class="ident">Argument</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
@@ -586,6 +671,21 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_gpu_backend_deprecated</span>(<span class="ident">_backend</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+    <span class="bool-val">false</span>
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gfxstream&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_vulkan</span>() -&gt; <span class="ident">bool</span> {
+    <span class="bool-val">true</span>
+}
+
+<span class="comment">// Doesn&#39;t do anything on unix.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_serial_params</span>(<span class="ident">_serial_params</span>: <span class="kw-2">&amp;</span><span class="ident">SerialParameters</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="prelude-val">Ok</span>(())
+}
+
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_arguments</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Argument</span><span class="op">&gt;</span> {
     <span class="macro">vec!</span>[
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
@@ -605,6 +705,8 @@
           <span class="ident">Argument::value</span>(<span class="string">&quot;host_ip&quot;</span>,
                           <span class="string">&quot;IP&quot;</span>,
                           <span class="string">&quot;IP address to assign to host tap interface.&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;netmask&quot;</span>, <span class="string">&quot;NETMASK&quot;</span>, <span class="string">&quot;Netmask for VM subnet.&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;mac&quot;</span>, <span class="string">&quot;MAC&quot;</span>, <span class="string">&quot;MAC address for VM.&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;tap-name&quot;</span>,
                           <span class="string">&quot;NAME&quot;</span>,
                           <span class="string">&quot;Name of a configured persistent TAP interface to use for networking. A different virtual network card will be added each time this argument is given.&quot;</span>),
@@ -637,6 +739,8 @@
                               unpin_limit=NUM - Unpin limit for each unpin cycle, in unit of page count. 0 is invalid.
 
                               unpin_gen_threshold=NUM -  Number of unpin intervals a pinned page must be busy for to be aged into the older which is less frequently checked generation.&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;seccomp-policy-dir&quot;</span>, <span class="string">&quot;PATH&quot;</span>, <span class="string">&quot;Path to seccomp .policy files.&quot;</span>),
+          <span class="ident">Argument::flag</span>(<span class="string">&quot;seccomp-log-failures&quot;</span>, <span class="string">&quot;Instead of seccomp filter failures being fatal, they will be logged instead.&quot;</span>),
     ]
 }
 
@@ -845,6 +949,42 @@
                         })<span class="question-mark">?</span>,
                 )
         }
+        <span class="string">&quot;netmask&quot;</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">netmask</span>.<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
+                    <span class="string">&quot;`netmask` already given&quot;</span>.<span class="ident">to_owned</span>(),
+                ));
+            }
+            <span class="ident">cfg</span>.<span class="ident">netmask</span> <span class="op">=</span>
+                <span class="prelude-val">Some</span>(
+                    <span class="ident">value</span>
+                        .<span class="ident">unwrap</span>()
+                        .<span class="ident">parse</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                            <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;`netmask` needs to be in the form \&quot;x.x.x.x\&quot;&quot;</span>),
+                        })<span class="question-mark">?</span>,
+                )
+        }
+        <span class="string">&quot;mac&quot;</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">mac_address</span>.<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
+                    <span class="string">&quot;`mac` already given&quot;</span>.<span class="ident">to_owned</span>(),
+                ));
+            }
+            <span class="ident">cfg</span>.<span class="ident">mac_address</span> <span class="op">=</span>
+                <span class="prelude-val">Some</span>(
+                    <span class="ident">value</span>
+                        .<span class="ident">unwrap</span>()
+                        .<span class="ident">parse</span>()
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
+                            <span class="ident">expected</span>: <span class="ident">String::from</span>(
+                                <span class="string">&quot;`mac` needs to be in the form \&quot;XX:XX:XX:XX:XX:XX\&quot;&quot;</span>,
+                            ),
+                        })<span class="question-mark">?</span>,
+                )
+        }
         <span class="string">&quot;tap-name&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">tap_name</span>.<span class="ident">push</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>());
         }
@@ -921,6 +1061,34 @@
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer_next&quot;</span>))]</span>
         <span class="string">&quot;gpu-render-server&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">gpu_render_server_parameters</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">parse_gpu_render_server_options</span>(<span class="ident">value</span>)<span class="question-mark">?</span>);
+        }
+        <span class="string">&quot;seccomp-policy-dir&quot;</span> =&gt; {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>.<span class="ident">jail_config</span> {
+                <span class="comment">// `value` is Some because we are in this match so it&#39;s safe to unwrap.</span>
+                <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>());
+            }
+        }
+        <span class="string">&quot;seccomp-log-failures&quot;</span> =&gt; {
+            <span class="comment">// A side-effect of this flag is to force the use of .policy files</span>
+            <span class="comment">// instead of .bpf files (.bpf files are expected and assumed to be</span>
+            <span class="comment">// compiled to fail an unpermitted action with &quot;trap&quot;).</span>
+            <span class="comment">// Normally crosvm will first attempt to use a .bpf file, and if</span>
+            <span class="comment">// not present it will then try to use a .policy file.  It&#39;s up</span>
+            <span class="comment">// to the build to decide which of these files is present for</span>
+            <span class="comment">// crosvm to use (for CrOS the build will use .bpf files for</span>
+            <span class="comment">// x64 builds and .policy files for arm/arm64 builds).</span>
+            <span class="comment">//</span>
+            <span class="comment">// This flag will likely work as expected for builds that use</span>
+            <span class="comment">// .policy files.  For builds that only use .bpf files the initial</span>
+            <span class="comment">// result when using this flag is likely to be a file-not-found</span>
+            <span class="comment">// error (since the .policy files are not present).</span>
+            <span class="comment">// For .bpf builds you can either 1) manually add the .policy files,</span>
+            <span class="comment">// or 2) do not use this command-line parameter and instead</span>
+            <span class="comment">// temporarily change the build by passing &quot;log&quot; rather than</span>
+            <span class="comment">// &quot;trap&quot; as the &quot;--default-action&quot; to compile_seccomp_policy.py.</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>.<span class="ident">jail_config</span> {
+                <span class="ident">jail_config</span>.<span class="ident">seccomp_log_failures</span> <span class="op">=</span> <span class="bool-val">true</span>;
+            }
         }
         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     }
