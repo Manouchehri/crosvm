@@ -932,6 +932,8 @@
 <span id="931">931</span>
 <span id="932">932</span>
 <span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1015,66 +1017,68 @@
 
 <span class="doccomment">/// Holds the pieces needed to build a VM. Passed to `build_vm` in the `LinuxArch` trait below to</span>
 <span class="doccomment">/// create a `RunnableLinuxVm`.</span>
+<span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VmComponents</span> {
-    <span class="kw">pub</span> <span class="ident">memory_size</span>: <span class="ident">u64</span>,
-    <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">vm_image</span>: <span class="ident">VmImage</span>,
-    <span class="kw">pub</span> <span class="ident">android_fstab</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">initrd_image</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">extra_kernel_params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">acpi_sdts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SDT</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">android_fstab</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">gdb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">Tube</span>)<span class="op">&gt;</span>, <span class="comment">// port and control tube.</span>
-    <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">direct_gpe</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">extra_kernel_params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">gdb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">Tube</span>)<span class="op">&gt;</span>, <span class="comment">// port and control tube.</span>
+    <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">initrd_image</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">memory_size</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
     <span class="doccomment">/// A file to load as pVM firmware. Must be `Some` iff</span>
     <span class="doccomment">/// `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
     <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="kw">pub</span> <span class="ident">vm_image</span>: <span class="ident">VmImage</span>,
 }
 
 <span class="doccomment">/// Holds the elements needed to run a Linux VM. Created by `build_vm`.</span>
+<span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RunnableLinuxVm</span><span class="op">&lt;</span><span class="ident">V</span>: <span class="ident">VmArch</span>, <span class="ident">Vcpu</span>: <span class="ident">VcpuArch</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">vm</span>: <span class="ident">V</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
-    <span class="doccomment">/// If vcpus is None, then it&#39;s the responsibility of the vcpu thread to create vcpus.</span>
-    <span class="doccomment">/// If it&#39;s Some, then `build_vm` already created the vcpus.</span>
-    <span class="kw">pub</span> <span class="ident">vcpus</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vcpu</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">irq_chip</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IrqChipArch</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">has_bios</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">io_bus</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Bus</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">mmio_bus</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Bus</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">pid_debug_label_map</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">suspend_evt</span>: <span class="ident">Event</span>,
-    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">bat_control</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BatControl</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
     <span class="kw">pub</span> <span class="ident">gdb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">Tube</span>)<span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">has_bios</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">hotplug_bus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">HotPlugBus</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">io_bus</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Bus</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">irq_chip</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">IrqChipArch</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">mmio_bus</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Bus</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">pid_debug_label_map</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">pm</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">PmResource</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Devices to be notified before the system resumes from the S3 suspended state.</span>
     <span class="kw">pub</span> <span class="ident">resume_notify_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BusResumeDevice</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">root_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">PciRoot</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">hotplug_bus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">HotPlugBus</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">suspend_evt</span>: <span class="ident">Event</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="doccomment">/// If vcpus is None, then it&#39;s the responsibility of the vcpu thread to create vcpus.</span>
+    <span class="doccomment">/// If it&#39;s Some, then `build_vm` already created the vcpus.</span>
+    <span class="kw">pub</span> <span class="ident">vcpus</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vcpu</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">vm</span>: <span class="ident">V</span>,
 }
 
 <span class="doccomment">/// The device and optional jail.</span>
