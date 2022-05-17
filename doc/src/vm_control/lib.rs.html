@@ -1415,15 +1415,6 @@
 <span id="1414">1414</span>
 <span id="1415">1415</span>
 <span id="1416">1416</span>
-<span id="1417">1417</span>
-<span id="1418">1418</span>
-<span id="1419">1419</span>
-<span id="1420">1420</span>
-<span id="1421">1421</span>
-<span id="1422">1422</span>
-<span id="1423">1423</span>
-<span id="1424">1424</span>
-<span id="1425">1425</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1462,10 +1453,10 @@
 <span class="kw">use</span> <span class="ident">balloon_control</span>::{<span class="ident">BalloonTubeCommand</span>, <span class="ident">BalloonTubeResult</span>};
 
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">with_as_descriptor</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>,
-    <span class="ident">ExternalMapping</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MappedRegion</span>,
-    <span class="ident">MemoryMappingArena</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">MmapError</span>, <span class="ident">Protection</span>,
-    <span class="prelude-ty">Result</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">SharedMemory</span>, <span class="ident">Tube</span>, <span class="ident">SIGRTMIN</span>,
+    <span class="ident">error</span>, <span class="ident">with_as_descriptor</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">ExternalMapping</span>,
+    <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MappedRegion</span>, <span class="ident">MemoryMappingArena</span>,
+    <span class="ident">MemoryMappingBuilder</span>, <span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">MmapError</span>, <span class="ident">Protection</span>, <span class="prelude-ty">Result</span>, <span class="ident">SafeDescriptor</span>,
+    <span class="ident">SharedMemory</span>, <span class="ident">Tube</span>, <span class="ident">SIGRTMIN</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">IrqRoute</span>, <span class="ident">IrqSource</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
@@ -2559,15 +2550,6 @@
                                             <span class="ident">stats</span>,
                                             <span class="ident">balloon_actual</span>,
                                         };
-                                    }
-                                    <span class="prelude-val">Ok</span>(<span class="ident">BalloonTubeResult::NotReady</span> { <span class="ident">id</span> }) =&gt; {
-                                        <span class="kw">if</span> <span class="ident">sent_id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">id</span> {
-                                            <span class="macro">trace!</span>(<span class="string">&quot;Wrong id for balloon stats&quot;</span>);
-                                            <span class="comment">// Keep trying to get the fresh stats.</span>
-                                            <span class="kw">continue</span>;
-                                        }
-                                        <span class="macro">warn!</span>(<span class="string">&quot;balloon device not ready&quot;</span>);
-                                        <span class="kw">break</span> <span class="ident">VmResponse::Err</span>(<span class="ident">SysError::new</span>(<span class="ident">libc::EAGAIN</span>));
                                     }
                                     <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                                         <span class="macro">error!</span>(<span class="string">&quot;balloon socket recv failed: {}&quot;</span>, <span class="ident">e</span>);
