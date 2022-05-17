@@ -1423,6 +1423,24 @@
 <span id="1422">1422</span>
 <span id="1423">1423</span>
 <span id="1424">1424</span>
+<span id="1425">1425</span>
+<span id="1426">1426</span>
+<span id="1427">1427</span>
+<span id="1428">1428</span>
+<span id="1429">1429</span>
+<span id="1430">1430</span>
+<span id="1431">1431</span>
+<span id="1432">1432</span>
+<span id="1433">1433</span>
+<span id="1434">1434</span>
+<span id="1435">1435</span>
+<span id="1436">1436</span>
+<span id="1437">1437</span>
+<span id="1438">1438</span>
+<span id="1439">1439</span>
+<span id="1440">1440</span>
+<span id="1441">1441</span>
+<span id="1442">1442</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1767,6 +1785,13 @@
     <span class="ident">MainThread</span>,
 }
 
+<span class="doccomment">/// Represents the status of connection to the sibling.</span>
+<span class="kw">enum</span> <span class="ident">ConnStatus</span> {
+    <span class="ident">DataAvailable</span>,
+    <span class="ident">NoDataAvailable</span>,
+    <span class="ident">Disconnected</span>,
+}
+
 <span class="kw">impl</span> <span class="ident">Worker</span> {
     <span class="comment">// The entry point into `Worker`.</span>
     <span class="comment">// - At this point the connection with the sibling is already established.</span>
@@ -1870,7 +1895,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="comment">// Processes data from the Vhost-user sibling and forward to the driver via Rx buffers.</span>
+    <span class="comment">// Processes data from the Vhost-user sibling and forwards to the driver via Rx buffers.</span>
     <span class="kw">fn</span> <span class="ident">process_rx</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">wait_ctx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Keep looping until -</span>
         <span class="comment">// - No more Rx buffers are available on the Rx queue. OR</span>
@@ -1885,11 +1910,22 @@
         <span class="comment">//</span>
         <span class="comment">// Peek if any data is left on the Vhost-user sibling socket. If no, then</span>
         <span class="comment">// nothing to forwad to the device backend.</span>
-        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">is_sibling_data_available</span>()<span class="question-mark">?</span> {
+        <span class="kw">loop</span> {
+            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">check_sibling_connection</span>() {
+                <span class="ident">ConnStatus::DataAvailable</span> =&gt; (),
+                <span class="ident">ConnStatus::NoDataAvailable</span> =&gt; {
+                    <span class="kw">break</span>;
+                }
+                <span class="ident">ConnStatus::Disconnected</span> =&gt; {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SiblingDisconnected</span>);
+                }
+            };
+
             <span class="kw">let</span> <span class="ident">desc</span> <span class="op">=</span> <span class="self">self</span>
                 .<span class="ident">rx_queue</span>
                 .<span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>)
                 .<span class="ident">ok_or</span>(<span class="ident">Error::RxDescriptorsExhausted</span>)<span class="question-mark">?</span>;
+
             <span class="comment">// To successfully receive attached file descriptors, we need to</span>
             <span class="comment">// receive messages and corresponding attached file descriptors in</span>
             <span class="comment">// this way:</span>
@@ -1970,7 +2006,7 @@
     }
 
     <span class="comment">// Returns the sibling connection status.</span>
-    <span class="kw">fn</span> <span class="ident">is_sibling_data_available</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_sibling_connection</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ConnStatus</span> {
         <span class="comment">// Peek if any data is left on the Vhost-user sibling socket. If no, then</span>
         <span class="comment">// nothing to forwad to the device backend.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peek_buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">1</span>];
@@ -1986,14 +2022,14 @@
         };
 
         <span class="kw">match</span> <span class="ident">peek_ret</span> {
-            <span class="number">0</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SiblingDisconnected</span>),
+            <span class="number">0</span> =&gt; <span class="ident">ConnStatus::Disconnected</span>,
             <span class="ident">ret</span> <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> =&gt; <span class="kw">match</span> <span class="ident">base::Error::last</span>() {
                 <span class="comment">// EAGAIN means that no data is available. Any other error means that the sibling</span>
                 <span class="comment">// has disconnected.</span>
-                <span class="ident">e</span> <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">errno</span>() <span class="op">==</span> <span class="ident">libc::EAGAIN</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
-                <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SiblingDisconnected</span>),
+                <span class="ident">e</span> <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">errno</span>() <span class="op">==</span> <span class="ident">libc::EAGAIN</span> =&gt; <span class="ident">ConnStatus::NoDataAvailable</span>,
+                <span class="kw">_</span> =&gt; <span class="ident">ConnStatus::Disconnected</span>,
             },
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+            <span class="kw">_</span> =&gt; <span class="ident">ConnStatus::DataAvailable</span>,
         }
     }
 
