@@ -1476,7 +1476,7 @@
                             <span class="macro">error!</span>(<span class="string">&quot;Failed to flush the disk: {}&quot;</span>, <span class="ident">e</span>);
                             <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
                         }
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">flush_timer</span>.<span class="ident">wait</span>() {
+                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">flush_timer</span>.<span class="ident">mark_waited</span>() {
                             <span class="macro">error!</span>(<span class="string">&quot;Failed to clear flush timer: {}&quot;</span>, <span class="ident">e</span>);
                             <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
                         }

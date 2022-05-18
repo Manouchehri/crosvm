@@ -357,6 +357,8 @@
 <span id="356">356</span>
 <span id="357">357</span>
 <span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -452,10 +454,13 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Waits until the timer expires, returning WaitResult::Expired when it expires.</span>
+    <span class="doccomment">/// Waits until the timer expires or an optional wait timeout expires, whichever happens first.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// If timeout is not None, block for a maximum of the given `timeout` duration.</span>
-    <span class="doccomment">/// If a timeout occurs, return WaitResult::Timeout.</span>
+    <span class="doccomment">/// # Returns</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// - `WaitResult::Expired` if the timer expired.</span>
+    <span class="doccomment">/// - `WaitResult::Timeout` if `timeout` was not `None` and the timer did not expire within the</span>
+    <span class="doccomment">///   specified timeout period.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait_for</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitResult</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">wait_start</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
         <span class="kw">loop</span> {
@@ -491,8 +496,7 @@
         }
     }
 
-    <span class="doccomment">/// Block for a maximum of the given `timeout` duration.</span>
-    <span class="doccomment">/// If a timeout occurs, return WaitResult::Timeout.</span>
+    <span class="doccomment">/// Waits until the timer expires.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WaitResult</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">wait_for</span>(<span class="prelude-val">None</span>)
     }

@@ -2259,7 +2259,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">timer_handler</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">wait</span>() {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">timer</span>.<span class="ident">mark_waited</span>() {
             <span class="comment">// Under the current Timer implementation (as of Jan 2019), this failure shouldn&#39;t</span>
             <span class="comment">// happen but implementation details may change in the future, and the failure</span>
             <span class="comment">// cases are complex to reason about. Because of this, avoid unwrap().</span>
