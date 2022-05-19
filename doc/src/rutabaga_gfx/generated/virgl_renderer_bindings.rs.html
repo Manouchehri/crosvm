@@ -526,7 +526,7 @@
             <span class="ident">cookie</span>: <span class="kw-2">*mut</span> <span class="ident">::std::os::raw::c_void</span>,
             <span class="ident">ctx_id</span>: <span class="ident">u32</span>,
             <span class="ident">queue_id</span>: <span class="ident">u64</span>,
-            <span class="ident">fence_cookie</span>: <span class="kw-2">*mut</span> <span class="ident">::std::os::raw::c_void</span>,
+            <span class="ident">fence_id</span>: <span class="ident">u64</span>,
         ),
     <span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">get_server_fd</span>: <span class="ident">::std::option::Option</span><span class="op">&lt;</span>
@@ -848,7 +848,7 @@
         <span class="ident">ctx_id</span>: <span class="ident">u32</span>,
         <span class="ident">flags</span>: <span class="ident">u32</span>,
         <span class="ident">queue_id</span>: <span class="ident">u64</span>,
-        <span class="ident">fence_cookie</span>: <span class="kw-2">*mut</span> <span class="ident">::std::os::raw::c_void</span>,
+        <span class="ident">fence_id</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="ident">::std::os::raw::c_int</span>;
 }
 <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> {

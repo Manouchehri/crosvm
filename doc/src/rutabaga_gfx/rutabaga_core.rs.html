@@ -884,11 +884,6 @@
 <span id="883">883</span>
 <span id="884">884</span>
 <span id="885">885</span>
-<span id="886">886</span>
-<span id="887">887</span>
-<span id="888">888</span>
-<span id="889">889</span>
-<span id="890">890</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1084,7 +1079,7 @@
     <span class="kw">fn</span> <span class="ident">detach</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_resource</span>: <span class="kw-2">&amp;</span><span class="ident">RutabagaResource</span>);
 
     <span class="doccomment">/// Implementations must create a fence on specified `ring_idx` in `fence`.  This</span>
-    <span class="doccomment">/// allows for multiple syncrhonizations timelines per RutabagaContext.</span>
+    <span class="doccomment">/// allows for multiple synchronizations timelines per RutabagaContext.</span>
     <span class="kw">fn</span> <span class="ident">context_create_fence</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_fence</span>: <span class="ident">RutabagaFence</span>) -&gt; <span class="ident">RutabagaResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">RutabagaError::Unsupported</span>)
     }
@@ -1761,11 +1756,6 @@
 
             <span class="kw">let</span> <span class="ident">cross_domain</span> <span class="op">=</span> <span class="ident">CrossDomain::init</span>(<span class="self">self</span>.<span class="ident">channels</span>)<span class="question-mark">?</span>;
             <span class="ident">rutabaga_components</span>.<span class="ident">insert</span>(<span class="ident">RutabagaComponentType::CrossDomain</span>, <span class="ident">cross_domain</span>);
-
-            <span class="ident">rutabaga_capsets</span>.<span class="ident">push</span>(<span class="ident">RutabagaCapsetInfo</span> {
-                <span class="ident">capset_id</span>: <span class="ident">RUTABAGA_CAPSET_CROSS_DOMAIN</span>,
-                <span class="ident">component</span>: <span class="ident">RutabagaComponentType::CrossDomain</span>,
-            });
         }
 
         <span class="prelude-val">Ok</span>(<span class="ident">Rutabaga</span> {
