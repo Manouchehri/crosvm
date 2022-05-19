@@ -4152,6 +4152,30 @@
 <span id="4151">4151</span>
 <span id="4152">4152</span>
 <span id="4153">4153</span>
+<span id="4154">4154</span>
+<span id="4155">4155</span>
+<span id="4156">4156</span>
+<span id="4157">4157</span>
+<span id="4158">4158</span>
+<span id="4159">4159</span>
+<span id="4160">4160</span>
+<span id="4161">4161</span>
+<span id="4162">4162</span>
+<span id="4163">4163</span>
+<span id="4164">4164</span>
+<span id="4165">4165</span>
+<span id="4166">4166</span>
+<span id="4167">4167</span>
+<span id="4168">4168</span>
+<span id="4169">4169</span>
+<span id="4170">4170</span>
+<span id="4171">4171</span>
+<span id="4172">4172</span>
+<span id="4173">4173</span>
+<span id="4174">4174</span>
+<span id="4175">4175</span>
+<span id="4176">4176</span>
+<span id="4177">4177</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -6261,6 +6285,28 @@
 
             <span class="ident">cfg</span>.<span class="ident">pcie_ecam</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> { <span class="ident">base</span>, <span class="ident">size</span>: <span class="ident">len</span> });
         }
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+        <span class="string">&quot;pci-start&quot;</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">pci_low_start</span>.<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
+                    <span class="string">&quot;`pci-start` already given&quot;</span>.<span class="ident">to_owned</span>(),
+                ));
+            }
+
+            <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">parse_hex_or_decimal</span>(<span class="ident">value</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
+                <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pci-start parameter should be integer&quot;</span>),
+            })<span class="question-mark">?</span>;
+            <span class="comment">// pci-start should be below 4G and aligned to 256MB</span>
+            <span class="kw">if</span> <span class="ident">start</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x1_0000_0000</span> <span class="op">|</span><span class="op">|</span> <span class="ident">start</span> <span class="op">&amp;</span> <span class="number">0xFFF_FFFF</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::InvalidValue</span> {
+                    <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">to_owned</span>(),
+                    <span class="ident">expected</span>: <span class="ident">String::from</span>(<span class="string">&quot;pci-start should be below 4G and alignment to 256MB&quot;</span>),
+                });
+            }
+            <span class="ident">cfg</span>.<span class="ident">pci_low_start</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">start</span>);
+        }
         <span class="string">&quot;help&quot;</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::PrintHelp</span>),
         <span class="kw">_</span> =&gt; <span class="ident">sys::set_arguments</span>(<span class="ident">cfg</span>, <span class="ident">name</span>, <span class="ident">value</span>)<span class="question-mark">?</span>,
     }
@@ -6767,6 +6813,8 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;pcie-ecam&quot;</span>, <span class="string">&quot;mmio_base,mmio_length&quot;</span>,
                           <span class="string">&quot;Base and length for PCIE Enhanced Configuration Access Mechanism&quot;</span>),
+          <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+          <span class="ident">Argument::value</span>(<span class="string">&quot;pci-start&quot;</span>, <span class="string">&quot;pci_low_mmio_start&quot;</span>, <span class="string">&quot;the pci mmio start address below 4G&quot;</span>),
           <span class="ident">Argument::short_flag</span>(<span class="string">&#39;h&#39;</span>, <span class="string">&quot;help&quot;</span>, <span class="string">&quot;Print help message.&quot;</span>)];
 
     <span class="ident">arguments</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">sys::get_arguments</span>());
