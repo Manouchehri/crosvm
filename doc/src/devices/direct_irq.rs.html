@@ -199,27 +199,6 @@
 <span id="198">198</span>
 <span id="199">199</span>
 <span id="200">200</span>
-<span id="201">201</span>
-<span id="202">202</span>
-<span id="203">203</span>
-<span id="204">204</span>
-<span id="205">205</span>
-<span id="206">206</span>
-<span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -249,8 +228,6 @@
     <span class="ident">EnableGpe</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable direct sci irq&quot;</span>)]</span>
     <span class="ident">EnableSci</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to enable wake irq&quot;</span>)]</span>
-    <span class="ident">EnableWake</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to open /dev/plat-irq-forward: {0}&quot;</span>)]</span>
     <span class="ident">Open</span>(<span class="ident">io::Error</span>),
 }
@@ -331,10 +308,6 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">irq_wake_enable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irq_num</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">plat_irq_wake_ioctl</span>(<span class="ident">irq_num</span>, <span class="ident">PLAT_IRQ_WAKE_ENABLE</span>)
-    }
-
     <span class="doccomment">/// Enable hardware triggered SCI interrupt handling for GPE.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note: sci_irq_prepare() itself does not enable SCI forwarding yet</span>
@@ -383,21 +356,6 @@
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">PLAT_IRQ_FORWARD_SET</span>(), <span class="kw-2">&amp;</span><span class="ident">irq_set</span>[<span class="number">0</span>]) };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="prelude-val">Err</span>(<span class="ident">DirectIrqError::Enable</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(())
-        }
-    }
-
-    <span class="kw">fn</span> <span class="ident">plat_irq_wake_ioctl</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irq_num</span>: <span class="ident">u32</span>, <span class="ident">action</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DirectIrqError</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">irq_wake_set</span> <span class="op">=</span> <span class="ident">vec_with_array_field</span>::<span class="op">&lt;</span><span class="ident">plat_irq_wake_set</span>, <span class="ident">u32</span><span class="op">&gt;</span>(<span class="number">0</span>);
-        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">argsz</span> <span class="op">=</span> (<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">plat_irq_wake_set</span><span class="op">&gt;</span>()) <span class="kw">as</span> <span class="ident">u32</span>;
-        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">action_flags</span> <span class="op">=</span> <span class="ident">action</span>;
-        <span class="ident">irq_wake_set</span>[<span class="number">0</span>].<span class="ident">irq_number_host</span> <span class="op">=</span> <span class="ident">irq_num</span>;
-
-        <span class="comment">// Safe as we are the owner of plat_irq_wake_set and irq_wake_set which are valid value</span>
-        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">PLAT_IRQ_WAKE_SET</span>(), <span class="kw-2">&amp;</span><span class="ident">irq_wake_set</span>[<span class="number">0</span>]) };
-        <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">DirectIrqError::EnableWake</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(())
         }

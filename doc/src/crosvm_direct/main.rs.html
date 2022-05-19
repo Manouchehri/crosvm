@@ -4159,23 +4159,6 @@
 <span id="4158">4158</span>
 <span id="4159">4159</span>
 <span id="4160">4160</span>
-<span id="4161">4161</span>
-<span id="4162">4162</span>
-<span id="4163">4163</span>
-<span id="4164">4164</span>
-<span id="4165">4165</span>
-<span id="4166">4166</span>
-<span id="4167">4167</span>
-<span id="4168">4168</span>
-<span id="4169">4169</span>
-<span id="4170">4170</span>
-<span id="4171">4171</span>
-<span id="4172">4172</span>
-<span id="4173">4173</span>
-<span id="4174">4174</span>
-<span id="4175">4175</span>
-<span id="4176">4176</span>
-<span id="4177">4177</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -5994,21 +5977,6 @@
                 );
         }
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="string">&quot;direct-wake-irq&quot;</span> =&gt; {
-            <span class="ident">cfg</span>.<span class="ident">direct_wake_irq</span>
-                .<span class="ident">push</span>(
-                    <span class="ident">value</span>
-                        .<span class="ident">unwrap</span>()
-                        .<span class="ident">parse</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">argument::Error::InvalidValue</span> {
-                            <span class="ident">value</span>: <span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>(),
-                            <span class="ident">expected</span>: <span class="ident">String::from</span>(
-                                <span class="string">&quot;this value for `direct-wake-irq` must be an unsigned integer&quot;</span>,
-                            ),
-                        })<span class="question-mark">?</span>,
-                );
-        }
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
         <span class="string">&quot;direct-gpe&quot;</span> =&gt; {
             <span class="ident">cfg</span>.<span class="ident">direct_gpe</span>.<span class="ident">push</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">parse</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
                 <span class="ident">argument::Error::InvalidValue</span> {
@@ -6745,8 +6713,6 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-level-irq&quot;</span>, <span class="string">&quot;irq&quot;</span>, <span class="string">&quot;Enable interrupt passthrough&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-edge-irq&quot;</span>, <span class="string">&quot;irq&quot;</span>, <span class="string">&quot;Enable interrupt passthrough&quot;</span>),
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-          <span class="ident">Argument::value</span>(<span class="string">&quot;direct-wake-irq&quot;</span>, <span class="string">&quot;irq&quot;</span>, <span class="string">&quot;Enable wakeup interrupt for host&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-gpe&quot;</span>, <span class="string">&quot;gpe&quot;</span>, <span class="string">&quot;Enable GPE interrupt and register access passthrough&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;dmi&quot;</span>, <span class="string">&quot;DIR&quot;</span>, <span class="string">&quot;Directory with smbios_entry_point/DMI files&quot;</span>),
