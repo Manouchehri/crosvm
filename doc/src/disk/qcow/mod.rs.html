@@ -2509,6 +2509,15 @@
 <span id="2508">2508</span>
 <span id="2509">2509</span>
 <span id="2510">2510</span>
+<span id="2511">2511</span>
+<span id="2512">2512</span>
+<span id="2513">2513</span>
+<span id="2514">2514</span>
+<span id="2515">2515</span>
+<span id="2516">2516</span>
+<span id="2517">2517</span>
+<span id="2518">2518</span>
+<span id="2519">2519</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2946,9 +2955,15 @@
                 <span class="ident">OpenOptions::new</span>().<span class="ident">read</span>(<span class="bool-val">true</span>), <span class="comment">// TODO(b/190435784): Add support for O_DIRECT.</span>
             )
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::BackingFileIo</span>(<span class="ident">e</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">backing_file</span> <span class="op">=</span>
-                <span class="ident">create_disk_file</span>(<span class="ident">backing_raw_file</span>, <span class="ident">max_nesting_depth</span>, <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::BackingFileOpen</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))<span class="question-mark">?</span>;
+            <span class="comment">// is_sparse_file is false because qcow is internally sparse and we don&#39;t need file</span>
+            <span class="comment">// system sparseness on top of that.</span>
+            <span class="kw">let</span> <span class="ident">backing_file</span> <span class="op">=</span> <span class="ident">create_disk_file</span>(
+                <span class="ident">backing_raw_file</span>,
+                <span class="comment">/* is_sparse_file= */</span> <span class="bool-val">false</span>,
+                <span class="ident">max_nesting_depth</span>,
+                <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>),
+            )
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::BackingFileOpen</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(<span class="ident">backing_file</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
@@ -3090,8 +3105,11 @@
             <span class="ident">OpenOptions::new</span>().<span class="ident">read</span>(<span class="bool-val">true</span>), <span class="comment">// TODO(b/190435784): add support for O_DIRECT.</span>
         )
         .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::BackingFileIo</span>(<span class="ident">e</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
+        <span class="comment">// is_sparse_file is false because qcow is internally sparse and we don&#39;t need file</span>
+        <span class="comment">// system sparseness on top of that.</span>
         <span class="kw">let</span> <span class="ident">backing_file</span> <span class="op">=</span> <span class="ident">create_disk_file</span>(
             <span class="ident">backing_raw_file</span>,
+            <span class="comment">/* is_sparse_file= */</span> <span class="bool-val">false</span>,
             <span class="ident">backing_file_max_nesting_depth</span>,
             <span class="ident">backing_path</span>,
         )
@@ -4154,7 +4172,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">basic_file</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">File</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create tempfile&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create temp file&quot;</span>);
         <span class="ident">disk_file</span>.<span class="ident">write_all</span>(<span class="ident">header</span>).<span class="ident">unwrap</span>();
         <span class="ident">disk_file</span>.<span class="ident">set_len</span>(<span class="number">0x8000_0000</span>).<span class="ident">unwrap</span>();
         <span class="ident">disk_file</span>.<span class="ident">seek</span>(<span class="ident">SeekFrom::Start</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>();
@@ -4172,7 +4190,7 @@
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">QcowFile</span>),
     {
-        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create tempfile&quot;</span>);
+        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create temp file&quot;</span>);
         <span class="kw">let</span> <span class="ident">qcow_file</span> <span class="op">=</span> <span class="ident">QcowFile::new</span>(<span class="ident">file</span>, <span class="ident">file_size</span>).<span class="ident">unwrap</span>();
 
         <span class="ident">testfn</span>(<span class="ident">qcow_file</span>); <span class="comment">// File closed when the function exits.</span>
@@ -4197,7 +4215,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">default_header</span>() {
         <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">QcowHeader::create_for_size_and_path</span>(<span class="number">0x10_0000</span>, <span class="prelude-val">None</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create tempfile&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create temp file&quot;</span>);
         <span class="ident">header</span>
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to create header.&quot;</span>)
             .<span class="ident">write_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">disk_file</span>)
@@ -4218,7 +4236,7 @@
     <span class="kw">fn</span> <span class="ident">header_with_backing</span>() {
         <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">QcowHeader::create_for_size_and_path</span>(<span class="number">0x10_0000</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;/my/path/to/a/file&quot;</span>))
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to create header.&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create tempfile&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">disk_file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create temp file&quot;</span>);
         <span class="ident">header</span>
             .<span class="ident">write_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">disk_file</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;Failed to write header to shm.&quot;</span>);
