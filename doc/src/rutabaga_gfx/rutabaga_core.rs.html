@@ -884,6 +884,9 @@
 <span id="883">883</span>
 <span id="884">884</span>
 <span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -926,6 +929,9 @@
     <span class="kw">pub</span> <span class="ident">info_3d</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Resource3DInfo</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vulkan_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VulkanInfo</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">backing_iovecs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RutabagaIovec</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+
+    <span class="doccomment">/// Bitmask of components that have already imported this resource</span>
+    <span class="kw">pub</span> <span class="ident">import_mask</span>: <span class="ident">u32</span>,
 }
 
 <span class="doccomment">/// A RutabagaComponent is a building block of the Virtual Graphics Interface (VGI).  Each component</span>
