@@ -1536,6 +1536,7 @@
 <span id="1535">1535</span>
 <span id="1536">1536</span>
 <span id="1537">1537</span>
+<span id="1538">1538</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1989,6 +1990,7 @@
             <span class="ident">VmCap::PvClock</span> =&gt; <span class="bool-val">false</span>,
             <span class="ident">VmCap::PvClockSuspend</span> =&gt; <span class="self">self</span>.<span class="ident">check_raw_capability</span>(<span class="ident">KvmCap::KvmclockCtrl</span>),
             <span class="ident">VmCap::Protected</span> =&gt; <span class="self">self</span>.<span class="ident">check_raw_capability</span>(<span class="ident">KvmCap::ArmProtectedVm</span>),
+            <span class="ident">VmCap::EarlyInitCpuid</span> =&gt; <span class="bool-val">false</span>,
         }
     }
 
@@ -2187,7 +2189,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">handle_deflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">handle_inflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">guest_mem</span>.<span class="ident">remove_range</span>(<span class="ident">guest_address</span>, <span class="ident">size</span>) {
             <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
             <span class="prelude-val">Err</span>(<span class="ident">vm_memory::Error::MemoryAccess</span>(<span class="kw">_</span>, <span class="ident">MmapError::SystemCallFailed</span>(<span class="ident">e</span>))) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
@@ -2195,7 +2197,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">handle_inflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">_size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">handle_deflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">_size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// No-op, when the guest attempts to access the pages again, Linux/KVM will provide them.</span>
         <span class="prelude-val">Ok</span>(())
     }

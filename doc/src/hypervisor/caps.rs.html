@@ -27,6 +27,8 @@
 <span id="26">26</span>
 <span id="27">27</span>
 <span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -54,6 +56,8 @@
     <span class="ident">PvClockSuspend</span>,
     <span class="doccomment">/// VM can be run in protected mode, where the host does not have access to its memory.</span>
     <span class="ident">Protected</span>,
+    <span class="doccomment">/// VM completes initialization of CPUID at creation time, not required after.</span>
+    <span class="ident">EarlyInitCpuid</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="hypervisor" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

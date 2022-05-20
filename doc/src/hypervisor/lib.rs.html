@@ -696,15 +696,15 @@
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">/// * `guest_address` - Address in the guest&#39;s &quot;physical&quot; memory to begin the unmapping</span>
     <span class="doccomment">/// * `size` - The size of the region to unmap, in bytes</span>
-    <span class="kw">fn</span> <span class="ident">handle_deflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">handle_inflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Reallocates memory and maps it to provide to the guest. This is intended to be used</span>
-    <span class="doccomment">/// exclusively in tandem with `handle_deflate`, and will return an `Err` Result otherwise.</span>
+    <span class="doccomment">/// exclusively in tandem with `handle_inflate`, and will return an `Err` Result otherwise.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">/// * `guest_address` - Address in the guest&#39;s &quot;physical&quot; memory to begin the mapping</span>
     <span class="doccomment">/// * `size` - The size of the region to map, in bytes</span>
-    <span class="kw">fn</span> <span class="ident">handle_inflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">handle_deflate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">guest_address</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A unique fingerprint for a particular `VcpuRunHandle`, used in `Vcpu` impls to ensure the</span>

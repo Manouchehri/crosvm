@@ -1790,6 +1790,8 @@
 <span id="1789">1789</span>
 <span id="1790">1790</span>
 <span id="1791">1791</span>
+<span id="1792">1792</span>
+<span id="1793">1793</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1864,7 +1866,7 @@
     <span class="ident">BusDeviceObj</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">PciAddress</span>, <span class="ident">PciConfigIo</span>, <span class="ident">PciConfigMmio</span>,
     <span class="ident">PciDevice</span>, <span class="ident">PciVirtualConfigMmio</span>,
 };
-<span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuX86_64</span>, <span class="ident">Vm</span>, <span class="ident">VmX86_64</span>};
+<span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuX86_64</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>, <span class="ident">VmX86_64</span>};
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">MemRegion</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
@@ -2554,17 +2556,19 @@
         <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
         <span class="ident">itmt</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="ident">cpuid::setup_cpuid</span>(
-            <span class="ident">hypervisor</span>,
-            <span class="ident">irq_chip</span>,
-            <span class="ident">vcpu</span>,
-            <span class="ident">vcpu_id</span>,
-            <span class="ident">num_cpus</span>,
-            <span class="ident">no_smt</span>,
-            <span class="ident">host_cpu_topology</span>,
-            <span class="ident">itmt</span>,
-        )
-        .<span class="ident">map_err</span>(<span class="ident">Error::SetupCpuid</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">vm</span>.<span class="ident">check_capability</span>(<span class="ident">VmCap::EarlyInitCpuid</span>) {
+            <span class="ident">cpuid::setup_cpuid</span>(
+                <span class="ident">hypervisor</span>,
+                <span class="ident">irq_chip</span>,
+                <span class="ident">vcpu</span>,
+                <span class="ident">vcpu_id</span>,
+                <span class="ident">num_cpus</span>,
+                <span class="ident">no_smt</span>,
+                <span class="ident">host_cpu_topology</span>,
+                <span class="ident">itmt</span>,
+            )
+            .<span class="ident">map_err</span>(<span class="ident">Error::SetupCpuid</span>)<span class="question-mark">?</span>;
+        }
 
         <span class="kw">if</span> <span class="ident">has_bios</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
