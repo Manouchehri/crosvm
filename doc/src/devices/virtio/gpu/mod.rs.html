@@ -1424,7 +1424,7 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">ExternalMapping</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>,
-    <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">SafeDescriptor</span>, <span class="ident">SendTube</span>, <span class="ident">Tube</span>, <span class="ident">VmEventType</span>, <span class="ident">WaitContext</span>,
 };
 
 <span class="kw">use</span> <span class="ident">data_model</span>::<span class="kw-2">*</span>;
@@ -2196,7 +2196,7 @@
 
 <span class="kw">struct</span> <span class="ident">Worker</span> {
     <span class="ident">interrupt</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Interrupt</span><span class="op">&gt;</span>,
-    <span class="ident">exit_evt</span>: <span class="ident">Event</span>,
+    <span class="ident">exit_evt_wrtube</span>: <span class="ident">SendTube</span>,
     <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
     <span class="ident">ctrl_queue</span>: <span class="ident">SharedQueueReader</span>,
     <span class="ident">ctrl_evt</span>: <span class="ident">Event</span>,
@@ -2315,7 +2315,7 @@
                     <span class="ident">Token::Display</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">close_requested</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">process_display</span>();
                         <span class="kw">if</span> <span class="ident">close_requested</span> {
-                            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">exit_evt</span>.<span class="ident">write</span>(<span class="number">1</span>);
+                            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">exit_evt_wrtube</span>.<span class="ident">send</span>::<span class="op">&lt;</span><span class="ident">VmEventType</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">VmEventType::Exit</span>);
                         }
                     }
                     <span class="ident">Token::ResourceBridge</span> { <span class="ident">index</span> } =&gt; {
@@ -2403,7 +2403,7 @@
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gpu</span> {
-    <span class="ident">exit_evt</span>: <span class="ident">Event</span>,
+    <span class="ident">exit_evt_wrtube</span>: <span class="ident">SendTube</span>,
     <span class="ident">gpu_device_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">resource_bridges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">event_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventDevice</span><span class="op">&gt;</span>,
@@ -2424,7 +2424,7 @@
 
 <span class="kw">impl</span> <span class="ident">Gpu</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">exit_evt</span>: <span class="ident">Event</span>,
+        <span class="ident">exit_evt_wrtube</span>: <span class="ident">SendTube</span>,
         <span class="ident">gpu_device_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
         <span class="ident">resource_bridges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
         <span class="ident">display_backends</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DisplayBackend</span><span class="op">&gt;</span>,
@@ -2491,7 +2491,7 @@
             .<span class="ident">set_rutabaga_channels</span>(<span class="ident">rutabaga_channels_opt</span>);
 
         <span class="ident">Gpu</span> {
-            <span class="ident">exit_evt</span>,
+            <span class="ident">exit_evt_wrtube</span>,
             <span class="ident">gpu_device_tube</span>,
             <span class="ident">resource_bridges</span>,
             <span class="ident">event_devices</span>,
@@ -2616,7 +2616,7 @@
             <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">render_server_fd</span>.<span class="ident">as_raw_descriptor</span>());
         }
 
-        <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">exit_evt</span>.<span class="ident">as_raw_descriptor</span>());
+        <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">exit_evt_wrtube</span>.<span class="ident">as_raw_descriptor</span>());
         <span class="kw">for</span> <span class="ident">bridge</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">resource_bridges</span> {
             <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">bridge</span>.<span class="ident">as_raw_descriptor</span>());
         }
@@ -2682,10 +2682,10 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">exit_evt</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">exit_evt</span>.<span class="ident">try_clone</span>() {
+        <span class="kw">let</span> <span class="ident">exit_evt_wrtube</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">exit_evt_wrtube</span>.<span class="ident">try_clone</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;error cloning exit event: {}&quot;</span>, <span class="ident">e</span>);
+                <span class="macro">error!</span>(<span class="string">&quot;error cloning exit tube: {}&quot;</span>, <span class="ident">e</span>);
                 <span class="kw">return</span>;
             }
         };
@@ -2748,7 +2748,7 @@
 
                         <span class="ident">Worker</span> {
                             <span class="ident">interrupt</span>: <span class="ident">irq</span>,
-                            <span class="ident">exit_evt</span>,
+                            <span class="ident">exit_evt_wrtube</span>,
                             <span class="ident">mem</span>,
                             <span class="ident">ctrl_queue</span>: <span class="ident">ctrl_queue</span>.<span class="ident">clone</span>(),
                             <span class="ident">ctrl_evt</span>,

@@ -147,6 +147,15 @@
 <span id="146">146</span>
 <span id="147">147</span>
 <span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -294,6 +303,15 @@
         .<span class="ident">to_hyphenated</span>()
         .<span class="ident">encode_lower</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>)
         .<span class="ident">to_owned</span>()
+}
+
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">VmEventType</span> {
+    <span class="ident">Exit</span>,
+    <span class="ident">Reset</span>,
+    <span class="ident">Crash</span>,
+    <span class="ident">Panic</span>(<span class="ident">u8</span>),
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="base" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

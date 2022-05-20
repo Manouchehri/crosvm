@@ -2369,16 +2369,6 @@
 <span id="2368">2368</span>
 <span id="2369">2369</span>
 <span id="2370">2370</span>
-<span id="2371">2371</span>
-<span id="2372">2372</span>
-<span id="2373">2373</span>
-<span id="2374">2374</span>
-<span id="2375">2375</span>
-<span id="2376">2376</span>
-<span id="2377">2377</span>
-<span id="2378">2378</span>
-<span id="2379">2379</span>
-<span id="2380">2380</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2479,7 +2469,7 @@
     <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
     <span class="ident">vm</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Vm</span>,
     <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
-    <span class="ident">_exit_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
+    <span class="ident">vm_evt_wrtube</span>: <span class="kw-2">&amp;</span><span class="ident">SendTube</span>,
     <span class="ident">wayland_device_tube</span>: <span class="ident">Tube</span>,
     <span class="ident">gpu_device_tube</span>: <span class="ident">Tube</span>,
     <span class="ident">vhost_user_gpu_tubes</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Tube</span>, <span class="ident">Tube</span>, <span class="ident">Tube</span>)<span class="op">&gt;</span>,
@@ -2614,7 +2604,7 @@
 
             <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_gpu_device</span>(
                 <span class="ident">cfg</span>,
-                <span class="ident">_exit_evt</span>,
+                <span class="ident">vm_evt_wrtube</span>,
                 <span class="ident">gpu_device_tube</span>,
                 <span class="ident">resource_bridges</span>,
                 <span class="comment">// Use the unnamed socket for GPU display screens.</span>
@@ -2842,8 +2832,7 @@
     <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
     <span class="ident">vm</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Vm</span>,
     <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
-    <span class="ident">exit_evt</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
-    <span class="ident">panic_wrtube</span>: <span class="ident">Tube</span>,
+    <span class="ident">vm_evt_wrtube</span>: <span class="kw-2">&amp;</span><span class="ident">SendTube</span>,
     <span class="ident">iommu_attached_endpoints</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">control_tubes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TaggedControlTube</span><span class="op">&gt;</span>,
     <span class="ident">wayland_device_tube</span>: <span class="ident">Tube</span>,
@@ -2966,7 +2955,7 @@
         <span class="ident">cfg</span>,
         <span class="ident">vm</span>,
         <span class="ident">resources</span>,
-        <span class="ident">exit_evt</span>,
+        <span class="ident">vm_evt_wrtube</span>,
         <span class="ident">wayland_device_tube</span>,
         <span class="ident">gpu_device_tube</span>,
         <span class="ident">vhost_user_gpu_tubes</span>,
@@ -3012,7 +3001,11 @@
         <span class="ident">devices</span>.<span class="ident">push</span>((<span class="ident">Box::new</span>(<span class="ident">StubPciDevice::new</span>(<span class="ident">params</span>)), <span class="prelude-val">None</span>));
     }
 
-    <span class="ident">devices</span>.<span class="ident">push</span>((<span class="ident">Box::new</span>(<span class="ident">PvPanicPciDevice::new</span>(<span class="ident">panic_wrtube</span>)), <span class="prelude-val">None</span>));
+    <span class="ident">devices</span>.<span class="ident">push</span>((
+        <span class="ident">Box::new</span>(<span class="ident">PvPanicPciDevice::new</span>(<span class="ident">vm_evt_wrtube</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>)),
+        <span class="prelude-val">None</span>,
+    ));
+
     <span class="prelude-val">Ok</span>(<span class="ident">devices</span>)
 }
 
@@ -3599,10 +3592,8 @@
         <span class="ident">vvu_proxy_device_tubes</span>.<span class="ident">push</span>(<span class="ident">vvu_proxy_device_tube</span>);
     }
 
-    <span class="kw">let</span> <span class="ident">exit_evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">reset_evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">crash_evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> (<span class="ident">panic_rdtube</span>, <span class="ident">panic_wrtube</span>) <span class="op">=</span> <span class="ident">Tube::pair</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create tube&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> (<span class="ident">vm_evt_wrtube</span>, <span class="ident">vm_evt_rdtube</span>) <span class="op">=</span>
+        <span class="ident">Tube::directional_pair</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create vm event tube&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">pstore_size</span> <span class="op">=</span> <span class="ident">components</span>.<span class="ident">pstore</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pstore</span><span class="op">|</span> <span class="ident">pstore</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">u64</span>);
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sys_allocator</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
@@ -3699,8 +3690,7 @@
         <span class="kw-2">&amp;</span><span class="ident">cfg</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">vm</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">sys_allocator</span>,
-        <span class="kw-2">&amp;</span><span class="ident">exit_evt</span>,
-        <span class="ident">panic_wrtube</span>,
+        <span class="kw-2">&amp;</span><span class="ident">vm_evt_wrtube</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">iommu_attached_endpoints</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">control_tubes</span>,
         <span class="ident">wayland_device_tube</span>,
@@ -3799,8 +3789,7 @@
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>), <span class="ident">allow</span>(<span class="ident">unused_mut</span>))]</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">linux</span> <span class="op">=</span> <span class="ident">Arch::build_vm</span>::<span class="op">&lt;</span><span class="ident">V</span>, <span class="ident">Vcpu</span><span class="op">&gt;</span>(
         <span class="ident">components</span>,
-        <span class="kw-2">&amp;</span><span class="ident">exit_evt</span>,
-        <span class="kw-2">&amp;</span><span class="ident">reset_evt</span>,
+        <span class="kw-2">&amp;</span><span class="ident">vm_evt_wrtube</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">sys_allocator</span>,
         <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">serial_parameters</span>,
         <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;serial&quot;</span>)<span class="question-mark">?</span>,
@@ -3865,10 +3854,8 @@
         <span class="kw-2">&amp;</span><span class="ident">disk_host_tubes</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
         <span class="ident">usb_control_tube</span>,
-        <span class="ident">exit_evt</span>,
-        <span class="ident">reset_evt</span>,
-        <span class="ident">crash_evt</span>,
-        <span class="ident">panic_rdtube</span>,
+        <span class="ident">vm_evt_rdtube</span>,
+        <span class="ident">vm_evt_wrtube</span>,
         <span class="ident">sigchld_fd</span>,
         <span class="ident">Arc::clone</span>(<span class="kw-2">&amp;</span><span class="ident">map_request</span>),
         <span class="ident">gralloc</span>,
@@ -4050,10 +4037,8 @@
     <span class="ident">balloon_host_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">disk_host_tubes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Tube</span>],
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span> <span class="ident">usb_control_tube</span>: <span class="ident">Tube</span>,
-    <span class="ident">exit_evt</span>: <span class="ident">Event</span>,
-    <span class="ident">reset_evt</span>: <span class="ident">Event</span>,
-    <span class="ident">crash_evt</span>: <span class="ident">Event</span>,
-    <span class="ident">panic_rdtube</span>: <span class="ident">Tube</span>,
+    <span class="ident">vm_evt_rdtube</span>: <span class="ident">RecvTube</span>,
+    <span class="ident">vm_evt_wrtube</span>: <span class="ident">SendTube</span>,
     <span class="ident">sigchld_fd</span>: <span class="ident">SignalFd</span>,
     <span class="ident">map_request</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ExternalMapping</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw-2">mut</span> <span class="ident">gralloc</span>: <span class="ident">RutabagaGralloc</span>,
@@ -4062,10 +4047,7 @@
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ExitState</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
     <span class="kw">enum</span> <span class="ident">Token</span> {
-        <span class="ident">Exit</span>,
-        <span class="ident">Reset</span>,
-        <span class="ident">Crash</span>,
-        <span class="ident">Panic</span>,
+        <span class="ident">VmEvent</span>,
         <span class="ident">Suspend</span>,
         <span class="ident">ChildSignal</span>,
         <span class="ident">IrqFd</span> { <span class="ident">index</span>: <span class="ident">IrqEventIndex</span> },
@@ -4079,12 +4061,9 @@
         .<span class="ident">expect</span>(<span class="string">&quot;failed to set terminal raw mode&quot;</span>);
 
     <span class="kw">let</span> <span class="ident">wait_ctx</span> <span class="op">=</span> <span class="ident">WaitContext::build_with</span>(<span class="kw-2">&amp;</span>[
-        (<span class="kw-2">&amp;</span><span class="ident">exit_evt</span>, <span class="ident">Token::Exit</span>),
-        (<span class="kw-2">&amp;</span><span class="ident">reset_evt</span>, <span class="ident">Token::Reset</span>),
-        (<span class="kw-2">&amp;</span><span class="ident">crash_evt</span>, <span class="ident">Token::Crash</span>),
-        (<span class="kw-2">&amp;</span><span class="ident">panic_rdtube</span>, <span class="ident">Token::Panic</span>),
         (<span class="kw-2">&amp;</span><span class="ident">linux</span>.<span class="ident">suspend_evt</span>, <span class="ident">Token::Suspend</span>),
         (<span class="kw-2">&amp;</span><span class="ident">sigchld_fd</span>, <span class="ident">Token::ChildSignal</span>),
+        (<span class="kw-2">&amp;</span><span class="ident">vm_evt_rdtube</span>, <span class="ident">Token::VmEvent</span>),
     ])
     .<span class="ident">context</span>(<span class="string">&quot;failed to add descriptor to wait context&quot;</span>)<span class="question-mark">?</span>;
 
@@ -4189,9 +4168,9 @@
             <span class="ident">linux</span>.<span class="ident">has_bios</span>,
             (<span class="kw-2">*</span><span class="ident">linux</span>.<span class="ident">io_bus</span>).<span class="ident">clone</span>(),
             (<span class="kw-2">*</span><span class="ident">linux</span>.<span class="ident">mmio_bus</span>).<span class="ident">clone</span>(),
-            <span class="ident">exit_evt</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;failed to clone event&quot;</span>)<span class="question-mark">?</span>,
-            <span class="ident">reset_evt</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;failed to clone event&quot;</span>)<span class="question-mark">?</span>,
-            <span class="ident">crash_evt</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;failed to clone event&quot;</span>)<span class="question-mark">?</span>,
+            <span class="ident">vm_evt_wrtube</span>
+                .<span class="ident">try_clone</span>()
+                .<span class="ident">context</span>(<span class="string">&quot;failed to clone vm event tube&quot;</span>)<span class="question-mark">?</span>,
             <span class="ident">linux</span>.<span class="ident">vm</span>.<span class="ident">check_capability</span>(<span class="ident">VmCap::PvClockSuspend</span>),
             <span class="ident">from_main_channel</span>,
             <span class="ident">use_hypervisor_signals</span>,
@@ -4250,37 +4229,38 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vm_control_indices_to_remove</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="ident">event</span> <span class="kw">in</span> <span class="ident">events</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">is_readable</span>) {
             <span class="kw">match</span> <span class="ident">event</span>.<span class="ident">token</span> {
-                <span class="ident">Token::Exit</span> =&gt; {
-                    <span class="macro">info!</span>(<span class="string">&quot;vcpu requested shutdown&quot;</span>);
-                    <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
-                }
-                <span class="ident">Token::Reset</span> =&gt; {
-                    <span class="macro">info!</span>(<span class="string">&quot;vcpu requested reset&quot;</span>);
-                    <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Reset</span>;
-                    <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
-                }
-                <span class="ident">Token::Crash</span> =&gt; {
-                    <span class="macro">info!</span>(<span class="string">&quot;vcpu crashed&quot;</span>);
-                    <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Crash</span>;
-                    <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
-                }
-                <span class="ident">Token::Panic</span> =&gt; {
+                <span class="ident">Token::VmEvent</span> =&gt; {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">break_to_wait</span>: <span class="ident">bool</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                    <span class="kw">match</span> <span class="ident">panic_rdtube</span>.<span class="ident">recv</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>() {
-                        <span class="prelude-val">Ok</span>(<span class="ident">panic_code</span>) =&gt; {
-                            <span class="kw">let</span> <span class="ident">panic_code</span> <span class="op">=</span> <span class="ident">PvPanicCode::from_u8</span>(<span class="ident">panic_code</span>);
-                            <span class="macro">info!</span>(<span class="string">&quot;Guest reported panic [Code: {}]&quot;</span>, <span class="ident">panic_code</span>);
-                            <span class="kw">if</span> <span class="ident">panic_code</span> <span class="op">==</span> <span class="ident">PvPanicCode::CrashLoaded</span> {
-                                <span class="comment">// VM is booting to crash kernel.</span>
-                                <span class="ident">break_to_wait</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                    <span class="kw">match</span> <span class="ident">vm_evt_rdtube</span>.<span class="ident">recv</span>::<span class="op">&lt;</span><span class="ident">VmEventType</span><span class="op">&gt;</span>() {
+                        <span class="prelude-val">Ok</span>(<span class="ident">vm_event</span>) =&gt; <span class="kw">match</span> <span class="ident">vm_event</span> {
+                            <span class="ident">VmEventType::Exit</span> =&gt; {
+                                <span class="macro">info!</span>(<span class="string">&quot;vcpu requested shutdown&quot;</span>);
+                                <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Stop</span>;
                             }
-                        }
+                            <span class="ident">VmEventType::Reset</span> =&gt; {
+                                <span class="macro">info!</span>(<span class="string">&quot;vcpu requested reset&quot;</span>);
+                                <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Reset</span>;
+                            }
+                            <span class="ident">VmEventType::Crash</span> =&gt; {
+                                <span class="macro">info!</span>(<span class="string">&quot;vcpu crashed&quot;</span>);
+                                <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Crash</span>;
+                            }
+                            <span class="ident">VmEventType::Panic</span>(<span class="ident">panic_code</span>) =&gt; {
+                                <span class="kw">let</span> <span class="ident">panic_code</span> <span class="op">=</span> <span class="ident">PvPanicCode::from_u8</span>(<span class="ident">panic_code</span>);
+                                <span class="macro">info!</span>(<span class="string">&quot;Guest reported panic [Code: {}]&quot;</span>, <span class="ident">panic_code</span>);
+                                <span class="kw">if</span> <span class="ident">panic_code</span> <span class="op">==</span> <span class="ident">PvPanicCode::CrashLoaded</span> {
+                                    <span class="comment">// VM is booting to crash kernel.</span>
+                                    <span class="ident">break_to_wait</span> <span class="op">=</span> <span class="bool-val">false</span>;
+                                } <span class="kw">else</span> {
+                                    <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::GuestPanic</span>;
+                                }
+                            }
+                        },
                         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                            <span class="macro">warn!</span>(<span class="string">&quot;failed to recv panic event: {} &quot;</span>, <span class="ident">e</span>);
+                            <span class="macro">warn!</span>(<span class="string">&quot;failed to recv VmEvent: {}&quot;</span>, <span class="ident">e</span>);
                         }
                     }
                     <span class="kw">if</span> <span class="ident">break_to_wait</span> {
-                        <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::GuestPanic</span>;
                         <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
                     }
                 }
