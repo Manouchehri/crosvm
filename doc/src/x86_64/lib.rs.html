@@ -1768,6 +1768,7 @@
 <span id="1767">1767</span>
 <span id="1768">1768</span>
 <span id="1769">1769</span>
+<span id="1770">1770</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2547,6 +2548,7 @@
         }
 
         <span class="kw">if</span> <span class="ident">has_bios</span> {
+            <span class="ident">regs::set_reset_vector</span>(<span class="ident">vcpu</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetupRegs</span>)<span class="question-mark">?</span>;
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
 

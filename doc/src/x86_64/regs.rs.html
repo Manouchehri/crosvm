@@ -406,6 +406,34 @@
 <span id="405">405</span>
 <span id="406">406</span>
 <span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -429,6 +457,9 @@
     <span class="doccomment">/// Failed to get sregs for this cpu.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to get sregs for this cpu: {0}&quot;</span>)]</span>
     <span class="ident">GetSRegsIoctlFailed</span>(<span class="ident">base::Error</span>),
+    <span class="doccomment">/// Failed to get base registers for this cpu.</span>
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to get base registers for this cpu: {0}&quot;</span>)]</span>
+    <span class="ident">GettingRegistersIoctl</span>(<span class="ident">base::Error</span>),
     <span class="doccomment">/// Setting up msrs failed.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;setting up msrs failed: {0}&quot;</span>)]</span>
     <span class="ident">MsrIoctlFailed</span>(<span class="ident">base::Error</span>),
@@ -753,6 +784,31 @@
     <span class="ident">setup_page_tables</span>(<span class="ident">mem</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sregs</span>)<span class="question-mark">?</span>; <span class="comment">// TODO(dgreid) - Can this be done once per system instead?</span>
 
     <span class="ident">vcpu</span>.<span class="ident">set_sregs</span>(<span class="kw-2">&amp;</span><span class="ident">sregs</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetSRegsIoctlFailed</span>)<span class="question-mark">?</span>;
+
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="doccomment">/// Configures a CPU to be pointed at the i386 reset vector.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The reset vector is the default location a CPU will go to find the first instruction it will</span>
+<span class="doccomment">/// execute after a reset. On i386, the reset vector means the RIP is set to 0xfff0 the CS base is</span>
+<span class="doccomment">/// set to 0xffff0000, and the CS selector is set to 0xf000.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// When using a BIOS, each of the VCPUs should be pointed at the reset vector before execution</span>
+<span class="doccomment">/// begins.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">/// * `vcpu` - the VCPU to configure.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_reset_vector</span>(<span class="ident">vcpu</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">VcpuX86_64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sregs</span> <span class="op">=</span> <span class="ident">vcpu</span>.<span class="ident">get_sregs</span>().<span class="ident">map_err</span>(<span class="ident">Error::GetSRegsIoctlFailed</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regs</span> <span class="op">=</span> <span class="ident">vcpu</span>.<span class="ident">get_regs</span>().<span class="ident">map_err</span>(<span class="ident">Error::GettingRegistersIoctl</span>)<span class="question-mark">?</span>;
+
+    <span class="ident">regs</span>.<span class="ident">rip</span> <span class="op">=</span> <span class="number">0xfff0</span>;
+    <span class="ident">sregs</span>.<span class="ident">cs</span>.<span class="ident">base</span> <span class="op">=</span> <span class="number">0xffff0000</span>;
+    <span class="ident">sregs</span>.<span class="ident">cs</span>.<span class="ident">selector</span> <span class="op">=</span> <span class="number">0xf000</span>;
+
+    <span class="ident">vcpu</span>.<span class="ident">set_sregs</span>(<span class="kw-2">&amp;</span><span class="ident">sregs</span>).<span class="ident">map_err</span>(<span class="ident">Error::SetSRegsIoctlFailed</span>)<span class="question-mark">?</span>;
+    <span class="ident">vcpu</span>.<span class="ident">set_regs</span>(<span class="kw-2">&amp;</span><span class="ident">regs</span>).<span class="ident">map_err</span>(<span class="ident">Error::SettingRegistersIoctl</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
