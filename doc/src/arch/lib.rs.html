@@ -921,21 +921,6 @@
 <span id="920">920</span>
 <span id="921">921</span>
 <span id="922">922</span>
-<span id="923">923</span>
-<span id="924">924</span>
-<span id="925">925</span>
-<span id="926">926</span>
-<span id="927">927</span>
-<span id="928">928</span>
-<span id="929">929</span>
-<span id="930">930</span>
-<span id="931">931</span>
-<span id="932">932</span>
-<span id="933">933</span>
-<span id="934">934</span>
-<span id="935">935</span>
-<span id="936">936</span>
-<span id="937">937</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1794,10 +1779,11 @@
 <span class="doccomment">/// Read and write permissions setting</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Wrap read_allow and write_allow to store them in MsrHandlers level.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrRWType</span> {
-    <span class="kw">pub</span> <span class="ident">read_allow</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">write_allow</span>: <span class="ident">bool</span>,
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrRWType</span> {
+    <span class="ident">ReadOnly</span>,
+    <span class="ident">WriteOnly</span>,
+    <span class="ident">ReadWrite</span>,
 }
 
 <span class="doccomment">/// Handler types for userspace-msr</span>
@@ -1837,32 +1823,18 @@
     }
 }
 
-<span class="doccomment">/// If user doesn&#39;t specific CPU0, the default source CPU is running CPU.</span>
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MsrValueFrom</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">MsrValueFrom::RWFromRunningCPU</span>
-    }
-}
-
 <span class="doccomment">/// Config option for userspace-msr handing</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// MsrConfig will be collected with its corresponding MSR&#39;s index.</span>
 <span class="doccomment">/// eg, (msr_index, msr_config)</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MsrConfig</span> {
     <span class="doccomment">/// If support RDMSR/WRMSR emulation in crosvm?</span>
     <span class="kw">pub</span> <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,
     <span class="doccomment">/// Handlers should be used to handling MSR.</span>
-    <span class="doccomment">/// User must set this field.</span>
-    <span class="kw">pub</span> <span class="ident">action</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrAction</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">action</span>: <span class="ident">MsrAction</span>,
     <span class="doccomment">/// MSR source CPU.</span>
     <span class="kw">pub</span> <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">MsrConfig</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
-        <span class="ident">Default::default</span>()
-    }
 }
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
@@ -1870,8 +1842,6 @@
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrExitHandlerError</span> {
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Fail to create MSR handler&quot;</span>)]</span>
     <span class="ident">HandlerCreateFailed</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error parameter&quot;</span>)]</span>
-    <span class="ident">InvalidParam</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="arch" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

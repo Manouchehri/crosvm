@@ -1768,30 +1768,6 @@
 <span id="1767">1767</span>
 <span id="1768">1768</span>
 <span id="1769">1769</span>
-<span id="1770">1770</span>
-<span id="1771">1771</span>
-<span id="1772">1772</span>
-<span id="1773">1773</span>
-<span id="1774">1774</span>
-<span id="1775">1775</span>
-<span id="1776">1776</span>
-<span id="1777">1777</span>
-<span id="1778">1778</span>
-<span id="1779">1779</span>
-<span id="1780">1780</span>
-<span id="1781">1781</span>
-<span id="1782">1782</span>
-<span id="1783">1783</span>
-<span id="1784">1784</span>
-<span id="1785">1785</span>
-<span id="1786">1786</span>
-<span id="1787">1787</span>
-<span id="1788">1788</span>
-<span id="1789">1789</span>
-<span id="1790">1790</span>
-<span id="1791">1791</span>
-<span id="1792">1792</span>
-<span id="1793">1793</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3358,12 +3334,24 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">insert_msr_map</span>(
+<span class="kw">fn</span> <span class="ident">insert_msr</span>(
     <span class="ident">msr_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
     <span class="ident">key</span>: <span class="ident">u32</span>,
-    <span class="ident">value</span>: <span class="ident">MsrConfig</span>,
+    <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,
+    <span class="ident">action</span>: <span class="ident">MsrAction</span>,
+    <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
 ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">ItmtError</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">msr_map</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">value</span>).<span class="ident">is_some</span>() {
+    <span class="kw">if</span> <span class="ident">msr_map</span>
+        .<span class="ident">insert</span>(
+            <span class="ident">key</span>,
+            <span class="ident">MsrConfig</span> {
+                <span class="ident">rw_type</span>,
+                <span class="ident">action</span>,
+                <span class="ident">from</span>,
+            },
+        )
+        .<span class="ident">is_some</span>()
+    {
         <span class="prelude-val">Err</span>(<span class="ident">ItmtError::MsrDuplicate</span>(<span class="ident">key</span>))
     } <span class="kw">else</span> {
         <span class="prelude-val">Ok</span>(())
@@ -3375,83 +3363,47 @@
 ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">ItmtError</span><span class="op">&gt;</span> {
     <span class="ident">check_itmt_cpu_support</span>()<span class="question-mark">?</span>;
 
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_HWP_CAPABILITIES</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">false</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
-
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_PM_ENABLE</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">true</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
-
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_HWP_REQUEST</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">true</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
-
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">false</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
-
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_PLATFORM_INFO</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">false</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
-
-    <span class="ident">insert_msr_map</span>(
-        <span class="ident">msr_map</span>,
-        <span class="ident">MSR_IA32_PERF_CTL</span>,
-        <span class="ident">MsrConfig</span> {
-            <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span> {
-                <span class="ident">read_allow</span>: <span class="bool-val">true</span>,
-                <span class="ident">write_allow</span>: <span class="bool-val">true</span>,
-            },
-            <span class="ident">action</span>: <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
-            <span class="ident">from</span>: <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-        },
-    )<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="ident">msrs</span> <span class="op">=</span> <span class="macro">vec!</span>[
+        (
+            <span class="ident">MSR_HWP_CAPABILITIES</span>,
+            <span class="ident">MsrRWType::ReadOnly</span>,
+            <span class="ident">MsrAction::MsrPassthrough</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+        (
+            <span class="ident">MSR_PM_ENABLE</span>,
+            <span class="ident">MsrRWType::ReadWrite</span>,
+            <span class="ident">MsrAction::MsrEmulate</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+        (
+            <span class="ident">MSR_HWP_REQUEST</span>,
+            <span class="ident">MsrRWType::ReadWrite</span>,
+            <span class="ident">MsrAction::MsrEmulate</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+        (
+            <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
+            <span class="ident">MsrRWType::ReadOnly</span>,
+            <span class="ident">MsrAction::MsrPassthrough</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+        (
+            <span class="ident">MSR_PLATFORM_INFO</span>,
+            <span class="ident">MsrRWType::ReadOnly</span>,
+            <span class="ident">MsrAction::MsrPassthrough</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+        (
+            <span class="ident">MSR_IA32_PERF_CTL</span>,
+            <span class="ident">MsrRWType::ReadWrite</span>,
+            <span class="ident">MsrAction::MsrEmulate</span>,
+            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+        ),
+    ];
+    <span class="kw">for</span> <span class="ident">msr</span> <span class="kw">in</span> <span class="ident">msrs</span> {
+        <span class="ident">insert_msr</span>(<span class="ident">msr_map</span>, <span class="ident">msr</span>.<span class="number">0</span>, <span class="ident">msr</span>.<span class="number">1</span>, <span class="ident">msr</span>.<span class="number">2</span>, <span class="ident">msr</span>.<span class="number">3</span>)<span class="question-mark">?</span>;
+    }
 
     <span class="prelude-val">Ok</span>(())
 }

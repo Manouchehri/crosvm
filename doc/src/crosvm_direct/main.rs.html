@@ -4161,11 +4161,6 @@
 <span id="4160">4160</span>
 <span id="4161">4161</span>
 <span id="4162">4162</span>
-<span id="4163">4163</span>
-<span id="4164">4164</span>
-<span id="4165">4165</span>
-<span id="4166">4166</span>
-<span id="4167">4167</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4190,7 +4185,8 @@
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
 <span class="kw">use</span> <span class="ident">arch</span>::{
-    <span class="ident">set_default_serial_parameters</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrValueFrom</span>, <span class="ident">Pstore</span>, <span class="ident">VcpuAffinity</span>,
+    <span class="ident">set_default_serial_parameters</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrRWType</span>, <span class="ident">MsrValueFrom</span>, <span class="ident">Pstore</span>,
+    <span class="ident">VcpuAffinity</span>,
 };
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">getpid</span>, <span class="ident">info</span>, <span class="ident">kill_process_group</span>, <span class="ident">pagesize</span>, <span class="ident">reap_child</span>, <span class="ident">syslog</span>, <span class="ident">warn</span>};
 <span class="kw">use</span> <span class="ident">crosvm</span>::{
@@ -4792,7 +4788,9 @@
 }
 
 <span class="kw">fn</span> <span class="ident">parse_userspace_msr_options</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">MsrConfig</span>)<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_config</span> <span class="op">=</span> <span class="ident">MsrConfig::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rw_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrRWType</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">action</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrAction</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromRunningCPU</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">argument::parse_key_value_options</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="ident">value</span>, <span class="string">&#39;,&#39;</span>);
     <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">options</span>
@@ -4805,42 +4803,42 @@
     <span class="kw">for</span> <span class="ident">opt</span> <span class="kw">in</span> <span class="ident">options</span> {
         <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">key</span>() {
             <span class="string">&quot;type&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
-                <span class="string">&quot;r&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>,
-                <span class="string">&quot;w&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> <span class="op">=</span> <span class="bool-val">true</span>,
-                <span class="string">&quot;rw&quot;</span> <span class="op">|</span> <span class="string">&quot;wr&quot;</span> =&gt; {
-                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                    <span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> <span class="op">=</span> <span class="bool-val">true</span>;
-                }
+                <span class="string">&quot;r&quot;</span> =&gt; <span class="ident">rw_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrRWType::ReadOnly</span>),
+                <span class="string">&quot;w&quot;</span> =&gt; <span class="ident">rw_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrRWType::WriteOnly</span>),
+                <span class="string">&quot;rw&quot;</span> <span class="op">|</span> <span class="string">&quot;wr&quot;</span> =&gt; <span class="ident">rw_type</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrRWType::ReadWrite</span>),
                 <span class="kw">_</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad type&quot;</span>)));
                 }
             },
             <span class="string">&quot;action&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
-                <span class="string">&quot;pass&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
-                <span class="string">&quot;emu&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
+                <span class="string">&quot;pass&quot;</span> =&gt; <span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrPassthrough</span>),
+                <span class="string">&quot;emu&quot;</span> =&gt; <span class="ident">action</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">MsrAction::MsrEmulate</span>),
                 <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad action&quot;</span>))),
             },
             <span class="string">&quot;from&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
-                <span class="string">&quot;cpu0&quot;</span> =&gt; <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>,
+                <span class="string">&quot;cpu0&quot;</span> =&gt; <span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>,
                 <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad from&quot;</span>))),
             },
             <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_key_err</span>()),
         }
     }
 
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">msr_config</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span> {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
-            <span class="string">&quot;userspace-msr: type is required&quot;</span>,
-        )));
-    }
+    <span class="kw">let</span> <span class="ident">rw_type</span> <span class="op">=</span> <span class="ident">rw_type</span>.<span class="ident">ok_or</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
+        <span class="string">&quot;userspace-msr: type is required&quot;</span>,
+    )))<span class="question-mark">?</span>;
 
-    <span class="kw">if</span> <span class="ident">msr_config</span>.<span class="ident">action</span>.<span class="ident">is_none</span>() {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
-            <span class="string">&quot;userspace-msr: action is required&quot;</span>,
-        )));
-    }
+    <span class="kw">let</span> <span class="ident">action</span> <span class="op">=</span> <span class="ident">action</span>.<span class="ident">ok_or</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="ident">String::from</span>(
+        <span class="string">&quot;userspace-msr: action is required&quot;</span>,
+    )))<span class="question-mark">?</span>;
 
-    <span class="prelude-val">Ok</span>((<span class="ident">index</span>, <span class="ident">msr_config</span>))
+    <span class="prelude-val">Ok</span>((
+        <span class="ident">index</span>,
+        <span class="ident">MsrConfig</span> {
+            <span class="ident">rw_type</span>,
+            <span class="ident">action</span>,
+            <span class="ident">from</span>,
+        },
+    ))
 }
 
 <span class="kw">fn</span> <span class="ident">parse_serial_options</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">argument::Result</span><span class="op">&lt;</span><span class="ident">SerialParameters</span><span class="op">&gt;</span> {
@@ -8305,23 +8303,15 @@ with a &#39;--backing_file&#39;.&quot;</span>
         <span class="kw">let</span> (<span class="ident">pass_cpu0_index</span>, <span class="ident">pass_cpu0_cfg</span>) <span class="op">=</span>
             <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=r,action=pass,from=cpu0&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_index</span>, <span class="number">0x10</span>);
-        <span class="macro">assert!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="kw-2">*</span><span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">MsrAction::MsrPassthrough</span>
-        );
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>, <span class="ident">MsrRWType::ReadOnly</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>, <span class="ident">MsrAction::MsrPassthrough</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromCPU0</span>);
 
         <span class="kw">let</span> (<span class="ident">pass_cpus_index</span>, <span class="ident">pass_cpus_cfg</span>) <span class="op">=</span>
             <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=rw,action=emu&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_index</span>, <span class="number">0x10</span>);
-        <span class="macro">assert!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">read_allow</span>);
-        <span class="macro">assert!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">rw_type</span>.<span class="ident">write_allow</span>);
-        <span class="macro">assert_eq!</span>(
-            <span class="kw-2">*</span><span class="ident">pass_cpus_cfg</span>.<span class="ident">action</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>(),
-            <span class="ident">MsrAction::MsrEmulate</span>
-        );
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">rw_type</span>, <span class="ident">MsrRWType::ReadWrite</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">action</span>, <span class="ident">MsrAction::MsrEmulate</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpus_cfg</span>.<span class="ident">from</span>, <span class="ident">MsrValueFrom::RWFromRunningCPU</span>);
 
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,action=none&quot;</span>).<span class="ident">is_err</span>());
