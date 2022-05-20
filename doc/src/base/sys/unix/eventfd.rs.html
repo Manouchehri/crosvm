@@ -206,32 +206,12 @@
 <span id="205">205</span>
 <span id="206">206</span>
 <span id="207">207</span>
-<span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
-<span id="216">216</span>
-<span id="217">217</span>
-<span id="218">218</span>
-<span id="219">219</span>
-<span id="220">220</span>
-<span id="221">221</span>
-<span id="222">222</span>
-<span id="223">223</span>
-<span id="224">224</span>
-<span id="225">225</span>
-<span id="226">226</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">mem</span>,
-    <span class="ident">ops::Deref</span>,
     <span class="ident">os::unix::io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">RawFd</span>},
     <span class="ident">ptr</span>,
     <span class="ident">time::Duration</span>,
@@ -242,7 +222,6 @@
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">duration_to_timespec</span>, <span class="ident">errno_result</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">SafeDescriptor</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::generate_scoped_event</span>;
 
 <span class="doccomment">/// A safe wrapper around a Linux eventfd (man 2 eventfd).</span>
 <span class="doccomment">///</span>
@@ -400,8 +379,6 @@
     }
 }
 
-<span class="macro">generate_scoped_event!</span>(<span class="ident">EventFd</span>);
-
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
@@ -424,21 +401,6 @@
         <span class="kw">let</span> <span class="ident">evt_clone</span> <span class="op">=</span> <span class="ident">evt</span>.<span class="ident">try_clone</span>().<span class="ident">unwrap</span>();
         <span class="ident">evt</span>.<span class="ident">write</span>(<span class="number">923</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">evt_clone</span>.<span class="ident">read</span>(), <span class="prelude-val">Ok</span>(<span class="number">923</span>));
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">scoped_event</span>() {
-        <span class="kw">let</span> <span class="ident">scoped_evt</span> <span class="op">=</span> <span class="ident">ScopedEvent::new</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">evt_clone</span>: <span class="ident">EventFd</span> <span class="op">=</span> <span class="ident">scoped_evt</span>.<span class="ident">try_clone</span>().<span class="ident">unwrap</span>();
-        <span class="ident">drop</span>(<span class="ident">scoped_evt</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">evt_clone</span>.<span class="ident">read</span>(), <span class="prelude-val">Ok</span>(<span class="number">1</span>));
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">eventfd_from_scoped_event</span>() {
-        <span class="kw">let</span> <span class="ident">scoped_evt</span> <span class="op">=</span> <span class="ident">ScopedEvent::new</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">evt</span>: <span class="ident">EventFd</span> <span class="op">=</span> <span class="ident">scoped_evt</span>.<span class="ident">into</span>();
-        <span class="ident">evt</span>.<span class="ident">write</span>(<span class="number">1</span>).<span class="ident">unwrap</span>();
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
