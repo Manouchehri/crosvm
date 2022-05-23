@@ -1,1 +1,1 @@
-{"rustc":9289672224281493355,"features":"","target":0,"profile":0,"path":0,"deps":[[1292591910928550362,"build_script_build",false,6444148316519810484]],"local":[{"Precalculated":"1653342666.391436635s (src/generated/xlib.rs)"}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}
+{"rustc":9289672224281493355,"features":"","target":0,"profile":0,"path":0,"deps":[[1292591910928550362,"build_script_build",false,6444148316519810484]],"local":[{"Precalculated":"1653346170.667665401s (protocol/aura-shell.xml)"}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}
