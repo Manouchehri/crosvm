@@ -1348,6 +1348,39 @@
 <span id="1347">1347</span>
 <span id="1348">1348</span>
 <span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
+<span id="1357">1357</span>
+<span id="1358">1358</span>
+<span id="1359">1359</span>
+<span id="1360">1360</span>
+<span id="1361">1361</span>
+<span id="1362">1362</span>
+<span id="1363">1363</span>
+<span id="1364">1364</span>
+<span id="1365">1365</span>
+<span id="1366">1366</span>
+<span id="1367">1367</span>
+<span id="1368">1368</span>
+<span id="1369">1369</span>
+<span id="1370">1370</span>
+<span id="1371">1371</span>
+<span id="1372">1372</span>
+<span id="1373">1373</span>
+<span id="1374">1374</span>
+<span id="1375">1375</span>
+<span id="1376">1376</span>
+<span id="1377">1377</span>
+<span id="1378">1378</span>
+<span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1367,8 +1400,8 @@
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventType</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">PollToken</span>,
-    <span class="ident">RawDescriptor</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventType</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>,
+    <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
 };
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le32</span>};
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">recv</span>, <span class="ident">MSG_DONTWAIT</span>, <span class="ident">MSG_PEEK</span>};
@@ -1601,6 +1634,22 @@
     <span class="ident">Disconnected</span>,
 }
 
+<span class="doccomment">/// Reason why rxq processing is stopped.</span>
+<span class="kw">enum</span> <span class="ident">RxqStatus</span> {
+    <span class="doccomment">/// All pending data have been processed.</span>
+    <span class="ident">Processed</span>,
+    <span class="doccomment">/// No descriptors available to forward vhost-user messages.</span>
+    <span class="ident">DescriptorsExhausted</span>,
+    <span class="doccomment">/// Sibling disconnected.</span>
+    <span class="ident">Disconnected</span>,
+}
+
+<span class="doccomment">/// Reason for a worker&#39;s successful exit.</span>
+<span class="kw">enum</span> <span class="ident">ExitReason</span> {
+    <span class="ident">Killed</span>,
+    <span class="ident">Disconnected</span>,
+}
+
 <span class="kw">impl</span> <span class="ident">Worker</span> {
     <span class="comment">// The entry point into `Worker`.</span>
     <span class="comment">// - At this point the connection with the sibling is already established.</span>
@@ -1613,7 +1662,7 @@
         <span class="ident">tx_queue_evt</span>: <span class="ident">Event</span>,
         <span class="ident">main_thread_tube</span>: <span class="ident">Tube</span>,
         <span class="ident">kill_evt</span>: <span class="ident">Event</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ExitReason</span><span class="op">&gt;</span> {
         <span class="comment">// TODO(abhishekbh): Should interrupt.signal_config_changed be called here ?.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wait_ctx</span>: <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">WaitContext::build_with</span>(<span class="kw-2">&amp;</span>[
             (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slave_req_helper</span>, <span class="ident">Token::SiblingSocket</span>),
@@ -1633,8 +1682,8 @@
                 <span class="kw">match</span> <span class="ident">event</span>.<span class="ident">token</span> {
                     <span class="ident">Token::SiblingSocket</span> =&gt; {
                         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">process_rx</span>(<span class="kw-2">&amp;mut</span> <span class="ident">wait_ctx</span>) {
-                            <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) =&gt; (),
-                            <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) =&gt; {
+                            <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::Processed</span>) =&gt; (),
+                            <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::DescriptorsExhausted</span>) =&gt; {
                                 <span class="comment">// If the driver has no Rx buffers left, then no</span>
                                 <span class="comment">// point monitoring the Vhost-user sibling for data. There</span>
                                 <span class="comment">// would be no way to send it to the device backend.</span>
@@ -1647,9 +1696,9 @@
                                     .<span class="ident">context</span>(<span class="string">&quot;failed to disable EPOLLIN on sibling VM socket fd&quot;</span>)<span class="question-mark">?</span>;
                                 <span class="ident">sibling_socket_polling_enabled</span> <span class="op">=</span> <span class="bool-val">false</span>;
                             }
-                            <span class="comment">// TODO(b/216407443): Handle sibling disconnection. The sibling sends</span>
-                            <span class="comment">// 0-length data the proxy device forwards it to the guest so that the</span>
-                            <span class="comment">// VVU backend can get notified that the connection is closed.</span>
+                            <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::Disconnected</span>) =&gt; {
+                                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ExitReason::Disconnected</span>);
+                            }
                             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
                         }
                     }
@@ -1693,7 +1742,7 @@
                     }
                     <span class="ident">Token::Kill</span> =&gt; {
                         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">kill_evt</span>.<span class="ident">read</span>();
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ExitReason::Killed</span>);
                     }
                 }
             }
@@ -1701,8 +1750,7 @@
     }
 
     <span class="comment">// Processes data from the Vhost-user sibling and forwards to the driver via Rx buffers.</span>
-    <span class="comment">// If rx queue&#39;s descriptors are exhausted while data is avilable, returns `Ok(false)`.</span>
-    <span class="kw">fn</span> <span class="ident">process_rx</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">wait_ctx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">process_rx</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">wait_ctx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">WaitContext</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RxqStatus</span><span class="op">&gt;</span> {
         <span class="comment">// Keep looping until -</span>
         <span class="comment">// - No more Rx buffers are available on the Rx queue. OR</span>
         <span class="comment">// - No more data is available on the Vhost-user sibling socket (checked via a</span>
@@ -1717,22 +1765,31 @@
         <span class="comment">// Peek if any data is left on the Vhost-user sibling socket. If no, then</span>
         <span class="comment">// nothing to forwad to the device backend.</span>
         <span class="kw">loop</span> {
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">check_sibling_connection</span>() {
-                <span class="ident">ConnStatus::DataAvailable</span> =&gt; (),
-                <span class="ident">ConnStatus::NoDataAvailable</span> =&gt; {
-                    <span class="kw">break</span>;
-                }
-                <span class="ident">ConnStatus::Disconnected</span> =&gt; {
-                    <span class="macro">bail!</span>(<span class="string">&quot;sibling is disconnected&quot;</span>);
-                }
+            <span class="kw">let</span> <span class="ident">is_connected</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">check_sibling_connection</span>() {
+                <span class="ident">ConnStatus::DataAvailable</span> =&gt; <span class="bool-val">true</span>,
+                <span class="ident">ConnStatus::Disconnected</span> =&gt; <span class="bool-val">false</span>,
+                <span class="ident">ConnStatus::NoDataAvailable</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::Processed</span>),
             };
 
             <span class="kw">let</span> <span class="ident">desc</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">rx_queue</span>.<span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>) {
                 <span class="prelude-val">Some</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>,
                 <span class="prelude-val">None</span> =&gt; {
-                    <span class="comment">// Descriptors are exhausted.</span>
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::DescriptorsExhausted</span>);
                 }
+            };
+
+            <span class="comment">// If a sibling is disconnected, send 0-length data to the guest and return an error.</span>
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">is_connected</span> {
+                <span class="comment">// Send 0-length data</span>
+                <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">desc</span>.<span class="ident">index</span>;
+                <span class="self">self</span>.<span class="ident">rx_queue</span>.<span class="ident">pop_peeked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>);
+                <span class="self">self</span>.<span class="ident">rx_queue</span>.<span class="ident">add_used</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="ident">index</span>, <span class="number">0</span> <span class="comment">/* len */</span>);
+                <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">rx_queue</span>.<span class="ident">trigger_interrupt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">interrupt</span>) {
+                    <span class="comment">// This interrupt should always be injected. We&#39;d rather fail</span>
+                    <span class="comment">// fast if there is an error.</span>
+                    <span class="macro">panic!</span>(<span class="string">&quot;failed to send interrupt&quot;</span>);
+                }
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RxqStatus::Disconnected</span>);
             };
 
             <span class="comment">// To successfully receive attached file descriptors, we need to</span>
@@ -1810,8 +1867,6 @@
                 }
             }
         }
-
-        <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
     }
 
     <span class="comment">// Returns the sibling connection status.</span>
@@ -2469,11 +2524,22 @@
                 };
                 <span class="kw">let</span> <span class="ident">rx_queue_evt</span> <span class="op">=</span> <span class="ident">activate_params</span>.<span class="ident">queue_evts</span>.<span class="ident">remove</span>(<span class="number">0</span>);
                 <span class="kw">let</span> <span class="ident">tx_queue_evt</span> <span class="op">=</span> <span class="ident">activate_params</span>.<span class="ident">queue_evts</span>.<span class="ident">remove</span>(<span class="number">0</span>);
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">worker</span>.<span class="ident">run</span>(<span class="ident">rx_queue_evt</span>, <span class="ident">tx_queue_evt</span>, <span class="ident">main_thread_tube</span>, <span class="ident">kill_evt</span>) {
-                    <span class="comment">// TODO(b/216407443): Handle sibling reconnect events.</span>
-                    <span class="macro">error!</span>(<span class="string">&quot;worker thread exited: {}&quot;</span>, <span class="ident">e</span>);
+
+                <span class="kw">match</span> <span class="ident">worker</span>.<span class="ident">run</span>(<span class="ident">rx_queue_evt</span>, <span class="ident">tx_queue_evt</span>, <span class="ident">main_thread_tube</span>, <span class="ident">kill_evt</span>) {
+                    <span class="prelude-val">Ok</span>(<span class="ident">ExitReason::Killed</span>) =&gt; {
+                        <span class="macro">info!</span>(<span class="string">&quot;worker thread exited successfully&quot;</span>);
+                        <span class="prelude-val">Ok</span>(<span class="ident">worker</span>)
+                    }
+                    <span class="prelude-val">Ok</span>(<span class="ident">ExitReason::Disconnected</span>) =&gt; {
+                        <span class="comment">// TODO(b/216407443): Handle sibling reconnect events.</span>
+                        <span class="macro">info!</span>(<span class="string">&quot;worker thread exited: sibling disconnected&quot;</span>);
+                        <span class="prelude-val">Ok</span>(<span class="ident">worker</span>)
+                    }
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                        <span class="macro">error!</span>(<span class="string">&quot;worker thread exited with an error: {:#}&quot;</span>, <span class="ident">e</span>);
+                        <span class="prelude-val">Ok</span>(<span class="ident">worker</span>)
+                    }
                 }
-                <span class="prelude-val">Ok</span>(<span class="ident">worker</span>)
             });
 
         <span class="kw">match</span> <span class="ident">worker_result</span> {
