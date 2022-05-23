@@ -310,9 +310,6 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -473,10 +470,7 @@
             <span class="ident">SerialType::Syslog</span> =&gt; {
                 <span class="ident">syslog::push_descriptors</span>(<span class="ident">keep_rds</span>);
                 (
-                    <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">syslog::Syslogger::new</span>(
-                        <span class="ident">syslog::Priority::Info</span>,
-                        <span class="ident">syslog::Facility::Daemon</span>,
-                    ))),
+                    <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">syslog::Syslogger::new</span>(<span class="ident">base::syslog::Level::Info</span>))),
                     <span class="prelude-val">None</span>,
                 )
             }

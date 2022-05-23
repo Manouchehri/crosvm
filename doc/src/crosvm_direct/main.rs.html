@@ -4161,6 +4161,28 @@
 <span id="4160">4160</span>
 <span id="4161">4161</span>
 <span id="4162">4162</span>
+<span id="4163">4163</span>
+<span id="4164">4164</span>
+<span id="4165">4165</span>
+<span id="4166">4166</span>
+<span id="4167">4167</span>
+<span id="4168">4168</span>
+<span id="4169">4169</span>
+<span id="4170">4170</span>
+<span id="4171">4171</span>
+<span id="4172">4172</span>
+<span id="4173">4173</span>
+<span id="4174">4174</span>
+<span id="4175">4175</span>
+<span id="4176">4176</span>
+<span id="4177">4177</span>
+<span id="4178">4178</span>
+<span id="4179">4179</span>
+<span id="4180">4180</span>
+<span id="4181">4181</span>
+<span id="4182">4182</span>
+<span id="4183">4183</span>
+<span id="4184">4184</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -5391,8 +5413,15 @@
                     <span class="string">&quot;`syslog-tag` already given&quot;</span>.<span class="ident">to_owned</span>(),
                 ));
             }
-            <span class="ident">syslog::set_proc_name</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>());
             <span class="ident">cfg</span>.<span class="ident">syslog_tag</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>());
+        }
+        <span class="string">&quot;log-level&quot;</span> =&gt; {
+            <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">log_level</span>.<span class="ident">is_some</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::TooManyArguments</span>(
+                    <span class="string">&quot;`log-level` already given&quot;</span>.<span class="ident">to_owned</span>(),
+                ));
+            }
+            <span class="ident">cfg</span>.<span class="ident">log_level</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>.<span class="ident">unwrap</span>().<span class="ident">to_owned</span>());
         }
         <span class="string">&quot;root&quot;</span> <span class="op">|</span> <span class="string">&quot;rwroot&quot;</span> <span class="op">|</span> <span class="string">&quot;disk&quot;</span> <span class="op">|</span> <span class="string">&quot;rwdisk&quot;</span> =&gt; {
             <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">ok_or</span>(<span class="ident">argument::Error::ExpectedArgument</span>(
@@ -6562,6 +6591,10 @@
                               stdin - Direct standard input to this serial device. Can only be given once. Will default to first serial port if not provided.
                               &quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;syslog-tag&quot;</span>, <span class="string">&quot;TAG&quot;</span>, <span class="string">&quot;When logging to syslog, use the provided tag.&quot;</span>),
+          <span class="ident">Argument::value</span>(<span class="string">&quot;log-level&quot;</span>, <span class="string">&quot;LOG_LEVEL&quot;</span>, <span class="string">&quot;Log level to use (trace,debug,info,warn,error,off)
+                                                    Example:
+                                                        off
+                                                        info,devices=off,base::syslog=trace&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;x-display&quot;</span>, <span class="string">&quot;DISPLAY&quot;</span>, <span class="string">&quot;X11 display name to use.&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;display-window-keyboard&quot;</span>, <span class="string">&quot;Capture keyboard input from the display window.&quot;</span>),
           <span class="ident">Argument::flag</span>(<span class="string">&quot;display-window-mouse&quot;</span>, <span class="string">&quot;Capture keyboard input from the display window.&quot;</span>),
@@ -6794,6 +6827,22 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
         <span class="ident">set_argument</span>(<span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>, <span class="ident">name</span>, <span class="ident">value</span>)
     })
     .<span class="ident">and_then</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">validate_arguments</span>(<span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>));
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">syslog::LogConfig</span> {
+        <span class="ident">proc_name</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">tag</span>) <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">syslog_tag</span> {
+            <span class="ident">tag</span>.<span class="ident">clone</span>()
+        } <span class="kw">else</span> {
+            <span class="ident">String::from</span>(<span class="string">&quot;crosvm&quot;</span>)
+        },
+        <span class="ident">filter</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">level</span>) <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">log_level</span> {
+            <span class="ident">level</span>
+        } <span class="kw">else</span> {
+            <span class="string">&quot;info&quot;</span>
+        },
+        ..<span class="ident">Default::default</span>()
+    }) {
+        <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+    }
 
     <span class="kw">match</span> <span class="ident">match_res</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
@@ -7441,11 +7490,6 @@ with a &#39;--backing_file&#39;.&quot;</span>
 }
 
 <span class="kw">fn</span> <span class="ident">crosvm_main</span>() -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init</span>() {
-        <span class="macro">println!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
-    }
-
     <span class="ident">panic_hook::set_panic_hook</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">std::env::args</span>();
