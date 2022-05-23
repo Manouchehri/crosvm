@@ -887,6 +887,7 @@
 <span id="886">886</span>
 <span id="887">887</span>
 <span id="888">888</span>
+<span id="889">889</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1658,6 +1659,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rutabaga_components</span>: <span class="ident">Map</span><span class="op">&lt;</span><span class="ident">RutabagaComponentType</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RutabagaComponent</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
             <span class="ident">Default::default</span>();
 
+        <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rutabaga_capsets</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RutabagaCapsetInfo</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Default::default</span>();
 
         <span class="comment">// Make sure that disabled components are not used as default.</span>

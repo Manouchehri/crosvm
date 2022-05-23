@@ -1399,6 +1399,7 @@
 <span id="1398">1398</span>
 <span id="1399">1399</span>
 <span id="1400">1400</span>
+<span id="1401">1401</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2558,6 +2559,7 @@
         <span class="kw">let</span> <span class="ident">num_capsets</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">rutabaga_component</span> {
             <span class="ident">RutabagaComponentType::Rutabaga2D</span> =&gt; <span class="number">0</span>,
             <span class="kw">_</span> =&gt; {
+                <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">num_capsets</span> <span class="op">=</span> <span class="number">0</span>;
 
                 <span class="comment">// Three capsets for virgl_renderer</span>
