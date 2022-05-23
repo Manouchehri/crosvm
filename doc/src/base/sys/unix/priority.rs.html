@@ -37,11 +37,16 @@
 <span id="36">36</span>
 <span id="37">37</span>
 <span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="prelude-ty">Result</span>};
+
+<span class="kw">use</span> <span class="ident">std::mem::MaybeUninit</span>;
 
 <span class="doccomment">/// Enables real time thread priorities in the current thread up to `limit`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_rt_prio_limit</span>(<span class="ident">limit</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -61,9 +66,10 @@
 
 <span class="doccomment">/// Sets the current thread to be scheduled using the round robin real time class with `priority`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_rt_round_robin</span>(<span class="ident">priority</span>: <span class="ident">i32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">sched_param</span> <span class="op">=</span> <span class="ident">libc::sched_param</span> {
-        <span class="ident">sched_priority</span>: <span class="ident">priority</span>,
-    };
+    <span class="comment">// Safe because sched_param only contains primitive types for which zero</span>
+    <span class="comment">// initialization is valid.</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sched_param</span>: <span class="ident">libc::sched_param</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">MaybeUninit::zeroed</span>().<span class="ident">assume_init</span>() };
+    <span class="ident">sched_param</span>.<span class="ident">sched_priority</span> <span class="op">=</span> <span class="ident">priority</span>;
 
     <span class="comment">// Safe because the kernel doesn&#39;t modify memory that is accessible to the process here.</span>
     <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span>

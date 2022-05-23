@@ -545,6 +545,9 @@
 <span id="544">544</span>
 <span id="545">545</span>
 <span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -556,6 +559,7 @@
     <span class="ident">fs::File</span>,
     <span class="ident">io</span>::{<span class="ident">IoSlice</span>, <span class="ident">IoSliceMut</span>},
     <span class="ident">mem::size_of</span>,
+    <span class="ident">mem::MaybeUninit</span>,
     <span class="ident">os::unix</span>::{
         <span class="ident">io</span>::{<span class="ident">AsRawFd</span>, <span class="ident">FromRawFd</span>, <span class="ident">RawFd</span>},
         <span class="ident">net</span>::{<span class="ident">UnixDatagram</span>, <span class="ident">UnixStream</span>},
@@ -577,7 +581,7 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">CMSG_ALIGN</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>:<span class="ident">expr</span>) =&gt; {
-        ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>) <span class="op">+</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">c_long</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">c_long</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>)
+        (((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>) <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">+</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">c_long</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">c_long</span><span class="op">&gt;</span>() <span class="op">-</span> <span class="number">1</span>)
     };
 }
 
@@ -589,7 +593,7 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">CMSG_LEN</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">cmsghdr</span><span class="op">&gt;</span>() <span class="op">+</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>)
+        <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">cmsghdr</span><span class="op">&gt;</span>() <span class="op">+</span> ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">len</span>) <span class="kw">as</span> <span class="ident">usize</span>)
     };
 }
 
@@ -611,7 +615,7 @@
     <span class="kw">if</span> <span class="ident">next_cmsg</span>
         .<span class="ident">wrapping_offset</span>(<span class="number">1</span>)
         .<span class="ident">wrapping_sub</span>(<span class="ident">msghdr</span>.<span class="ident">msg_control</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="kw">as</span> <span class="ident">usize</span>
-        <span class="op">&gt;</span> <span class="ident">msghdr</span>.<span class="ident">msg_controllen</span>
+        <span class="op">&gt;</span> <span class="ident">msghdr</span>.<span class="ident">msg_controllen</span> <span class="kw">as</span> <span class="ident">usize</span>
     {
         <span class="ident">null_mut</span>()
     } <span class="kw">else</span> {
@@ -635,11 +639,9 @@
         } <span class="kw">else</span> {
             <span class="ident">CmsgBuffer::Heap</span>(
                 <span class="macro">vec!</span>[
-                    <span class="ident">cmsghdr</span> {
-                        <span class="ident">cmsg_len</span>: <span class="number">0</span>,
-                        <span class="ident">cmsg_level</span>: <span class="number">0</span>,
-                        <span class="ident">cmsg_type</span>: <span class="number">0</span>,
-                    };
+                    <span class="comment">// Safe because cmsghdr only contains primitive types for</span>
+                    <span class="comment">// which zero initialization is valid.</span>
+                    <span class="kw">unsafe</span> { <span class="ident">MaybeUninit</span>::<span class="op">&lt;</span><span class="ident">cmsghdr</span><span class="op">&gt;</span><span class="ident">::zeroed</span>().<span class="ident">assume_init</span>() };
                     <span class="ident">cap_in_cmsghdr_units</span>
                 ]
                 .<span class="ident">into_boxed_slice</span>(),
@@ -655,28 +657,32 @@
     }
 }
 
+<span class="comment">// Musl requires a try_into when assigning to msg_iovlen and msg_controllen</span>
+<span class="comment">// that is unnecessary when compiling for glibc.</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::useless_conversion</span>)]</span>
 <span class="kw">fn</span> <span class="ident">raw_sendmsg</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">AsIobuf</span><span class="op">&gt;</span>(<span class="ident">fd</span>: <span class="ident">RawFd</span>, <span class="ident">out_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">D</span>], <span class="ident">out_fds</span>: <span class="kw-2">&amp;</span>[<span class="ident">RawFd</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cmsg_capacity</span> <span class="op">=</span> <span class="macro">CMSG_SPACE!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="ident">out_fds</span>.<span class="ident">len</span>());
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cmsg_buffer</span> <span class="op">=</span> <span class="ident">CmsgBuffer::with_capacity</span>(<span class="ident">cmsg_capacity</span>);
 
     <span class="kw">let</span> <span class="ident">iovec</span> <span class="op">=</span> <span class="ident">AsIobuf::as_iobuf_slice</span>(<span class="ident">out_data</span>);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">msghdr</span> {
-        <span class="ident">msg_name</span>: <span class="ident">null_mut</span>(),
-        <span class="ident">msg_namelen</span>: <span class="number">0</span>,
-        <span class="ident">msg_iov</span>: <span class="ident">iovec</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">iovec</span>,
-        <span class="ident">msg_iovlen</span>: <span class="ident">iovec</span>.<span class="ident">len</span>(),
-        <span class="ident">msg_control</span>: <span class="ident">null_mut</span>(),
-        <span class="ident">msg_controllen</span>: <span class="number">0</span>,
-        <span class="ident">msg_flags</span>: <span class="number">0</span>,
-    };
+    <span class="comment">// msghdr on musl has private __pad1 and __pad2 fields that cannot be initialized.</span>
+    <span class="comment">// Safe because msghdr only contains primitive types for which zero</span>
+    <span class="comment">// initialization is valid.</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span>: <span class="ident">msghdr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">MaybeUninit::zeroed</span>().<span class="ident">assume_init</span>() };
+    <span class="ident">msg</span>.<span class="ident">msg_iov</span> <span class="op">=</span> <span class="ident">iovec</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">iovec</span>;
+    <span class="ident">msg</span>.<span class="ident">msg_iovlen</span> <span class="op">=</span> <span class="ident">iovec</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
 
     <span class="kw">if</span> <span class="op">!</span><span class="ident">out_fds</span>.<span class="ident">is_empty</span>() {
-        <span class="kw">let</span> <span class="ident">cmsg</span> <span class="op">=</span> <span class="ident">cmsghdr</span> {
-            <span class="ident">cmsg_len</span>: <span class="macro">CMSG_LEN!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="ident">out_fds</span>.<span class="ident">len</span>()),
-            <span class="ident">cmsg_level</span>: <span class="ident">SOL_SOCKET</span>,
-            <span class="ident">cmsg_type</span>: <span class="ident">SCM_RIGHTS</span>,
-        };
+        <span class="comment">// msghdr on musl has an extra __pad1 field, initialize the whole struct to zero.</span>
+        <span class="comment">// Safe because cmsghdr only contains primitive types for which zero</span>
+        <span class="comment">// initialization is valid.</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cmsg</span>: <span class="ident">cmsghdr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">MaybeUninit::zeroed</span>().<span class="ident">assume_init</span>() };
+        <span class="ident">cmsg</span>.<span class="ident">cmsg_len</span> <span class="op">=</span> <span class="macro">CMSG_LEN!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="ident">out_fds</span>.<span class="ident">len</span>())
+            .<span class="ident">try_into</span>()
+            .<span class="ident">unwrap</span>();
+        <span class="ident">cmsg</span>.<span class="ident">cmsg_level</span> <span class="op">=</span> <span class="ident">SOL_SOCKET</span>;
+        <span class="ident">cmsg</span>.<span class="ident">cmsg_type</span> <span class="op">=</span> <span class="ident">SCM_RIGHTS</span>;
         <span class="kw">unsafe</span> {
             <span class="comment">// Safe because cmsg_buffer was allocated to be large enough to contain cmsghdr.</span>
             <span class="ident">write_unaligned</span>(<span class="ident">cmsg_buffer</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">cmsghdr</span>, <span class="ident">cmsg</span>);
@@ -690,7 +696,7 @@
         }
 
         <span class="ident">msg</span>.<span class="ident">msg_control</span> <span class="op">=</span> <span class="ident">cmsg_buffer</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">c_void</span>;
-        <span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="op">=</span> <span class="ident">cmsg_capacity</span>;
+        <span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="op">=</span> <span class="ident">cmsg_capacity</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
     }
 
     <span class="comment">// Safe because the msghdr was properly constructed from valid (or null) pointers of the</span>
@@ -704,23 +710,23 @@
     }
 }
 
+<span class="comment">// Musl requires a try_into when assigning to msg_iovlen, msg_controllen and</span>
+<span class="comment">// cmsg_len that is unnecessary when compiling for glibc.</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::useless_conversion</span>)]</span>
 <span class="kw">fn</span> <span class="ident">raw_recvmsg</span>(<span class="ident">fd</span>: <span class="ident">RawFd</span>, <span class="ident">iovs</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">IoSliceMut</span>], <span class="ident">in_fds</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">RawFd</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">usize</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">cmsg_capacity</span> <span class="op">=</span> <span class="macro">CMSG_SPACE!</span>(<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>() <span class="op">*</span> <span class="ident">in_fds</span>.<span class="ident">len</span>());
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cmsg_buffer</span> <span class="op">=</span> <span class="ident">CmsgBuffer::with_capacity</span>(<span class="ident">cmsg_capacity</span>);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">msghdr</span> {
-        <span class="ident">msg_name</span>: <span class="ident">null_mut</span>(),
-        <span class="ident">msg_namelen</span>: <span class="number">0</span>,
-        <span class="ident">msg_iov</span>: <span class="ident">iovs</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">iovec</span>,
-        <span class="ident">msg_iovlen</span>: <span class="ident">iovs</span>.<span class="ident">len</span>(),
-        <span class="ident">msg_control</span>: <span class="ident">null_mut</span>(),
-        <span class="ident">msg_controllen</span>: <span class="number">0</span>,
-        <span class="ident">msg_flags</span>: <span class="number">0</span>,
-    };
+    <span class="comment">// msghdr on musl has private __pad1 and __pad2 fields that cannot be initialized.</span>
+    <span class="comment">// Safe because msghdr only contains primitive types for which zero</span>
+    <span class="comment">// initialization is valid.</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msg</span>: <span class="ident">msghdr</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">MaybeUninit::zeroed</span>().<span class="ident">assume_init</span>() };
+    <span class="ident">msg</span>.<span class="ident">msg_iov</span> <span class="op">=</span> <span class="ident">iovs</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">iovec</span>;
+    <span class="ident">msg</span>.<span class="ident">msg_iovlen</span> <span class="op">=</span> <span class="ident">iovs</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
 
     <span class="kw">if</span> <span class="op">!</span><span class="ident">in_fds</span>.<span class="ident">is_empty</span>() {
         <span class="ident">msg</span>.<span class="ident">msg_control</span> <span class="op">=</span> <span class="ident">cmsg_buffer</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">c_void</span>;
-        <span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="op">=</span> <span class="ident">cmsg_capacity</span>;
+        <span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="op">=</span> <span class="ident">cmsg_capacity</span>.<span class="ident">try_into</span>().<span class="ident">unwrap</span>();
     }
 
     <span class="comment">// Safe because the msghdr was properly constructed from valid (or null) pointers of the</span>
@@ -731,7 +737,7 @@
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::last</span>());
     }
 
-    <span class="kw">if</span> <span class="ident">total_read</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="op">&lt;</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">cmsghdr</span><span class="op">&gt;</span>() {
+    <span class="kw">if</span> <span class="ident">total_read</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> (<span class="ident">msg</span>.<span class="ident">msg_controllen</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">cmsghdr</span><span class="op">&gt;</span>() {
         <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="number">0</span>, <span class="number">0</span>));
     }
 
@@ -743,7 +749,7 @@
         <span class="kw">let</span> <span class="ident">cmsg</span> <span class="op">=</span> <span class="kw">unsafe</span> { (<span class="ident">cmsg_ptr</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">cmsghdr</span>).<span class="ident">read_unaligned</span>() };
 
         <span class="kw">if</span> <span class="ident">cmsg</span>.<span class="ident">cmsg_level</span> <span class="op">==</span> <span class="ident">SOL_SOCKET</span> <span class="op">&amp;&amp;</span> <span class="ident">cmsg</span>.<span class="ident">cmsg_type</span> <span class="op">==</span> <span class="ident">SCM_RIGHTS</span> {
-            <span class="kw">let</span> <span class="ident">fd_count</span> <span class="op">=</span> (<span class="ident">cmsg</span>.<span class="ident">cmsg_len</span> <span class="op">-</span> <span class="macro">CMSG_LEN!</span>(<span class="number">0</span>)) <span class="op">/</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>();
+            <span class="kw">let</span> <span class="ident">fd_count</span> <span class="op">=</span> (<span class="ident">cmsg</span>.<span class="ident">cmsg_len</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="macro">CMSG_LEN!</span>(<span class="number">0</span>)) <span class="op">/</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span>();
             <span class="kw">unsafe</span> {
                 <span class="ident">copy_nonoverlapping</span>(
                     <span class="ident">CMSG_DATA</span>(<span class="ident">cmsg_ptr</span>),

@@ -380,9 +380,9 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IOCSIZE_MASK</span>: <span class="ident">c_uint</span> <span class="op">=</span> <span class="number">1_073_676_288</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">IOCSIZE_SHIFT</span>: <span class="ident">c_uint</span> <span class="op">=</span> <span class="number">16</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_env</span> <span class="op">=</span> <span class="string">&quot;musl&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">IoctlNr</span> <span class="op">=</span> <span class="ident">c_int</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>))]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;android&quot;</span>, <span class="ident">target_env</span> <span class="op">=</span> <span class="string">&quot;musl&quot;</span>)))]</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">IoctlNr</span> <span class="op">=</span> <span class="ident">c_ulong</span>;
 
 <span class="doccomment">/// Run an ioctl with no arguments.</span>

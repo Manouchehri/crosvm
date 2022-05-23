@@ -1240,7 +1240,7 @@
 <span class="comment">// Safe because we fulfill our contract of returning a genuine pthread handle.</span>
 <span class="kw">unsafe</span> <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Killable</span> <span class="kw">for</span> <span class="ident">JoinHandle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">pthread_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">pthread_t</span> {
-        <span class="self">self</span>.<span class="ident">as_pthread_t</span>()
+        <span class="self">self</span>.<span class="ident">as_pthread_t</span>() <span class="kw">as</span> <span class="kw">_</span>
     }
 }
 
