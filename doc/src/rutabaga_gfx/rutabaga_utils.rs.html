@@ -608,6 +608,13 @@
 <span id="607">607</span>
 <span id="608">608</span>
 <span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -733,6 +740,7 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RUTABAGA_CAPSET_GFXSTREAM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RUTABAGA_CAPSET_VENUS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RUTABAGA_CAPSET_CROSS_DOMAIN</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">5</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">RUTABAGA_CAPSET_DRM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">6</span>;
 
 <span class="doccomment">/// An error generated while using this crate.</span>
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
@@ -909,6 +917,7 @@
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_NO_VIRGL</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">7</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">VIRGLRENDERER_USE_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>;
 <span class="kw">const</span> <span class="ident">VIRGLRENDERER_RENDER_SERVER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">9</span>;
+<span class="kw">const</span> <span class="ident">VIRGLRENDERER_DRM</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">10</span>;
 
 <span class="doccomment">/// virglrenderer flag struct.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
@@ -960,6 +969,11 @@
     <span class="doccomment">/// Enable venus support</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_venus</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">VirglRendererFlags</span> {
         <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">VIRGLRENDERER_VENUS</span>, <span class="ident">v</span>)
+    }
+
+    <span class="doccomment">/// Enable drm native context support</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_drm</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">VirglRendererFlags</span> {
+        <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">VIRGLRENDERER_DRM</span>, <span class="ident">v</span>)
     }
 
     <span class="doccomment">/// Use EGL for context creation.</span>

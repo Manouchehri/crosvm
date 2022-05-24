@@ -4183,6 +4183,14 @@
 <span id="4182">4182</span>
 <span id="4183">4183</span>
 <span id="4184">4184</span>
+<span id="4185">4185</span>
+<span id="4186">4186</span>
+<span id="4187">4187</span>
+<span id="4188">4188</span>
+<span id="4189">4189</span>
+<span id="4190">4190</span>
+<span id="4191">4191</span>
+<span id="4192">4192</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4257,6 +4265,8 @@
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">x86_64::set_itmt_msr_config</span>;
+
+<span class="kw">use</span> <span class="ident">rutabaga_gfx::calculate_context_mask</span>;
 
 <span class="kw">const</span> <span class="ident">ONE_MB</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
 <span class="kw">const</span> <span class="ident">MB_ALIGNED</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">ONE_MB</span> <span class="op">-</span> <span class="number">1</span>;
@@ -4637,6 +4647,10 @@
                         });
                     }
                 },
+                <span class="string">&quot;context-types&quot;</span> =&gt; {
+                    <span class="kw">let</span> <span class="ident">context_types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">split</span>(<span class="string">&#39;:&#39;</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>();
+                    <span class="ident">gpu_params</span>.<span class="ident">context_mask</span> <span class="op">=</span> <span class="ident">calculate_context_mask</span>(<span class="ident">context_types</span>);
+                }
                 <span class="string">&quot;&quot;</span> =&gt; {}
                 <span class="kw">_</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(<span class="macro">format!</span>(
@@ -6653,6 +6667,8 @@ There is a cost of slightly increased latency the first time the file is accesse
                               Possible key values:
 
                               backend=(2d|virglrenderer|gfxstream) - Which backend to use for virtio-gpu (determining rendering protocol)
+
+                              context-types=LIST - The list of supported context types, separated by &#39;:&#39; (default: no contexts enabled)
 
                               width=INT - The width of the virtual display connected to the virtio-gpu.
 
