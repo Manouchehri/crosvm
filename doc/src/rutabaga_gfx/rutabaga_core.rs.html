@@ -1599,7 +1599,7 @@
 
 <span class="kw">impl</span> <span class="ident">RutabagaBuilder</span> {
     <span class="doccomment">/// Create new a RutabagaBuilder.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">default_component</span>: <span class="ident">RutabagaComponentType</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">default_component</span>: <span class="ident">RutabagaComponentType</span>, <span class="ident">_context_mask</span>: <span class="ident">u64</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
         <span class="ident">RutabagaBuilder</span> {
             <span class="ident">display_width</span>: <span class="prelude-val">None</span>,
             <span class="ident">display_height</span>: <span class="prelude-val">None</span>,

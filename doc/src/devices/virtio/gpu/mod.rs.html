@@ -1400,6 +1400,10 @@
 <span id="1399">1399</span>
 <span id="1400">1400</span>
 <span id="1401">1401</span>
+<span id="1402">1402</span>
+<span id="1403">1403</span>
+<span id="1404">1404</span>
+<span id="1405">1405</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1499,6 +1503,7 @@
     <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">GpuMode</span>,
     <span class="kw">pub</span> <span class="ident">cache_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cache_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">context_mask</span>: <span class="ident">u64</span>,
 }
 
 <span class="comment">// First queue is for virtio gpu commands. Second queue is for cursor commands, which we expect</span>
@@ -1529,6 +1534,7 @@
             <span class="ident">cache_path</span>: <span class="prelude-val">None</span>,
             <span class="ident">cache_size</span>: <span class="prelude-val">None</span>,
             <span class="ident">udmabuf</span>: <span class="bool-val">false</span>,
+            <span class="ident">context_mask</span>: <span class="number">0</span>,
         }
     }
 }
@@ -2421,6 +2427,7 @@
     <span class="ident">base_features</span>: <span class="ident">u64</span>,
     <span class="ident">udmabuf</span>: <span class="ident">bool</span>,
     <span class="ident">render_server_fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SafeDescriptor</span><span class="op">&gt;</span>,
+    <span class="ident">_context_mask</span>: <span class="ident">u64</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Gpu</span> {
@@ -2484,7 +2491,7 @@
             <span class="ident">display_height</span> <span class="op">=</span> <span class="ident">gpu_parameters</span>.<span class="ident">displays</span>[<span class="number">0</span>].<span class="ident">height</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">rutabaga_builder</span> <span class="op">=</span> <span class="ident">RutabagaBuilder::new</span>(<span class="ident">component</span>)
+        <span class="kw">let</span> <span class="ident">rutabaga_builder</span> <span class="op">=</span> <span class="ident">RutabagaBuilder::new</span>(<span class="ident">component</span>, <span class="ident">gpu_parameters</span>.<span class="ident">context_mask</span>)
             .<span class="ident">set_display_width</span>(<span class="ident">display_width</span>)
             .<span class="ident">set_display_height</span>(<span class="ident">display_height</span>)
             .<span class="ident">set_virglrenderer_flags</span>(<span class="ident">virglrenderer_flags</span>)
@@ -2509,6 +2516,7 @@
             <span class="ident">base_features</span>,
             <span class="ident">udmabuf</span>: <span class="ident">gpu_parameters</span>.<span class="ident">udmabuf</span>,
             <span class="ident">render_server_fd</span>,
+            <span class="ident">_context_mask</span>: <span class="ident">gpu_parameters</span>.<span class="ident">context_mask</span>,
         }
     }
 
