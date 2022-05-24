@@ -1137,6 +1137,19 @@
 <span id="1136">1136</span>
 <span id="1137">1137</span>
 <span id="1138">1138</span>
+<span id="1139">1139</span>
+<span id="1140">1140</span>
+<span id="1141">1141</span>
+<span id="1142">1142</span>
+<span id="1143">1143</span>
+<span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1285,6 +1298,19 @@
     <span class="kw">pub</span> <span class="ident">block_size</span>: <span class="ident">u32</span>,
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span>, <span class="ident">deserialize_with</span> <span class="op">=</span> <span class="string">&quot;deserialize_disk_id&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="ident">DISK_ID_LEN</span>]<span class="op">&gt;</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">DiskOption</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">path</span>: <span class="ident">PathBuf::from</span>(<span class="string">&quot;&quot;</span>),
+            <span class="ident">read_only</span>: <span class="bool-val">true</span>,
+            <span class="ident">sparse</span>: <span class="bool-val">false</span>,
+            <span class="ident">o_direct</span>: <span class="bool-val">false</span>,
+            <span class="ident">block_size</span>: <span class="number">512</span>,
+            <span class="ident">id</span>: <span class="prelude-val">None</span>,
+        }
+    }
 }
 
 <span class="kw">struct</span> <span class="ident">Worker</span> {
