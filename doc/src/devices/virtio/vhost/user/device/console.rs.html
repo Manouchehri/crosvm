@@ -381,12 +381,12 @@
     <span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu::pci::VvuPciDevice</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="self">self</span>, <span class="ident">copy_config</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="self">self</span>, <span class="ident">copy_config</span>, <span class="ident">SignalableInterrupt</span>};
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_tx_queue</span>(
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_tx_queue</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">SignalableInterrupt</span><span class="op">&gt;</span>(
     <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">virtio::Queue</span>,
     <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
-    <span class="ident">doorbell</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Doorbell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">doorbell</span>: <span class="ident">I</span>,
     <span class="ident">kick_evt</span>: <span class="ident">EventAsync</span>,
     <span class="kw-2">mut</span> <span class="ident">output</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Write</span><span class="op">&gt;</span>,
 ) {
@@ -399,10 +399,10 @@
     }
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_rx_queue</span>(
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_rx_queue</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">SignalableInterrupt</span><span class="op">&gt;</span>(
     <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">virtio::Queue</span>,
     <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
-    <span class="ident">doorbell</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Doorbell</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">doorbell</span>: <span class="ident">I</span>,
     <span class="ident">kick_evt</span>: <span class="ident">EventAsync</span>,
     <span class="ident">in_buffer</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">in_avail_evt</span>: <span class="ident">EventAsync</span>,
