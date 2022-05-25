@@ -811,14 +811,6 @@
 <span id="810">810</span>
 <span id="811">811</span>
 <span id="812">812</span>
-<span id="813">813</span>
-<span id="814">814</span>
-<span id="815">815</span>
-<span id="816">816</span>
-<span id="817">817</span>
-<span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -843,9 +835,10 @@
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">BarRange</span>, <span class="ident">MsixCap</span>, <span class="ident">MsixConfig</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>,
-    <span class="ident">PciBarRegionType</span>, <span class="ident">PciCapability</span>, <span class="ident">PciCapabilityID</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>,
-    <span class="ident">PciDeviceError</span>, <span class="ident">PciDisplaySubclass</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PciId</span>, <span class="ident">PciInterruptPin</span>, <span class="ident">PciSubclass</span>,
+    <span class="ident">BarRange</span>, <span class="ident">MsixCap</span>, <span class="ident">MsixConfig</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>,
+    <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciCapability</span>, <span class="ident">PciCapabilityID</span>, <span class="ident">PciClassCode</span>,
+    <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciDisplaySubclass</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PciId</span>,
+    <span class="ident">PciInterruptPin</span>, <span class="ident">PciSubclass</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::ipc_memory_mapper::IpcMemoryMapper</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
@@ -901,13 +894,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VirtioPciCap</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">cfg_type</span>: <span class="ident">PciCapabilityType</span>, <span class="ident">bar</span>: <span class="ident">u8</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">length</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">cfg_type</span>: <span class="ident">PciCapabilityType</span>, <span class="ident">bar</span>: <span class="ident">PciBarIndex</span>, <span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">length</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">VirtioPciCap</span> {
             <span class="ident">cap_vndr</span>: <span class="number">0</span>,
             <span class="ident">cap_next</span>: <span class="number">0</span>,
             <span class="ident">cap_len</span>: <span class="ident">std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VirtioPciCap</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u8</span>,
             <span class="ident">cfg_type</span>: <span class="ident">cfg_type</span> <span class="kw">as</span> <span class="ident">u8</span>,
-            <span class="ident">bar</span>,
+            <span class="ident">bar</span>: <span class="ident">bar</span> <span class="kw">as</span> <span class="ident">u8</span>,
             <span class="ident">id</span>: <span class="number">0</span>,
             <span class="ident">padding</span>: [<span class="number">0</span>; <span class="number">2</span>],
             <span class="ident">offset</span>: <span class="ident">Le32::from</span>(<span class="ident">offset</span>),
@@ -947,7 +940,7 @@
 <span class="kw">impl</span> <span class="ident">VirtioPciNotifyCap</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">cfg_type</span>: <span class="ident">PciCapabilityType</span>,
-        <span class="ident">bar</span>: <span class="ident">u8</span>,
+        <span class="ident">bar</span>: <span class="ident">PciBarIndex</span>,
         <span class="ident">offset</span>: <span class="ident">u32</span>,
         <span class="ident">length</span>: <span class="ident">u32</span>,
         <span class="ident">multiplier</span>: <span class="ident">Le32</span>,
@@ -958,7 +951,7 @@
                 <span class="ident">cap_next</span>: <span class="number">0</span>,
                 <span class="ident">cap_len</span>: <span class="ident">std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VirtioPciNotifyCap</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u8</span>,
                 <span class="ident">cfg_type</span>: <span class="ident">cfg_type</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                <span class="ident">bar</span>,
+                <span class="ident">bar</span>: <span class="ident">bar</span> <span class="kw">as</span> <span class="ident">u8</span>,
                 <span class="ident">id</span>: <span class="number">0</span>,
                 <span class="ident">padding</span>: [<span class="number">0</span>; <span class="number">2</span>],
                 <span class="ident">offset</span>: <span class="ident">Le32::from</span>(<span class="ident">offset</span>),
@@ -994,14 +987,20 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VirtioPciShmCap</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">cfg_type</span>: <span class="ident">PciCapabilityType</span>, <span class="ident">bar</span>: <span class="ident">u8</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">length</span>: <span class="ident">u64</span>, <span class="ident">shmid</span>: <span class="ident">u8</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">cfg_type</span>: <span class="ident">PciCapabilityType</span>,
+        <span class="ident">bar</span>: <span class="ident">PciBarIndex</span>,
+        <span class="ident">offset</span>: <span class="ident">u64</span>,
+        <span class="ident">length</span>: <span class="ident">u64</span>,
+        <span class="ident">shmid</span>: <span class="ident">u8</span>,
+    ) -&gt; <span class="self">Self</span> {
         <span class="ident">VirtioPciShmCap</span> {
             <span class="ident">cap</span>: <span class="ident">VirtioPciCap</span> {
                 <span class="ident">cap_vndr</span>: <span class="number">0</span>,
                 <span class="ident">cap_next</span>: <span class="number">0</span>,
                 <span class="ident">cap_len</span>: <span class="ident">std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VirtioPciShmCap</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u8</span>,
                 <span class="ident">cfg_type</span>: <span class="ident">cfg_type</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                <span class="ident">bar</span>,
+                <span class="ident">bar</span>: <span class="ident">bar</span>.<span class="ident">into</span>(),
                 <span class="ident">id</span>: <span class="ident">shmid</span>,
                 <span class="ident">padding</span>: [<span class="number">0</span>; <span class="number">2</span>],
                 <span class="ident">offset</span>: <span class="ident">Le32::from</span>(<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span>),
@@ -1029,16 +1028,22 @@
 <span class="comment">// Allocate one bar for the structs pointed to by the capability structures.</span>
 <span class="kw">const</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x0000</span>;
 <span class="kw">const</span> <span class="ident">COMMON_CONFIG_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">56</span>;
+<span class="kw">const</span> <span class="ident">COMMON_CONFIG_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">COMMON_CONFIG_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
 <span class="kw">const</span> <span class="ident">ISR_CONFIG_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="kw">const</span> <span class="ident">ISR_CONFIG_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">ISR_CONFIG_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x2000</span>;
 <span class="kw">const</span> <span class="ident">DEVICE_CONFIG_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
+<span class="kw">const</span> <span class="ident">DEVICE_CONFIG_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">DEVICE_CONFIG_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x3000</span>;
 <span class="kw">const</span> <span class="ident">NOTIFICATION_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
+<span class="kw">const</span> <span class="ident">NOTIFICATION_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">NOTIFICATION_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x6000</span>;
 <span class="kw">const</span> <span class="ident">MSIX_TABLE_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
+<span class="kw">const</span> <span class="ident">MSIX_TABLE_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_TABLE_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x7000</span>;
 <span class="kw">const</span> <span class="ident">MSIX_PBA_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x1000</span>;
+<span class="kw">const</span> <span class="ident">MSIX_PBA_LAST</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_PBA_SIZE</span> <span class="op">-</span> <span class="number">1</span>;
 <span class="kw">const</span> <span class="ident">CAPABILITY_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x8000</span>;
 
 <span class="kw">const</span> <span class="ident">NOTIFY_OFF_MULTIPLIER</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">4</span>; <span class="comment">// A dword per notification address.</span>
@@ -1062,7 +1067,7 @@
     <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
     <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
-    <span class="ident">settings_bar</span>: <span class="ident">u8</span>,
+    <span class="ident">settings_bar</span>: <span class="ident">PciBarIndex</span>,
     <span class="ident">msix_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsixConfig</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="ident">common_config</span>: <span class="ident">VirtioPciCommonConfig</span>,
@@ -1133,7 +1138,7 @@
             <span class="ident">queues</span>,
             <span class="ident">queue_evts</span>,
             <span class="ident">mem</span>,
-            <span class="ident">settings_bar</span>: <span class="number">0</span>,
+            <span class="ident">settings_bar</span>: <span class="ident">PciBarIndex::Bar0</span>,
             <span class="ident">msix_config</span>,
             <span class="ident">msix_cap_reg_idx</span>: <span class="prelude-val">None</span>,
             <span class="ident">common_config</span>: <span class="ident">VirtioPciCommonConfig</span> {
@@ -1172,7 +1177,7 @@
 
     <span class="kw">fn</span> <span class="ident">add_settings_pci_capabilities</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">settings_bar</span>: <span class="ident">u8</span>,
+        <span class="ident">settings_bar</span>: <span class="ident">PciBarIndex</span>,
     ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
         <span class="comment">// Add pointers to the different configuration structures from the PCI capabilities.</span>
         <span class="kw">let</span> <span class="ident">common_cap</span> <span class="op">=</span> <span class="ident">VirtioPciCap::new</span>(
@@ -1218,7 +1223,7 @@
             .<span class="ident">map_err</span>(<span class="ident">PciDeviceError::CapabilitiesSetup</span>)<span class="question-mark">?</span>;
 
         <span class="comment">//TODO(dgreid) - How will the configuration_cap work?</span>
-        <span class="kw">let</span> <span class="ident">configuration_cap</span> <span class="op">=</span> <span class="ident">VirtioPciCap::new</span>(<span class="ident">PciCapabilityType::PciConfig</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let</span> <span class="ident">configuration_cap</span> <span class="op">=</span> <span class="ident">VirtioPciCap::new</span>(<span class="ident">PciCapabilityType::PciConfig</span>, <span class="ident">settings_bar</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="self">self</span>.<span class="ident">config_regs</span>
             .<span class="ident">add_capability</span>(<span class="kw-2">&amp;</span><span class="ident">configuration_cap</span>)
             .<span class="ident">map_err</span>(<span class="ident">PciDeviceError::CapabilitiesSetup</span>)<span class="question-mark">?</span>;
@@ -1360,14 +1365,14 @@
                     <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
                     <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
                     <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-                    <span class="ident">bar</span>: <span class="number">0</span>,
+                    <span class="ident">bar</span>: <span class="self">self</span>.<span class="ident">settings_bar</span>.<span class="ident">into</span>(),
                 },
                 <span class="macro">format!</span>(<span class="string">&quot;virtio-{}-cap_bar&quot;</span>, <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">device_type</span>()),
                 <span class="ident">CAPABILITY_BAR_SIZE</span>,
             )
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoAllocationFailed</span>(<span class="ident">CAPABILITY_BAR_SIZE</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">PciBarConfiguration::new</span>(
-            <span class="number">0</span>,
+            <span class="self">self</span>.<span class="ident">settings_bar</span>,
             <span class="ident">CAPABILITY_BAR_SIZE</span>,
             <span class="ident">PciBarRegionType::Memory32BitRegion</span>,
             <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,
@@ -1376,8 +1381,7 @@
         <span class="kw">let</span> <span class="ident">settings_bar</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">config_regs</span>
             .<span class="ident">add_pci_bar</span>(<span class="ident">config</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoRegistrationFailed</span>(<span class="ident">settings_config_addr</span>, <span class="ident">e</span>))<span class="question-mark">?</span>
-            <span class="kw">as</span> <span class="ident">u8</span>;
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoRegistrationFailed</span>(<span class="ident">settings_config_addr</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
         <span class="ident">ranges</span>.<span class="ident">push</span>(<span class="ident">BarRange</span> {
             <span class="ident">addr</span>: <span class="ident">settings_config_addr</span>,
             <span class="ident">size</span>: <span class="ident">CAPABILITY_BAR_SIZE</span>,
@@ -1427,7 +1431,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">ranges</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
     }
 
@@ -1442,7 +1446,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">ioevents</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="ident">u64</span>, <span class="ident">Datamatch</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">settings_bar</span> <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">settings_bar</span>);
         <span class="kw">let</span> <span class="ident">notify_base</span> <span class="op">=</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span>;
         <span class="self">self</span>.<span class="ident">queue_evts</span>
             .<span class="ident">iter</span>()
@@ -1479,125 +1483,105 @@
         (<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">config_regs</span>).<span class="ident">write_reg</span>(<span class="ident">reg_idx</span>, <span class="ident">offset</span>, <span class="ident">data</span>)
     }
 
-    <span class="comment">// Clippy: the value of COMMON_CONFIG_BAR_OFFSET happens to be zero so the</span>
-    <span class="comment">// expression `COMMON_CONFIG_BAR_OFFSET &lt;= o` is always true, but this code</span>
-    <span class="comment">// is written such that the value of the const may be changed independently.</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::absurd_extreme_comparisons</span>)]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::manual_range_contains</span>)]</span>
     <span class="kw">fn</span> <span class="ident">read_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
-        <span class="comment">// The driver is only allowed to do aligned, properly sized access.</span>
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">settings_bar</span> <span class="kw">as</span> <span class="ident">usize</span>);
-        <span class="kw">if</span> <span class="ident">addr</span> <span class="op">&lt;</span> <span class="ident">bar0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">addr</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">CAPABILITY_BAR_SIZE</span> {
-            <span class="kw">let</span> <span class="ident">bar_config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bars</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">config</span><span class="op">|</span> {
-                <span class="ident">addr</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">address</span>() <span class="op">&amp;&amp;</span> <span class="ident">addr</span> <span class="op">&lt;</span> (<span class="ident">config</span>.<span class="ident">address</span>() <span class="op">+</span> <span class="ident">config</span>.<span class="ident">size</span>())
-            });
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">bar_config</span> {
-                <span class="self">self</span>.<span class="ident">device</span>
-                    .<span class="ident">read_bar</span>(<span class="ident">c</span>.<span class="ident">bar_index</span>(), <span class="ident">addr</span> <span class="op">-</span> <span class="ident">c</span>.<span class="ident">address</span>(), <span class="ident">data</span>);
-            }
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar0</span>;
+        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
+            .<span class="ident">config_regs</span>
+            .<span class="ident">get_bars</span>()
+            .<span class="ident">find</span>(<span class="op">|</span><span class="ident">bar</span><span class="op">|</span> <span class="ident">bar</span>.<span class="ident">address_range</span>().<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>))
+        {
+            <span class="prelude-val">Some</span>(<span class="ident">bar</span>) =&gt; <span class="ident">bar</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
+        };
+
+        <span class="kw">if</span> <span class="ident">bar</span>.<span class="ident">bar_index</span>() <span class="op">==</span> <span class="self">self</span>.<span class="ident">settings_bar</span> {
+            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>.<span class="ident">address</span>();
             <span class="kw">match</span> <span class="ident">offset</span> {
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">COMMON_CONFIG_SIZE</span> =&gt;
-                {
-                    <span class="self">self</span>.<span class="ident">common_config</span>.<span class="ident">read</span>(
-                        <span class="ident">o</span> <span class="op">-</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>,
-                        <span class="ident">data</span>,
-                        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">queues</span>,
-                        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">as_mut</span>(),
-                    )
-                }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">ISR_CONFIG_SIZE</span> =&gt; {
+                <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">COMMON_CONFIG_LAST</span> =&gt; <span class="self">self</span>.<span class="ident">common_config</span>.<span class="ident">read</span>(
+                    <span class="ident">offset</span> <span class="op">-</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>,
+                    <span class="ident">data</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">queues</span>,
+                    <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">as_mut</span>(),
+                ),
+                <span class="ident">ISR_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">ISR_CONFIG_LAST</span> =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get_mut</span>(<span class="number">0</span>) {
                         <span class="comment">// Reading this register resets it to 0.</span>
                         <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">interrupt_status</span>.<span class="ident">swap</span>(<span class="number">0</span>, <span class="ident">Ordering::SeqCst</span>) <span class="kw">as</span> <span class="ident">u8</span>;
                     }
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">DEVICE_CONFIG_SIZE</span> =&gt;
-                {
-                    <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">read_config</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>, <span class="ident">data</span>);
+                <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">DEVICE_CONFIG_LAST</span> =&gt; {
+                    <span class="self">self</span>.<span class="ident">device</span>
+                        .<span class="ident">read_config</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>, <span class="ident">data</span>);
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">NOTIFICATION_SIZE</span> =&gt;
-                {
+                <span class="ident">NOTIFICATION_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">NOTIFICATION_LAST</span> =&gt; {
                     <span class="comment">// Handled with ioevents.</span>
                 }
-
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_TABLE_SIZE</span> =&gt; {
+                <span class="ident">MSIX_TABLE_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">MSIX_TABLE_LAST</span> =&gt; {
                     <span class="self">self</span>.<span class="ident">msix_config</span>
                         .<span class="ident">lock</span>()
-                        .<span class="ident">read_msix_table</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span>, <span class="ident">data</span>);
+                        .<span class="ident">read_msix_table</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span>, <span class="ident">data</span>);
                 }
-
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_PBA_SIZE</span> =&gt; {
+                <span class="ident">MSIX_PBA_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">MSIX_PBA_LAST</span> =&gt; {
                     <span class="self">self</span>.<span class="ident">msix_config</span>
                         .<span class="ident">lock</span>()
-                        .<span class="ident">read_pba_entries</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span>, <span class="ident">data</span>);
+                        .<span class="ident">read_pba_entries</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span>, <span class="ident">data</span>);
                 }
-
                 <span class="kw">_</span> =&gt; (),
             }
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">device</span>
+                .<span class="ident">read_bar</span>(<span class="ident">bar</span>.<span class="ident">bar_index</span>(), <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>.<span class="ident">address</span>(), <span class="ident">data</span>);
         }
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::absurd_extreme_comparisons</span>)]</span>
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::manual_range_contains</span>)]</span>
     <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="self">self</span>.<span class="ident">settings_bar</span> <span class="kw">as</span> <span class="ident">usize</span>);
-        <span class="kw">if</span> <span class="ident">addr</span> <span class="op">&lt;</span> <span class="ident">bar0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">addr</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">CAPABILITY_BAR_SIZE</span> {
-            <span class="kw">let</span> <span class="ident">bar_config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bars</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">config</span><span class="op">|</span> {
-                <span class="ident">addr</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">address</span>() <span class="op">&amp;&amp;</span> <span class="ident">addr</span> <span class="op">&lt;</span> (<span class="ident">config</span>.<span class="ident">address</span>() <span class="op">+</span> <span class="ident">config</span>.<span class="ident">size</span>())
-            });
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">bar_config</span> {
-                <span class="self">self</span>.<span class="ident">device</span>
-                    .<span class="ident">write_bar</span>(<span class="ident">c</span>.<span class="ident">bar_index</span>(), <span class="ident">addr</span> <span class="op">-</span> <span class="ident">c</span>.<span class="ident">address</span>(), <span class="ident">data</span>);
-            }
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar0</span>;
+        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
+            .<span class="ident">config_regs</span>
+            .<span class="ident">get_bars</span>()
+            .<span class="ident">find</span>(<span class="op">|</span><span class="ident">bar</span><span class="op">|</span> <span class="ident">bar</span>.<span class="ident">address_range</span>().<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>))
+        {
+            <span class="prelude-val">Some</span>(<span class="ident">bar</span>) =&gt; <span class="ident">bar</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
+        };
+
+        <span class="kw">if</span> <span class="ident">bar</span>.<span class="ident">bar_index</span>() <span class="op">==</span> <span class="self">self</span>.<span class="ident">settings_bar</span> {
+            <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>.<span class="ident">address</span>();
             <span class="kw">match</span> <span class="ident">offset</span> {
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">COMMON_CONFIG_SIZE</span> =&gt;
-                {
-                    <span class="self">self</span>.<span class="ident">common_config</span>.<span class="ident">write</span>(
-                        <span class="ident">o</span> <span class="op">-</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>,
-                        <span class="ident">data</span>,
-                        <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">queues</span>,
-                        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">as_mut</span>(),
-                    )
-                }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">ISR_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">ISR_CONFIG_SIZE</span> =&gt; {
+                <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">COMMON_CONFIG_LAST</span> =&gt; <span class="self">self</span>.<span class="ident">common_config</span>.<span class="ident">write</span>(
+                    <span class="ident">offset</span> <span class="op">-</span> <span class="ident">COMMON_CONFIG_BAR_OFFSET</span>,
+                    <span class="ident">data</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">queues</span>,
+                    <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">as_mut</span>(),
+                ),
+                <span class="ident">ISR_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">ISR_CONFIG_LAST</span> =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">data</span>.<span class="ident">get</span>(<span class="number">0</span>) {
                         <span class="self">self</span>.<span class="ident">interrupt_status</span>
                             .<span class="ident">fetch_and</span>(<span class="op">!</span>(<span class="kw-2">*</span><span class="ident">v</span> <span class="kw">as</span> <span class="ident">usize</span>), <span class="ident">Ordering::SeqCst</span>);
                     }
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">DEVICE_CONFIG_SIZE</span> =&gt;
-                {
-                    <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">write_config</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>, <span class="ident">data</span>);
+                <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">DEVICE_CONFIG_LAST</span> =&gt; {
+                    <span class="self">self</span>.<span class="ident">device</span>
+                        .<span class="ident">write_config</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">DEVICE_CONFIG_BAR_OFFSET</span>, <span class="ident">data</span>);
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">NOTIFICATION_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">NOTIFICATION_SIZE</span> =&gt;
-                {
+                <span class="ident">NOTIFICATION_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">NOTIFICATION_LAST</span> =&gt; {
                     <span class="comment">// Handled with ioevents.</span>
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_TABLE_SIZE</span> =&gt; {
+                <span class="ident">MSIX_TABLE_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">MSIX_TABLE_LAST</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">behavior</span> <span class="op">=</span> <span class="self">self</span>
                         .<span class="ident">msix_config</span>
                         .<span class="ident">lock</span>()
-                        .<span class="ident">write_msix_table</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span>, <span class="ident">data</span>);
+                        .<span class="ident">write_msix_table</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">MSIX_TABLE_BAR_OFFSET</span>, <span class="ident">data</span>);
                     <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">control_notify</span>(<span class="ident">behavior</span>);
                 }
-                <span class="ident">o</span> <span class="kw">if</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span> <span class="op">+</span> <span class="ident">MSIX_PBA_SIZE</span> =&gt; {
+                <span class="ident">MSIX_PBA_BAR_OFFSET</span>..<span class="op">=</span><span class="ident">MSIX_PBA_LAST</span> =&gt; {
                     <span class="self">self</span>.<span class="ident">msix_config</span>
                         .<span class="ident">lock</span>()
-                        .<span class="ident">write_pba_entries</span>(<span class="ident">o</span> <span class="op">-</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span>, <span class="ident">data</span>);
+                        .<span class="ident">write_pba_entries</span>(<span class="ident">offset</span> <span class="op">-</span> <span class="ident">MSIX_PBA_BAR_OFFSET</span>, <span class="ident">data</span>);
                 }
-
                 <span class="kw">_</span> =&gt; (),
             }
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">device</span>
+                .<span class="ident">write_bar</span>(<span class="ident">bar</span>.<span class="ident">bar_index</span>(), <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>.<span class="ident">address</span>(), <span class="ident">data</span>);
         }
 
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">device_activated</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">is_driver_ready</span>() {

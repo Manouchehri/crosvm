@@ -345,6 +345,7 @@
 <span id="344">344</span>
 <span id="345">345</span>
 <span id="346">346</span>
+<span id="347">347</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -364,7 +365,8 @@
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciCapability</span>,
+    <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>,
+    <span class="ident">PciCapability</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
     <span class="ident">copy_config</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">PciCapabilityType</span>, <span class="ident">Queue</span>, <span class="ident">VirtioDevice</span>,
@@ -386,7 +388,7 @@
 <span class="comment">// The fs device does not have a fixed number of queues.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">QUEUE_SIZE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1024</span>;
 
-<span class="kw">const</span> <span class="ident">FS_BAR_NUM</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">const</span> <span class="ident">FS_BAR_NUM</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar4</span>;
 <span class="kw">const</span> <span class="ident">FS_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">const</span> <span class="ident">FS_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>;
 
@@ -660,11 +662,11 @@
             <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
             <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
             <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-            <span class="ident">bar</span>: <span class="ident">FS_BAR_NUM</span>,
+            <span class="ident">bar</span>: <span class="ident">FS_BAR_NUM</span>.<span class="ident">into</span>(),
         });
 
         <span class="macro">vec!</span>[<span class="ident">PciBarConfiguration::new</span>(
-            <span class="ident">FS_BAR_NUM</span> <span class="kw">as</span> <span class="ident">usize</span>,
+            <span class="ident">FS_BAR_NUM</span>,
             <span class="ident">FS_BAR_SIZE</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,

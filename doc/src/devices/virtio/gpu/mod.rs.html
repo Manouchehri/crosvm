@@ -1398,6 +1398,7 @@
 <span id="1397">1397</span>
 <span id="1398">1398</span>
 <span id="1399">1399</span>
+<span id="1400">1400</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1454,7 +1455,8 @@
 <span class="kw">use</span> <span class="ident"><span class="self">self</span>::virtio_gpu::VirtioGpu</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciCapability</span>,
+    <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>,
+    <span class="ident">PciCapability</span>,
 };
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_DISPLAY_WIDTH</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1280</span>;
@@ -1505,7 +1507,7 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">QUEUE_SIZES</span>: <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="number">256</span>, <span class="number">16</span>];
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FENCE_POLL_INTERVAL</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_millis</span>(<span class="number">1</span>);
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_NUM</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">4</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_NUM</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>;
 
@@ -2777,10 +2779,10 @@
             <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
             <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
             <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-            <span class="ident">bar</span>: <span class="ident">GPU_BAR_NUM</span>,
+            <span class="ident">bar</span>: <span class="ident">GPU_BAR_NUM</span>.<span class="ident">into</span>(),
         });
         <span class="macro">vec!</span>[<span class="ident">PciBarConfiguration::new</span>(
-            <span class="ident">GPU_BAR_NUM</span> <span class="kw">as</span> <span class="ident">usize</span>,
+            <span class="ident">GPU_BAR_NUM</span>,
             <span class="ident">GPU_BAR_SIZE</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,

@@ -1449,7 +1449,7 @@
 <span class="comment">// https://stefanha.github.io/virtio/vhost-user-slave.html#x1-2870004.</span>
 <span class="kw">const</span> <span class="ident">VIRTIO_VHOST_USER_STATUS_SLAVE_UP</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0</span>;
 
-<span class="kw">const</span> <span class="ident">BAR_INDEX</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">2</span>;
+<span class="kw">const</span> <span class="ident">BAR_INDEX</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar2</span>;
 
 <span class="comment">// Bar configuration.</span>
 <span class="comment">// All offsets are from the starting of bar `BAR_INDEX`.</span>
@@ -2351,7 +2351,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">check_bar_metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_index</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">bar_index</span> <span class="op">!</span><span class="op">=</span> <span class="ident">BAR_INDEX</span> <span class="kw">as</span> <span class="ident">usize</span> {
+        <span class="kw">if</span> <span class="ident">bar_index</span> <span class="op">!</span><span class="op">=</span> <span class="ident">BAR_INDEX</span> {
             <span class="macro">bail!</span>(<span class="string">&quot;invalid bar index: {}&quot;</span>, <span class="ident">bar_index</span>);
         }
 
@@ -2677,11 +2677,11 @@
             <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
             <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
             <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-            <span class="ident">bar</span>: <span class="ident">BAR_INDEX</span>,
+            <span class="ident">bar</span>: <span class="ident">BAR_INDEX</span> <span class="kw">as</span> <span class="ident">u8</span>,
         });
 
         <span class="macro">vec!</span>[<span class="ident">PciBarConfiguration::new</span>(
-            <span class="ident">BAR_INDEX</span> <span class="kw">as</span> <span class="ident">usize</span>,
+            <span class="ident">BAR_INDEX</span>,
             <span class="self">self</span>.<span class="ident">device_bar_size</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="comment">// NotPrefetchable so as to exit on every read / write event in the</span>
