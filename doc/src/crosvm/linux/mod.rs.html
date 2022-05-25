@@ -2368,7 +2368,6 @@
 <span id="2367">2367</span>
 <span id="2368">2368</span>
 <span id="2369">2369</span>
-<span id="2370">2370</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4213,6 +4212,7 @@
     <span class="ident">vcpu_thread_barrier</span>.<span class="ident">wait</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Stop</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pvpanic_code</span> <span class="op">=</span> <span class="ident">PvPanicCode::Unknown</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">balloon_stats_id</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
 
     <span class="lifetime">&#39;wait</span>: <span class="kw">loop</span> {
@@ -4246,14 +4246,9 @@
                                 <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::Crash</span>;
                             }
                             <span class="ident">VmEventType::Panic</span>(<span class="ident">panic_code</span>) =&gt; {
-                                <span class="kw">let</span> <span class="ident">panic_code</span> <span class="op">=</span> <span class="ident">PvPanicCode::from_u8</span>(<span class="ident">panic_code</span>);
-                                <span class="macro">info!</span>(<span class="string">&quot;Guest reported panic [Code: {}]&quot;</span>, <span class="ident">panic_code</span>);
-                                <span class="kw">if</span> <span class="ident">panic_code</span> <span class="op">==</span> <span class="ident">PvPanicCode::CrashLoaded</span> {
-                                    <span class="comment">// VM is booting to crash kernel.</span>
-                                    <span class="ident">break_to_wait</span> <span class="op">=</span> <span class="bool-val">false</span>;
-                                } <span class="kw">else</span> {
-                                    <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::GuestPanic</span>;
-                                }
+                                <span class="ident">pvpanic_code</span> <span class="op">=</span> <span class="ident">PvPanicCode::from_u8</span>(<span class="ident">panic_code</span>);
+                                <span class="macro">info!</span>(<span class="string">&quot;Guest reported panic [Code: {}]&quot;</span>, <span class="ident">pvpanic_code</span>);
+                                <span class="ident">break_to_wait</span> <span class="op">=</span> <span class="bool-val">false</span>;
                             }
                         },
                         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
@@ -4261,6 +4256,9 @@
                         }
                     }
                     <span class="kw">if</span> <span class="ident">break_to_wait</span> {
+                        <span class="kw">if</span> <span class="ident">pvpanic_code</span> <span class="op">==</span> <span class="ident">PvPanicCode::Panicked</span> {
+                            <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident">ExitState::GuestPanic</span>;
+                        }
                         <span class="kw">break</span> <span class="lifetime">&#39;wait</span>;
                     }
                 }
