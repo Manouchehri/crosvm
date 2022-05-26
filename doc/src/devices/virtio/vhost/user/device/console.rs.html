@@ -351,6 +351,8 @@
 <span id="350">350</span>
 <span id="351">351</span>
 <span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -373,7 +375,9 @@
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::{<span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serial_device</span>::{<span class="ident">SerialDevice</span>, <span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serial_device</span>::{
+    <span class="ident">SerialDevice</span>, <span class="ident">SerialHardware</span>, <span class="ident">SerialInput</span>, <span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>,
+};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::console</span>::{
     <span class="ident">handle_input</span>, <span class="ident">process_transmit_queue</span>, <span class="ident">spawn_input_thread</span>, <span class="ident">virtio_console_config</span>, <span class="ident">ConsoleError</span>,
 };
@@ -425,7 +429,7 @@
 }
 
 <span class="kw">struct</span> <span class="ident">ConsoleDevice</span> {
-    <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerialInput</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">output</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">avail_features</span>: <span class="ident">u64</span>,
 }
@@ -434,7 +438,7 @@
     <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
         <span class="ident">_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerialInput</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">output</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">_sync</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FileSync</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">_out_timestamp</span>: <span class="ident">bool</span>,

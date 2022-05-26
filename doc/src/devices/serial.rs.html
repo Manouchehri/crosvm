@@ -466,6 +466,7 @@
 <span id="465">465</span>
 <span id="466">466</span>
 <span id="467">467</span>
+<span id="468">468</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -481,6 +482,7 @@
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::bus::BusAccessInfo</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serial_device::SerialInput</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusDevice</span>, <span class="ident">SerialDevice</span>};
 
 <span class="kw">const</span> <span class="ident">LOOP_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x40</span>;
@@ -547,7 +549,7 @@
     <span class="comment">// Host input/output</span>
     <span class="ident">in_buffer</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
     <span class="ident">in_channel</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerialInput</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">out</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
@@ -555,7 +557,7 @@
     <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">_protected_vm</span>: <span class="ident">ProtectionType</span>,
         <span class="ident">interrupt_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">input</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerialInput</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">out</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">io::Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">_sync</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FileSync</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">_out_timestamp</span>: <span class="ident">bool</span>,
