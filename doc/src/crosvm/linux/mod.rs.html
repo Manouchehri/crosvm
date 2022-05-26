@@ -2368,6 +2368,7 @@
 <span id="2367">2367</span>
 <span id="2368">2368</span>
 <span id="2369">2369</span>
+<span id="2370">2370</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3798,6 +3799,7 @@
         <span class="ident">devices</span>,
         <span class="ident">irq_chip</span>,
         <span class="kw-2">&amp;mut</span> <span class="ident">vcpu_ids</span>,
+        <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;serial&quot;</span>)<span class="question-mark">?</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;the architecture failed to build the vm&quot;</span>)<span class="question-mark">?</span>;
 

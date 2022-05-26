@@ -318,6 +318,23 @@
 <span id="317">317</span>
 <span id="318">318</span>
 <span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -406,6 +423,7 @@
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">SerialHardware</span> {
     <span class="ident">Serial</span>,        <span class="comment">// Standard PC-style (8250/16550 compatible) UART</span>
     <span class="ident">VirtioConsole</span>, <span class="comment">// virtio-console device</span>
+    <span class="ident">Debugcon</span>,      <span class="comment">// Bochs style debug port</span>
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">SerialHardware</span> {
@@ -419,6 +437,7 @@
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span> {
             <span class="ident">SerialHardware::Serial</span> =&gt; <span class="string">&quot;serial&quot;</span>.<span class="ident">to_string</span>(),
             <span class="ident">SerialHardware::VirtioConsole</span> =&gt; <span class="string">&quot;virtio-console&quot;</span>.<span class="ident">to_string</span>(),
+            <span class="ident">SerialHardware::Debugcon</span> =&gt; <span class="string">&quot;debugcon&quot;</span>.<span class="ident">to_string</span>(),
         };
 
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">s</span>)
@@ -427,6 +446,11 @@
 
 <span class="kw">fn</span> <span class="ident">serial_parameters_default_num</span>() -&gt; <span class="ident">u8</span> {
     <span class="number">1</span>
+}
+
+<span class="kw">fn</span> <span class="ident">serial_parameters_default_debugcon_port</span>() -&gt; <span class="ident">u16</span> {
+    <span class="comment">// Default to the port bochs uses.</span>
+    <span class="number">0xe9</span>
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Deserialize</span>)]</span>
@@ -443,6 +467,8 @@
     <span class="kw">pub</span> <span class="ident">earlycon</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">stdin</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">out_timestamp</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span> <span class="op">=</span> <span class="string">&quot;serial_parameters_default_debugcon_port&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">debugcon_port</span>: <span class="ident">u16</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">SerialParameters</span> {
@@ -544,6 +570,7 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">false</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">false</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
+                <span class="ident">debugcon_port</span>: <span class="number">0xe9</span>,
             }
         );
 
@@ -570,6 +597,8 @@
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">hardware</span>, <span class="ident">SerialHardware::Serial</span>);
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;hardware=virtio-console&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">hardware</span>, <span class="ident">SerialHardware::VirtioConsole</span>);
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;hardware=debugcon&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">hardware</span>, <span class="ident">SerialHardware::Debugcon</span>);
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;hardware=foobar&quot;</span>);
         <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">is_err</span>());
 
@@ -615,8 +644,12 @@
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;stdin=foobar&quot;</span>);
         <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">is_err</span>());
 
+        <span class="comment">// debugcon port parameter</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;debugcon_port=1026&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">debugcon_port</span>, <span class="number">1026</span>);
+
         <span class="comment">// all together</span>
-        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;type=stdout,path=/some/path,hardware=virtio-console,num=5,earlycon,console,stdin,input=/some/input,out_timestamp&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;type=stdout,path=/some/path,hardware=virtio-console,num=5,earlycon,console,stdin,input=/some/input,out_timestamp,debugcon_port=12&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(
             <span class="ident">params</span>,
             <span class="ident">SerialParameters</span> {
@@ -629,6 +662,7 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">true</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">true</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">true</span>,
+                <span class="ident">debugcon_port</span>: <span class="number">12</span>,
             }
         );
 

@@ -1812,6 +1812,61 @@
 <span id="1811">1811</span>
 <span id="1812">1812</span>
 <span id="1813">1813</span>
+<span id="1814">1814</span>
+<span id="1815">1815</span>
+<span id="1816">1816</span>
+<span id="1817">1817</span>
+<span id="1818">1818</span>
+<span id="1819">1819</span>
+<span id="1820">1820</span>
+<span id="1821">1821</span>
+<span id="1822">1822</span>
+<span id="1823">1823</span>
+<span id="1824">1824</span>
+<span id="1825">1825</span>
+<span id="1826">1826</span>
+<span id="1827">1827</span>
+<span id="1828">1828</span>
+<span id="1829">1829</span>
+<span id="1830">1830</span>
+<span id="1831">1831</span>
+<span id="1832">1832</span>
+<span id="1833">1833</span>
+<span id="1834">1834</span>
+<span id="1835">1835</span>
+<span id="1836">1836</span>
+<span id="1837">1837</span>
+<span id="1838">1838</span>
+<span id="1839">1839</span>
+<span id="1840">1840</span>
+<span id="1841">1841</span>
+<span id="1842">1842</span>
+<span id="1843">1843</span>
+<span id="1844">1844</span>
+<span id="1845">1845</span>
+<span id="1846">1846</span>
+<span id="1847">1847</span>
+<span id="1848">1848</span>
+<span id="1849">1849</span>
+<span id="1850">1850</span>
+<span id="1851">1851</span>
+<span id="1852">1852</span>
+<span id="1853">1853</span>
+<span id="1854">1854</span>
+<span id="1855">1855</span>
+<span id="1856">1856</span>
+<span id="1857">1857</span>
+<span id="1858">1858</span>
+<span id="1859">1859</span>
+<span id="1860">1860</span>
+<span id="1861">1861</span>
+<span id="1862">1862</span>
+<span id="1863">1863</span>
+<span id="1864">1864</span>
+<span id="1865">1865</span>
+<span id="1866">1866</span>
+<span id="1867">1867</span>
+<span id="1868">1868</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1882,8 +1937,8 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">SendTube</span>, <span class="ident">TubeError</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices</span>::{
-    <span class="ident">BusDeviceObj</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">PciAddress</span>, <span class="ident">PciConfigIo</span>, <span class="ident">PciConfigMmio</span>,
-    <span class="ident">PciDevice</span>, <span class="ident">PciVirtualConfigMmio</span>,
+    <span class="ident">BusDevice</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">Debugcon</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">PciAddress</span>,
+    <span class="ident">PciConfigIo</span>, <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>, <span class="ident">PciVirtualConfigMmio</span>, <span class="ident">ProxyDevice</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuX86_64</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>, <span class="ident">VmX86_64</span>};
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
@@ -1912,6 +1967,8 @@
     <span class="ident">CloneEvent</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone IRQ chip: {0}&quot;</span>)]</span>
     <span class="ident">CloneIrqChip</span>(<span class="ident">base::Error</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to clone jail: {0}&quot;</span>)]</span>
+    <span class="ident">CloneJail</span>(<span class="ident">minijail::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to clone a Tube: {0}&quot;</span>)]</span>
     <span class="ident">CloneTube</span>(<span class="ident">TubeError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;the given kernel command line was invalid: {0}&quot;</span>)]</span>
@@ -1924,6 +1981,8 @@
     <span class="ident">CreateAcpi</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to create battery devices: {0}&quot;</span>)]</span>
     <span class="ident">CreateBatDevices</span>(<span class="ident">arch::DeviceRegistrationError</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;could not create debugcon device: {0}&quot;</span>)]</span>
+    <span class="ident">CreateDebugconDevice</span>(<span class="ident">devices::SerialError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to make an Event: {0}&quot;</span>)]</span>
     <span class="ident">CreateEvent</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create fdt: {0}&quot;</span>)]</span>
@@ -1939,6 +1998,8 @@
     <span class="ident">CreatePit</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to make PIT device: {0}&quot;</span>)]</span>
     <span class="ident">CreatePitDevice</span>(<span class="ident">devices::PitError</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to create proxy device: {0}&quot;</span>)]</span>
+    <span class="ident">CreateProxyDevice</span>(<span class="ident">devices::ProxyError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unable to create serial devices: {0}&quot;</span>)]</span>
     <span class="ident">CreateSerialDevices</span>(<span class="ident">arch::DeviceRegistrationError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create socket: {0}&quot;</span>)]</span>
@@ -1953,6 +2014,8 @@
     <span class="ident">EnableSplitIrqchip</span>(<span class="ident">base::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to get serial cmdline: {0}&quot;</span>)]</span>
     <span class="ident">GetSerialCmdline</span>(<span class="ident">GetSerialCmdlineError</span>),
+    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to insert device onto bus: {0}&quot;</span>)]</span>
+    <span class="ident">InsertBus</span>(<span class="ident">devices::BusError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;the kernel extends past the end of RAM&quot;</span>)]</span>
     <span class="ident">KernelOffsetPastEnd</span>,
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;error loading bios: {0}&quot;</span>)]</span>
@@ -2323,6 +2386,7 @@
         <span class="ident">devs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BusDeviceObj</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Minijail</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
         <span class="ident">irq_chip</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">IrqChipX86_64</span>,
         <span class="ident">vcpu_ids</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+        <span class="ident">debugcon_jail</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Minijail</span><span class="op">&gt;</span>,
     ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">RunnableLinuxVm</span><span class="op">&lt;</span><span class="ident">V</span>, <span class="ident">Vcpu</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">V</span>: <span class="ident">VmX86_64</span>,
@@ -2430,6 +2494,12 @@
             <span class="kw-2">&amp;</span><span class="ident">io_bus</span>,
             <span class="ident">serial_parameters</span>,
             <span class="ident">serial_jail</span>,
+        )<span class="question-mark">?</span>;
+        <span class="ident"><span class="self">Self</span>::setup_debugcon_devices</span>(
+            <span class="ident">components</span>.<span class="ident">protected_vm</span>,
+            <span class="kw-2">&amp;</span><span class="ident">io_bus</span>,
+            <span class="ident">serial_parameters</span>,
+            <span class="ident">debugcon_jail</span>,
         )<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resume_notify_devices</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -3393,6 +3463,46 @@
         <span class="ident">irq_chip</span>
             .<span class="ident">register_edge_irq_event</span>(<span class="ident">X86_64_SERIAL_2_4_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_2_4</span>)
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">setup_debugcon_devices</span>(
+        <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+        <span class="ident">io_bus</span>: <span class="kw-2">&amp;</span><span class="ident">devices::Bus</span>,
+        <span class="ident">serial_parameters</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">SerialHardware</span>, <span class="ident">u8</span>), <span class="ident">SerialParameters</span><span class="op">&gt;</span>,
+        <span class="ident">debugcon_jail</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Minijail</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">for</span> <span class="ident">param</span> <span class="kw">in</span> <span class="ident">serial_parameters</span>.<span class="ident">values</span>() {
+            <span class="kw">if</span> <span class="ident">param</span>.<span class="ident">hardware</span> <span class="op">!</span><span class="op">=</span> <span class="ident">SerialHardware::Debugcon</span> {
+                <span class="kw">continue</span>;
+            }
+
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">preserved_fds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+            <span class="kw">let</span> <span class="ident">con</span> <span class="op">=</span> <span class="ident">param</span>
+                .<span class="ident">create_serial_device</span>::<span class="op">&lt;</span><span class="ident">Debugcon</span><span class="op">&gt;</span>(
+                    <span class="ident">protected_vm</span>,
+                    <span class="comment">// Debugcon doesn&#39;t use the interrupt event</span>
+                    <span class="kw-2">&amp;</span><span class="ident">Event::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="ident">preserved_fds</span>,
+                )
+                .<span class="ident">map_err</span>(<span class="ident">Error::CreateDebugconDevice</span>)<span class="question-mark">?</span>;
+
+            <span class="kw">let</span> <span class="ident">con</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BusDevice</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">debugcon_jail</span>.<span class="ident">as_ref</span>() {
+                <span class="prelude-val">Some</span>(<span class="ident">jail</span>) =&gt; <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(
+                    <span class="ident">ProxyDevice::new</span>(
+                        <span class="ident">con</span>,
+                        <span class="kw-2">&amp;</span><span class="ident">jail</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneJail</span>)<span class="question-mark">?</span>,
+                        <span class="ident">preserved_fds</span>,
+                    )
+                    .<span class="ident">map_err</span>(<span class="ident">Error::CreateProxyDevice</span>)<span class="question-mark">?</span>,
+                )),
+                <span class="prelude-val">None</span> =&gt; <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">con</span>)),
+            };
+            <span class="ident">io_bus</span>
+                .<span class="ident">insert</span>(<span class="ident">con</span>.<span class="ident">clone</span>(), <span class="ident">param</span>.<span class="ident">debugcon_port</span>.<span class="ident">into</span>(), <span class="number">1</span>)
+                .<span class="ident">map_err</span>(<span class="ident">Error::InsertBus</span>)<span class="question-mark">?</span>;
+        }
 
         <span class="prelude-val">Ok</span>(())
     }
