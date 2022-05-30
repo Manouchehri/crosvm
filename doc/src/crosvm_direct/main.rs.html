@@ -3986,6 +3986,23 @@
 <span id="3985">3985</span>
 <span id="3986">3986</span>
 <span id="3987">3987</span>
+<span id="3988">3988</span>
+<span id="3989">3989</span>
+<span id="3990">3990</span>
+<span id="3991">3991</span>
+<span id="3992">3992</span>
+<span id="3993">3993</span>
+<span id="3994">3994</span>
+<span id="3995">3995</span>
+<span id="3996">3996</span>
+<span id="3997">3997</span>
+<span id="3998">3998</span>
+<span id="3999">3999</span>
+<span id="4000">4000</span>
+<span id="4001">4001</span>
+<span id="4002">4002</span>
+<span id="4003">4003</span>
+<span id="4004">4004</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4531,6 +4548,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rw_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrRWType</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">action</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MsrAction</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromRunningCPU</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">filter</span>: <span class="ident">bool</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">options</span> <span class="op">=</span> <span class="ident">argument::parse_key_value_options</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="ident">value</span>, <span class="string">&#39;,&#39;</span>);
     <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">options</span>
@@ -4559,6 +4577,12 @@
                 <span class="string">&quot;cpu0&quot;</span> =&gt; <span class="ident">from</span> <span class="op">=</span> <span class="ident">MsrValueFrom::RWFromCPU0</span>,
                 <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad from&quot;</span>))),
             },
+            <span class="string">&quot;filter&quot;</span> =&gt; <span class="kw">match</span> <span class="ident">opt</span>.<span class="ident">value</span>()<span class="question-mark">?</span> {
+                <span class="string">&quot;yes&quot;</span> =&gt; <span class="ident">filter</span> <span class="op">=</span> <span class="bool-val">true</span>,
+                <span class="string">&quot;no&quot;</span> =&gt; <span class="ident">filter</span> <span class="op">=</span> <span class="bool-val">false</span>,
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_value_err</span>(<span class="ident">String::from</span>(<span class="string">&quot;bad filter&quot;</span>))),
+            },
+
             <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">opt</span>.<span class="ident">invalid_key_err</span>()),
         }
     }
@@ -4577,6 +4601,7 @@
             <span class="ident">rw_type</span>,
             <span class="ident">action</span>,
             <span class="ident">from</span>,
+            <span class="ident">filter</span>,
         },
     ))
 }
@@ -6407,14 +6432,16 @@ iommu=on|off - indicates whether to enable virtio IOMMU for this device&quot;</s
           <span class="ident">Argument::value</span>(<span class="string">&quot;direct-gpe&quot;</span>, <span class="string">&quot;gpe&quot;</span>, <span class="string">&quot;Enable GPE interrupt and register access passthrough&quot;</span>),
           <span class="ident">Argument::value</span>(<span class="string">&quot;dmi&quot;</span>, <span class="string">&quot;DIR&quot;</span>, <span class="string">&quot;Directory with smbios_entry_point/DMI files&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-          <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,type=TYPE,action=TYPE,[from=TYPE]&quot;</span>,
+          <span class="ident">Argument::value</span>(<span class="string">&quot;userspace-msr&quot;</span>, <span class="string">&quot;INDEX,type=TYPE,action=ACTION,[from=FROM],[filter=FILTER]&quot;</span>,
                               <span class="string">&quot;Userspace MSR handling. Takes INDEX of the MSR and how they are handled.
 
                               type=(r|w|rw|wr) - read/write permission control.
 
                               action=(pass|emu) - if the control of msr is effective on host.
 
-                              from=(cpu0) - source of msr value. if not set, the source is running CPU.&quot;</span>),
+                              from=(cpu0) - source of msr value. if not set, the source is running CPU.
+
+                              filter=(yes|no) - if the msr is filtered in KVM.&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
           <span class="ident">Argument::flag</span>(<span class="string">&quot;host-cpu-topology&quot;</span>, <span class="string">&quot;Use mirror cpu topology of Host for Guest VM, also copy some cpu feature to Guest VM.&quot;</span>),
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
@@ -7950,6 +7977,13 @@ with a &#39;--backing_file&#39;.&quot;</span>
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">parse_userspace_msr_options_test</span>() {
+        <span class="kw">let</span> (<span class="ident">pass_cpu0_index</span>, <span class="ident">pass_cpu0_cfg</span>) <span class="op">=</span>
+            <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=w,action=pass,filter=yes&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_index</span>, <span class="number">0x10</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">rw_type</span>, <span class="ident">MsrRWType::WriteOnly</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">action</span>, <span class="ident">MsrAction::MsrPassthrough</span>);
+        <span class="macro">assert!</span>(<span class="ident">pass_cpu0_cfg</span>.<span class="ident">filter</span>);
+
         <span class="kw">let</span> (<span class="ident">pass_cpu0_index</span>, <span class="ident">pass_cpu0_cfg</span>) <span class="op">=</span>
             <span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=r,action=pass,from=cpu0&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">pass_cpu0_index</span>, <span class="number">0x10</span>);

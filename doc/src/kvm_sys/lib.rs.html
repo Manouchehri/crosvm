@@ -163,6 +163,13 @@
 <span id="162">162</span>
 <span id="163">163</span>
 <span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -176,6 +183,11 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_io_nr</span>, <span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_iowr_nr</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">flexible_array_impl</span>, <span class="ident">FlexibleArray</span>};
 <span class="comment">// Each of the below modules defines ioctls specific to their platform.</span>
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x2000</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span> <span class="op">/</span> <span class="number">8</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">x86</span> {
@@ -315,6 +327,8 @@
 <span class="macro">ioctl_io_nr!</span>(<span class="ident">KVM_KVMCLOCK_CTRL</span>, <span class="ident">KVMIO</span>, <span class="number">0xad</span>);
 <span class="macro">ioctl_iowr_nr!</span>(<span class="ident">KVM_GET_REG_LIST</span>, <span class="ident">KVMIO</span>, <span class="number">0xb0</span>, <span class="ident">kvm_reg_list</span>);
 <span class="macro">ioctl_io_nr!</span>(<span class="ident">KVM_SMI</span>, <span class="ident">KVMIO</span>, <span class="number">0xb7</span>);
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="macro">ioctl_iow_nr!</span>(<span class="ident">KVM_X86_SET_MSR_FILTER</span>, <span class="ident">KVMIO</span>, <span class="number">0xc6</span>, <span class="ident">kvm_msr_filter</span>);
 
 <span class="comment">// Along with the common ioctls, we reexport the ioctls of the current</span>
 <span class="comment">// platform.</span>

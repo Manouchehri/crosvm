@@ -1867,6 +1867,14 @@
 <span id="1866">1866</span>
 <span id="1867">1867</span>
 <span id="1868">1868</span>
+<span id="1869">1869</span>
+<span id="1870">1870</span>
+<span id="1871">1871</span>
+<span id="1872">1872</span>
+<span id="1873">1873</span>
+<span id="1874">1874</span>
+<span id="1875">1875</span>
+<span id="1876">1876</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3538,6 +3546,7 @@
     <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,
     <span class="ident">action</span>: <span class="ident">MsrAction</span>,
     <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
+    <span class="ident">filter</span>: <span class="ident">bool</span>,
 ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">ItmtError</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">msr_map</span>
         .<span class="ident">insert</span>(
@@ -3546,6 +3555,7 @@
                 <span class="ident">rw_type</span>,
                 <span class="ident">action</span>,
                 <span class="ident">from</span>,
+                <span class="ident">filter</span>,
             },
         )
         .<span class="ident">is_some</span>()
@@ -3567,40 +3577,46 @@
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
         (
             <span class="ident">MSR_PM_ENABLE</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
         (
             <span class="ident">MSR_HWP_REQUEST</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
         (
             <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
         (
             <span class="ident">MSR_PLATFORM_INFO</span>,
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
         (
             <span class="ident">MSR_IA32_PERF_CTL</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+            <span class="bool-val">false</span>,
         ),
     ];
     <span class="kw">for</span> <span class="ident">msr</span> <span class="kw">in</span> <span class="ident">msrs</span> {
-        <span class="ident">insert_msr</span>(<span class="ident">msr_map</span>, <span class="ident">msr</span>.<span class="number">0</span>, <span class="ident">msr</span>.<span class="number">1</span>, <span class="ident">msr</span>.<span class="number">2</span>, <span class="ident">msr</span>.<span class="number">3</span>)<span class="question-mark">?</span>;
+        <span class="ident">insert_msr</span>(<span class="ident">msr_map</span>, <span class="ident">msr</span>.<span class="number">0</span>, <span class="ident">msr</span>.<span class="number">1</span>, <span class="ident">msr</span>.<span class="number">2</span>, <span class="ident">msr</span>.<span class="number">3</span>, <span class="ident">msr</span>.<span class="number">4</span>)<span class="question-mark">?</span>;
     }
 
     <span class="prelude-val">Ok</span>(())

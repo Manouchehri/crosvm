@@ -931,6 +931,8 @@
 <span id="930">930</span>
 <span id="931">931</span>
 <span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1855,6 +1857,8 @@
     <span class="kw">pub</span> <span class="ident">action</span>: <span class="ident">MsrAction</span>,
     <span class="doccomment">/// MSR source CPU.</span>
     <span class="kw">pub</span> <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
+    <span class="doccomment">/// Whether to override KVM MSR emulation.</span>
+    <span class="kw">pub</span> <span class="ident">filter</span>: <span class="ident">bool</span>,
 }
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>

@@ -1692,6 +1692,82 @@
 <span id="1691">1691</span>
 <span id="1692">1692</span>
 <span id="1693">1693</span>
+<span id="1694">1694</span>
+<span id="1695">1695</span>
+<span id="1696">1696</span>
+<span id="1697">1697</span>
+<span id="1698">1698</span>
+<span id="1699">1699</span>
+<span id="1700">1700</span>
+<span id="1701">1701</span>
+<span id="1702">1702</span>
+<span id="1703">1703</span>
+<span id="1704">1704</span>
+<span id="1705">1705</span>
+<span id="1706">1706</span>
+<span id="1707">1707</span>
+<span id="1708">1708</span>
+<span id="1709">1709</span>
+<span id="1710">1710</span>
+<span id="1711">1711</span>
+<span id="1712">1712</span>
+<span id="1713">1713</span>
+<span id="1714">1714</span>
+<span id="1715">1715</span>
+<span id="1716">1716</span>
+<span id="1717">1717</span>
+<span id="1718">1718</span>
+<span id="1719">1719</span>
+<span id="1720">1720</span>
+<span id="1721">1721</span>
+<span id="1722">1722</span>
+<span id="1723">1723</span>
+<span id="1724">1724</span>
+<span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
+<span id="1729">1729</span>
+<span id="1730">1730</span>
+<span id="1731">1731</span>
+<span id="1732">1732</span>
+<span id="1733">1733</span>
+<span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
+<span id="1750">1750</span>
+<span id="1751">1751</span>
+<span id="1752">1752</span>
+<span id="1753">1753</span>
+<span id="1754">1754</span>
+<span id="1755">1755</span>
+<span id="1756">1756</span>
+<span id="1757">1757</span>
+<span id="1758">1758</span>
+<span id="1759">1759</span>
+<span id="1760">1760</span>
+<span id="1761">1761</span>
+<span id="1762">1762</span>
+<span id="1763">1763</span>
+<span id="1764">1764</span>
+<span id="1765">1765</span>
+<span id="1766">1766</span>
+<span id="1767">1767</span>
+<span id="1768">1768</span>
+<span id="1769">1769</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2019,8 +2095,6 @@
         <span class="ident">cap</span>.<span class="ident">args</span>[<span class="number">0</span>] <span class="op">=</span> (<span class="ident">KVM_MSR_EXIT_REASON_UNKNOWN</span>
             <span class="op">|</span> <span class="ident">KVM_MSR_EXIT_REASON_INVAL</span>
             <span class="op">|</span> <span class="ident">KVM_MSR_EXIT_REASON_FILTER</span>) <span class="kw">as</span> <span class="ident">u64</span>;
-        <span class="comment">// TODO(b/215297064): Filter only the ones we care about with ioctl</span>
-        <span class="comment">// KVM_X86_SET_MSR_FILTER</span>
 
         <span class="comment">// Safe because we know that our file is a VM fd, we know that the</span>
         <span class="comment">// kernel will only read correct amount of memory from our pointer, and</span>
@@ -2045,6 +2119,84 @@
         <span class="comment">// kernel will only read correct amount of memory from our pointer, and</span>
         <span class="comment">// we verify the return result.</span>
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">KVM_ENABLE_CAP</span>(), <span class="kw-2">&amp;</span><span class="ident">cap</span>) };
+        <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
+            <span class="ident">errno_result</span>()
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
+        }
+    }
+
+    <span class="doccomment">/// Set msr filter.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_msr_filter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msr_list</span>: (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>)) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rd_nmsrs</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wr_nmsrs</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rd_msr_bitmap</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>]<span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">Box::new</span>([<span class="number">0xff</span>; <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>]);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wr_msr_bitmap</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>]<span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">Box::new</span>([<span class="number">0xff</span>; <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>]);
+        <span class="kw">let</span> (<span class="ident">rd_msrs</span>, <span class="ident">wr_msrs</span>) <span class="op">=</span> <span class="ident">msr_list</span>;
+
+        <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="ident">rd_msrs</span> {
+            <span class="comment">// currently we only consider the MSR lower than</span>
+            <span class="comment">// KVM_MSR_FILTER_RANGE_MAX_BITS</span>
+            <span class="kw">if</span> <span class="ident">index</span> <span class="op">&gt;</span><span class="op">=</span> (<span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                <span class="kw">continue</span>;
+            }
+            <span class="ident">rd_nmsrs</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="ident">rd_msr_bitmap</span>[(<span class="ident">index</span> <span class="op">/</span> <span class="number">8</span>) <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;=</span> <span class="op">!</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">index</span> <span class="op">&amp;</span> <span class="number">0x7</span>));
+        }
+        <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="ident">wr_msrs</span> {
+            <span class="comment">// currently we only consider the MSR lower than</span>
+            <span class="comment">// KVM_MSR_FILTER_RANGE_MAX_BITS</span>
+            <span class="kw">if</span> <span class="ident">index</span> <span class="op">&gt;</span><span class="op">=</span> (<span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span> <span class="kw">as</span> <span class="ident">u32</span>) {
+                <span class="kw">continue</span>;
+            }
+            <span class="ident">wr_nmsrs</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            <span class="ident">wr_msr_bitmap</span>[(<span class="ident">index</span> <span class="op">/</span> <span class="number">8</span>) <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;=</span> <span class="op">!</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">index</span> <span class="op">&amp;</span> <span class="number">0x7</span>));
+        }
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">msr_filter</span> <span class="op">=</span> <span class="ident">kvm_msr_filter</span> {
+            <span class="ident">flags</span>: <span class="ident">KVM_MSR_FILTER_DEFAULT_ALLOW</span>,
+            ..<span class="ident">Default::default</span>()
+        };
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">count</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">if</span> <span class="ident">rd_nmsrs</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">flags</span> <span class="op">=</span> <span class="ident">KVM_MSR_FILTER_READ</span>;
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">nmsrs</span> <span class="op">=</span> <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span> <span class="kw">as</span> <span class="ident">u32</span>;
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">base</span> <span class="op">=</span> <span class="number">0x0</span>;
+            <span class="comment">// The ownership of the box is moved to bitmap raw pointer,</span>
+            <span class="comment">// it needs to be freed explicitly later</span>
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">bitmap</span> <span class="op">=</span> <span class="ident">Box::into_raw</span>(<span class="ident">rd_msr_bitmap</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>;
+            <span class="ident">count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+        <span class="kw">if</span> <span class="ident">wr_nmsrs</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">flags</span> <span class="op">=</span> <span class="ident">KVM_MSR_FILTER_WRITE</span>;
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">nmsrs</span> <span class="op">=</span> <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BITS</span> <span class="kw">as</span> <span class="ident">u32</span>;
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">base</span> <span class="op">=</span> <span class="number">0x0</span>;
+            <span class="comment">// The ownership of the box is moved to bitmap raw pointer,</span>
+            <span class="comment">// it needs to be freed explicitly later</span>
+            <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">count</span>].<span class="ident">bitmap</span> <span class="op">=</span> <span class="ident">Box::into_raw</span>(<span class="ident">wr_msr_bitmap</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>;
+            <span class="ident">count</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">if</span> <span class="ident">count</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="comment">// Safe because we know that our file is a VM fd, we know that the</span>
+            <span class="comment">// kernel will only read correct amount of memory from our pointer, and</span>
+            <span class="comment">// we verify the return result.</span>
+            <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl_with_ref</span>(<span class="self">self</span>, <span class="ident">KVM_X86_SET_MSR_FILTER</span>(), <span class="kw-2">&amp;</span><span class="ident">msr_filter</span>) };
+        }
+
+        <span class="comment">// convert the raw pointer to a Box for automatic cleanup</span>
+        <span class="kw">for</span> <span class="ident">index</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">count</span> {
+            <span class="kw">let</span> <span class="ident">_bitmap</span> <span class="op">=</span> <span class="kw">unsafe</span> {
+                <span class="ident">Box::from_raw</span>(
+                    <span class="ident">msr_filter</span>.<span class="ident">ranges</span>[<span class="ident">index</span>].<span class="ident">bitmap</span> <span class="kw">as</span> <span class="kw-2">*mut</span> [<span class="ident">u8</span>; <span class="ident">KVM_MSR_FILTER_RANGE_MAX_BYTES</span>],
+                )
+            };
+        }
+
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="ident">errno_result</span>()
         } <span class="kw">else</span> {
