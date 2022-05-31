@@ -933,6 +933,11 @@
 <span id="932">932</span>
 <span id="933">933</span>
 <span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1160,6 +1165,10 @@
     <span class="doccomment">/// * `vcpu_id` - The id of the given `vcpu`.</span>
     <span class="doccomment">/// * `num_cpus` - Number of virtual CPUs the guest will have.</span>
     <span class="doccomment">/// * `has_bios` - Whether the `VmImage` is a `Bios` image</span>
+    <span class="doccomment">/// * `no_smt` - Wheter diabling SMT.</span>
+    <span class="doccomment">/// * `host_cpu_topology` - whether enabling host cpu topology.</span>
+    <span class="doccomment">/// * `enable_pnp_data` - whether enabling PnP statistics data.</span>
+    <span class="doccomment">/// * `itmt` - whether enabling ITMT scheduler</span>
     <span class="kw">fn</span> <span class="ident">configure_vcpu</span><span class="op">&lt;</span><span class="ident">V</span>: <span class="ident">Vm</span><span class="op">&gt;</span>(
         <span class="ident">vm</span>: <span class="kw-2">&amp;</span><span class="ident">V</span>,
         <span class="ident">hypervisor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">HypervisorArch</span>,
@@ -1170,6 +1179,7 @@
         <span class="ident">has_bios</span>: <span class="ident">bool</span>,
         <span class="ident">no_smt</span>: <span class="ident">bool</span>,
         <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+        <span class="ident">enable_pnp_data</span>: <span class="ident">bool</span>,
         <span class="ident">itmt</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>;
 
