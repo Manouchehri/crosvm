@@ -6168,7 +6168,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">is_empty</span>() {
             <span class="kw">for</span> (<span class="kw">_</span>, <span class="ident">msr_config</span>) <span class="kw">in</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>.<span class="ident">iter</span>() {
                 <span class="kw">if</span> <span class="ident">msr_config</span>.<span class="ident">from</span> <span class="op">==</span> <span class="ident">MsrValueFrom::RWFromRunningCPU</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::UnknownArgument</span>(
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(
                         <span class="string">&quot;`userspace-msr` must set `cpu0` if `host-cpu-topology` is not set&quot;</span>
                             .<span class="ident">to_owned</span>(),
                     ));
@@ -6228,7 +6228,7 @@
             }
         }
         <span class="ident">set_itmt_msr_config</span>(<span class="kw-2">&amp;mut</span> <span class="ident">cfg</span>.<span class="ident">userspace_msr</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-            <span class="ident">argument::Error::UnknownArgument</span>(<span class="macro">format!</span>(<span class="string">&quot;the cpu doesn&#39;t support itmt {}&quot;</span>, <span class="ident">e</span>))
+            <span class="ident">argument::Error::UnexpectedValue</span>(<span class="macro">format!</span>(<span class="string">&quot;the cpu doesn&#39;t support itmt {}&quot;</span>, <span class="ident">e</span>))
         })<span class="question-mark">?</span>;
     }
     <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">balloon</span> <span class="op">&amp;&amp;</span> <span class="ident">cfg</span>.<span class="ident">balloon_control</span>.<span class="ident">is_some</span>() {
