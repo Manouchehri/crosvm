@@ -1016,6 +1016,7 @@
 <span id="1015">1015</span>
 <span id="1016">1016</span>
 <span id="1017">1017</span>
+<span id="1018">1018</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1786,7 +1787,9 @@
 <span class="kw">impl</span> <span class="ident">RutabagaBuilder</span> {
     <span class="doccomment">/// Create new a RutabagaBuilder.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">default_component</span>: <span class="ident">RutabagaComponentType</span>, <span class="ident">context_mask</span>: <span class="ident">u64</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
-        <span class="kw">let</span> <span class="ident">virglrenderer_flags</span> <span class="op">=</span> <span class="ident">VirglRendererFlags::new</span>();
+        <span class="kw">let</span> <span class="ident">virglrenderer_flags</span> <span class="op">=</span> <span class="ident">VirglRendererFlags::new</span>()
+            .<span class="ident">use_thread_sync</span>(<span class="bool-val">true</span>)
+            .<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
         <span class="kw">let</span> <span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="ident">GfxstreamFlags::new</span>().<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
 
         <span class="ident">RutabagaBuilder</span> {
@@ -1934,7 +1937,6 @@
                 .<span class="ident">virglrenderer_flags</span>
                 .<span class="ident">use_virgl</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_VIRGL2</span>))
                 .<span class="ident">use_venus</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_VENUS</span>))
-                .<span class="ident">use_async_fence_cb</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_DRM</span>))
                 .<span class="ident">use_drm</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_DRM</span>));
         }
 
