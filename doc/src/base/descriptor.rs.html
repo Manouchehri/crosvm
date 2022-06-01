@@ -129,6 +129,38 @@
 <span id="128">128</span>
 <span id="129">129</span>
 <span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -156,11 +188,26 @@
 <span class="doccomment">/// Trait for returning the underlying raw descriptor, without giving up ownership of the</span>
 <span class="doccomment">/// descriptor.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsRawDescriptor</span> {
+    <span class="doccomment">/// Returns the underlying raw descriptor.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Since the descriptor is still owned by the provider, callers should not assume that it will</span>
+    <span class="doccomment">/// remain open for longer than the immediate call of this method. In particular, it is a</span>
+    <span class="doccomment">/// dangerous practice to store the result of this method for future use: instead, it should be</span>
+    <span class="doccomment">/// used to e.g. obtain a raw descriptor that is immediately passed to a system call.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If you need to use the descriptor for a longer time (and particularly if you cannot reliably</span>
+    <span class="doccomment">/// track the lifetime of the providing object), you should probably consider using</span>
+    <span class="doccomment">/// [`SafeDescriptor`] (possibly along with [`trait@IntoRawDescriptor`]) to get full ownership</span>
+    <span class="doccomment">/// over a descriptor pointing to the same resource.</span>
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span>;
 }
 
 <span class="doccomment">/// A trait similar to `AsRawDescriptor` but supports an arbitrary number of descriptors.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">AsRawDescriptors</span> {
+    <span class="doccomment">/// Returns the underlying raw descriptors.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Please refer to the documentation of [`AsRawDescriptor::as_raw_descriptor`] for limitations</span>
+    <span class="doccomment">/// and recommended use.</span>
     <span class="kw">fn</span> <span class="ident">as_raw_descriptors</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span>;
 }
 
@@ -237,9 +284,26 @@
     }
 }
 
-<span class="doccomment">/// For use cases where a simple wrapper around a RawDescriptor is needed.</span>
-<span class="doccomment">/// This is a simply a wrapper and does not manage the lifetime of the descriptor.</span>
-<span class="doccomment">/// Most usages should prefer SafeDescriptor or using a RawDescriptor directly</span>
+<span class="doccomment">/// For use cases where a simple wrapper around a [`RawDescriptor`] is needed, in order to e.g.</span>
+<span class="doccomment">/// implement [`trait@AsRawDescriptor`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is a simply a wrapper and does not manage the lifetime of the descriptor. As such it is the</span>
+<span class="doccomment">/// responsibility of the user to ensure that the wrapped descriptor will not be closed for as long</span>
+<span class="doccomment">/// as the `Descriptor` is alive.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Most use-cases should prefer [`SafeDescriptor`] or implementing and using</span>
+<span class="doccomment">/// [`trait@AsRawDescriptor`] on the type providing the descriptor. Using this wrapper usually means</span>
+<span class="doccomment">/// something can be improved in your code.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Valid uses of this struct include:</span>
+<span class="doccomment">/// * You only have a valid [`RawDescriptor`] and need to pass something that implements</span>
+<span class="doccomment">///   [`trait@AsRawDescriptor`] to a function,</span>
+<span class="doccomment">/// * You need to serialize a [`RawDescriptor`],</span>
+<span class="doccomment">/// * You need [`trait@Send`] or [`trait@Sync`] for your descriptor and properly handle the case</span>
+<span class="doccomment">///   where your descriptor gets closed.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Note that with the exception of the last use-case (which requires proper error checking against</span>
+<span class="doccomment">/// the descriptor being closed), the `Descriptor` instance would be very short-lived.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Hash</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>)]</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">transparent</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Descriptor</span>(<span class="kw">pub</span> <span class="ident">RawDescriptor</span>);

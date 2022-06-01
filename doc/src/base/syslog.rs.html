@@ -912,7 +912,7 @@
     <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>, <span class="kw-2">&amp;</span><span class="ident">log::Record</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span>,
 {
     <span class="doccomment">/// A filter for log messages. Please see</span>
-    <span class="doccomment">/// module level documentation and [`env_logger` crate][https://docs.rs/env_logger]</span>
+    <span class="doccomment">/// module level documentation and [`env_logger` crate](https://docs.rs/env_logger)</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Example: `off`, `trace`, `trace,crosvm=error,base::syslog=debug`</span>
     <span class="kw">pub</span> <span class="ident">filter</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
@@ -923,7 +923,7 @@
     <span class="doccomment">/// descriptor to preserve on forks (intended to be used with pipe)</span>
     <span class="kw">pub</span> <span class="ident">pipe_fd</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span>,
     <span class="doccomment">/// A formatter to use with the pipe. (Syslog has hardcoded format)</span>
-    <span class="doccomment">/// see module level documentation and [`env_logger` crate][https://docs.rs/env_logger]</span>
+    <span class="doccomment">/// see module level documentation and [`env_logger` crate](https://docs.rs/env_logger)</span>
     <span class="kw">pub</span> <span class="ident">pipe_formatter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
     <span class="doccomment">/// TAG to use for syslog output</span>
     <span class="kw">pub</span> <span class="ident">proc_name</span>: <span class="ident">String</span>,
@@ -1022,7 +1022,7 @@
 <span class="doccomment">/// besides return `Ok` or `Err` appropriately.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Arguments:</span>
-<span class="doccomment">/// * filter: See https://docs.rs/env_logger/0.9/env_logger/index.html for example filter</span>
+<span class="doccomment">/// * filter: See &lt;https://docs.rs/env_logger/0.9/env_logger/index.html&gt; for example filter</span>
 <span class="doccomment">///     specifications</span>
 <span class="doccomment">/// * stderr: If set will output to stderr (in addition)</span>
 <span class="doccomment">/// * file:  If set will output to this file (in addition)</span>

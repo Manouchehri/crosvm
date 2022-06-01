@@ -612,6 +612,8 @@
 <span id="611">611</span>
 <span id="612">612</span>
 <span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -999,6 +1001,7 @@
     <span class="kw">pub</span> <span class="ident">display_window_keyboard</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">display_window_mouse</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">enable_pnp_data</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">executable_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Executable</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">file_backed_mappings</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FileBackedMappingParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
@@ -1126,6 +1129,7 @@
             <span class="ident">display_window_keyboard</span>: <span class="bool-val">false</span>,
             <span class="ident">display_window_mouse</span>: <span class="bool-val">false</span>,
             <span class="ident">dmi_path</span>: <span class="prelude-val">None</span>,
+            <span class="ident">enable_pnp_data</span>: <span class="bool-val">false</span>,
             <span class="ident">executable_path</span>: <span class="prelude-val">None</span>,
             <span class="ident">file_backed_mappings</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">force_s2idle</span>: <span class="bool-val">false</span>,

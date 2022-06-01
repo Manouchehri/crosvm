@@ -878,9 +878,13 @@
 <span id="877">877</span>
 <span id="878">878</span>
 <span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
+
+<span class="kw">mod</span> <span class="ident">sys</span>;
 
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
 <span class="kw">use</span> <span class="ident">std::rc::Rc</span>;
@@ -1249,7 +1253,7 @@
                     <span class="ident">interrupt</span>.<span class="ident">borrow</span>().<span class="ident">signal_config_changed</span>();
 
                     <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">=</span> <span class="bool-val">false</span>;
-                    <span class="kw">return</span> <span class="ident">send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">actual_pages</span>)
+                    <span class="kw">return</span> <span class="ident">sys::send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">actual_pages</span>)
                         .<span class="ident">map_err</span>(<span class="ident">BalloonError::SendResponse</span>);
                 }
             }
@@ -1312,7 +1316,7 @@
 
                     <span class="kw">if</span> <span class="ident">allow_failure</span> {
                         <span class="kw">if</span> <span class="ident">num_pages</span> <span class="op">==</span> <span class="ident">state</span>.<span class="ident">actual_pages</span> {
-                            <span class="ident">send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">num_pages</span>)
+                            <span class="ident">sys::send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">num_pages</span>)
                                 .<span class="ident">map_err</span>(<span class="ident">BalloonError::SendResponse</span>)<span class="question-mark">?</span>;
                         } <span class="kw">else</span> {
                             <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">=</span> <span class="bool-val">true</span>;

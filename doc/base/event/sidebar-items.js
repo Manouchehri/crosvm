@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Event","See PlatformEvent for struct- and method-level documentation."]]});
+initSidebarItems({"struct":[["Event","See the platform-specific Event struct for struct- and method-level documentation."]]});

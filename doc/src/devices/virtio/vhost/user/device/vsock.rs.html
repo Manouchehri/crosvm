@@ -618,24 +618,6 @@
 <span id="617">617</span>
 <span id="618">618</span>
 <span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
-<span id="633">633</span>
-<span id="634">634</span>
-<span id="635">635</span>
-<span id="636">636</span>
-<span id="637">637</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1159,7 +1141,7 @@
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_device</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>,
     <span class="ident">socket</span>: <span class="ident">P</span>,
-    <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">StdMutex</span><span class="op">&lt;</span><span class="ident">VsockBackend</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">backend</span>: <span class="ident">StdMutex</span><span class="op">&lt;</span><span class="ident">VsockBackend</span><span class="op">&gt;</span>,
 ) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">UnixListener::bind</span>(<span class="ident">socket</span>)
         .<span class="ident">map</span>(<span class="ident">UnlinkUnixListener</span>)
@@ -1175,28 +1157,24 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromArgs</span>)]</span>
-<span class="attribute">#[<span class="ident">argh</span>(<span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>)]</span>
-<span class="kw">struct</span> <span class="ident">Options</span> {
-    <span class="attribute">#[<span class="ident">argh</span>(
-        <span class="ident">option</span>,
-        <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;path to bind a listening vhost-user socket&quot;</span>,
-        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>
-    )]</span>
+<span class="attribute">#[<span class="ident">argh</span>(<span class="ident">subcommand</span>, <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;vsock&quot;</span>)]</span>
+<span class="doccomment">/// Vsock options</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span> {
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// path to bind a listening vhost-user socket</span>
     <span class="ident">socket</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;name of vfio pci device&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;STRING&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;STRING&quot;</span>)]</span>
+    <span class="doccomment">/// name of vfio pci device</span>
     <span class="ident">vfio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(
-        <span class="ident">option</span>,
-        <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;the vsock context id for this device&quot;</span>,
-        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;INT&quot;</span>
-    )]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;INT&quot;</span>)]</span>
+    <span class="doccomment">/// the vsock context id for this device</span>
     <span class="ident">cid</span>: <span class="ident">u64</span>,
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
-        <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;path to the vhost-vsock control socket&quot;</span>,
         <span class="ident">default</span> <span class="op">=</span> <span class="string">&quot;String::from(\&quot;/dev/vhost-vsock\&quot;)&quot;</span>,
         <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>
     )]</span>
+    <span class="doccomment">/// path to the vhost-vsock control socket</span>
     <span class="ident">vhost_socket</span>: <span class="ident">String</span>,
 }
 
@@ -1219,7 +1197,6 @@
         }),
     )
     .<span class="ident">map</span>(<span class="ident">StdMutex::new</span>)
-    .<span class="ident">map</span>(<span class="ident">Arc::new</span>)
     .<span class="ident">context</span>(<span class="string">&quot;failed to create `VsockBackend`&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">driver</span> <span class="op">=</span> <span class="ident">VvuDevice::new</span>(<span class="ident">device</span>);
 
@@ -1242,27 +1219,14 @@
 }
 
 <span class="doccomment">/// Returns an error if the given `args` is invalid or the device fails to run.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_vsock_device</span>(<span class="ident">program_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Options::from_args</span>(<span class="kw-2">&amp;</span>[<span class="ident">program_name</span>], <span class="ident">args</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">opts</span>) =&gt; <span class="ident">opts</span>,
-        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-            <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">status</span>.<span class="ident">is_err</span>() {
-                <span class="macro">bail!</span>(<span class="ident">e</span>.<span class="ident">output</span>);
-            } <span class="kw">else</span> {
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">output</span>);
-            }
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
-        }
-    };
-
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_vsock_device</span>(<span class="ident">opts</span>: <span class="ident">Options</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">match</span> (<span class="ident">opts</span>.<span class="ident">socket</span>, <span class="ident">opts</span>.<span class="ident">vfio</span>) {
         (<span class="prelude-val">Some</span>(<span class="ident">socket</span>), <span class="prelude-val">None</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span>
                 <span class="ident">VsockBackend::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">opts</span>.<span class="ident">cid</span>, <span class="ident">opts</span>.<span class="ident">vhost_socket</span>, <span class="ident">HandlerType::VhostUser</span>)
-                    .<span class="ident">map</span>(<span class="ident">StdMutex::new</span>)
-                    .<span class="ident">map</span>(<span class="ident">Arc::new</span>)<span class="question-mark">?</span>;
+                    .<span class="ident">map</span>(<span class="ident">StdMutex::new</span>)<span class="question-mark">?</span>;
 
             <span class="comment">// TODO: Replace the `and_then` with `Result::flatten` once it is stabilized.</span>
             <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">run_device</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">socket</span>, <span class="ident">backend</span>))

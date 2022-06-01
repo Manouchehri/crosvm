@@ -706,7 +706,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">create_dummy_slave</span>() {
-        <span class="kw">let</span> <span class="ident">slave</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>()));
+        <span class="kw">let</span> <span class="ident">slave</span> <span class="op">=</span> <span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>());
 
         <span class="ident">slave</span>.<span class="ident">set_owner</span>().<span class="ident">unwrap</span>();
         <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">set_owner</span>().<span class="ident">is_err</span>());
@@ -714,40 +714,40 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_set_owner</span>() {
-        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>()));
-        <span class="kw">let</span> (<span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>());
+        <span class="kw">let</span> (<span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>);
 
-        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
         <span class="ident">master</span>.<span class="ident">set_owner</span>().<span class="ident">unwrap</span>();
         <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
-        <span class="macro">assert!</span>(<span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
+        <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
         <span class="ident">master</span>.<span class="ident">set_owner</span>().<span class="ident">unwrap</span>();
         <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">is_err</span>());
-        <span class="macro">assert!</span>(<span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
+        <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_set_features</span>() {
         <span class="kw">let</span> <span class="ident">mbar</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Barrier::new</span>(<span class="number">2</span>));
         <span class="kw">let</span> <span class="ident">sbar</span> <span class="op">=</span> <span class="ident">mbar</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>()));
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>());
+        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>);
 
         <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert!</span>(<span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
+            <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
 
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
-                <span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_features</span>,
+                <span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_features</span>,
                 <span class="ident">VIRTIO_FEATURES</span> <span class="op">&amp;</span> <span class="op">!</span><span class="number">0x1</span>
             );
 
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
-                <span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_protocol_features</span>,
+                <span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_protocol_features</span>,
                 <span class="ident">VhostUserProtocolFeatures::all</span>().<span class="ident">bits</span>()
             );
 
@@ -773,26 +773,26 @@
     <span class="kw">fn</span> <span class="ident">test_master_slave_process</span>() {
         <span class="kw">let</span> <span class="ident">mbar</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Barrier::new</span>(<span class="number">2</span>));
         <span class="kw">let</span> <span class="ident">sbar</span> <span class="op">=</span> <span class="ident">mbar</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>()));
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">slave_be</span> <span class="op">=</span> <span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>());
+        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">master</span>, <span class="kw-2">mut</span> <span class="ident">slave</span>) <span class="op">=</span> <span class="ident">create_master_slave_pair</span>(<span class="ident">slave_be</span>);
 
         <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
             <span class="comment">// set_own()</span>
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert!</span>(<span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
+            <span class="macro">assert!</span>(<span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">owned</span>);
 
             <span class="comment">// get/set_features()</span>
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
-                <span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_features</span>,
+                <span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_features</span>,
                 <span class="ident">VIRTIO_FEATURES</span> <span class="op">&amp;</span> <span class="op">!</span><span class="number">0x1</span>
             );
 
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="ident">slave</span>.<span class="ident">handle_request</span>().<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
-                <span class="ident">slave_be</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_protocol_features</span>,
+                <span class="ident">slave</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">acked_protocol_features</span>,
                 <span class="ident">VhostUserProtocolFeatures::all</span>().<span class="ident">bits</span>()
             );
 

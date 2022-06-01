@@ -1016,6 +1016,13 @@
 <span id="1015">1015</span>
 <span id="1016">1016</span>
 <span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1786,7 +1793,9 @@
 <span class="kw">impl</span> <span class="ident">RutabagaBuilder</span> {
     <span class="doccomment">/// Create new a RutabagaBuilder.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">default_component</span>: <span class="ident">RutabagaComponentType</span>, <span class="ident">context_mask</span>: <span class="ident">u64</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
-        <span class="kw">let</span> <span class="ident">virglrenderer_flags</span> <span class="op">=</span> <span class="ident">VirglRendererFlags::new</span>();
+        <span class="kw">let</span> <span class="ident">virglrenderer_flags</span> <span class="op">=</span> <span class="ident">VirglRendererFlags::new</span>()
+            .<span class="ident">use_thread_sync</span>(<span class="bool-val">true</span>)
+            .<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
         <span class="kw">let</span> <span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="ident">GfxstreamFlags::new</span>().<span class="ident">use_async_fence_cb</span>(<span class="bool-val">true</span>);
 
         <span class="ident">RutabagaBuilder</span> {
@@ -1871,6 +1880,12 @@
         <span class="self">self</span>
     }
 
+    <span class="doccomment">/// Use the Vulkan swapchain to draw on the host window for gfxstream.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_wsi</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RutabagaWsi</span><span class="op">&gt;</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
+        <span class="self">self</span>.<span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">gfxstream_flags</span>.<span class="ident">set_wsi</span>(<span class="ident">v</span>);
+        <span class="self">self</span>
+    }
+
     <span class="doccomment">/// Set rutabaga channels for the RutabagaBuilder</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_rutabaga_channels</span>(
         <span class="kw-2">mut</span> <span class="self">self</span>,
@@ -1934,7 +1949,6 @@
                 .<span class="ident">virglrenderer_flags</span>
                 .<span class="ident">use_virgl</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_VIRGL2</span>))
                 .<span class="ident">use_venus</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_VENUS</span>))
-                .<span class="ident">use_async_fence_cb</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_DRM</span>))
                 .<span class="ident">use_drm</span>(<span class="ident">capset_enabled</span>(<span class="ident">RUTABAGA_CAPSET_DRM</span>));
         }
 

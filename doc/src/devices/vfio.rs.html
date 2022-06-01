@@ -1432,6 +1432,41 @@
 <span id="1431">1431</span>
 <span id="1432">1432</span>
 <span id="1433">1433</span>
+<span id="1434">1434</span>
+<span id="1435">1435</span>
+<span id="1436">1436</span>
+<span id="1437">1437</span>
+<span id="1438">1438</span>
+<span id="1439">1439</span>
+<span id="1440">1440</span>
+<span id="1441">1441</span>
+<span id="1442">1442</span>
+<span id="1443">1443</span>
+<span id="1444">1444</span>
+<span id="1445">1445</span>
+<span id="1446">1446</span>
+<span id="1447">1447</span>
+<span id="1448">1448</span>
+<span id="1449">1449</span>
+<span id="1450">1450</span>
+<span id="1451">1451</span>
+<span id="1452">1452</span>
+<span id="1453">1453</span>
+<span id="1454">1454</span>
+<span id="1455">1455</span>
+<span id="1456">1456</span>
+<span id="1457">1457</span>
+<span id="1458">1458</span>
+<span id="1459">1459</span>
+<span id="1460">1460</span>
+<span id="1461">1461</span>
+<span id="1462">1462</span>
+<span id="1463">1463</span>
+<span id="1464">1464</span>
+<span id="1465">1465</span>
+<span id="1466">1466</span>
+<span id="1467">1467</span>
+<span id="1468">1468</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1542,6 +1577,20 @@
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u32</span>)]</span>
 <span class="kw">enum</span> <span class="ident">IommuType</span> {
     <span class="ident">Type1V2</span> <span class="op">=</span> <span class="ident">VFIO_TYPE1v2_IOMMU</span>,
+    <span class="comment">// ChromeOS specific vfio_iommu_type1 implementation that is optimized for</span>
+    <span class="comment">// small, dynamic mappings. For clients which create large, relatively</span>
+    <span class="comment">// static mappings, Type1V2 is still preferred.</span>
+    <span class="comment">//</span>
+    <span class="comment">// See crrev.com/c/3593528 for the implementation.</span>
+    <span class="ident">Type1ChromeOS</span> <span class="op">=</span> <span class="number">100001</span>,
+}
+
+<span class="comment">// Hint as to whether IOMMU mappings will tend to be large and static or</span>
+<span class="comment">// small and dynamic.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>)]</span>
+<span class="kw">enum</span> <span class="ident">IommuMappingHint</span> {
+    <span class="ident">Static</span>,
+    <span class="ident">Dynamic</span>,
 }
 
 <span class="doccomment">/// VfioContainer contain multi VfioGroup, and delegate an IOMMU domain table</span>
@@ -1740,7 +1789,15 @@
         <span class="prelude-val">Err</span>(<span class="ident">VfioError::IommuGetCapInfo</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">init_vfio_iommu</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">init_vfio_iommu</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">hint</span>: <span class="ident">IommuMappingHint</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// If we expect granular, dynamic mappings (i.e. viommu/coiommu), try the</span>
+        <span class="comment">// ChromeOS Type1ChromeOS first, then fall back to upstream versions.</span>
+        <span class="kw">if</span> <span class="ident">hint</span> <span class="op">==</span> <span class="ident">IommuMappingHint::Dynamic</span> {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">set_iommu</span>(<span class="ident">IommuType::Type1ChromeOS</span>) <span class="op">==</span> <span class="number">0</span> {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+            }
+        }
+
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">check_extension</span>(<span class="ident">IommuType::Type1V2</span>) {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VfioError::VfioType1V2</span>);
         }
@@ -1763,9 +1820,16 @@
             <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">group</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">VfioGroup::new</span>(<span class="self">self</span>, <span class="ident">id</span>)<span class="question-mark">?</span>));
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">groups</span>.<span class="ident">is_empty</span>() {
-                    <span class="comment">// Before the first group is added into container, do once per</span>
-                    <span class="comment">// container initialization.</span>
-                    <span class="self">self</span>.<span class="ident">init_vfio_iommu</span>()<span class="question-mark">?</span>;
+                    <span class="comment">// Before the first group is added into container, do once per container</span>
+                    <span class="comment">// initialization. Both coiommu and virtio-iommu rely on small, dynamic</span>
+                    <span class="comment">// mappings. However, if an iommu is not enabled, then we map the entirety</span>
+                    <span class="comment">// of guest memory as a small number of large, static mappings.</span>
+                    <span class="kw">let</span> <span class="ident">mapping_hint</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">iommu_enabled</span> {
+                        <span class="ident">IommuMappingHint::Dynamic</span>
+                    } <span class="kw">else</span> {
+                        <span class="ident">IommuMappingHint::Static</span>
+                    };
+                    <span class="self">self</span>.<span class="ident">init_vfio_iommu</span>(<span class="ident">mapping_hint</span>)<span class="question-mark">?</span>;
 
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">iommu_enabled</span> {
                         <span class="ident">vm</span>.<span class="ident">get_memory</span>().<span class="ident">with_regions</span>(
@@ -1807,7 +1871,7 @@
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">groups</span>.<span class="ident">is_empty</span>() {
                     <span class="comment">// Before the first group is added into container, do once per</span>
                     <span class="comment">// container initialization.</span>
-                    <span class="self">self</span>.<span class="ident">init_vfio_iommu</span>()<span class="question-mark">?</span>;
+                    <span class="self">self</span>.<span class="ident">init_vfio_iommu</span>(<span class="ident">IommuMappingHint::Static</span>)<span class="question-mark">?</span>;
                 }
 
                 <span class="self">self</span>.<span class="ident">groups</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">group</span>.<span class="ident">clone</span>());
@@ -1841,13 +1905,18 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clone_as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">raw_descriptor</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">libc::dup</span>(<span class="self">self</span>.<span class="ident">container</span>.<span class="ident">as_raw_descriptor</span>()) };
         <span class="kw">if</span> <span class="ident">raw_descriptor</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="prelude-val">Err</span>(<span class="ident">VfioError::ContainerDupError</span>)
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">raw_descriptor</span>)
         }
+    }
+
+    <span class="comment">// Gets group ids for all groups in the container.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">group_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">groups</span>.<span class="ident">keys</span>().<span class="ident">collect</span>()
     }
 }
 
@@ -2052,6 +2121,7 @@
                 <span class="kw">let</span> <span class="ident">group_id</span> <span class="op">=</span> <span class="ident">VfioGroup::get_group_id</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
 
                 <span class="comment">// One VFIO container is used for all devices belong to one VFIO group</span>
+                <span class="comment">// NOTE: vfio_wrapper relies on each container containing exactly one group.</span>
                 <span class="ident">IOMMU_CONTAINERS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">containers</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">v</span>.<span class="ident">borrow_mut</span>() {
                         <span class="kw">let</span> <span class="ident">container</span> <span class="op">=</span> <span class="ident">containers</span>

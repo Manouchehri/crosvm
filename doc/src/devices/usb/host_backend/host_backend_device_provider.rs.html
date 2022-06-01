@@ -292,8 +292,6 @@
 <span id="291">291</span>
 <span id="292">292</span>
 <span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -309,7 +307,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">EventHandler</span>, <span class="ident">EventLoop</span>, <span class="ident">FailHandle</span>};
 
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WatchingEvents</span>};
 <span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
@@ -459,8 +457,6 @@
             }
         };
 
-        <span class="kw">let</span> <span class="ident">device_descriptor</span> <span class="op">=</span> <span class="ident">Descriptor</span>(<span class="ident">device</span>.<span class="ident">as_raw_descriptor</span>());
-
         <span class="kw">let</span> <span class="ident">arc_mutex_device</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">device</span>));
 
         <span class="kw">let</span> <span class="ident">event_handler</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">EventHandler</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">UsbUtilEventHandler</span> {
@@ -468,7 +464,7 @@
         });
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">event_loop</span>.<span class="ident">add_event</span>(
-            <span class="kw-2">&amp;</span><span class="ident">device_descriptor</span>,
+            <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">arc_mutex_device</span>.<span class="ident">lock</span>(),
             <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>().<span class="ident">set_write</span>(),
             <span class="ident">Arc::downgrade</span>(<span class="kw-2">&amp;</span><span class="ident">event_handler</span>),
         ) {

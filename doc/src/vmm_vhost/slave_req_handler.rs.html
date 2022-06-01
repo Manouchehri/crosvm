@@ -956,6 +956,12 @@
 <span id="955">955</span>
 <span id="956">956</span>
 <span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -963,7 +969,7 @@
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 <span class="kw">use</span> <span class="ident">std::slice</span>;
-<span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>};
+<span class="kw">use</span> <span class="ident">std::sync::Mutex</span>;
 
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 
@@ -1353,7 +1359,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>, <span class="ident">E</span>: <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="ident">slave_req_helper</span>: <span class="ident">SlaveReqHelper</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>,
     <span class="comment">// the vhost-user backend device object</span>
-    <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">backend</span>: <span class="ident">S</span>,
 
     <span class="ident">virtio_features</span>: <span class="ident">u64</span>,
     <span class="ident">acked_virtio_features</span>: <span class="ident">u64</span>,
@@ -1366,14 +1372,20 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span><span class="op">&gt;</span> <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">MasterReqEndpoint</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a vhost-user slave endpoint from a connected socket.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_stream</span>(<span class="ident">socket</span>: <span class="ident">SystemStream</span>, <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_stream</span>(<span class="ident">socket</span>: <span class="ident">SystemStream</span>, <span class="ident">backend</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">MasterReqEndpoint::from</span>(<span class="ident">socket</span>), <span class="ident">backend</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>, <span class="ident">E</span>: <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">as_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">S</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">backend</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>, <span class="ident">E</span>: <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a vhost-user slave endpoint.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">endpoint</span>: <span class="ident">E</span>, <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">endpoint</span>: <span class="ident">E</span>, <span class="ident">backend</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SlaveReqHandler</span> {
             <span class="ident">slave_req_helper</span>: <span class="ident">SlaveReqHelper::new</span>(<span class="ident">endpoint</span>, <span class="ident">backend</span>.<span class="ident">protocol</span>()),
             <span class="ident">backend</span>,
@@ -1390,7 +1402,7 @@
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">/// * - `path` - path of Unix domain socket listener to connect to</span>
     <span class="doccomment">/// * - `backend` - handler for requests from the master to the slave</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">connect</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">connect</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">backend</span>: <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">Endpoint</span>::<span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="ident">::connect</span>(<span class="ident">path</span>)<span class="question-mark">?</span>, <span class="ident">backend</span>))
     }
 
@@ -1904,7 +1916,7 @@
     <span class="kw">fn</span> <span class="ident">test_slave_req_handler_new</span>() {
         <span class="kw">let</span> (<span class="ident">p1</span>, <span class="ident">_p2</span>) <span class="op">=</span> <span class="ident">SystemStream::pair</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">endpoint</span> <span class="op">=</span> <span class="ident">MasterReqEndpoint::from</span>(<span class="ident">p1</span>);
-        <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>()));
+        <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">Mutex::new</span>(<span class="ident">DummySlaveReqHandler::new</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">SlaveReqHandler::new</span>(<span class="ident">endpoint</span>, <span class="ident">backend</span>);
 
         <span class="ident">handler</span>.<span class="ident">check_state</span>().<span class="ident">unwrap</span>();

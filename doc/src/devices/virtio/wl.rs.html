@@ -2483,7 +2483,7 @@
     <span class="kw">fn</span> <span class="ident">allocate</span>(<span class="ident">vm</span>: <span class="ident">VmRequester</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="ident">WlResult</span><span class="op">&lt;</span><span class="ident">WlVfd</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">size_page_aligned</span> <span class="op">=</span> <span class="ident">round_up_to_page_size</span>(<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="kw">let</span> <span class="ident">vfd_shm</span> <span class="op">=</span>
-            <span class="ident">SharedMemory::named</span>(<span class="string">&quot;virtwl_alloc&quot;</span>, <span class="ident">size_page_aligned</span>).<span class="ident">map_err</span>(<span class="ident">WlError::NewAlloc</span>)<span class="question-mark">?</span>;
+            <span class="ident">SharedMemory::new</span>(<span class="string">&quot;virtwl_alloc&quot;</span>, <span class="ident">size_page_aligned</span>).<span class="ident">map_err</span>(<span class="ident">WlError::NewAlloc</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> (<span class="ident">vfd_shm</span>, <span class="ident">register_response</span>) <span class="op">=</span> <span class="ident">vm</span>.<span class="ident">register_memory</span>(<span class="ident">vfd_shm</span>)<span class="question-mark">?</span>;
 
@@ -3370,7 +3370,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">ThisError</span>, <span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">ThisError</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;no descriptors available in queue&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DescriptorsExhausted</span>;
 

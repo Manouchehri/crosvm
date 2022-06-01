@@ -1424,6 +1424,54 @@
 <span id="1423">1423</span>
 <span id="1424">1424</span>
 <span id="1425">1425</span>
+<span id="1426">1426</span>
+<span id="1427">1427</span>
+<span id="1428">1428</span>
+<span id="1429">1429</span>
+<span id="1430">1430</span>
+<span id="1431">1431</span>
+<span id="1432">1432</span>
+<span id="1433">1433</span>
+<span id="1434">1434</span>
+<span id="1435">1435</span>
+<span id="1436">1436</span>
+<span id="1437">1437</span>
+<span id="1438">1438</span>
+<span id="1439">1439</span>
+<span id="1440">1440</span>
+<span id="1441">1441</span>
+<span id="1442">1442</span>
+<span id="1443">1443</span>
+<span id="1444">1444</span>
+<span id="1445">1445</span>
+<span id="1446">1446</span>
+<span id="1447">1447</span>
+<span id="1448">1448</span>
+<span id="1449">1449</span>
+<span id="1450">1450</span>
+<span id="1451">1451</span>
+<span id="1452">1452</span>
+<span id="1453">1453</span>
+<span id="1454">1454</span>
+<span id="1455">1455</span>
+<span id="1456">1456</span>
+<span id="1457">1457</span>
+<span id="1458">1458</span>
+<span id="1459">1459</span>
+<span id="1460">1460</span>
+<span id="1461">1461</span>
+<span id="1462">1462</span>
+<span id="1463">1463</span>
+<span id="1464">1464</span>
+<span id="1465">1465</span>
+<span id="1466">1466</span>
+<span id="1467">1467</span>
+<span id="1468">1468</span>
+<span id="1469">1469</span>
+<span id="1470">1470</span>
+<span id="1471">1471</span>
+<span id="1472">1472</span>
+<span id="1473">1473</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1462,7 +1510,7 @@
 <span class="kw">use</span> <span class="ident">balloon_control</span>::{<span class="ident">BalloonTubeCommand</span>, <span class="ident">BalloonTubeResult</span>};
 
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">with_as_descriptor</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>,
+    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">with_as_descriptor</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>,
     <span class="ident">ExternalMapping</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MappedRegion</span>,
     <span class="ident">MemoryMappingArena</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">MemoryMappingBuilderUnix</span>, <span class="ident">MmapError</span>, <span class="ident">Protection</span>,
     <span class="prelude-ty">Result</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">SharedMemory</span>, <span class="ident">Tube</span>, <span class="ident">SIGRTMIN</span>,
@@ -1473,7 +1521,7 @@
     <span class="ident">DrmFormat</span>, <span class="ident">ImageAllocationInfo</span>, <span class="ident">RutabagaGralloc</span>, <span class="ident">RutabagaGrallocFlags</span>, <span class="ident">RutabagaHandle</span>,
     <span class="ident">VulkanInfo</span>,
 };
-<span class="kw">use</span> <span class="ident">sync::Mutex</span>;
+<span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
 
 <span class="doccomment">/// Struct that describes the offset and stride of a plane located in GPU memory.</span>
@@ -2448,6 +2496,35 @@
     }
 }
 
+<span class="kw">fn</span> <span class="ident">generate_sleep_button_event</span>(
+    <span class="ident">pm</span>: <span class="kw-2">&amp;mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">PmResource</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">guest_suspended_cvar</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>,
+) {
+    <span class="comment">// During suspend also emulate sleepbtn, which allows to suspend VM (if running e.g. acpid and</span>
+    <span class="comment">// reacts on sleep button events)</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pm</span>) <span class="op">=</span> <span class="ident">pm</span> {
+        <span class="ident">pm</span>.<span class="ident">lock</span>().<span class="ident">slpbtn_evt</span>();
+    } <span class="kw">else</span> {
+        <span class="macro">error!</span>(<span class="string">&quot;generating sleepbtn during suspend not supported&quot;</span>);
+    }
+
+    <span class="kw">let</span> (<span class="ident">lock</span>, <span class="ident">cvar</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">guest_suspended_cvar</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guest_suspended</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">lock</span>();
+
+    <span class="kw-2">*</span><span class="ident">guest_suspended</span> <span class="op">=</span> <span class="bool-val">false</span>;
+
+    <span class="comment">// Wait for notification about guest suspension, if not received after 15sec,</span>
+    <span class="comment">// proceed anyway.</span>
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">cvar</span>.<span class="ident">wait_timeout</span>(<span class="ident">guest_suspended</span>, <span class="ident">std::time::Duration::from_secs</span>(<span class="number">15</span>));
+    <span class="ident">guest_suspended</span> <span class="op">=</span> <span class="ident">result</span>.<span class="number">0</span>;
+
+    <span class="kw">if</span> <span class="ident">result</span>.<span class="number">1</span>.<span class="ident">timed_out</span>() {
+        <span class="macro">warn!</span>(<span class="string">&quot;Guest suspension timeout - proceeding anyway&quot;</span>);
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">guest_suspended</span> {
+        <span class="macro">info!</span>(<span class="string">&quot;Guest suspended&quot;</span>);
+    }
+}
+
 <span class="kw">impl</span> <span class="ident">VmRequest</span> {
     <span class="doccomment">/// Executes this request on the given Vm and other mutable state.</span>
     <span class="doccomment">///</span>
@@ -2464,6 +2541,8 @@
         <span class="ident">usb_control_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
         <span class="ident">bat_control</span>: <span class="kw-2">&amp;mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BatControl</span><span class="op">&gt;</span>,
         <span class="ident">vcpu_handles</span>: <span class="kw-2">&amp;</span>[(<span class="ident">JoinHandle</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">VcpuControl</span><span class="op">&gt;</span>)],
+        <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
+        <span class="ident">guest_suspended_cvar</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>,
     ) -&gt; <span class="ident">VmResponse</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident">VmRequest::Exit</span> =&gt; {
@@ -2489,11 +2568,27 @@
                 }
             }
             <span class="ident">VmRequest::Suspend</span> =&gt; {
+                <span class="kw">if</span> <span class="ident">force_s2idle</span> {
+                    <span class="ident">generate_sleep_button_event</span>(<span class="ident">pm</span>, <span class="kw-2">&amp;</span><span class="ident">guest_suspended_cvar</span>);
+                }
+
                 <span class="kw-2">*</span><span class="ident">run_mode</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VmRunMode::Suspending</span>);
                 <span class="ident">VmResponse::Ok</span>
             }
             <span class="ident">VmRequest::Resume</span> =&gt; {
                 <span class="kw-2">*</span><span class="ident">run_mode</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">VmRunMode::Running</span>);
+
+                <span class="kw">if</span> <span class="ident">force_s2idle</span> {
+                    <span class="comment">// During resume also emulate powerbtn event which will allow to wakeup fully</span>
+                    <span class="comment">// suspended guest.</span>
+                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pm</span>) <span class="op">=</span> <span class="ident">pm</span> {
+                        <span class="ident">pm</span>.<span class="ident">lock</span>().<span class="ident">pwrbtn_evt</span>();
+                    } <span class="kw">else</span> {
+                        <span class="macro">error!</span>(<span class="string">&quot;triggering power btn during resume not supported&quot;</span>);
+                        <span class="kw">return</span> <span class="ident">VmResponse::Err</span>(<span class="ident">SysError::new</span>(<span class="ident">ENOTSUP</span>));
+                    }
+                }
+
                 <span class="ident">VmResponse::Ok</span>
             }
             <span class="ident">VmRequest::Gpe</span>(<span class="ident">gpe</span>) =&gt; {
@@ -2747,6 +2842,7 @@
     <span class="comment">// Add the vfio device attached to virtio-iommu.</span>
     <span class="ident">VfioDeviceAdd</span> {
         <span class="ident">endpoint_addr</span>: <span class="ident">u32</span>,
+        <span class="ident">wrapper_id</span>: <span class="ident">u32</span>,
         <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">with</span> <span class="op">=</span> <span class="string">&quot;with_as_descriptor&quot;</span>)]</span>
         <span class="ident">container</span>: <span class="ident">File</span>,
     },

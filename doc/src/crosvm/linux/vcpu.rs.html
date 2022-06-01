@@ -669,6 +669,27 @@
 <span id="668">668</span>
 <span id="669">669</span>
 <span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -677,6 +698,7 @@
 <span class="kw">use</span> <span class="ident">std::fs</span>::{<span class="ident">File</span>, <span class="ident">OpenOptions</span>};
 <span class="kw">use</span> <span class="ident">std::io::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::sync</span>::{<span class="ident">mpsc</span>, <span class="ident">Arc</span>, <span class="ident">Barrier</span>};
+<span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
 
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 <span class="kw">use</span> <span class="ident">std::thread::JoinHandle</span>;
@@ -772,6 +794,7 @@
     <span class="ident">use_hypervisor_signals</span>: <span class="ident">bool</span>,
     <span class="ident">enable_per_vm_core_scheduling</span>: <span class="ident">bool</span>,
     <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="ident">enable_pnp_data</span>: <span class="ident">bool</span>,
     <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="ident">vcpu_cgroup_tasks_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">V</span>, <span class="ident">VcpuRunHandle</span>)<span class="op">&gt;</span>
@@ -814,6 +837,7 @@
         <span class="ident">has_bios</span>,
         <span class="ident">no_smt</span>,
         <span class="ident">host_cpu_topology</span>,
+        <span class="ident">enable_pnp_data</span>,
         <span class="ident">itmt</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to configure vcpu&quot;</span>)<span class="question-mark">?</span>;
@@ -934,17 +958,30 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)))]</span>
-<span class="kw">fn</span> <span class="ident">handle_s2idle_request</span>(<span class="ident">_privileged_vm</span>: <span class="ident">bool</span>) {}
+<span class="kw">fn</span> <span class="ident">handle_s2idle_request</span>(
+    <span class="ident">_privileged_vm</span>: <span class="ident">bool</span>,
+    <span class="ident">_guest_suspended_cvar</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>,
+) {
+}
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-<span class="kw">fn</span> <span class="ident">handle_s2idle_request</span>(<span class="ident">privileged_vm</span>: <span class="ident">bool</span>) {
+<span class="kw">fn</span> <span class="ident">handle_s2idle_request</span>(<span class="ident">privileged_vm</span>: <span class="ident">bool</span>, <span class="ident">guest_suspended_cvar</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>) {
     <span class="kw">const</span> <span class="ident">POWER_STATE_FREEZE</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;freeze&quot;</span>;
 
-    <span class="comment">// For non privileged guests, we silently ignore the suspend request</span>
+    <span class="comment">// For non privileged guests, wake up blocked thread on condvar, which is awaiting</span>
+    <span class="comment">// non-privileged guest suspension to finish.</span>
     <span class="kw">if</span> <span class="op">!</span><span class="ident">privileged_vm</span> {
+        <span class="kw">let</span> (<span class="ident">lock</span>, <span class="ident">cvar</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">guest_suspended_cvar</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">guest_suspended</span> <span class="op">=</span> <span class="ident">lock</span>.<span class="ident">lock</span>();
+        <span class="kw-2">*</span><span class="ident">guest_suspended</span> <span class="op">=</span> <span class="bool-val">true</span>;
+
+        <span class="ident">cvar</span>.<span class="ident">notify_one</span>();
+        <span class="macro">info!</span>(<span class="string">&quot;dbg: s2idle notified&quot;</span>);
+
         <span class="kw">return</span>;
     }
 
+    <span class="comment">// For privileged guests, proceed with the suspend request</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">power_state</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">OpenOptions::new</span>().<span class="ident">write</span>(<span class="bool-val">true</span>).<span class="ident">open</span>(<span class="string">&quot;/sys/power/state&quot;</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
         <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
@@ -978,6 +1015,7 @@
     <span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span> <span class="ident">guest_mem</span>: <span class="ident">GuestMemory</span>,
     <span class="ident">msr_handlers</span>: <span class="ident">MsrHandlers</span>,
+    <span class="ident">guest_suspended_cvar</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>,
 ) -&gt; <span class="ident">ExitState</span>
 <span class="kw">where</span>
     <span class="ident">V</span>: <span class="ident">VcpuArch</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -1142,7 +1180,7 @@
                     <span class="kw">return</span> <span class="ident">ExitState::Stop</span>;
                 }
                 <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::SystemEventS2Idle</span>) =&gt; {
-                    <span class="ident">handle_s2idle_request</span>(<span class="ident">privileged_vm</span>);
+                    <span class="ident">handle_s2idle_request</span>(<span class="ident">privileged_vm</span>, <span class="kw-2">&amp;</span><span class="ident">guest_suspended_cvar</span>);
                 }
                 <span class="attribute">#[<span class="ident">rustfmt::skip</span>]</span> <span class="prelude-val">Ok</span>(<span class="ident">VcpuExit::Debug</span> { .. }) =&gt; {
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
@@ -1215,10 +1253,12 @@
     <span class="op">&gt;</span>,
     <span class="ident">enable_per_vm_core_scheduling</span>: <span class="ident">bool</span>,
     <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="ident">enable_pnp_data</span>: <span class="ident">bool</span>,
     <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
     <span class="ident">vcpu_cgroup_tasks_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
     <span class="ident">userspace_msr</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
+    <span class="ident">guest_suspended_cvar</span>: <span class="ident">Arc</span><span class="op">&lt;</span>(<span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>, <span class="ident">Condvar</span>)<span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JoinHandle</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">V</span>: <span class="ident">VcpuArch</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -1246,6 +1286,7 @@
                     <span class="ident">use_hypervisor_signals</span>,
                     <span class="ident">enable_per_vm_core_scheduling</span>,
                     <span class="ident">host_cpu_topology</span>,
+                    <span class="ident">enable_pnp_data</span>,
                     <span class="ident">itmt</span>,
                     <span class="ident">vcpu_cgroup_tasks_file</span>,
                 );
@@ -1302,6 +1343,7 @@
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
                     <span class="ident">guest_mem</span>,
                     <span class="ident">msr_handlers</span>,
+                    <span class="ident">guest_suspended_cvar</span>,
                 )
             };
 

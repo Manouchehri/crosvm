@@ -575,7 +575,8 @@ document, but will likely not be required in the future.</p>
 <pre><code class="language-sh">sommelier -X --xwayland-path=/usr/bin/Xwayland xeyes
 </code></pre>
 <h2 id="gdb-support"><a class="header" href="#gdb-support">GDB Support</a></h2>
-<p>crosvm supports <a href="https://sourceware.org/gdb/onlinedocs/gdb/Remote-Protocol.html">GDB Remote Serial Protocol</a> to allow developers to debug guest kernel via GDB.</p>
+<p>crosvm supports <a href="https://sourceware.org/gdb/onlinedocs/gdb/Remote-Protocol.html">GDB Remote Serial Protocol</a> to allow developers to debug guest kernel via GDB
+(<strong>x86 only</strong>).</p>
 <p>You can enable the feature by <code>--gdb</code> flag:</p>
 <pre><code class="language-sh"># Use uncompressed vmlinux
 crosvm run --gdb &lt;port&gt; ${USUAL_CROSVM_ARGS} vmlinux
@@ -769,10 +770,12 @@ only).</p>
 <p>However, changes are not acceped to the <code>cros/chromeos</code> branch, and should be submitted to
 <code>cros/main</code> instead.</p>
 <p>Use <code>repo upload -D main</code> to upload changes to the main branch, which works fine in most cases where
-gerrit can rebase the commit cleanly. If not, please rebase to <code>cros/main</code> manually:</p>
+gerrit and kokoro can rebase the commit cleanly. If not, please rebase to <code>cros/main</code> manually:</p>
 <pre><code class="language-bash">git branch --set-upstream-to cros/main
 git rebase
 </code></pre>
+<p>If this doesn't work, use <code>tools/chromeos/rebase_for_review</code> to rebase the changes onto main and
+<code>repo upload</code> to upload changes to the main branch.</p>
 <h2 id="first-time-setup--running-tools"><a class="header" href="#first-time-setup--running-tools">First time setup / running tools</a></h2>
 <ul>
 <li>

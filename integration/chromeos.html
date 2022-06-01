@@ -154,10 +154,12 @@ only).</p>
 <p>However, changes are not acceped to the <code>cros/chromeos</code> branch, and should be submitted to
 <code>cros/main</code> instead.</p>
 <p>Use <code>repo upload -D main</code> to upload changes to the main branch, which works fine in most cases where
-gerrit can rebase the commit cleanly. If not, please rebase to <code>cros/main</code> manually:</p>
+gerrit and kokoro can rebase the commit cleanly. If not, please rebase to <code>cros/main</code> manually:</p>
 <pre><code class="language-bash">git branch --set-upstream-to cros/main
 git rebase
 </code></pre>
+<p>If this doesn't work, use <code>tools/chromeos/rebase_for_review</code> to rebase the changes onto main and
+<code>repo upload</code> to upload changes to the main branch.</p>
 <h2 id="first-time-setup--running-tools"><a class="header" href="#first-time-setup--running-tools">First time setup / running tools</a></h2>
 <ul>
 <li>
