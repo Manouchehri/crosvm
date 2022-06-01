@@ -1000,13 +1000,14 @@
 <span id="999"> 999</span>
 <span id="1000">1000</span>
 <span id="1001">1001</span>
+<span id="1002">1002</span>
+<span id="1003">1003</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::cell::RefCell</span>;
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">btree_map::Entry</span>, <span class="ident">BTreeMap</span>};
-<span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 <span class="kw">use</span> <span class="ident">std::mem::size_of</span>;
 <span class="kw">use</span> <span class="ident">std::ops::RangeInclusive</span>;
@@ -1143,7 +1144,8 @@
     <span class="ident">WriteBufferTooSmall</span>,
 }
 
-<span class="kw">struct</span> <span class="ident">Worker</span> {
+<span class="comment">// Shared state for the virtio-iommu device.</span>
+<span class="kw">struct</span> <span class="ident">State</span> {
     <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
     <span class="ident">page_mask</span>: <span class="ident">u64</span>,
     <span class="comment">// Hot-pluggable PCI endpoints ranges</span>
@@ -1157,17 +1159,26 @@
     <span class="comment">// key: domain ID</span>
     <span class="comment">// value: reference counter and MemoryMapperTrait</span>
     <span class="ident">domain_map</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, (<span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+    <span class="comment">// Contains all pass-through endpoints that attach to this IOMMU device</span>
+    <span class="comment">// key: endpoint PCI address</span>
+    <span class="comment">// value: reference counter and MemoryMapperTrait</span>
+    <span class="ident">endpoints</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">Worker</span> {
-    <span class="comment">// Remove the endpoint from the endpoint_map and decrement the reference</span>
-    <span class="comment">// counter (or remove the entry if the ref count is 1) from domain_map.</span>
-    <span class="comment">// Returns true on success, and false if the endpoint can&#39;t be detached.</span>
+<span class="kw">impl</span> <span class="ident">State</span> {
+    <span class="comment">// Detach the given endpoint if possible, and return whether or not the endpoint</span>
+    <span class="comment">// was actually detached.</span>
+    <span class="comment">//</span>
+    <span class="comment">// The device MUST ensure that after being detached from a domain, the endpoint</span>
+    <span class="comment">// cannot access any mapping from that domain.</span>
+    <span class="comment">//</span>
+    <span class="comment">// Currently, we only support detaching an endpoint if it is the only endpoint attached</span>
+    <span class="comment">// to its domain.</span>
     <span class="kw">fn</span> <span class="ident">detach_endpoint</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">endpoint</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
         <span class="comment">// The endpoint has attached to an IOMMU domain</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attached_domain</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">endpoint_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
             <span class="comment">// Remove the entry or update the domain reference count</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">o</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">attached_domain</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Entry::Occupied</span>(<span class="ident">o</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">attached_domain</span>) {
                 <span class="kw">let</span> (<span class="ident">refs</span>, <span class="ident">mapper</span>) <span class="op">=</span> <span class="ident">o</span>.<span class="ident">get</span>();
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">mapper</span>.<span class="ident">lock</span>().<span class="ident">supports_detach</span>() {
                     <span class="kw">return</span> <span class="bool-val">false</span>;
@@ -1179,9 +1190,7 @@
                         <span class="ident">mapper</span>.<span class="ident">lock</span>().<span class="ident">reset_domain</span>();
                         <span class="ident">o</span>.<span class="ident">remove</span>();
                     }
-                    <span class="kw">_</span> =&gt; {
-                        <span class="kw-2">*</span><span class="ident">o</span>.<span class="ident">get_mut</span>() <span class="op">=</span> (<span class="ident">refs</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">mapper</span>.<span class="ident">clone</span>());
-                    }
+                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
                 }
             }
         }
@@ -1207,7 +1216,6 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">reader</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Reader</span>,
         <span class="ident">tail</span>: <span class="kw-2">&amp;mut</span> <span class="ident">virtio_iommu_req_tail</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">req</span>: <span class="ident">virtio_iommu_req_attach</span> <span class="op">=</span>
             <span class="ident">reader</span>.<span class="ident">read_obj</span>().<span class="ident">map_err</span>(<span class="ident">IommuError::GuestMemoryRead</span>)<span class="question-mark">?</span>;
@@ -1225,7 +1233,7 @@
         <span class="comment">// VIRTIO_IOMMU_S_NOENT.</span>
         <span class="kw">let</span> <span class="ident">domain</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">domain</span>.<span class="ident">into</span>();
         <span class="kw">let</span> <span class="ident">endpoint</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">endpoint</span>.<span class="ident">into</span>();
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">endpoints</span>.<span class="ident">borrow</span>().<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
             <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_NOENT</span>;
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
         }
@@ -1244,15 +1252,38 @@
             }
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">vfio_container</span>) <span class="op">=</span> <span class="ident">endpoints</span>.<span class="ident">borrow_mut</span>().<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">mapper</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
+            <span class="comment">// The same mapper can&#39;t be used for two domains at the same time,</span>
+            <span class="comment">// since that would result in conflicts/permission leaks between</span>
+            <span class="comment">// the two domains.</span>
+            <span class="kw">let</span> <span class="ident">mapper_id</span> <span class="op">=</span> {
+                <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">mapper</span>.<span class="ident">lock</span>();
+                ((<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">m</span>).<span class="ident">type_id</span>(), <span class="ident">m</span>.<span class="ident">id</span>())
+            };
+            <span class="kw">for</span> (<span class="ident">other_endpoint</span>, <span class="ident">other_mapper</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">iter</span>() {
+                <span class="kw">let</span> <span class="ident">other_id</span> <span class="op">=</span> {
+                    <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">other_mapper</span>.<span class="ident">lock</span>();
+                    ((<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">m</span>).<span class="ident">type_id</span>(), <span class="ident">m</span>.<span class="ident">id</span>())
+                };
+                <span class="kw">if</span> <span class="ident">mapper_id</span> <span class="op">==</span> <span class="ident">other_id</span> {
+                    <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>
+                        .<span class="ident">endpoint_map</span>
+                        .<span class="ident">get</span>(<span class="ident">other_endpoint</span>)
+                        .<span class="ident">map_or</span>(<span class="bool-val">true</span>, <span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">domain</span>)
+                    {
+                        <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_UNSUPP</span>;
+                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
+                    }
+                }
+            }
+
             <span class="kw">let</span> <span class="ident">new_ref</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">domain</span>) {
                 <span class="prelude-val">None</span> =&gt; <span class="number">1</span>,
                 <span class="prelude-val">Some</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>.<span class="number">0</span> <span class="op">+</span> <span class="number">1</span>,
             };
 
             <span class="self">self</span>.<span class="ident">endpoint_map</span>.<span class="ident">insert</span>(<span class="ident">endpoint</span>, <span class="ident">domain</span>);
-            <span class="self">self</span>.<span class="ident">domain_map</span>
-                .<span class="ident">insert</span>(<span class="ident">domain</span>, (<span class="ident">new_ref</span>, <span class="ident">vfio_container</span>.<span class="ident">clone</span>()));
+            <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">insert</span>(<span class="ident">domain</span>, (<span class="ident">new_ref</span>, <span class="ident">mapper</span>.<span class="ident">clone</span>()));
         }
 
         <span class="prelude-val">Ok</span>(<span class="number">0</span>)
@@ -1262,7 +1293,6 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">reader</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Reader</span>,
         <span class="ident">tail</span>: <span class="kw-2">&amp;mut</span> <span class="ident">virtio_iommu_req_tail</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">req</span>: <span class="ident">virtio_iommu_req_detach</span> <span class="op">=</span>
             <span class="ident">reader</span>.<span class="ident">read_obj</span>().<span class="ident">map_err</span>(<span class="ident">IommuError::GuestMemoryRead</span>)<span class="question-mark">?</span>;
@@ -1271,7 +1301,7 @@
         <span class="comment">// the device MUST reject the request and set status to</span>
         <span class="comment">// VIRTIO_IOMMU_S_NOENT.</span>
         <span class="kw">let</span> <span class="ident">endpoint</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">endpoint</span>.<span class="ident">into</span>();
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">endpoints</span>.<span class="ident">borrow</span>().<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
             <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_NOENT</span>;
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
         }
@@ -1381,7 +1411,6 @@
         <span class="ident">reader</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Reader</span>,
         <span class="ident">writer</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Writer</span>,
         <span class="ident">tail</span>: <span class="kw-2">&amp;mut</span> <span class="ident">virtio_iommu_req_tail</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">req</span>: <span class="ident">virtio_iommu_req_probe</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_obj</span>().<span class="ident">map_err</span>(<span class="ident">IommuError::GuestMemoryRead</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">endpoint</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">endpoint</span>.<span class="ident">into</span>();
@@ -1389,7 +1418,7 @@
         <span class="comment">// If the endpoint identified by endpoint doesn’t exist,</span>
         <span class="comment">// then the device SHOULD reject the request and set status</span>
         <span class="comment">// to VIRTIO_IOMMU_S_NOENT.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">endpoints</span>.<span class="ident">borrow</span>().<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint</span>) {
             <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_NOENT</span>;
         }
 
@@ -1438,11 +1467,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">properties_size</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">execute_request</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">avail_desc</span>: <span class="kw-2">&amp;</span><span class="ident">DescriptorChain</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">execute_request</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">avail_desc</span>: <span class="kw-2">&amp;</span><span class="ident">DescriptorChain</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span>
             <span class="ident">Reader::new</span>(<span class="self">self</span>.<span class="ident">mem</span>.<span class="ident">clone</span>(), <span class="ident">avail_desc</span>.<span class="ident">clone</span>()).<span class="ident">map_err</span>(<span class="ident">IommuError::CreateReader</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span>
@@ -1462,17 +1487,13 @@
         };
 
         <span class="kw">let</span> <span class="ident">reply_len</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">req_head</span>.<span class="ident">type_</span> {
-            <span class="ident">VIRTIO_IOMMU_T_ATTACH</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">process_attach_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>, <span class="ident">endpoints</span>)<span class="question-mark">?</span>
-            }
-            <span class="ident">VIRTIO_IOMMU_T_DETACH</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">process_detach_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>, <span class="ident">endpoints</span>)<span class="question-mark">?</span>
-            }
+            <span class="ident">VIRTIO_IOMMU_T_ATTACH</span> =&gt; <span class="self">self</span>.<span class="ident">process_attach_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>)<span class="question-mark">?</span>,
+            <span class="ident">VIRTIO_IOMMU_T_DETACH</span> =&gt; <span class="self">self</span>.<span class="ident">process_detach_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>)<span class="question-mark">?</span>,
             <span class="ident">VIRTIO_IOMMU_T_MAP</span> =&gt; <span class="self">self</span>.<span class="ident">process_dma_map_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>)<span class="question-mark">?</span>,
             <span class="ident">VIRTIO_IOMMU_T_UNMAP</span> =&gt; <span class="self">self</span>.<span class="ident">process_dma_unmap_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>)<span class="question-mark">?</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
             <span class="ident">VIRTIO_IOMMU_T_PROBE</span> =&gt; {
-                <span class="self">self</span>.<span class="ident">process_probe_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">writer</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>, <span class="ident">endpoints</span>)<span class="question-mark">?</span>
+                <span class="self">self</span>.<span class="ident">process_probe_request</span>(<span class="kw-2">&amp;mut</span> <span class="ident">reader</span>, <span class="kw-2">&amp;mut</span> <span class="ident">writer</span>, <span class="kw-2">&amp;mut</span> <span class="ident">tail</span>)<span class="question-mark">?</span>
             }
             <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::UnexpectedDescriptor</span>),
         };
@@ -1483,45 +1504,13 @@
         <span class="prelude-val">Ok</span>((<span class="ident">reply_len</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">+</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">virtio_iommu_req_tail</span><span class="op">&gt;</span>())
     }
 
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">request_queue</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">SignalableInterrupt</span><span class="op">&gt;</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">Queue</span>,
-        <span class="kw-2">mut</span> <span class="ident">queue_event</span>: <span class="ident">EventAsync</span>,
-        <span class="ident">interrupt</span>: <span class="kw-2">&amp;</span><span class="ident">I</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">avail_desc</span> <span class="op">=</span> <span class="ident">queue</span>
-                .<span class="ident">next_async</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="kw-2">&amp;mut</span> <span class="ident">queue_event</span>)
-                .<span class="kw">await</span>
-                .<span class="ident">map_err</span>(<span class="ident">IommuError::ReadAsyncDesc</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">desc_index</span> <span class="op">=</span> <span class="ident">avail_desc</span>.<span class="ident">index</span>;
-
-            <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">execute_request</span>(<span class="kw-2">&amp;</span><span class="ident">avail_desc</span>, <span class="ident">endpoints</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">len</span>) =&gt; <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="macro">error!</span>(<span class="string">&quot;execute_request failed: {}&quot;</span>, <span class="ident">e</span>);
-
-                    <span class="comment">// If a request type is not recognized, the device SHOULD NOT write</span>
-                    <span class="comment">// the buffer and SHOULD set the used length to zero</span>
-                    <span class="number">0</span>
-                }
-            };
-
-            <span class="ident">queue</span>.<span class="ident">add_used</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="ident">desc_index</span>, <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>);
-            <span class="ident">queue</span>.<span class="ident">trigger_interrupt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mem</span>, <span class="ident">interrupt</span>);
-        }
-    }
-
     <span class="kw">fn</span> <span class="ident">handle_add_vfio_device</span>(
-        <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>,
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">endpoint_addr</span>: <span class="ident">u32</span>,
-        <span class="ident">container_fd</span>: <span class="ident">File</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">hp_endpoints_ranges</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">wrapper</span>: <span class="ident">VfioWrapper</span>,
     ) -&gt; <span class="ident">VirtioIOMMUVfioResult</span> {
         <span class="kw">let</span> <span class="ident">exists</span> <span class="op">=</span> <span class="op">|</span><span class="ident">endpoint_addr</span>: <span class="ident">u32</span><span class="op">|</span> -&gt; <span class="ident">bool</span> {
-            <span class="kw">for</span> <span class="ident">endpoints_range</span> <span class="kw">in</span> <span class="ident">hp_endpoints_ranges</span>.<span class="ident">iter</span>() {
+            <span class="kw">for</span> <span class="ident">endpoints_range</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">hp_endpoints_ranges</span>.<span class="ident">iter</span>() {
                 <span class="kw">if</span> <span class="ident">endpoints_range</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint_addr</span>) {
                     <span class="kw">return</span> <span class="bool-val">true</span>;
                 }
@@ -1533,160 +1522,164 @@
             <span class="kw">return</span> <span class="ident">VirtioIOMMUVfioResult::NotInPCIRanges</span>;
         }
 
-        <span class="kw">let</span> <span class="ident">vfio_container</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">VfioContainer::new_from_container</span>(<span class="ident">container_fd</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">vfio_container</span>) =&gt; <span class="ident">vfio_container</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;failed to verify the new container: {}&quot;</span>, <span class="ident">e</span>);
-                <span class="kw">return</span> <span class="ident">VirtioIOMMUVfioResult::NoAvailableContainer</span>;
-            }
-        };
-        <span class="ident">endpoints</span>.<span class="ident">borrow_mut</span>().<span class="ident">insert</span>(
-            <span class="ident">endpoint_addr</span>,
-            <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Box::new</span>(<span class="ident">VfioWrapper::new</span>(
-                <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">vfio_container</span>)),
-                <span class="ident">mem</span>.<span class="ident">clone</span>(),
-            )))),
-        );
+        <span class="self">self</span>.<span class="ident">endpoints</span>
+            .<span class="ident">insert</span>(<span class="ident">endpoint_addr</span>, <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Box::new</span>(<span class="ident">wrapper</span>))));
         <span class="ident">VirtioIOMMUVfioResult::Ok</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">handle_del_vfio_device</span>(
-        <span class="ident">pci_address</span>: <span class="ident">u32</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">VirtioIOMMUVfioResult</span> {
-        <span class="kw">if</span> <span class="ident">endpoints</span>.<span class="ident">borrow_mut</span>().<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">pci_address</span>).<span class="ident">is_none</span>() {
+    <span class="kw">fn</span> <span class="ident">handle_del_vfio_device</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">pci_address</span>: <span class="ident">u32</span>) -&gt; <span class="ident">VirtioIOMMUVfioResult</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">endpoints</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">pci_address</span>).<span class="ident">is_none</span>() {
             <span class="macro">error!</span>(<span class="string">&quot;There is no vfio container of {}&quot;</span>, <span class="ident">pci_address</span>);
             <span class="kw">return</span> <span class="ident">VirtioIOMMUVfioResult::NoSuchDevice</span>;
         }
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">domain</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">endpoint_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">pci_address</span>) {
+            <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">domain</span>);
+        }
         <span class="ident">VirtioIOMMUVfioResult::Ok</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">handle_vfio</span>(
-        <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>,
-        <span class="ident">vfio_cmd</span>: <span class="ident">VirtioIOMMUVfioCommand</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">hp_endpoints_ranges</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="ident">VirtioIOMMUResponse</span> {
+    <span class="kw">fn</span> <span class="ident">handle_vfio</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">vfio_cmd</span>: <span class="ident">VirtioIOMMUVfioCommand</span>) -&gt; <span class="ident">VirtioIOMMUResponse</span> {
         <span class="kw">use</span> <span class="ident">VirtioIOMMUVfioCommand</span>::<span class="kw-2">*</span>;
         <span class="kw">let</span> <span class="ident">vfio_result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vfio_cmd</span> {
             <span class="ident">VfioDeviceAdd</span> {
-                <span class="ident">endpoint_addr</span>,
+                <span class="ident">wrapper_id</span>,
                 <span class="ident">container</span>,
-            } =&gt; <span class="ident"><span class="self">Self</span>::handle_add_vfio_device</span>(
-                <span class="ident">mem</span>,
                 <span class="ident">endpoint_addr</span>,
-                <span class="ident">container</span>,
-                <span class="ident">endpoints</span>,
-                <span class="ident">hp_endpoints_ranges</span>,
-            ),
-            <span class="ident">VfioDeviceDel</span> { <span class="ident">endpoint_addr</span> } =&gt; {
-                <span class="ident"><span class="self">Self</span>::handle_del_vfio_device</span>(<span class="ident">endpoint_addr</span>, <span class="ident">endpoints</span>)
-            }
+            } =&gt; <span class="kw">match</span> <span class="ident">VfioContainer::new_from_container</span>(<span class="ident">container</span>) {
+                <span class="prelude-val">Ok</span>(<span class="ident">vfio_container</span>) =&gt; {
+                    <span class="kw">let</span> <span class="ident">wrapper</span> <span class="op">=</span>
+                        <span class="ident">VfioWrapper::new_with_id</span>(<span class="ident">vfio_container</span>, <span class="ident">wrapper_id</span>, <span class="self">self</span>.<span class="ident">mem</span>.<span class="ident">clone</span>());
+                    <span class="self">self</span>.<span class="ident">handle_add_vfio_device</span>(<span class="ident">endpoint_addr</span>, <span class="ident">wrapper</span>)
+                }
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                    <span class="macro">error!</span>(<span class="string">&quot;failed to verify the new container: {}&quot;</span>, <span class="ident">e</span>);
+                    <span class="ident">VirtioIOMMUVfioResult::NoAvailableContainer</span>
+                }
+            },
+            <span class="ident">VfioDeviceDel</span> { <span class="ident">endpoint_addr</span> } =&gt; <span class="self">self</span>.<span class="ident">handle_del_vfio_device</span>(<span class="ident">endpoint_addr</span>),
         };
         <span class="ident">VirtioIOMMUResponse::VfioResponse</span>(<span class="ident">vfio_result</span>)
     }
+}
 
-    <span class="comment">// Async task that handles messages from the host</span>
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_command_tube</span>(
-        <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>,
-        <span class="ident">command_tube</span>: <span class="ident">AsyncTube</span>,
-        <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">hp_endpoints_ranges</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">loop</span> {
-            <span class="kw">match</span> <span class="ident">command_tube</span>.<span class="ident">next</span>::<span class="op">&lt;</span><span class="ident">VirtioIOMMURequest</span><span class="op">&gt;</span>().<span class="kw">await</span> {
-                <span class="prelude-val">Ok</span>(<span class="ident">command</span>) =&gt; {
-                    <span class="kw">let</span> <span class="ident">response</span>: <span class="ident">VirtioIOMMUResponse</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">command</span> {
-                        <span class="ident">VirtioIOMMURequest::VfioCommand</span>(<span class="ident">vfio_cmd</span>) =&gt; {
-                            <span class="ident"><span class="self">Self</span>::handle_vfio</span>(<span class="ident">mem</span>, <span class="ident">vfio_cmd</span>, <span class="ident">endpoints</span>, <span class="ident">hp_endpoints_ranges</span>)
-                        }
-                    };
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">send</span>(<span class="ident">response</span>).<span class="kw">await</span> {
-                        <span class="macro">error!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">IommuError::VirtioIOMMUResponseError</span>(<span class="ident">e</span>));
+<span class="comment">// Async task that handles messages from the host</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_command_tube</span>(<span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">command_tube</span>: <span class="ident">AsyncTube</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">loop</span> {
+        <span class="kw">match</span> <span class="ident">command_tube</span>.<span class="ident">next</span>::<span class="op">&lt;</span><span class="ident">VirtioIOMMURequest</span><span class="op">&gt;</span>().<span class="kw">await</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">command</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">response</span>: <span class="ident">VirtioIOMMUResponse</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">command</span> {
+                    <span class="ident">VirtioIOMMURequest::VfioCommand</span>(<span class="ident">vfio_cmd</span>) =&gt; {
+                        <span class="ident">state</span>.<span class="ident">borrow_mut</span>().<span class="ident">handle_vfio</span>(<span class="ident">vfio_cmd</span>)
                     }
-                }
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::VirtioIOMMUReqError</span>(<span class="ident">e</span>));
+                };
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">send</span>(<span class="ident">response</span>).<span class="kw">await</span> {
+                    <span class="macro">error!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">IommuError::VirtioIOMMUResponseError</span>(<span class="ident">e</span>));
                 }
             }
-        }
-    }
-
-    <span class="kw">fn</span> <span class="ident">run</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">iommu_device_tube</span>: <span class="ident">Tube</span>,
-        <span class="kw-2">mut</span> <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
-        <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-        <span class="ident">kill_evt</span>: <span class="ident">Event</span>,
-        <span class="ident">interrupt</span>: <span class="ident">Interrupt</span>,
-        <span class="ident">endpoints</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">translate_response_senders</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Tube</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">translate_request_rx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">expect</span>(<span class="string">&quot;Failed to create an executor&quot;</span>);
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">evts_async</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">queue_evts</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">EventAsync::new</span>(<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async event for queue&quot;</span>))
-            .<span class="ident">collect</span>();
-        <span class="kw">let</span> <span class="ident">interrupt</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">interrupt</span>));
-        <span class="kw">let</span> <span class="ident">interrupt_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">interrupt</span>.<span class="ident">borrow</span>();
-
-        <span class="kw">let</span> (<span class="ident">req_queue</span>, <span class="ident">req_evt</span>) <span class="op">=</span> (<span class="ident">queues</span>.<span class="ident">remove</span>(<span class="number">0</span>), <span class="ident">evts_async</span>.<span class="ident">remove</span>(<span class="number">0</span>));
-
-        <span class="kw">let</span> <span class="ident">hp_endpoints_ranges</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span>.<span class="ident">hp_endpoints_ranges</span>.<span class="ident">clone</span>());
-        <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="self">self</span>.<span class="ident">mem</span>.<span class="ident">clone</span>());
-        <span class="comment">// contains all pass-through endpoints that attach to this IOMMU device</span>
-        <span class="comment">// key: endpoint PCI address</span>
-        <span class="comment">// value: reference counter and MemoryMapperTrait</span>
-        <span class="kw">let</span> <span class="ident">endpoints</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">endpoints</span>));
-
-        <span class="kw">let</span> <span class="ident">f_resample</span> <span class="op">=</span> <span class="ident">async_utils::handle_irq_resample</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">interrupt</span>.<span class="ident">clone</span>());
-        <span class="kw">let</span> <span class="ident">f_kill</span> <span class="op">=</span> <span class="ident">async_utils::await_and_exit</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">kill_evt</span>);
-
-        <span class="kw">let</span> <span class="ident">request_tube</span> <span class="op">=</span> <span class="ident">translate_request_rx</span>
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">t</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async tube for rx&quot;</span>));
-        <span class="kw">let</span> <span class="ident">response_tubes</span> <span class="op">=</span> <span class="ident">translate_response_senders</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">m</span><span class="op">|</span> {
-            <span class="ident">m</span>.<span class="ident">into_iter</span>()
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
-                    (
-                        <span class="ident">x</span>.<span class="number">0</span>,
-                        <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">x</span>.<span class="number">1</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async tube&quot;</span>),
-                    )
-                })
-                .<span class="ident">collect</span>()
-        });
-
-        <span class="kw">let</span> <span class="ident">f_handle_translate_request</span> <span class="op">=</span>
-            <span class="ident">handle_translate_request</span>(<span class="kw-2">&amp;</span><span class="ident">endpoints</span>, <span class="ident">request_tube</span>, <span class="ident">response_tubes</span>);
-        <span class="kw">let</span> <span class="ident">f_request</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">request_queue</span>(<span class="ident">req_queue</span>, <span class="ident">req_evt</span>, <span class="ident">interrupt_ref</span>, <span class="kw-2">&amp;</span><span class="ident">endpoints</span>);
-
-        <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">iommu_device_tube</span>).<span class="ident">unwrap</span>();
-        <span class="comment">// Future to handle command messages from host, such as passing vfio containers.</span>
-        <span class="kw">let</span> <span class="ident">f_cmd</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::handle_command_tube</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="ident">command_tube</span>, <span class="kw-2">&amp;</span><span class="ident">endpoints</span>, <span class="kw-2">&amp;</span><span class="ident">hp_endpoints_ranges</span>);
-
-        <span class="kw">let</span> <span class="ident">done</span> <span class="op">=</span> <span class="kw">async</span> {
-            <span class="macro">select!</span> {
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_request</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handling request queue&quot;</span>),
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_resample</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handle_irq_resample&quot;</span>),
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_kill</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in await_and_exit&quot;</span>),
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_handle_translate_request</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handle_translate_request&quot;</span>),
-                <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_cmd</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handling host request&quot;</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::VirtioIOMMUReqError</span>(<span class="ident">e</span>));
             }
-        };
-        <span class="kw">match</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">done</span>) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(())) =&gt; {}
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; <span class="macro">error!</span>(<span class="string">&quot;Error in worker: {}&quot;</span>, <span class="ident">e</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::AsyncExec</span>(<span class="ident">e</span>)),
         }
-
-        <span class="prelude-val">Ok</span>(())
     }
 }
 
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">request_queue</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">SignalableInterrupt</span><span class="op">&gt;</span>(
+    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">Queue</span>,
+    <span class="kw-2">mut</span> <span class="ident">queue_event</span>: <span class="ident">EventAsync</span>,
+    <span class="ident">interrupt</span>: <span class="kw-2">&amp;</span><span class="ident">I</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">loop</span> {
+        <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">mem</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">avail_desc</span> <span class="op">=</span> <span class="ident">queue</span>
+            .<span class="ident">next_async</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="kw-2">&amp;mut</span> <span class="ident">queue_event</span>)
+            .<span class="kw">await</span>
+            .<span class="ident">map_err</span>(<span class="ident">IommuError::ReadAsyncDesc</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">desc_index</span> <span class="op">=</span> <span class="ident">avail_desc</span>.<span class="ident">index</span>;
+
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">borrow_mut</span>().<span class="ident">execute_request</span>(<span class="kw-2">&amp;</span><span class="ident">avail_desc</span>) {
+            <span class="prelude-val">Ok</span>(<span class="ident">len</span>) =&gt; <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                <span class="macro">error!</span>(<span class="string">&quot;execute_request failed: {}&quot;</span>, <span class="ident">e</span>);
+
+                <span class="comment">// If a request type is not recognized, the device SHOULD NOT write</span>
+                <span class="comment">// the buffer and SHOULD set the used length to zero</span>
+                <span class="number">0</span>
+            }
+        };
+
+        <span class="ident">queue</span>.<span class="ident">add_used</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="ident">desc_index</span>, <span class="ident">len</span> <span class="kw">as</span> <span class="ident">u32</span>);
+        <span class="ident">queue</span>.<span class="ident">trigger_interrupt</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="ident">interrupt</span>);
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">run</span>(
+    <span class="ident">state</span>: <span class="ident">State</span>,
+    <span class="ident">iommu_device_tube</span>: <span class="ident">Tube</span>,
+    <span class="kw-2">mut</span> <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
+    <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+    <span class="ident">kill_evt</span>: <span class="ident">Event</span>,
+    <span class="ident">interrupt</span>: <span class="ident">Interrupt</span>,
+    <span class="ident">translate_response_senders</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Tube</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">translate_request_rx</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">state</span>));
+    <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">expect</span>(<span class="string">&quot;Failed to create an executor&quot;</span>);
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">evts_async</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventAsync</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">queue_evts</span>
+        .<span class="ident">into_iter</span>()
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">EventAsync::new</span>(<span class="ident">e</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async event for queue&quot;</span>))
+        .<span class="ident">collect</span>();
+    <span class="kw">let</span> <span class="ident">interrupt</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">interrupt</span>));
+    <span class="kw">let</span> <span class="ident">interrupt_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">interrupt</span>.<span class="ident">borrow</span>();
+
+    <span class="kw">let</span> (<span class="ident">req_queue</span>, <span class="ident">req_evt</span>) <span class="op">=</span> (<span class="ident">queues</span>.<span class="ident">remove</span>(<span class="number">0</span>), <span class="ident">evts_async</span>.<span class="ident">remove</span>(<span class="number">0</span>));
+
+    <span class="kw">let</span> <span class="ident">f_resample</span> <span class="op">=</span> <span class="ident">async_utils::handle_irq_resample</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">interrupt</span>.<span class="ident">clone</span>());
+    <span class="kw">let</span> <span class="ident">f_kill</span> <span class="op">=</span> <span class="ident">async_utils::await_and_exit</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">kill_evt</span>);
+
+    <span class="kw">let</span> <span class="ident">request_tube</span> <span class="op">=</span> <span class="ident">translate_request_rx</span>
+        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">t</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async tube for rx&quot;</span>));
+    <span class="kw">let</span> <span class="ident">response_tubes</span> <span class="op">=</span> <span class="ident">translate_response_senders</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">m</span><span class="op">|</span> {
+        <span class="ident">m</span>.<span class="ident">into_iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
+                (
+                    <span class="ident">x</span>.<span class="number">0</span>,
+                    <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">x</span>.<span class="number">1</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to create async tube&quot;</span>),
+                )
+            })
+            .<span class="ident">collect</span>()
+    });
+
+    <span class="kw">let</span> <span class="ident">f_handle_translate_request</span> <span class="op">=</span> <span class="ident">handle_translate_request</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">request_tube</span>, <span class="ident">response_tubes</span>);
+    <span class="kw">let</span> <span class="ident">f_request</span> <span class="op">=</span> <span class="ident">request_queue</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">req_queue</span>, <span class="ident">req_evt</span>, <span class="ident">interrupt_ref</span>);
+
+    <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">iommu_device_tube</span>).<span class="ident">unwrap</span>();
+    <span class="comment">// Future to handle command messages from host, such as passing vfio containers.</span>
+    <span class="kw">let</span> <span class="ident">f_cmd</span> <span class="op">=</span> <span class="ident">handle_command_tube</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>, <span class="ident">command_tube</span>);
+
+    <span class="kw">let</span> <span class="ident">done</span> <span class="op">=</span> <span class="kw">async</span> {
+        <span class="macro">select!</span> {
+            <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_request</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handling request queue&quot;</span>),
+            <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_resample</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handle_irq_resample&quot;</span>),
+            <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_kill</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in await_and_exit&quot;</span>),
+            <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_handle_translate_request</span>.<span class="ident">fuse</span>() =&gt; {
+                <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handle_translate_request&quot;</span>)
+            }
+            <span class="ident">res</span> <span class="op">=</span> <span class="ident">f_cmd</span>.<span class="ident">fuse</span>() =&gt; <span class="ident">res</span>.<span class="ident">context</span>(<span class="string">&quot;error in handling host request&quot;</span>),
+        }
+    };
+    <span class="kw">match</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">done</span>) {
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(())) =&gt; {}
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; <span class="macro">error!</span>(<span class="string">&quot;Error in worker: {:#}&quot;</span>, <span class="ident">e</span>),
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::AsyncExec</span>(<span class="ident">e</span>)),
+    }
+
+    <span class="prelude-val">Ok</span>(())
+}
+
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_translate_request</span>(
-    <span class="ident">endpoints</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">request_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AsyncTube</span><span class="op">&gt;</span>,
     <span class="ident">response_tubes</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">AsyncTube</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1703,9 +1696,20 @@
             <span class="ident">endpoint_id</span>,
             <span class="ident">iova</span>,
             <span class="ident">size</span>,
-        } <span class="op">=</span> <span class="ident">request_tube</span>.<span class="ident">next</span>().<span class="kw">await</span>.<span class="ident">map_err</span>(<span class="ident">IommuError::Tube</span>)<span class="question-mark">?</span>;
+        } <span class="op">=</span> <span class="kw">match</span> <span class="ident">request_tube</span>.<span class="ident">next</span>().<span class="kw">await</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">req</span>) =&gt; <span class="ident">req</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">TubeError::Disconnected</span>) =&gt; {
+                <span class="comment">// This means the process on the other side of the tube went away. That&#39;s</span>
+                <span class="comment">// not a problem with virtio-iommu itself, so just exit this callback</span>
+                <span class="comment">// and wait for crosvm to exit.</span>
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::Tube</span>(<span class="ident">e</span>));
+            }
+        };
         <span class="kw">let</span> <span class="ident">translate_response</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">mapper</span>) <span class="op">=</span> <span class="ident">endpoints</span>.<span class="ident">borrow_mut</span>().<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint_id</span>) {
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">mapper</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">borrow_mut</span>().<span class="ident">endpoints</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint_id</span>) {
                 <span class="ident">mapper</span>
                     .<span class="ident">lock</span>()
                     .<span class="ident">translate</span>(<span class="ident">iova</span>, <span class="ident">size</span>)
@@ -1731,7 +1735,7 @@
 <span class="doccomment">/// Virtio device for IOMMU memory management.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iommu</span> {
     <span class="ident">kill_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-    <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span><span class="ident">Worker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">config</span>: <span class="ident">virtio_iommu_config</span>,
     <span class="ident">avail_features</span>: <span class="ident">u64</span>,
     <span class="comment">// Attached endpoints</span>
@@ -1890,27 +1894,27 @@
                 <span class="kw">let</span> <span class="ident">worker_result</span> <span class="op">=</span> <span class="ident">thread::Builder::new</span>()
                     .<span class="ident">name</span>(<span class="string">&quot;virtio_iommu&quot;</span>.<span class="ident">to_string</span>())
                     .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">worker</span> <span class="op">=</span> <span class="ident">Worker</span> {
+                        <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">State</span> {
                             <span class="ident">mem</span>,
                             <span class="ident">page_mask</span>,
                             <span class="ident">hp_endpoints_ranges</span>,
                             <span class="ident">endpoint_map</span>: <span class="ident">BTreeMap::new</span>(),
                             <span class="ident">domain_map</span>: <span class="ident">BTreeMap::new</span>(),
+                            <span class="ident">endpoints</span>: <span class="ident">eps</span>,
                         };
-                        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">worker</span>.<span class="ident">run</span>(
+                        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">run</span>(
+                            <span class="ident">state</span>,
                             <span class="ident">iommu_device_tube</span>,
                             <span class="ident">queues</span>,
                             <span class="ident">queue_evts</span>,
                             <span class="ident">kill_evt</span>,
                             <span class="ident">interrupt</span>,
-                            <span class="ident">eps</span>,
                             <span class="ident">translate_response_senders</span>,
                             <span class="ident">translate_request_rx</span>,
                         );
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">result</span> {
                             <span class="macro">error!</span>(<span class="string">&quot;virtio-iommu worker thread exited with error: {}&quot;</span>, <span class="ident">e</span>);
                         }
-                        <span class="ident">worker</span>
                     });
 
                 <span class="kw">match</span> <span class="ident">worker_result</span> {

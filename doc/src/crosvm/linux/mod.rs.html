@@ -2382,6 +2382,11 @@
 <span id="2381">2381</span>
 <span id="2382">2382</span>
 <span id="2383">2383</span>
+<span id="2384">2384</span>
+<span id="2385">2385</span>
+<span id="2386">2386</span>
+<span id="2387">2387</span>
+<span id="2388">2388</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2415,7 +2420,7 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">UnixSeqpacket</span>, <span class="ident">UnixSeqpacketListener</span>, <span class="ident">UnlinkUnixSeqpacketListener</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device::SerialHardware</span>;
 <span class="kw">use</span> <span class="ident">devices::vfio</span>::{<span class="ident">VfioCommonSetup</span>, <span class="ident">VfioCommonTrait</span>};
-<span class="kw">use</span> <span class="ident">devices::virtio::memory_mapper::MemoryMapperTrait</span>;
+<span class="kw">use</span> <span class="ident">devices::virtio::memory_mapper</span>::{<span class="ident">MemoryMapper</span>, <span class="ident">MemoryMapperTrait</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::vsock::VhostVsockConfig</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio</span>::{<span class="self">self</span>, <span class="ident">EventDevice</span>};
@@ -2876,7 +2881,7 @@
             .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">dev</span><span class="op">|</span> <span class="ident">dev</span>.<span class="ident">get_type</span>() <span class="op">==</span> <span class="ident">VfioType::Pci</span>)
         {
             <span class="kw">let</span> <span class="ident">vfio_path</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">vfio_dev</span>.<span class="ident">vfio_path</span>;
-            <span class="kw">let</span> (<span class="ident">vfio_pci_device</span>, <span class="ident">jail</span>) <span class="op">=</span> <span class="ident">create_vfio_device</span>(
+            <span class="kw">let</span> (<span class="ident">vfio_pci_device</span>, <span class="ident">jail</span>, <span class="ident">viommu_mapper</span>) <span class="op">=</span> <span class="ident">create_vfio_device</span>(
                 <span class="ident">cfg</span>,
                 <span class="ident">vm</span>,
                 <span class="ident">resources</span>,
@@ -2884,7 +2889,6 @@
                 <span class="ident">vfio_path</span>.<span class="ident">as_path</span>(),
                 <span class="prelude-val">None</span>,
                 <span class="ident">vfio_dev</span>.<span class="ident">guest_address</span>(),
-                <span class="ident">iommu_attached_endpoints</span>,
                 <span class="prelude-val">Some</span>(<span class="kw-2">&amp;mut</span> <span class="ident">coiommu_attached_endpoints</span>),
                 <span class="ident">vfio_dev</span>.<span class="ident">iommu_dev_type</span>(),
             )<span class="question-mark">?</span>;
@@ -2893,6 +2897,17 @@
                 <span class="ident">vfio_pci_device</span>.<span class="ident">get_max_iova</span>(),
                 <span class="ident">iova_max_addr</span>.<span class="ident">unwrap_or</span>(<span class="number">0</span>),
             ));
+
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">viommu_mapper</span>) <span class="op">=</span> <span class="ident">viommu_mapper</span> {
+                <span class="ident">iommu_attached_endpoints</span>.<span class="ident">insert</span>(
+                    <span class="ident">vfio_pci_device</span>
+                        .<span class="ident">pci_address</span>()
+                        .<span class="ident">context</span>(<span class="string">&quot;not initialized&quot;</span>)<span class="question-mark">?</span>
+                        .<span class="ident">to_u32</span>(),
+                    <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Box::new</span>(<span class="ident">viommu_mapper</span>))),
+                );
+            }
+
             <span class="ident">devices</span>.<span class="ident">push</span>((<span class="ident">vfio_pci_device</span>, <span class="ident">jail</span>));
         }
 
@@ -3916,8 +3931,7 @@
 
     <span class="kw">let</span> (<span class="ident">hp_bus</span>, <span class="ident">bus_num</span>) <span class="op">=</span> <span class="ident">get_hp_bus</span>(<span class="ident">linux</span>, <span class="ident">host_addr</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">endpoints</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
-    <span class="kw">let</span> (<span class="ident">vfio_pci_device</span>, <span class="ident">jail</span>) <span class="op">=</span> <span class="ident">create_vfio_device</span>(
+    <span class="kw">let</span> (<span class="ident">vfio_pci_device</span>, <span class="ident">jail</span>, <span class="ident">viommu_mapper</span>) <span class="op">=</span> <span class="ident">create_vfio_device</span>(
         <span class="ident">cfg</span>,
         <span class="kw-2">&amp;</span><span class="ident">linux</span>.<span class="ident">vm</span>,
         <span class="ident">sys_allocator</span>,
@@ -3925,7 +3939,6 @@
         <span class="ident">vfio_path</span>,
         <span class="prelude-val">Some</span>(<span class="ident">bus_num</span>),
         <span class="prelude-val">None</span>,
-        <span class="kw-2">&amp;mut</span> <span class="ident">endpoints</span>,
         <span class="prelude-val">None</span>,
         <span class="kw">if</span> <span class="ident">iommu_host_tube</span>.<span class="ident">is_some</span>() {
             <span class="ident">IommuDevType::VirtioIommu</span>
@@ -3938,26 +3951,23 @@
         .<span class="ident">context</span>(<span class="string">&quot;Failed to configure pci hotplug device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">iommu_host_tube</span>) <span class="op">=</span> <span class="ident">iommu_host_tube</span> {
-        <span class="kw">let</span> <span class="kw-2">&amp;</span><span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">endpoints</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">unwrap</span>().<span class="number">0</span>;
-        <span class="kw">let</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">endpoints</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">endpoint_addr</span>).<span class="ident">unwrap</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">vfio_wrapper</span>) <span class="op">=</span> <span class="ident">mapper</span>.<span class="ident">lock</span>().<span class="ident">as_vfio_wrapper</span>() {
-            <span class="kw">let</span> <span class="ident">vfio_container</span> <span class="op">=</span> <span class="ident">vfio_wrapper</span>.<span class="ident">as_vfio_container</span>();
-            <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="ident">vfio_container</span>.<span class="ident">lock</span>().<span class="ident">into_raw_descriptor</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VirtioIOMMURequest::VfioCommand</span>(<span class="ident">VirtioIOMMUVfioCommand::VfioDeviceAdd</span> {
-                <span class="ident">endpoint_addr</span>,
-                <span class="ident">container</span>: {
-                    <span class="comment">// Safe because the descriptor is uniquely owned by `descriptor`.</span>
-                    <span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">descriptor</span>) }
-                },
-            });
-
-            <span class="kw">match</span> <span class="ident">virtio_iommu_request</span>(<span class="ident">iommu_host_tube</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>)
-                .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">VirtioIOMMUVfioError::SocketFailed</span>)<span class="question-mark">?</span>
-            {
-                <span class="ident">VirtioIOMMUResponse::VfioResponse</span>(<span class="ident">VirtioIOMMUVfioResult::Ok</span>) =&gt; (),
-                <span class="ident">resp</span> =&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected message response: {:?}&quot;</span>, <span class="ident">resp</span>),
-            }
-        };
+        <span class="kw">let</span> <span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">pci_address</span>.<span class="ident">to_u32</span>();
+        <span class="kw">let</span> <span class="ident">vfio_wrapper</span> <span class="op">=</span> <span class="ident">viommu_mapper</span>.<span class="ident">context</span>(<span class="string">&quot;expected mapper&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="ident">vfio_wrapper</span>.<span class="ident">clone_as_raw_descriptor</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">VirtioIOMMURequest::VfioCommand</span>(<span class="ident">VirtioIOMMUVfioCommand::VfioDeviceAdd</span> {
+            <span class="ident">endpoint_addr</span>,
+            <span class="ident">wrapper_id</span>: <span class="ident">vfio_wrapper</span>.<span class="ident">id</span>(),
+            <span class="ident">container</span>: {
+                <span class="comment">// Safe because the descriptor is uniquely owned by `descriptor`.</span>
+                <span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">descriptor</span>) }
+            },
+        });
+        <span class="kw">match</span> <span class="ident">virtio_iommu_request</span>(<span class="ident">iommu_host_tube</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">VirtioIOMMUVfioError::SocketFailed</span>)<span class="question-mark">?</span>
+        {
+            <span class="ident">VirtioIOMMUResponse::VfioResponse</span>(<span class="ident">VirtioIOMMUVfioResult::Ok</span>) =&gt; (),
+            <span class="ident">resp</span> =&gt; <span class="macro">bail!</span>(<span class="string">&quot;Unexpected message response: {:?}&quot;</span>, <span class="ident">resp</span>),
+        }
     }
 
     <span class="kw">let</span> <span class="ident">host_key</span> <span class="op">=</span> <span class="ident">HostHotPlugKey::Vfio</span> { <span class="ident">host_addr</span> };

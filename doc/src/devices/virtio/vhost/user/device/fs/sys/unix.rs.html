@@ -145,19 +145,6 @@
 <span id="144">144</span>
 <span id="145">145</span>
 <span id="146">146</span>
-<span id="147">147</span>
-<span id="148">148</span>
-<span id="149">149</span>
-<span id="150">150</span>
-<span id="151">151</span>
-<span id="152">152</span>
-<span id="153">153</span>
-<span id="154">154</span>
-<span id="155">155</span>
-<span id="156">156</span>
-<span id="157">157</span>
-<span id="158">158</span>
-<span id="159">159</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -167,7 +154,6 @@
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>};
-<span class="kw">use</span> <span class="ident">argh::FromArgs</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">get_max_open_files</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">cros_async::Executor</span>;
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
@@ -239,19 +225,7 @@
 
 <span class="doccomment">/// Starts a vhost-user fs device.</span>
 <span class="doccomment">/// Returns an error if the given `args` is invalid or the device fails to run.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">program_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Options::from_args</span>(<span class="kw-2">&amp;</span>[<span class="ident">program_name</span>], <span class="ident">args</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">opts</span>) =&gt; <span class="ident">opts</span>,
-        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-            <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">status</span>.<span class="ident">is_err</span>() {
-                <span class="macro">bail!</span>(<span class="ident">e</span>.<span class="ident">output</span>);
-            } <span class="kw">else</span> {
-                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">output</span>);
-            }
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
-        }
-    };
-
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">opts</span>: <span class="ident">Options</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="ident">base::syslog::init</span>().<span class="ident">context</span>(<span class="string">&quot;Failed to initialize syslog&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;Failed to create executor&quot;</span>)<span class="question-mark">?</span>;

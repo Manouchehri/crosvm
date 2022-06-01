@@ -1345,6 +1345,7 @@
 <span id="1344">1344</span>
 <span id="1345">1345</span>
 <span id="1346">1346</span>
+<span id="1347">1347</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2372,6 +2373,7 @@
             .<span class="ident">set_use_vulkan</span>(<span class="ident">gpu_parameters</span>.<span class="ident">use_vulkan</span>)
             .<span class="ident">set_use_syncfd</span>(<span class="ident">gpu_parameters</span>.<span class="ident">gfxstream_use_syncfd</span>)
             .<span class="ident">set_use_guest_angle</span>(<span class="ident">gpu_parameters</span>.<span class="ident">gfxstream_use_guest_angle</span>)
+            .<span class="ident">set_wsi</span>(<span class="ident">gpu_parameters</span>.<span class="ident">wsi</span>.<span class="ident">as_ref</span>())
             .<span class="ident">set_use_external_blob</span>(<span class="ident">external_blob</span>)
             .<span class="ident">set_use_render_server</span>(<span class="ident">render_server_fd</span>.<span class="ident">is_some</span>());
 

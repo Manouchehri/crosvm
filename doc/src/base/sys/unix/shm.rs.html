@@ -456,53 +456,12 @@
 <span id="455">455</span>
 <span id="456">456</span>
 <span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
-<span id="468">468</span>
-<span id="469">469</span>
-<span id="470">470</span>
-<span id="471">471</span>
-<span id="472">472</span>
-<span id="473">473</span>
-<span id="474">474</span>
-<span id="475">475</span>
-<span id="476">476</span>
-<span id="477">477</span>
-<span id="478">478</span>
-<span id="479">479</span>
-<span id="480">480</span>
-<span id="481">481</span>
-<span id="482">482</span>
-<span id="483">483</span>
-<span id="484">484</span>
-<span id="485">485</span>
-<span id="486">486</span>
-<span id="487">487</span>
-<span id="488">488</span>
-<span id="489">489</span>
-<span id="490">490</span>
-<span id="491">491</span>
-<span id="492">492</span>
-<span id="493">493</span>
-<span id="494">494</span>
-<span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::{
-    <span class="ident">ffi</span>::{<span class="ident">CStr</span>, <span class="ident">CString</span>},
+    <span class="ident">ffi::CStr</span>,
     <span class="ident">fs</span>::{<span class="ident">read_link</span>, <span class="ident">File</span>},
     <span class="ident">io</span>::{
         <span class="ident">Read</span>, <span class="ident">Seek</span>, <span class="ident">SeekFrom</span>, <span class="ident">Write</span>, {<span class="self">self</span>},
@@ -616,33 +575,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">SharedMemory</span> {
-    <span class="doccomment">/// Convenience function for `SharedMemory::new` that is always named and accepts a wide variety</span>
-    <span class="doccomment">/// of string-like types.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Note that the given name may not have NUL characters anywhere in it, or this will return an</span>
-    <span class="doccomment">/// error.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">named</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">name</span>: <span class="ident">T</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">CString::new</span>(<span class="ident">name</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">EINVAL</span>))<span class="question-mark">?</span>),
-            <span class="ident">size</span>,
-        )
-    }
-
-    <span class="doccomment">/// Convenience function for `SharedMemory::new` that has an arbitrary and unspecified name.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">anon</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="prelude-val">None</span>, <span class="number">0</span>)
-    }
-
     <span class="doccomment">/// Creates a new shared memory file descriptor with zero size.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If a name is given, it will appear in `/proc/self/fd/&lt;shm fd&gt;` for the purposes of</span>
     <span class="doccomment">/// debugging. The name does not need to be unique.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The file descriptor is opened with the close on exec flag and allows memfd sealing.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CStr</span><span class="op">&gt;</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">shm_name</span> <span class="op">=</span> <span class="ident">name</span>
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">as_ptr</span>())
-            .<span class="ident">unwrap_or</span>(<span class="string">b&quot;/crosvm_shm\0&quot;</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">c_char</span>);
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">debug_name</span>: <span class="kw-2">&amp;</span><span class="ident">CStr</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SharedMemory</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">shm_name</span> <span class="op">=</span> <span class="ident">debug_name</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">c_char</span>;
         <span class="comment">// The following are safe because we give a valid C string and check the</span>
         <span class="comment">// results of the memfd_create call.</span>
         <span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">memfd_create</span>(<span class="ident">shm_name</span>, <span class="ident">MFD_CLOEXEC</span> <span class="op">|</span> <span class="ident">MFD_ALLOW_SEALING</span>) };
@@ -853,22 +793,9 @@
 
     <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::<span class="kw">super</span>::MemoryMapping</span>;
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">named</span>() {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
-            <span class="kw">return</span>;
-        }
-        <span class="kw">const</span> <span class="ident">TEST_NAME</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;Name McCool Person&quot;</span>;
-        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::named</span>(<span class="ident">TEST_NAME</span>, <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">read_name</span>(), <span class="prelude-val">Ok</span>(<span class="ident">TEST_NAME</span>.<span class="ident">to_owned</span>()));
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">anon</span>() {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
-            <span class="kw">return</span>;
-        }
-        <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+    <span class="kw">fn</span> <span class="ident">create_test_shmem</span>() -&gt; <span class="ident">SharedMemory</span> {
+        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="string">&quot;test&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create cstr name&quot;</span>);
+        <span class="ident">SharedMemory::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>)
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -876,8 +803,10 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">size</span>(), <span class="number">0</span>);
+        <span class="kw">const</span> <span class="ident">TEST_NAME</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;Name McCool Person&quot;</span>;
+        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">TEST_NAME</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create cstr name&quot;</span>);
+        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">read_name</span>(), <span class="prelude-val">Ok</span>(<span class="ident">TEST_NAME</span>.<span class="ident">to_owned</span>()));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -885,7 +814,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="number">1024</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to set shared memory size&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">size</span>(), <span class="number">1024</span>);
@@ -896,7 +825,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="number">0x7fff_ffff_ffff_ffff</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to set shared memory size&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">size</span>(), <span class="number">0x7fff_ffff_ffff_ffff</span>);
@@ -907,20 +836,9 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="number">0x8000_0000_0000_0000</span>).<span class="ident">unwrap_err</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">size</span>(), <span class="number">0</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">new_named</span>() {
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
-            <span class="kw">return</span>;
-        }
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;very unique name&quot;</span>;
-        <span class="kw">let</span> <span class="ident">cname</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">name</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">cname</span>), <span class="number">0</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">shm</span>.<span class="ident">read_name</span>(), <span class="prelude-val">Ok</span>(<span class="ident">name</span>.<span class="ident">to_owned</span>()));
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -928,7 +846,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">seals</span> <span class="op">=</span> <span class="ident">shm</span>.<span class="ident">get_seals</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to get seals&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">seals</span>.<span class="ident">bitmask</span>(), <span class="number">0</span>);
         <span class="ident">seals</span>.<span class="ident">set_seal_seal</span>();
@@ -944,7 +862,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="number">4096</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to set shared memory size&quot;</span>);
 
@@ -973,7 +891,7 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">kernel_has_memfd</span>() {
             <span class="kw">return</span>;
         }
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::anon</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create shared memory&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">create_test_shmem</span>();
         <span class="ident">shm</span>.<span class="ident">set_size</span>(<span class="number">8092</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to set shared memory size&quot;</span>);
 
