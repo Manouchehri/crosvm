@@ -2603,7 +2603,7 @@
         );
 
         <span class="comment">// notifymap_mem is used as Bar2 for Guest to check if request is completed by coIOMMU.</span>
-        <span class="kw">let</span> <span class="ident">notifymap_mem</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="string">&quot;coiommu_notifymap&quot;</span>, <span class="ident">COIOMMU_NOTIFYMAP_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>)
+        <span class="kw">let</span> <span class="ident">notifymap_mem</span> <span class="op">=</span> <span class="ident">SharedMemory::named</span>(<span class="string">&quot;coiommu_notifymap&quot;</span>, <span class="ident">COIOMMU_NOTIFYMAP_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>)
             .<span class="ident">context</span>(<span class="ident">Error::CreateSharedMemory</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">notifymap_mmap</span> <span class="op">=</span> <span class="ident">Arc::new</span>(
             <span class="ident">MemoryMappingBuilder::new</span>(<span class="ident">COIOMMU_NOTIFYMAP_SIZE</span>)
@@ -2614,7 +2614,7 @@
 
         <span class="comment">// topologymap_mem is used as Bar4 for Guest to check which device is on top of coIOMMU.</span>
         <span class="kw">let</span> <span class="ident">topologymap_mem</span> <span class="op">=</span>
-            <span class="ident">SharedMemory::new</span>(<span class="string">&quot;coiommu_topologymap&quot;</span>, <span class="ident">COIOMMU_TOPOLOGYMAP_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>)
+            <span class="ident">SharedMemory::named</span>(<span class="string">&quot;coiommu_topologymap&quot;</span>, <span class="ident">COIOMMU_TOPOLOGYMAP_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span>)
                 .<span class="ident">context</span>(<span class="ident">Error::CreateSharedMemory</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">topologymap_mmap</span> <span class="op">=</span> <span class="ident">Arc::new</span>(
             <span class="ident">MemoryMappingBuilder::new</span>(<span class="ident">COIOMMU_TOPOLOGYMAP_SIZE</span>)

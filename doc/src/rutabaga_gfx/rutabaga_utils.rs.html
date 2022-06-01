@@ -615,22 +615,6 @@
 <span id="614">614</span>
 <span id="615">615</span>
 <span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -646,7 +630,6 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">BaseError</span>, <span class="ident">ExternalMappingError</span>, <span class="ident">SafeDescriptor</span>};
 <span class="kw">use</span> <span class="ident">data_model::VolatileMemoryError</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;vulkano&quot;</span>)]</span>
@@ -1043,17 +1026,11 @@
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
-<span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_VULKAN_NATIVE_SWAPCHAIN_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">22</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>;
 
 <span class="doccomment">/// gfxstream flag struct.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GfxstreamFlags</span>(<span class="ident">u32</span>);
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">RutabagaWsi</span> {
-    <span class="ident">Vulkan</span>,
-}
 
 <span class="kw">impl</span> <span class="ident">GfxstreamFlags</span> {
     <span class="doccomment">/// Create new gfxstream flags.</span>
@@ -1107,15 +1084,6 @@
     <span class="doccomment">/// Use async fence completion callback.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_async_fence_cb</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
         <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>, <span class="ident">v</span>)
-    }
-
-    <span class="doccomment">/// Use the Vulkan swapchain to draw on the host window.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_wsi</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RutabagaWsi</span><span class="op">&gt;</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
-        <span class="kw">let</span> <span class="ident">use_vulkan_swapchain</span> <span class="op">=</span> <span class="macro">matches!</span>(<span class="ident">v</span>, <span class="prelude-val">Some</span>(<span class="ident">RutabagaWsi::Vulkan</span>));
-        <span class="self">self</span>.<span class="ident">set_flag</span>(
-            <span class="ident">GFXSTREAM_RENDERER_FLAGS_VULKAN_NATIVE_SWAPCHAIN_BIT</span>,
-            <span class="ident">use_vulkan_swapchain</span>,
-        )
     }
 }
 

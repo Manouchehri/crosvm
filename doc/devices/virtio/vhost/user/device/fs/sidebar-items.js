@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["handle_fs_queue",""]],"mod":[["sys",""]],"struct":[["FsBackend",""],["Options","FS Options"]]});
+initSidebarItems({"fn":[["handle_fs_queue",""],["run_fs_device",""]],"mod":[["sys",""]],"struct":[["FsBackend",""],["Options",""]]});

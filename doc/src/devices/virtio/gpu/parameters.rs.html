@@ -68,11 +68,6 @@
 <span id="67">67</span>
 <span id="68">68</span>
 <span id="69">69</span>
-<span id="70">70</span>
-<span id="71">71</span>
-<span id="72">72</span>
-<span id="73">73</span>
-<span id="74">74</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -80,7 +75,6 @@
 <span class="doccomment">//! Definitions and utilities for GPU related parameters.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::GpuMode</span>;
-<span class="kw">use</span> <span class="ident">rutabaga_gfx::RutabagaWsi</span>;
 
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
@@ -113,8 +107,6 @@
     <span class="kw">pub</span> <span class="ident">gfxstream_use_guest_angle</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">gfxstream_use_syncfd</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">use_vulkan</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">gfxstream_support_gles31</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span> <span class="ident">wsi</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RutabagaWsi</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">udmabuf</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">GpuMode</span>,
     <span class="kw">pub</span> <span class="ident">cache_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
@@ -138,8 +130,6 @@
             } <span class="kw">else</span> {
                 <span class="ident">GpuMode::Mode2D</span>
             },
-            <span class="ident">gfxstream_support_gles31</span>: <span class="bool-val">true</span>,
-            <span class="ident">wsi</span>: <span class="prelude-val">None</span>,
             <span class="ident">cache_path</span>: <span class="prelude-val">None</span>,
             <span class="ident">cache_size</span>: <span class="prelude-val">None</span>,
             <span class="ident">udmabuf</span>: <span class="bool-val">false</span>,

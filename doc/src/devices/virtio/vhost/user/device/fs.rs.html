@@ -225,13 +225,14 @@
 <span id="224">224</span>
 <span id="225">225</span>
 <span id="226">226</span>
+<span id="227">227</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">mod</span> <span class="ident">sys</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::start_device</span> <span class="kw">as</span> <span class="ident">run_fs_device</span>;
+<span class="kw">use</span> <span class="ident">sys::start_device</span>;
 
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
@@ -429,27 +430,28 @@
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromArgs</span>)]</span>
-<span class="attribute">#[<span class="ident">argh</span>(<span class="ident">subcommand</span>, <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;fs&quot;</span>)]</span>
-<span class="doccomment">/// FS Options</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span> {
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
-    <span class="doccomment">/// path to a vhost-user socket</span>
+<span class="attribute">#[<span class="ident">argh</span>(<span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;&quot;</span>)]</span>
+<span class="kw">struct</span> <span class="ident">Options</span> {
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;path to a vhost-user socket&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="ident">socket</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;STRING&quot;</span>)]</span>
-    <span class="doccomment">/// VFIO-PCI device name (e.g. &#39;0000:00:07.0&#39;)</span>
+    <span class="attribute">#[<span class="ident">argh</span>(
+        <span class="ident">option</span>,
+        <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;VFIO-PCI device name (e.g. &#39;0000:00:07.0&#39;)&quot;</span>,
+        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;STRING&quot;</span>
+    )]</span>
     <span class="ident">vfio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;TAG&quot;</span>)]</span>
-    <span class="doccomment">/// the virtio-fs tag</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;the virtio-fs tag&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;TAG&quot;</span>)]</span>
     <span class="ident">tag</span>: <span class="ident">String</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;DIR&quot;</span>)]</span>
-    <span class="doccomment">/// path to a directory to share</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;path to a directory to share&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;DIR&quot;</span>)]</span>
     <span class="ident">shared_dir</span>: <span class="ident">PathBuf</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;UIDMAP&quot;</span>)]</span>
-    <span class="doccomment">/// uid map to use</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;uid map to use&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;UIDMAP&quot;</span>)]</span>
     <span class="ident">uid_map</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;GIDMAP&quot;</span>)]</span>
-    <span class="doccomment">/// gid map to use</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">description</span> <span class="op">=</span> <span class="string">&quot;gid map to use&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;GIDMAP&quot;</span>)]</span>
     <span class="ident">gid_map</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+}
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_fs_device</span>(<span class="ident">program_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="ident">start_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>)
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>

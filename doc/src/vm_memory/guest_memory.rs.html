@@ -1035,8 +1035,6 @@
 <span id="1034">1034</span>
 <span id="1035">1035</span>
 <span id="1036">1036</span>
-<span id="1037">1037</span>
-<span id="1038">1038</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1229,11 +1227,9 @@
             <span class="ident">aligned_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">range</span>.<span class="number">1</span>;
         }
 
-        <span class="comment">// NOTE: Some tests rely on the GuestMemory&#39;s name when capturing metrics.</span>
-        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;crosvm_guest&quot;</span>;
         <span class="comment">// Shm must be mut even though it is only updated on Unix systems.</span>
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="ident">name</span>, <span class="ident">aligned_size</span>).<span class="ident">map_err</span>(<span class="ident">Error::MemoryCreationFailed</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shm</span> <span class="op">=</span> <span class="ident">SharedMemory::new</span>(<span class="prelude-val">None</span>, <span class="ident">aligned_size</span>).<span class="ident">map_err</span>(<span class="ident">Error::MemoryCreationFailed</span>)<span class="question-mark">?</span>;
 
         <span class="ident">sys::finalize_shm</span>(<span class="kw-2">&amp;mut</span> <span class="ident">shm</span>)<span class="question-mark">?</span>;
 
