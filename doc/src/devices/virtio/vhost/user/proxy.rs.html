@@ -1378,6 +1378,9 @@
 <span id="1377">1377</span>
 <span id="1378">1378</span>
 <span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2205,6 +2208,9 @@
     <span class="comment">// Processes a message sent, on `main_thread_tube`, in response to a doorbell write. It writes</span>
     <span class="comment">// to the corresponding call event of the vring index sent over `main_thread_tube`.</span>
     <span class="kw">fn</span> <span class="ident">process_doorbell_message</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">main_thread_tube</span>: <span class="kw-2">&amp;</span><span class="ident">Tube</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="comment">// It&#39;s okay to call |expect| here as there&#39;s no way to indicate failure on</span>
+        <span class="comment">// a doorbell write operation. We&#39;d rather fail early than have inconsistent</span>
+        <span class="comment">// state.</span>
         <span class="kw">let</span> <span class="ident">index</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">main_thread_tube</span>
             .<span class="ident">recv</span>()
             .<span class="ident">context</span>(<span class="string">&quot;failed to receive doorbell data&quot;</span>)<span class="question-mark">?</span>;

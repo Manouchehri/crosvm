@@ -300,35 +300,6 @@
 <span id="299">299</span>
 <span id="300">300</span>
 <span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
-<span id="310">310</span>
-<span id="311">311</span>
-<span id="312">312</span>
-<span id="313">313</span>
-<span id="314">314</span>
-<span id="315">315</span>
-<span id="316">316</span>
-<span id="317">317</span>
-<span id="318">318</span>
-<span id="319">319</span>
-<span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -629,35 +600,6 @@
         };
         <span class="prelude-val">Ok</span>(())
     }
-}
-
-<span class="doccomment">/// get override msr list</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_override_msr_list</span>(
-    <span class="ident">msr_list</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
-) -&gt; (
-    <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>, <span class="comment">/* read override */</span>
-    <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>, <span class="comment">/* write override */</span>
-) {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rd_msrs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wr_msrs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-
-    <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">config</span>) <span class="kw">in</span> <span class="ident">msr_list</span>.<span class="ident">iter</span>() {
-        <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">filter</span> {
-            <span class="kw">match</span> <span class="ident">config</span>.<span class="ident">rw_type</span> {
-                <span class="ident">MsrRWType::ReadOnly</span> =&gt; {
-                    <span class="ident">rd_msrs</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">index</span>);
-                }
-                <span class="ident">MsrRWType::WriteOnly</span> =&gt; {
-                    <span class="ident">wr_msrs</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">index</span>);
-                }
-                <span class="ident">MsrRWType::ReadWrite</span> =&gt; {
-                    <span class="ident">rd_msrs</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">index</span>);
-                    <span class="ident">wr_msrs</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">index</span>);
-                }
-            }
-        }
-    }
-    (<span class="ident">rd_msrs</span>, <span class="ident">wr_msrs</span>)
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="x86_64" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

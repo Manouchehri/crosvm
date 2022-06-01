@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["send_adjusted_response",""]]});

@@ -164,14 +164,14 @@
 
 <span class="kw">use</span> <span class="ident">std::io</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
+<span class="kw">use</span> <span class="ident">std::os::unix::net::UnixListener</span>;
 <span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>};
 <span class="kw">use</span> <span class="ident">argh::FromArgs</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">get_max_open_files</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">get_max_open_files</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">UnlinkUnixListener</span>};
 <span class="kw">use</span> <span class="ident">cros_async::Executor</span>;
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
-<span class="kw">use</span> <span class="ident">vmm_vhost::connection::socket::Listener</span> <span class="kw">as</span> <span class="ident">SocketListener</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::fs</span>::{<span class="ident">FsBackend</span>, <span class="ident">Options</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">DeviceRequestHandler</span>, <span class="ident">VhostUserBackend</span>};
@@ -262,8 +262,8 @@
         <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         <span class="prelude-val">Some</span>(<span class="ident">socket</span>) =&gt; {
             <span class="comment">// Create and bind unix socket</span>
-            <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">SocketListener::new</span>(<span class="ident">socket</span>, <span class="bool-val">true</span> <span class="comment">/* unlink */</span>)<span class="question-mark">?</span>;
-            <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">l</span>.<span class="ident">as_raw_descriptor</span>());
+            <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="ident">UnixListener::bind</span>(<span class="ident">socket</span>).<span class="ident">map</span>(<span class="ident">UnlinkUnixListener</span>)<span class="question-mark">?</span>;
+            <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">l</span>.<span class="ident">as_raw_fd</span>());
             <span class="prelude-val">Some</span>(<span class="ident">l</span>)
         }
     };

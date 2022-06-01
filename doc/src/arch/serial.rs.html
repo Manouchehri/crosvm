@@ -319,13 +319,6 @@
 <span id="318">318</span>
 <span id="319">319</span>
 <span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -372,7 +365,6 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">false</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">true</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-                ..<span class="ident">Default::default</span>()
             });
     }
 
@@ -391,7 +383,6 @@
             <span class="ident">earlycon</span>: <span class="bool-val">false</span>,
             <span class="ident">stdin</span>: <span class="bool-val">false</span>,
             <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-            ..<span class="ident">Default::default</span>()
         });
     }
 }
@@ -501,7 +492,6 @@
                 .<span class="ident">insert</span>(<span class="string">&quot;console&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;hvc{}&quot;</span>, <span class="ident">num</span> <span class="op">-</span> <span class="number">1</span>))
                 .<span class="ident">map_err</span>(<span class="ident">GetSerialCmdlineError::KernelCmdline</span>)<span class="question-mark">?</span>;
         }
-        <span class="prelude-val">Some</span>((<span class="ident">SerialHardware::Debugcon</span>, <span class="kw">_</span>)) =&gt; {}
         <span class="prelude-val">None</span> =&gt; {}
     }
 
@@ -566,7 +556,6 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">false</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">true</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-                <span class="ident">debugcon_port</span>: <span class="number">0</span>,
             },
         );
 
@@ -596,7 +585,6 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">false</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">true</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-                <span class="ident">debugcon_port</span>: <span class="number">0</span>,
             },
         );
 
@@ -613,7 +601,6 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">true</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">false</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-                <span class="ident">debugcon_port</span>: <span class="number">0</span>,
             },
         );
 
@@ -644,7 +631,6 @@
                 <span class="ident">earlycon</span>: <span class="bool-val">true</span>,
                 <span class="ident">stdin</span>: <span class="bool-val">true</span>,
                 <span class="ident">out_timestamp</span>: <span class="bool-val">false</span>,
-                <span class="ident">debugcon_port</span>: <span class="number">0</span>,
             },
         );
 

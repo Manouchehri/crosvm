@@ -256,6 +256,42 @@
 <span id="255">255</span>
 <span id="256">256</span>
 <span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -274,7 +310,7 @@
 <span class="kw">use</span> <span class="ident">std::os::raw::c_uint</span>;
 <span class="kw">use</span> <span class="ident">std::ptr::null</span>;
 
-<span class="kw">use</span> <span class="ident">base::AsRawDescriptor</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>};
 
 <span class="kw">const</span> <span class="ident">EVDEV</span>: <span class="ident">c_uint</span> <span class="op">=</span> <span class="number">69</span>;
 
@@ -373,7 +409,11 @@
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_id and we check the return</span>
         <span class="comment">// value</span>
-        <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGID</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">dev_id</span>)
+        <span class="ident">ioctl_with_mut_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGID</span>(),
+            <span class="kw-2">&amp;mut</span> <span class="ident">dev_id</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevIdError</span>(<span class="ident">errno</span>()));
@@ -392,7 +432,11 @@
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
         <span class="comment">// return value</span>
-        <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGNAME</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">name</span>)
+        <span class="ident">ioctl_with_mut_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGNAME</span>(),
+            <span class="kw-2">&amp;mut</span> <span class="ident">name</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevNameError</span>(<span class="ident">errno</span>()));
@@ -406,7 +450,11 @@
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
         <span class="comment">// return value</span>
-        <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGUNIQ</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">uniq</span>)
+        <span class="ident">ioctl_with_mut_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGUNIQ</span>(),
+            <span class="kw-2">&amp;mut</span> <span class="ident">uniq</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevSerialError</span>(<span class="ident">errno</span>()));
@@ -420,7 +468,11 @@
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
         <span class="comment">// return value</span>
-        <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGPROP</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">props</span>)
+        <span class="ident">ioctl_with_mut_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGPROP</span>(),
+            <span class="kw-2">&amp;mut</span> <span class="ident">props</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevPropertiesError</span>(<span class="ident">errno</span>()));
@@ -439,7 +491,11 @@
     <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
         <span class="comment">// return value</span>
-        <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGBIT</span>(<span class="number">0</span>), <span class="kw-2">&amp;mut</span> <span class="ident">evt_types</span>)
+        <span class="ident">ioctl_with_mut_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGBIT</span>(<span class="number">0</span>),
+            <span class="kw-2">&amp;mut</span> <span class="ident">evt_types</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevEventTypesError</span>(<span class="ident">errno</span>()));
@@ -456,7 +512,11 @@
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
             <span class="comment">// return value</span>
-            <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGBIT</span>(<span class="ident">ev</span> <span class="kw">as</span> <span class="ident">c_uint</span>), <span class="kw-2">&amp;mut</span> <span class="ident">evt_codes</span>)
+            <span class="ident">ioctl_with_mut_ref</span>(
+                <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+                <span class="ident">EVIOCGBIT</span>(<span class="ident">ev</span> <span class="kw">as</span> <span class="ident">c_uint</span>),
+                <span class="kw-2">&amp;mut</span> <span class="ident">evt_codes</span>,
+            )
         };
         <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InputError::EvdevEventTypesError</span>(<span class="ident">errno</span>()));
@@ -476,7 +536,11 @@
         <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="comment">// Safe because the kernel won&#39;t write more than size of evdev_buffer and we check the</span>
             <span class="comment">// return value</span>
-            <span class="ident">ioctl_with_mut_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGABS</span>(<span class="ident">abs</span> <span class="kw">as</span> <span class="ident">c_uint</span>), <span class="kw-2">&amp;mut</span> <span class="ident">abs_info</span>)
+            <span class="ident">ioctl_with_mut_ref</span>(
+                <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+                <span class="ident">EVIOCGABS</span>(<span class="ident">abs</span> <span class="kw">as</span> <span class="ident">c_uint</span>),
+                <span class="kw-2">&amp;mut</span> <span class="ident">abs_info</span>,
+            )
         };
         <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="ident">map</span>.<span class="ident">insert</span>(<span class="ident">abs</span>, <span class="ident">virtio_input_absinfo::from</span>(<span class="ident">abs_info</span>));
@@ -492,7 +556,11 @@
     <span class="kw">let</span> <span class="ident">val</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span>;
     <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel only read the value of the ptr and we check the return value</span>
-        <span class="ident">ioctl_with_ref</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGRAB</span>(), <span class="kw-2">&amp;</span><span class="ident">val</span>)
+        <span class="ident">ioctl_with_ref</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGRAB</span>(),
+            <span class="kw-2">&amp;</span><span class="ident">val</span>,
+        )
     };
     <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="prelude-val">Ok</span>(())
@@ -505,7 +573,11 @@
     <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="comment">// Safe because the kernel only reads the value of the ptr (doesn&#39;t dereference) and</span>
         <span class="comment">// we check the return value</span>
-        <span class="ident">ioctl_with_ptr</span>(<span class="ident">descriptor</span>, <span class="ident">EVIOCGRAB</span>(), <span class="ident">null</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>())
+        <span class="ident">ioctl_with_ptr</span>(
+            <span class="kw-2">&amp;</span><span class="ident">Descriptor</span>(<span class="ident">descriptor</span>.<span class="ident">as_raw_descriptor</span>()),
+            <span class="ident">EVIOCGRAB</span>(),
+            <span class="ident">null</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>(),
+        )
     };
     <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="prelude-val">Ok</span>(())

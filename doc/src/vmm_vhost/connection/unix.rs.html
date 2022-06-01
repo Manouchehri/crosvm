@@ -70,6 +70,9 @@
 <span id="69">69</span>
 <span id="70">70</span>
 <span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -82,12 +85,15 @@
     };
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::master::Master</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::message::MasterReq</span>;
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span>
-    <span class="kw">use</span> <span class="kw">crate</span>::{
-        <span class="ident">slave::SlaveListener</span>,
-        <span class="ident">slave_req_handler</span>::{<span class="ident">SlaveReqHandler</span>, <span class="ident">VhostUserSlaveReqHandler</span>},
-    };
     <span class="kw">use</span> <span class="ident">tempfile</span>::{<span class="ident">Builder</span>, <span class="ident">TempDir</span>};
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span>
+    <span class="kw">use</span> {
+        <span class="kw">crate</span>::{
+            <span class="ident">slave::SlaveListener</span>,
+            <span class="ident">slave_req_handler</span>::{<span class="ident">SlaveReqHandler</span>, <span class="ident">VhostUserSlaveReqHandler</span>},
+        },
+        <span class="ident">std::sync::Arc</span>,
+    };
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">TestMaster</span> <span class="op">=</span> <span class="ident">Master</span><span class="op">&lt;</span><span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span>;
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">TestEndpoint</span> <span class="op">=</span> <span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span>;
@@ -108,7 +114,7 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">create_master_slave_pair</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
-        <span class="ident">backend</span>: <span class="ident">S</span>,
+        <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     ) -&gt; (<span class="ident">TestMaster</span>, <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">TestEndpoint</span><span class="op">&gt;</span>)
     <span class="kw">where</span>
         <span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>,

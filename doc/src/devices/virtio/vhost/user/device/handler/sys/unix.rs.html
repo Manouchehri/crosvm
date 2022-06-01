@@ -389,25 +389,35 @@
 <span id="388">388</span>
 <span id="389">389</span>
 <span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
+<span class="kw">use</span> <span class="ident">std::os::unix::net::UnixListener</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>};
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">clear_fd_flags</span>, <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">SafeDescriptor</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">clear_fd_flags</span>, <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">UnlinkUnixListener</span>,
+};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">AsyncWrapper</span>, <span class="ident">Executor</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost</span>::{
     <span class="ident">connection</span>::{
-        <span class="ident">socket::Listener</span> <span class="kw">as</span> <span class="ident">SocketListener</span>,
         <span class="ident">vfio</span>::{<span class="ident">Endpoint</span> <span class="kw">as</span> <span class="ident">VfioEndpoint</span>, <span class="ident">Listener</span> <span class="kw">as</span> <span class="ident">VfioListener</span>},
-        <span class="ident">Endpoint</span>, <span class="ident">Listener</span>,
+        <span class="ident">Endpoint</span>,
     },
     <span class="ident">message</span>::{<span class="ident">MasterReq</span>, <span class="ident">VhostUserMemoryRegion</span>},
     <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>, <span class="ident">Protocol</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">VhostResult</span>, <span class="ident">SlaveListener</span>, <span class="ident">SlaveReqHandler</span>,
@@ -649,8 +659,9 @@
     <span class="doccomment">/// Creates a listening socket at `socket` and handles incoming messages from the VMM, which are</span>
     <span class="doccomment">/// dispatched to the device backend via the `VhostUserBackend` trait methods.</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">socket</span>: <span class="ident">P</span>, <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">SocketListener::new</span>(<span class="ident">socket</span>, <span class="bool-val">true</span> <span class="comment">/* unlink */</span>)
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create a socket listener&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">UnixListener::bind</span>(<span class="ident">socket</span>)
+            .<span class="ident">map</span>(<span class="ident">UnlinkUnixListener</span>)
+            .<span class="ident">context</span>(<span class="string">&quot;failed to create a UNIX domain socket listener&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">return</span> <span class="self">self</span>.<span class="ident">run_with_listener</span>(<span class="ident">listener</span>, <span class="ident">ex</span>).<span class="kw">await</span>;
     }
 
@@ -658,18 +669,18 @@
     <span class="doccomment">/// VMM, which are dispatched to the device backend via the `VhostUserBackend` trait methods.</span>
     <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_with_listener</span>(
         <span class="self">self</span>,
-        <span class="kw-2">mut</span> <span class="ident">listener</span>: <span class="ident">SocketListener</span>,
+        <span class="ident">listener</span>: <span class="ident">UnlinkUnixListener</span>,
         <span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">ex</span>
+        <span class="kw">let</span> (<span class="ident">socket</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">ex</span>
             .<span class="ident">spawn_blocking</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
                 <span class="ident">listener</span>
                     .<span class="ident">accept</span>()
                     .<span class="ident">context</span>(<span class="string">&quot;failed to accept an incoming connection&quot;</span>)
             })
-            .<span class="kw">await</span><span class="question-mark">?</span>
-            .<span class="ident">ok_or</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;failed to accept an incoming connection&quot;</span>))<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">req_handler</span> <span class="op">=</span> <span class="ident">SlaveReqHandler::from_stream</span>(<span class="ident">socket</span>, <span class="ident">std::sync::Mutex::new</span>(<span class="self">self</span>));
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">req_handler</span> <span class="op">=</span>
+            <span class="ident">SlaveReqHandler::from_stream</span>(<span class="ident">socket</span>, <span class="ident">Arc::new</span>(<span class="ident">std::sync::Mutex::new</span>(<span class="self">self</span>)));
 
         <span class="ident">run_handler</span>(<span class="ident">req_handler</span>, <span class="ident">ex</span>).<span class="kw">await</span>
     }
@@ -687,8 +698,11 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">VfioListener::new</span>(<span class="ident">driver</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to create a VFIO listener: {}&quot;</span>, <span class="ident">e</span>))
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> {
-                <span class="ident">SlaveListener</span>::<span class="op">&lt;</span><span class="ident">VfioEndpoint</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">l</span>, <span class="ident">std::sync::Mutex::new</span>(<span class="self">self</span>))
-                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to create SlaveListener: {}&quot;</span>, <span class="ident">e</span>))
+                <span class="ident">SlaveListener</span>::<span class="op">&lt;</span><span class="ident">VfioEndpoint</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(
+                    <span class="ident">l</span>,
+                    <span class="ident">Arc::new</span>(<span class="ident">std::sync::Mutex::new</span>(<span class="self">self</span>)),
+                )
+                .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to create SlaveListener: {}&quot;</span>, <span class="ident">e</span>))
             })<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">req_handler</span> <span class="op">=</span> <span class="ident">listener</span>
@@ -761,7 +775,9 @@
         });
 
         <span class="comment">// Device side</span>
-        <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">std::sync::Mutex::new</span>(<span class="ident">DeviceRequestHandler::new</span>(<span class="ident">FakeBackend::new</span>()));
+        <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">std::sync::Mutex::new</span>(<span class="ident">DeviceRequestHandler::new</span>(
+            <span class="ident">FakeBackend::new</span>(),
+        )));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">SlaveListener</span>::<span class="op">&lt;</span><span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">listener</span>, <span class="ident">handler</span>).<span class="ident">unwrap</span>();
 
         <span class="comment">// Notify listener is ready.</span>

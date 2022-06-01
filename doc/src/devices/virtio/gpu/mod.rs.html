@@ -1345,11 +1345,64 @@
 <span id="1344">1344</span>
 <span id="1345">1345</span>
 <span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
+<span id="1357">1357</span>
+<span id="1358">1358</span>
+<span id="1359">1359</span>
+<span id="1360">1360</span>
+<span id="1361">1361</span>
+<span id="1362">1362</span>
+<span id="1363">1363</span>
+<span id="1364">1364</span>
+<span id="1365">1365</span>
+<span id="1366">1366</span>
+<span id="1367">1367</span>
+<span id="1368">1368</span>
+<span id="1369">1369</span>
+<span id="1370">1370</span>
+<span id="1371">1371</span>
+<span id="1372">1372</span>
+<span id="1373">1373</span>
+<span id="1374">1374</span>
+<span id="1375">1375</span>
+<span id="1376">1376</span>
+<span id="1377">1377</span>
+<span id="1378">1378</span>
+<span id="1379">1379</span>
+<span id="1380">1380</span>
+<span id="1381">1381</span>
+<span id="1382">1382</span>
+<span id="1383">1383</span>
+<span id="1384">1384</span>
+<span id="1385">1385</span>
+<span id="1386">1386</span>
+<span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
+<span id="1394">1394</span>
+<span id="1395">1395</span>
+<span id="1396">1396</span>
+<span id="1397">1397</span>
+<span id="1398">1398</span>
+<span id="1399">1399</span>
+<span id="1400">1400</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">mod</span> <span class="ident">parameters</span>;
 <span class="kw">mod</span> <span class="ident">protocol</span>;
 <span class="kw">mod</span> <span class="ident">udmabuf</span>;
 <span class="kw">mod</span> <span class="ident">udmabuf_bindings</span>;
@@ -1406,16 +1459,47 @@
     <span class="ident">PciCapability</span>,
 };
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">parameters</span>::{
-    <span class="ident">DisplayParameters</span> <span class="kw">as</span> <span class="ident">GpuDisplayParameters</span>, <span class="ident">GpuParameters</span>, <span class="ident">DEFAULT_DISPLAY_HEIGHT</span>,
-    <span class="ident">DEFAULT_DISPLAY_WIDTH</span>,
-};
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_DISPLAY_WIDTH</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1280</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DEFAULT_DISPLAY_HEIGHT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1024</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">GpuMode</span> {
     <span class="ident">Mode2D</span>,
     <span class="ident">ModeVirglRenderer</span>,
     <span class="ident">ModeGfxstream</span>,
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GpuDisplayParameters</span> {
+    <span class="kw">pub</span> <span class="ident">width</span>: <span class="ident">u32</span>,
+    <span class="kw">pub</span> <span class="ident">height</span>: <span class="ident">u32</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GpuDisplayParameters</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">GpuDisplayParameters</span> {
+            <span class="ident">width</span>: <span class="ident">DEFAULT_DISPLAY_WIDTH</span>,
+            <span class="ident">height</span>: <span class="ident">DEFAULT_DISPLAY_HEIGHT</span>,
+        }
+    }
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GpuParameters</span> {
+    <span class="kw">pub</span> <span class="ident">displays</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GpuDisplayParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">renderer_use_egl</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">renderer_use_gles</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">renderer_use_glx</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">renderer_use_surfaceless</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">gfxstream_use_guest_angle</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">gfxstream_use_syncfd</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">use_vulkan</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">udmabuf</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">GpuMode</span>,
+    <span class="kw">pub</span> <span class="ident">cache_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cache_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">context_mask</span>: <span class="ident">u64</span>,
 }
 
 <span class="comment">// First queue is for virtio gpu commands. Second queue is for cursor commands, which we expect</span>
@@ -1426,6 +1510,30 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_NUM</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>;
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GpuParameters</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">GpuParameters</span> {
+            <span class="ident">displays</span>: <span class="macro">vec!</span>[],
+            <span class="ident">renderer_use_egl</span>: <span class="bool-val">true</span>,
+            <span class="ident">renderer_use_gles</span>: <span class="bool-val">true</span>,
+            <span class="ident">renderer_use_glx</span>: <span class="bool-val">false</span>,
+            <span class="ident">renderer_use_surfaceless</span>: <span class="bool-val">true</span>,
+            <span class="ident">gfxstream_use_guest_angle</span>: <span class="bool-val">false</span>,
+            <span class="ident">gfxstream_use_syncfd</span>: <span class="bool-val">true</span>,
+            <span class="ident">use_vulkan</span>: <span class="bool-val">false</span>,
+            <span class="ident">mode</span>: <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;virgl_renderer&quot;</span>) {
+                <span class="ident">GpuMode::ModeVirglRenderer</span>
+            } <span class="kw">else</span> {
+                <span class="ident">GpuMode::Mode2D</span>
+            },
+            <span class="ident">cache_path</span>: <span class="prelude-val">None</span>,
+            <span class="ident">cache_size</span>: <span class="prelude-val">None</span>,
+            <span class="ident">udmabuf</span>: <span class="bool-val">false</span>,
+            <span class="ident">context_mask</span>: <span class="number">0</span>,
+        }
+    }
+}
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VirtioScanoutBlobData</span> {

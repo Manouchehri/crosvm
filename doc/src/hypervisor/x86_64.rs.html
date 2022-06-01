@@ -633,6 +633,7 @@
 <span id="632">632</span>
 <span id="633">633</span>
 <span id="634">634</span>
+<span id="635">635</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -645,8 +646,9 @@
 <span class="kw">use</span> <span class="ident">bit_field</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">downcast_rs::impl_downcast</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Hypervisor</span>, <span class="ident">IrqRoute</span>, <span class="ident">IrqSource</span>, <span class="ident">IrqSourceChip</span>, <span class="ident">Vcpu</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
+
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Hypervisor</span>, <span class="ident">IrqRoute</span>, <span class="ident">IrqSource</span>, <span class="ident">IrqSourceChip</span>, <span class="ident">Vcpu</span>, <span class="ident">Vm</span>};
 
 <span class="doccomment">/// A trait for managing cpuids for an x86_64 hypervisor and for checking its capabilities.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HypervisorX86_64</span>: <span class="ident">Hypervisor</span> {

@@ -141,7 +141,6 @@
 <span id="140">140</span>
 <span id="141">141</span>
 <span id="142">142</span>
-<span id="143">143</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -232,8 +231,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">set_nonblocking</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_block</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// `accept` will never block on a VFIO connection.</span>
-        <span class="prelude-val">Ok</span>(())
+        <span class="macro">unimplemented!</span>(<span class="string">&quot;set_nonblocking&quot;</span>);
     }
 }
 
