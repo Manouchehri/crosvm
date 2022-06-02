@@ -812,6 +812,18 @@
 <span id="811">811</span>
 <span id="812">812</span>
 <span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -953,12 +965,6 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">struct</span> <span class="ident">virtio_balloon_event_header</span> {
     <span class="ident">evt_type</span>: <span class="ident">Le32</span>,
-}
-
-<span class="kw">fn</span> <span class="ident">send_adjusted_response</span>(<span class="ident">tube</span>: <span class="kw-2">&amp;</span><span class="ident">Tube</span>, <span class="ident">num_pages</span>: <span class="ident">u32</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">base::TubeError</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">num_bytes</span> <span class="op">=</span> (<span class="ident">num_pages</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">VIRTIO_BALLOON_PFN_SHIFT</span>;
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">BalloonTubeResult::Adjusted</span> { <span class="ident">num_bytes</span> };
-    <span class="ident">tube</span>.<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>)
 }
 
 <span class="comment">// Safe because it only has data and has no implicit padding.</span>
@@ -1103,7 +1109,7 @@
     <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">Queue</span>,
     <span class="kw-2">mut</span> <span class="ident">queue_event</span>: <span class="ident">EventAsync</span>,
     <span class="kw-2">mut</span> <span class="ident">stats_rx</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">Tube</span>,
+    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">AsyncTube</span>,
     <span class="ident">state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">BalloonState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">interrupt</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Interrupt</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 ) {
@@ -1153,7 +1159,8 @@
             <span class="ident">stats</span>,
             <span class="ident">id</span>,
         };
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>) {
+        <span class="kw">let</span> <span class="ident">send_result</span> <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">send</span>(<span class="ident">result</span>).<span class="kw">await</span>;
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">send_result</span> {
             <span class="macro">error!</span>(<span class="string">&quot;failed to send stats result: {}&quot;</span>, <span class="ident">e</span>);
         }
     }
@@ -1163,7 +1170,7 @@
     <span class="ident">state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">BalloonState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">interrupt</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Interrupt</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">r</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Reader</span>,
-    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">Tube</span>,
+    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">AsyncTube</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">read_obj</span>::<span class="op">&lt;</span><span class="ident">virtio_balloon_event_header</span><span class="op">&gt;</span>() {
         <span class="prelude-val">Ok</span>(<span class="ident">hdr</span>) =&gt; <span class="kw">match</span> <span class="ident">hdr</span>.<span class="ident">evt_type</span>.<span class="ident">to_native</span>() {
@@ -1177,7 +1184,8 @@
                     <span class="ident">interrupt</span>.<span class="ident">borrow</span>().<span class="ident">signal_config_changed</span>();
 
                     <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">=</span> <span class="bool-val">false</span>;
-                    <span class="kw">return</span> <span class="ident">sys::send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">actual_pages</span>)
+                    <span class="kw">return</span> <span class="ident">sys::send_adjusted_response_async</span>(<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">actual_pages</span>)
+                        .<span class="kw">await</span>
                         .<span class="ident">map_err</span>(<span class="ident">BalloonError::SendResponse</span>);
                 }
             }
@@ -1197,7 +1205,7 @@
     <span class="kw-2">mut</span> <span class="ident">queue_event</span>: <span class="ident">EventAsync</span>,
     <span class="ident">state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">BalloonState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">interrupt</span>: <span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Interrupt</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">Tube</span>,
+    <span class="ident">command_tube</span>: <span class="kw-2">&amp;</span><span class="ident">AsyncTube</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">loop</span> {
         <span class="kw">let</span> <span class="ident">avail_desc</span> <span class="op">=</span> <span class="ident">queue</span>
@@ -1266,6 +1274,7 @@
     <span class="kw-2">mut</span> <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="kw-2">mut</span> <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
     <span class="ident">command_tube</span>: <span class="ident">Tube</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> <span class="ident">dynamic_mapping_tube</span>: <span class="ident">Tube</span>,
     <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">interrupt</span>: <span class="ident">Interrupt</span>,
     <span class="ident">kill_evt</span>: <span class="ident">Event</span>,
@@ -1290,9 +1299,14 @@
             <span class="kw-2">&amp;</span><span class="ident">inflate_tube</span>,
             <span class="ident">interrupt</span>.<span class="ident">clone</span>(),
             <span class="op">|</span><span class="ident">guest_address</span>, <span class="ident">len</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">remove_range</span>(<span class="ident">guest_address</span>, <span class="ident">len</span>) {
-                    <span class="macro">warn!</span>(<span class="string">&quot;Marking pages unused failed: {}, addr={}&quot;</span>, <span class="ident">e</span>, <span class="ident">guest_address</span>);
-                }
+                <span class="ident">sys::free_memory</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">guest_address</span>,
+                    <span class="ident">len</span>,
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+                    <span class="ident">dynamic_mapping_tube</span>,
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+                    <span class="kw-2">&amp;</span><span class="ident">mem</span>,
+                )
             },
         );
         <span class="macro">pin_mut!</span>(<span class="ident">inflate</span>);
@@ -1306,7 +1320,14 @@
             <span class="ident">deflate_event</span>,
             <span class="kw-2">&amp;</span><span class="prelude-val">None</span>,
             <span class="ident">interrupt</span>.<span class="ident">clone</span>(),
-            <span class="op">|</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">|</span> {}, <span class="comment">// Ignore these.</span>
+            <span class="op">|</span><span class="ident">guest_address</span>, <span class="ident">len</span><span class="op">|</span> {
+                <span class="ident">sys::reclaim_memory</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">guest_address</span>,
+                    <span class="ident">len</span>,
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+                    <span class="ident">dynamic_mapping_tube</span>,
+                )
+            },
         );
         <span class="macro">pin_mut!</span>(<span class="ident">deflate</span>);
 
@@ -1373,6 +1394,8 @@
 <span class="doccomment">/// Virtio device for memory balloon inflation/deflation.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Balloon</span> {
     <span class="ident">command_tube</span>: <span class="ident">Tube</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="ident">dynamic_mapping_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">BalloonState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">features</span>: <span class="ident">u64</span>,
@@ -1399,6 +1422,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">base_features</span>: <span class="ident">u64</span>,
         <span class="ident">command_tube</span>: <span class="ident">Tube</span>,
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> <span class="ident">dynamic_mapping_tube</span>: <span class="ident">Tube</span>,
         <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
         <span class="ident">init_balloon_size</span>: <span class="ident">u64</span>,
         <span class="ident">mode</span>: <span class="ident">BalloonMode</span>,
@@ -1415,6 +1439,8 @@
 
         <span class="prelude-val">Ok</span>(<span class="ident">Balloon</span> {
             <span class="ident">command_tube</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">dynamic_mapping_tube</span>: <span class="prelude-val">Some</span>(<span class="ident">dynamic_mapping_tube</span>),
             <span class="ident">inflate_tube</span>,
             <span class="ident">state</span>: <span class="ident">Arc::new</span>(<span class="ident">AsyncMutex::new</span>(<span class="ident">BalloonState</span> {
                 <span class="ident">num_pages</span>: (<span class="ident">init_balloon_size</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">VIRTIO_BALLOON_PFN_SHIFT</span>) <span class="kw">as</span> <span class="ident">u32</span>,
@@ -1478,15 +1504,8 @@
     <span class="kw">fn</span> <span class="ident">write_config</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">config</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_config</span>();
         <span class="ident">copy_config</span>(<span class="ident">config</span>.<span class="ident">as_mut_slice</span>(), <span class="ident">offset</span>, <span class="ident">data</span>, <span class="number">0</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">lock</span>());
-        <span class="ident">state</span>.<span class="ident">actual_pages</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">actual</span>.<span class="ident">to_native</span>();
 
-        <span class="kw">if</span> <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">&amp;&amp;</span> <span class="ident">state</span>.<span class="ident">actual_pages</span> <span class="op">==</span> <span class="ident">state</span>.<span class="ident">num_pages</span> {
-            <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">=</span> <span class="bool-val">false</span>;
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">send_adjusted_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">num_pages</span>) {
-                <span class="macro">error!</span>(<span class="string">&quot;Failed to send response {:?}&quot;</span>, <span class="ident">e</span>);
-            }
-        }
+        <span class="ident">sys::send_adjusted_response_if_needed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">state</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">command_tube</span>, <span class="ident">config</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
@@ -1523,6 +1542,7 @@
         <span class="self">self</span>.<span class="ident">kill_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">self_kill_evt</span>);
 
         <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">clone</span>();
+
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
         <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">command_tube</span>.<span class="ident">try_clone</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">tube</span>) =&gt; <span class="ident">tube</span>,
@@ -1531,6 +1551,8 @@
                 <span class="kw">return</span>;
             }
         };
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+        <span class="kw">let</span> <span class="ident">mapping_tube</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">dynamic_mapping_tube</span>.<span class="ident">take</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">inflate_tube</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inflate_tube</span>.<span class="ident">take</span>();
         <span class="kw">let</span> <span class="ident">worker_result</span> <span class="op">=</span> <span class="ident">thread::Builder::new</span>()
             .<span class="ident">name</span>(<span class="string">&quot;virtio_balloon&quot;</span>.<span class="ident">to_string</span>())
@@ -1539,6 +1561,8 @@
                     <span class="ident">queue_evts</span>,
                     <span class="ident">queues</span>,
                     <span class="ident">command_tube</span>,
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+                    <span class="ident">mapping_tube</span>,
                     <span class="ident">inflate_tube</span>,
                     <span class="ident">interrupt</span>,
                     <span class="ident">kill_evt</span>,

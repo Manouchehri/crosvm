@@ -616,7 +616,7 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="ident">DescriptorChain</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>, <span class="ident">Writer</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le32</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
@@ -721,7 +721,7 @@
             .<span class="ident">vios_client</span>
             .<span class="ident">get_event_notifier</span>()
             .<span class="ident">map_err</span>(<span class="ident">SoundError::ClientEventNotifier</span>)<span class="question-mark">?</span>;
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">ControlQAvailable</span>,
             <span class="ident">EventQAvailable</span>,
@@ -1144,7 +1144,7 @@
     <span class="ident">senders</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">StreamMsg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">kill_evt</span>: <span class="ident">Event</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
     <span class="kw">enum</span> <span class="ident">Token</span> {
         <span class="ident">TxQAvailable</span>,
         <span class="ident">RxQAvailable</span>,

@@ -1020,8 +1020,8 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">pipe</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">FileFlags</span>, <span class="ident">FileReadWriteVolatile</span>, <span class="ident">FromRawDescriptor</span>,
-    <span class="ident">PollToken</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">ScmSocket</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">error</span>, <span class="ident">pipe</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">FileFlags</span>, <span class="ident">FileReadWriteVolatile</span>,
+    <span class="ident">FromRawDescriptor</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">ScmSocket</span>, <span class="ident">WaitContext</span>,
 };
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::cross_domain::cross_domain_protocol</span>::<span class="kw-2">*</span>;
@@ -1039,7 +1039,7 @@
 <span class="kw">const</span> <span class="ident">CROSS_DOMAIN_MAX_SEND_RECV_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span>
     <span class="ident">CROSS_DOMAIN_DEFAULT_BUFFER_SIZE</span> <span class="op">-</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">CrossDomainSendReceive</span><span class="op">&gt;</span>();
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
 <span class="kw">enum</span> <span class="ident">CrossDomainToken</span> {
     <span class="ident">ContextChannel</span>,
     <span class="ident">WaylandReadPipe</span>(<span class="ident">u32</span>),

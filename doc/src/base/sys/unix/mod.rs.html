@@ -679,7 +679,6 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
-<span id="681">681</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -732,7 +731,6 @@
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::errno</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>, <span class="kw-2">*</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">acpi_event</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">base_poll_token_derive</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">capabilities::drop_capabilities</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">descriptor</span>::<span class="kw-2">*</span>;
 <span class="comment">// EventFd is deprecated. Use Event instead. EventFd will be removed as soon as rest of the current</span>
@@ -744,7 +742,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ioctl</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">netlink</span>::<span class="kw-2">*</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll</span>::{<span class="ident">PollContext</span> <span class="kw">as</span> <span class="ident">EventContext</span>, <span class="ident">PollToken</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">poll</span>::{<span class="ident">PollContext</span> <span class="kw">as</span> <span class="ident">EventContext</span>, <span class="ident">WatchingEvents</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">priority</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sched</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">scoped_signal_handler</span>::<span class="kw-2">*</span>;

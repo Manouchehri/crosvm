@@ -1370,7 +1370,7 @@
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
 
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">ExternalMapping</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>,
+    <span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">ExternalMapping</span>, <span class="ident">RawDescriptor</span>,
     <span class="ident">SafeDescriptor</span>, <span class="ident">SendTube</span>, <span class="ident">Tube</span>, <span class="ident">VmEventType</span>, <span class="ident">WaitContext</span>,
 };
 
@@ -2103,7 +2103,7 @@
 
 <span class="kw">impl</span> <span class="ident">Worker</span> {
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">CtrlQueue</span>,
             <span class="ident">CursorQueue</span>,

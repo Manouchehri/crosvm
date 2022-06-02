@@ -392,80 +392,6 @@
 <span id="391">391</span>
 <span id="392">392</span>
 <span id="393">393</span>
-<span id="394">394</span>
-<span id="395">395</span>
-<span id="396">396</span>
-<span id="397">397</span>
-<span id="398">398</span>
-<span id="399">399</span>
-<span id="400">400</span>
-<span id="401">401</span>
-<span id="402">402</span>
-<span id="403">403</span>
-<span id="404">404</span>
-<span id="405">405</span>
-<span id="406">406</span>
-<span id="407">407</span>
-<span id="408">408</span>
-<span id="409">409</span>
-<span id="410">410</span>
-<span id="411">411</span>
-<span id="412">412</span>
-<span id="413">413</span>
-<span id="414">414</span>
-<span id="415">415</span>
-<span id="416">416</span>
-<span id="417">417</span>
-<span id="418">418</span>
-<span id="419">419</span>
-<span id="420">420</span>
-<span id="421">421</span>
-<span id="422">422</span>
-<span id="423">423</span>
-<span id="424">424</span>
-<span id="425">425</span>
-<span id="426">426</span>
-<span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
-<span id="437">437</span>
-<span id="438">438</span>
-<span id="439">439</span>
-<span id="440">440</span>
-<span id="441">441</span>
-<span id="442">442</span>
-<span id="443">443</span>
-<span id="444">444</span>
-<span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
-<span id="451">451</span>
-<span id="452">452</span>
-<span id="453">453</span>
-<span id="454">454</span>
-<span id="455">455</span>
-<span id="456">456</span>
-<span id="457">457</span>
-<span id="458">458</span>
-<span id="459">459</span>
-<span id="460">460</span>
-<span id="461">461</span>
-<span id="462">462</span>
-<span id="463">463</span>
-<span id="464">464</span>
-<span id="465">465</span>
-<span id="466">466</span>
-<span id="467">467</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -482,7 +408,8 @@
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">errno_result</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">AsRawDescriptor</span>, <span class="ident">EventType</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">TriggeredEvent</span>,
+    <span class="ident">AsRawDescriptor</span>, <span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>, <span class="ident">RawDescriptor</span>,
+    <span class="ident">TriggeredEvent</span>,
 };
 
 <span class="kw">const</span> <span class="ident">POLL_CONTEXT_MAX_EVENTS</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">16</span>;
@@ -497,81 +424,6 @@
         };
         <span class="ident">v</span> <span class="kw">as</span> <span class="ident">u32</span>
     }
-}
-
-<span class="doccomment">/// Trait for a token that can be associated with an `fd` in a `PollContext`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Simple enums that have no or primitive variant data data can use the `#[derive(PollToken)]`</span>
-<span class="doccomment">/// custom derive to implement this trait. See</span>
-<span class="doccomment">/// [base_poll_token_derive::poll_token](../poll_token_derive/fn.poll_token.html) for details.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">PollToken</span> {
-    <span class="doccomment">/// Converts this token into a u64 that can be turned back into a token via `from_raw_token`.</span>
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span>;
-
-    <span class="doccomment">/// Converts a raw token as returned from `as_raw_token` back into a token.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// It is invalid to give a raw token that was not returned via `as_raw_token` from the same</span>
-    <span class="doccomment">/// `Self`. The implementation can expect that this will never happen as a result of its usage</span>
-    <span class="doccomment">/// in `PollContext`.</span>
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span>;
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">usize</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="ident">u64</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">data</span> <span class="kw">as</span> <span class="self">Self</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">u64</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="kw-2">*</span><span class="self">self</span> <span class="kw">as</span> <span class="ident">u64</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">data</span> <span class="kw">as</span> <span class="self">Self</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">u32</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">u64::from</span>(<span class="kw-2">*</span><span class="self">self</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">data</span> <span class="kw">as</span> <span class="self">Self</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">u16</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">u64::from</span>(<span class="kw-2">*</span><span class="self">self</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">data</span> <span class="kw">as</span> <span class="self">Self</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">u8</span> {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">u64::from</span>(<span class="kw-2">*</span><span class="self">self</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident">data</span> <span class="kw">as</span> <span class="self">Self</span>
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> () {
-    <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="number">0</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">from_raw_token</span>(<span class="ident">_data</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {}
 }
 
 <span class="doccomment">/// Watching events taken by PollContext.</span>
@@ -617,7 +469,7 @@
     <span class="ident">tokens</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span>[<span class="ident">T</span>]<span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates a new `PollContext`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// Safe because we check the return value.</span>
@@ -820,13 +672,13 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
         <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">as_raw_descriptor</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PollToken</span><span class="op">&gt;</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">EventToken</span><span class="op">&gt;</span> <span class="ident">IntoRawDescriptor</span> <span class="kw">for</span> <span class="ident">PollContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_raw_descriptor</span>(<span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
         <span class="self">self</span>.<span class="ident">epoll_ctx</span>.<span class="ident">into_raw_descriptor</span>()
     }
@@ -835,7 +687,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident"><span class="kw">super</span>::Event</span>, <span class="kw-2">*</span>};
-    <span class="kw">use</span> <span class="ident">base_poll_token_derive::PollToken</span>;
+    <span class="kw">use</span> <span class="ident">base_event_token_derive::EventToken</span>;
     <span class="kw">use</span> <span class="ident">std::time::Instant</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -897,11 +749,11 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">poll_token_derive</span>() {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">event_token_derive</span>() {
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">EmptyToken</span> {}
 
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>, <span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">Alpha</span>,
             <span class="ident">Beta</span>,

@@ -272,10 +272,10 @@
 
 <span class="kw">use</span> <span class="ident">uuid::Uuid</span>;
 
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::Protection</span>;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">file_punch_hole</span>, <span class="ident">file_write_zeroes_at</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">get_cpu_affinity</span>, <span class="ident">set_cpu_affinity</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">with_as_descriptor</span>, <span class="ident">with_raw_descriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">INVALID_DESCRIPTOR</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">PollToken</span>, <span class="ident">Protection</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::descriptor</span>::{
     <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Descriptor</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">IntoRawDescriptor</span>,

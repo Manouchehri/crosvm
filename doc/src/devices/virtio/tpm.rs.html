@@ -295,7 +295,7 @@
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
@@ -389,7 +389,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>, <span class="ident">Debug</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>, <span class="ident">Debug</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="comment">// A request is ready on the queue.</span>
             <span class="ident">QueueAvailable</span>,

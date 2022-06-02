@@ -4090,7 +4090,7 @@
     <span class="ident">vcpu_ids</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="ident">iommu_host_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ExitState</span><span class="op">&gt;</span> {
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
     <span class="kw">enum</span> <span class="ident">Token</span> {
         <span class="ident">VmEvent</span>,
         <span class="ident">Suspend</span>,

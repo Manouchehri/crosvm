@@ -527,7 +527,7 @@
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">FileSync</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">FileSync</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le16</span>, <span class="ident">Le32</span>};
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -743,7 +743,7 @@
 
 <span class="kw">impl</span> <span class="ident">Worker</span> {
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">ReceiveQueueAvailable</span>,
             <span class="ident">TransmitQueueAvailable</span>,

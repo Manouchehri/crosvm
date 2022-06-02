@@ -899,8 +899,8 @@
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">add_fd_flags</span>, <span class="ident">block_signal</span>, <span class="ident">clear_signal</span>, <span class="ident">drop_capabilities</span>, <span class="ident">enable_core_scheduling</span>, <span class="ident">error</span>,
     <span class="ident">getegid</span>, <span class="ident">geteuid</span>, <span class="ident">info</span>, <span class="ident">pipe</span>, <span class="ident">register_rt_signal_handler</span>, <span class="ident">validate_raw_descriptor</span>, <span class="ident">warn</span>,
-    <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">Killable</span>, <span class="ident">MmapError</span>,
-    <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">SignalFd</span>, <span class="ident">WaitContext</span>, <span class="ident">SIGRTMIN</span>,
+    <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">Killable</span>,
+    <span class="ident">MmapError</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">SignalFd</span>, <span class="ident">WaitContext</span>, <span class="ident">SIGRTMIN</span>,
 };
 <span class="kw">use</span> <span class="ident">kvm</span>::{<span class="ident">Cap</span>, <span class="ident">Datamatch</span>, <span class="ident">IoeventAddress</span>, <span class="ident">Kvm</span>, <span class="ident">Vcpu</span>, <span class="ident">VcpuExit</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
@@ -1344,7 +1344,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
 <span class="kw">enum</span> <span class="ident">Token</span> {
     <span class="ident">Exit</span>,
     <span class="ident">ChildSignal</span>,

@@ -1166,7 +1166,7 @@
 <span class="kw">use</span> <span class="ident">base::Error</span> <span class="kw">as</span> <span class="ident">SysError</span>;
 <span class="kw">use</span> <span class="ident">base::Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Timer</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Timer</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
 };
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 <span class="kw">use</span> <span class="ident">disk::DiskFile</span>;
@@ -1443,7 +1443,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">queue_evt</span>: <span class="ident">Event</span>, <span class="ident">kill_evt</span>: <span class="ident">Event</span>) {
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">FlushTimer</span>,
             <span class="ident">QueueAvailable</span>,

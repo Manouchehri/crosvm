@@ -1932,7 +1932,7 @@
 <span class="kw">use</span> <span class="ident">base::ioctl_iow_nr</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">error</span>, <span class="ident">ioctl_iowr_nr</span>, <span class="ident">ioctl_with_ref</span>, <span class="ident">pipe</span>, <span class="ident">round_up_to_page_size</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>,
-    <span class="ident">Error</span>, <span class="ident">Event</span>, <span class="ident">EventType</span>, <span class="ident">FileFlags</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
+    <span class="ident">Error</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">FileFlags</span>, <span class="ident">FromRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>,
     <span class="ident">ScmSocket</span>, <span class="ident">SharedMemory</span>, <span class="ident">SharedMemoryUnix</span>, <span class="ident">Tube</span>, <span class="ident">TubeError</span>, <span class="ident">WaitContext</span>,
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
@@ -3526,7 +3526,7 @@
     <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>, <span class="ident">kill_evt</span>: <span class="ident">Event</span>) {
         <span class="kw">let</span> <span class="ident">in_queue_evt</span> <span class="op">=</span> <span class="ident">queue_evts</span>.<span class="ident">remove</span>(<span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">out_queue_evt</span> <span class="op">=</span> <span class="ident">queue_evts</span>.<span class="ident">remove</span>(<span class="number">0</span>);
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="ident">InQueue</span>,
             <span class="ident">OutQueue</span>,

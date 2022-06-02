@@ -262,7 +262,7 @@
 <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">syscall</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">syscall</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">fuse::filesystem</span>::{<span class="ident">FileSystem</span>, <span class="ident">ZeroCopyReader</span>, <span class="ident">ZeroCopyWriter</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vm_control</span>::{<span class="ident">FsMappingRequest</span>, <span class="ident">VmResponse</span>};
@@ -456,7 +456,7 @@
         <span class="comment">// Safe because this doesn&#39;t modify any memory and we check the return value.</span>
         <span class="macro">syscall!</span>(<span class="kw">unsafe</span> { <span class="ident">libc::unshare</span>(<span class="ident">libc::CLONE_FS</span>) }).<span class="ident">map_err</span>(<span class="ident">Error::UnshareFromParent</span>)<span class="question-mark">?</span>;
 
-        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+        <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
         <span class="kw">enum</span> <span class="ident">Token</span> {
             <span class="comment">// A request is ready on the queue.</span>
             <span class="ident">QueueReady</span>,

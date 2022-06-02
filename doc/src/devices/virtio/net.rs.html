@@ -819,6 +819,8 @@
 <span id="818">818</span>
 <span id="819">819</span>
 <span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -832,7 +834,9 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
 <span class="kw">use</span> <span class="ident">base::Error</span> <span class="kw">as</span> <span class="ident">SysError</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventType</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>,
+};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le16</span>, <span class="ident">Le64</span>};
 <span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">TapError</span>, <span class="ident">MacAddress</span>, <span class="ident">TapT</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -1133,7 +1137,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Token</span> {
     <span class="comment">// A frame is available for reading from the tap device to receive in the guest.</span>
     <span class="ident">RxTap</span>,

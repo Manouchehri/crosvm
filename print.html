@@ -975,7 +975,7 @@ added to the context along with an associated token, whose type is the type para
 <code>WaitContext</code>. A call to the <code>wait</code> function will block until at least one of the waitable objects
 has become signaled and will return a collection of the tokens associated with those objects. The
 tokens used with <code>WaitContext</code> must be convertible to and from a <code>u64</code>. There is a custom derive
-<code>#[derive(PollToken)]</code> which can be applied to an <code>enum</code> declaration that makes it easy to use your
+<code>#[derive(EventToken)]</code> which can be applied to an <code>enum</code> declaration that makes it easy to use your
 own enum in a <code>WaitContext</code>.</p>
 <h4 id="linux-platform-limitations"><a class="header" href="#linux-platform-limitations">Linux Platform Limitations</a></h4>
 <p>The limitations of <code>WaitContext</code> on Linux are the same as the limitations of <code>epoll</code>. The same FD

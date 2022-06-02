@@ -85,7 +85,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::metrics_requests::MetricsRequest</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::RequestHandler</span>;
 <span class="kw">use</span> <span class="ident">anyhow::Result</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">PollToken</span>, <span class="ident">Tube</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">EventToken</span>, <span class="ident">Tube</span>};
 
 <span class="doccomment">/// Handles incoming requests to log metrics</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">MetricsRequestHandler</span> {
@@ -101,7 +101,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">closed_tubes</span>: <span class="ident">usize</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">MetricsControllerToken</span> {
     <span class="doccomment">/// Triggered when the agent&#39;s pipe is readable (e.g. read_notifier).</span>
     <span class="ident">Agent</span>(<span class="ident">usize</span>),

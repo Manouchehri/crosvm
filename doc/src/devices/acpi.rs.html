@@ -891,7 +891,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">IrqLevelEvent</span>};
 <span class="kw">use</span> <span class="ident">acpi_tables</span>::{<span class="ident">aml</span>, <span class="ident">aml::Aml</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">SendTube</span>, <span class="ident">VmEventType</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">warn</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">SendTube</span>, <span class="ident">VmEventType</span>, <span class="ident">WaitContext</span>,
 };
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">AcpiNotifyEvent</span>, <span class="ident">NetlinkGenericSocket</span>};
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
@@ -1077,7 +1077,7 @@
         }
     };
 
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
     <span class="kw">enum</span> <span class="ident">Token</span> {
         <span class="ident">AcpiEvent</span>,
         <span class="ident">InterruptResample</span>,

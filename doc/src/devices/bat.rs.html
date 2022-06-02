@@ -498,7 +498,7 @@
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">IrqLevelEvent</span>};
 <span class="kw">use</span> <span class="ident">acpi_tables</span>::{<span class="ident">aml</span>, <span class="ident">aml::Aml</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
+    <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
 };
 <span class="kw">use</span> <span class="ident">power_monitor</span>::{<span class="ident">BatteryStatus</span>, <span class="ident">CreatePowerMonitorFn</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -662,7 +662,7 @@
         <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
     };
 
-    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
     <span class="kw">enum</span> <span class="ident">Token</span> {
         <span class="ident">Commands</span>,
         <span class="ident">Resample</span>,

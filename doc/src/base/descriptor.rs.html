@@ -165,7 +165,7 @@
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">PollToken</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">fs::File</span>,
@@ -314,7 +314,7 @@
 }
 
 <span class="doccomment">/// Implement token for implementations that wish to use this struct as such</span>
-<span class="kw">impl</span> <span class="ident">PollToken</span> <span class="kw">for</span> <span class="ident">Descriptor</span> {
+<span class="kw">impl</span> <span class="ident">EventToken</span> <span class="kw">for</span> <span class="ident">Descriptor</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u64</span>
     }

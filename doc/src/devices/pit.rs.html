@@ -1469,7 +1469,7 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">PollToken</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">bit_field::BitField1</span>;
 <span class="kw">use</span> <span class="ident">bit_field</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">PitChannelState</span>, <span class="ident">PitRWMode</span>, <span class="ident">PitRWState</span>, <span class="ident">PitState</span>};
@@ -1607,7 +1607,7 @@
 
 <span class="kw">const</span> <span class="ident">MAX_TIMER_FREQ</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">65536</span>;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PollToken</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">EventToken</span>)]</span>
 <span class="kw">enum</span> <span class="ident">Token</span> {
     <span class="comment">// The timer expired.</span>
     <span class="ident">TimerExpire</span>,
