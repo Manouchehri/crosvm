@@ -155,6 +155,8 @@
 <span id="154">154</span>
 <span id="155">155</span>
 <span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -199,6 +201,8 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wait_context</span>::{<span class="ident">EventToken</span>, <span class="ident">EventType</span>, <span class="ident">TriggeredEvent</span>, <span class="ident">WaitContext</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">write_zeroes</span>::{<span class="ident">PunchHole</span>, <span class="ident">WriteZeroesAt</span>};
 
+<span class="comment">// TODO(b/233233301): reorganize platform specific exports under platform</span>
+<span class="comment">// namespaces instead of exposing them directly in base::.</span>
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys::unix</span>;
