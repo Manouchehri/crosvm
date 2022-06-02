@@ -480,6 +480,19 @@
 <span id="479">479</span>
 <span id="480">480</span>
 <span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -506,6 +519,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
     <span class="self">self</span>, <span class="ident">gpu</span>,
     <span class="ident">vhost::user::device::handler</span>::{<span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>},
+    <span class="ident">vhost::user::device::vvu::pci::VvuPciDevice</span>,
     <span class="ident">vhost::user::device::wl::parse_wayland_sock</span>,
     <span class="ident">DescriptorChain</span>, <span class="ident">Gpu</span>, <span class="ident">GpuDisplayParameters</span>, <span class="ident">GpuParameters</span>, <span class="ident">Queue</span>, <span class="ident">QueueReader</span>, <span class="ident">VirtioDevice</span>,
 };
@@ -825,7 +839,10 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Options</span> {
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// path to bind a listening vhost-user socket</span>
-    <span class="ident">socket</span>: <span class="ident">String</span>,
+    <span class="ident">socket</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;STRING&quot;</span>)]</span>
+    <span class="doccomment">/// VFIO-PCI device name (e.g. &#39;0000:00:07.0&#39;)</span>
+    <span class="ident">vfio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">from_str_fn</span>(<span class="ident">parse_wayland_sock</span>), <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH[,name=NAME]&quot;</span>)]</span>
     <span class="doccomment">/// path to one or more Wayland sockets. The unnamed socket is</span>
     <span class="doccomment">/// used for displaying virtual screens while the named ones are used for IPC</span>
@@ -853,6 +870,7 @@
         <span class="ident">params</span>: <span class="kw-2">mut</span> <span class="ident">gpu_parameters</span>,
         <span class="ident">resource_bridge</span>,
         <span class="ident">socket</span>,
+        <span class="ident">vfio</span>,
         <span class="ident">wayland_sock</span>,
     } <span class="op">=</span> <span class="ident">opts</span>;
 
@@ -959,7 +977,15 @@
 
     <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">backend</span>);
     <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us flatten.</span>
-    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run</span>(<span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
+    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">socket</span>, <span class="ident">vfio</span>) {
+        (<span class="prelude-val">Some</span>(<span class="ident">socket</span>), <span class="prelude-val">None</span>) =&gt; <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run</span>(<span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>,
+        (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">vfio</span>)) =&gt; {
+            <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">GpuBackend::MAX_QUEUE_NUM</span>)<span class="question-mark">?</span>;
+            <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run_vvu</span>(<span class="ident">device</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
+        }
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;exactly one of `--socket` or `--vfio` is required&quot;</span>)),
+    };
+    <span class="ident">res</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>
