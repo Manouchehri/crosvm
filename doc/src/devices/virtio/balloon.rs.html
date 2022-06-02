@@ -812,74 +812,6 @@
 <span id="811">811</span>
 <span id="812">812</span>
 <span id="813">813</span>
-<span id="814">814</span>
-<span id="815">815</span>
-<span id="816">816</span>
-<span id="817">817</span>
-<span id="818">818</span>
-<span id="819">819</span>
-<span id="820">820</span>
-<span id="821">821</span>
-<span id="822">822</span>
-<span id="823">823</span>
-<span id="824">824</span>
-<span id="825">825</span>
-<span id="826">826</span>
-<span id="827">827</span>
-<span id="828">828</span>
-<span id="829">829</span>
-<span id="830">830</span>
-<span id="831">831</span>
-<span id="832">832</span>
-<span id="833">833</span>
-<span id="834">834</span>
-<span id="835">835</span>
-<span id="836">836</span>
-<span id="837">837</span>
-<span id="838">838</span>
-<span id="839">839</span>
-<span id="840">840</span>
-<span id="841">841</span>
-<span id="842">842</span>
-<span id="843">843</span>
-<span id="844">844</span>
-<span id="845">845</span>
-<span id="846">846</span>
-<span id="847">847</span>
-<span id="848">848</span>
-<span id="849">849</span>
-<span id="850">850</span>
-<span id="851">851</span>
-<span id="852">852</span>
-<span id="853">853</span>
-<span id="854">854</span>
-<span id="855">855</span>
-<span id="856">856</span>
-<span id="857">857</span>
-<span id="858">858</span>
-<span id="859">859</span>
-<span id="860">860</span>
-<span id="861">861</span>
-<span id="862">862</span>
-<span id="863">863</span>
-<span id="864">864</span>
-<span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
-<span id="879">879</span>
-<span id="880">880</span>
-<span id="881">881</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -891,17 +823,14 @@
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
-<span class="kw">use</span> <span class="ident">futures</span>::{
-    <span class="ident">channel</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>},
-    <span class="ident">pin_mut</span>, <span class="ident">StreamExt</span>,
-};
+<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">channel::mpsc</span>, <span class="ident">pin_mut</span>, <span class="ident">StreamExt</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span> <span class="kw">as</span> <span class="ident">ThisError</span>;
 
 <span class="kw">use</span> <span class="ident">balloon_control</span>::{<span class="ident">BalloonStats</span>, <span class="ident">BalloonTubeCommand</span>, <span class="ident">BalloonTubeResult</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="self">self</span>, <span class="ident">error</span>, <span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="self">self</span>, <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{
-    <span class="ident">block_on</span>, <span class="ident">select2</span>, <span class="ident">select6</span>, <span class="ident">select7</span>, <span class="ident">sync::Mutex</span> <span class="kw">as</span> <span class="ident">AsyncMutex</span>, <span class="ident">AsyncTube</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>,
+    <span class="ident">block_on</span>, <span class="ident">select6</span>, <span class="ident">select7</span>, <span class="ident">sync::Mutex</span> <span class="kw">as</span> <span class="ident">AsyncMutex</span>, <span class="ident">AsyncTube</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>,
 };
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le16</span>, <span class="ident">Le32</span>, <span class="ident">Le64</span>};
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>};
@@ -921,9 +850,6 @@
     <span class="doccomment">/// Failed to create async message receiver.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create async message receiver: {0}&quot;</span>)]</span>
     <span class="ident">CreatingMessageReceiver</span>(<span class="ident">base::TubeError</span>),
-    <span class="doccomment">/// IO Error.</span>
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;IO error: {0}&quot;</span>)]</span>
-    <span class="ident">IoError</span>(<span class="attribute">#[<span class="ident">from</span>]</span> <span class="ident">std::io::Error</span>),
     <span class="doccomment">/// Failed to receive command message.</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to receive command message: {0}&quot;</span>)]</span>
     <span class="ident">ReceivingCommand</span>(<span class="ident">base::TubeError</span>),
@@ -934,7 +860,6 @@
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to write config event: {0}&quot;</span>)]</span>
     <span class="ident">WritingConfigEvent</span>(<span class="ident">base::Error</span>),
 }
-
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">BalloonError</span><span class="op">&gt;</span>;
 
 <span class="comment">// Balloon implements four virt IO queues: Inflate, Deflate, Stats, Event.</span>
@@ -1191,7 +1116,6 @@
         }
         <span class="prelude-val">Ok</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">index</span>,
     };
-
     <span class="kw">loop</span> {
         <span class="comment">// Wait for a request to read the stats.</span>
         <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">stats_rx</span>.<span class="ident">next</span>().<span class="kw">await</span> {
@@ -1336,30 +1260,6 @@
     }
 }
 
-<span class="comment">// Stub worker thread to reply with `NotReady`</span>
-<span class="kw">fn</span> <span class="ident">run_stub_worker</span>(<span class="ident">signal</span>: <span class="ident">oneshot::Receiver</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">command_tube</span>: <span class="ident">Tube</span>) -&gt; <span class="ident">Tube</span> {
-    <span class="macro">trace!</span>(<span class="string">&quot;spawning ballon_stats stub worker&quot;</span>);
-
-    <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="ident">AsyncTube::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">command_tube</span>).<span class="ident">unwrap</span>();
-    {
-        <span class="kw">let</span> <span class="ident">stub_replier</span> <span class="op">=</span> <span class="kw">async</span> {
-            <span class="kw">loop</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">BalloonTubeCommand::Stats</span> { <span class="ident">id</span> }) <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">next</span>().<span class="kw">await</span> {
-                    <span class="macro">trace!</span>(<span class="string">&quot;Sending not ready response to balloon stats request&quot;</span>);
-                    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">BalloonTubeResult::NotReady</span> { <span class="ident">id</span> };
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">command_tube</span>.<span class="ident">send</span>(<span class="ident">res</span>).<span class="kw">await</span> {
-                        <span class="macro">error!</span>(<span class="string">&quot;failed to send stats result: {}&quot;</span>, <span class="ident">e</span>);
-                    }
-                }
-            }
-        };
-        <span class="macro">pin_mut!</span>(<span class="ident">stub_replier</span>);
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">select2</span>(<span class="ident">signal</span>, <span class="ident">stub_replier</span>));
-    }
-    <span class="ident">command_tube</span>.<span class="ident">into</span>()
-}
-
 <span class="comment">// The main worker thread. Initialized the asynchronous worker tasks and passes them to the executor</span>
 <span class="comment">// to be processed.</span>
 <span class="kw">fn</span> <span class="ident">run_worker</span>(
@@ -1472,15 +1372,13 @@
 
 <span class="doccomment">/// Virtio device for memory balloon inflation/deflation.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Balloon</span> {
-    <span class="ident">command_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
+    <span class="ident">command_tube</span>: <span class="ident">Tube</span>,
     <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">state</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AsyncMutex</span><span class="op">&lt;</span><span class="ident">BalloonState</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">features</span>: <span class="ident">u64</span>,
     <span class="ident">acked_features</span>: <span class="ident">u64</span>,
     <span class="ident">kill_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">stub_worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">stub_signal</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">oneshot::Sender</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Operation mode of the balloon.</span>
@@ -1516,7 +1414,7 @@
             };
 
         <span class="prelude-val">Ok</span>(<span class="ident">Balloon</span> {
-            <span class="ident">command_tube</span>: <span class="prelude-val">Some</span>(<span class="ident">command_tube</span>),
+            <span class="ident">command_tube</span>,
             <span class="ident">inflate_tube</span>,
             <span class="ident">state</span>: <span class="ident">Arc::new</span>(<span class="ident">AsyncMutex::new</span>(<span class="ident">BalloonState</span> {
                 <span class="ident">num_pages</span>: (<span class="ident">init_balloon_size</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">VIRTIO_BALLOON_PFN_SHIFT</span>) <span class="kw">as</span> <span class="ident">u32</span>,
@@ -1525,10 +1423,8 @@
             })),
             <span class="ident">kill_evt</span>: <span class="prelude-val">None</span>,
             <span class="ident">worker_thread</span>: <span class="prelude-val">None</span>,
-            <span class="ident">stub_worker_thread</span>: <span class="prelude-val">None</span>,
             <span class="ident">features</span>,
             <span class="ident">acked_features</span>: <span class="number">0</span>,
-            <span class="ident">stub_signal</span>: <span class="prelude-val">None</span>,
         })
     }
 
@@ -1560,11 +1456,11 @@
 
 <span class="kw">impl</span> <span class="ident">VirtioDevice</span> <span class="kw">for</span> <span class="ident">Balloon</span> {
     <span class="kw">fn</span> <span class="ident">keep_rds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">command_tube</span>
-            .<span class="ident">iter</span>()
-            .<span class="ident">chain</span>(<span class="self">self</span>.<span class="ident">inflate_tube</span>.<span class="ident">iter</span>())
-            .<span class="ident">map</span>(<span class="ident">AsRawDescriptor::as_raw_descriptor</span>)
-            .<span class="ident">collect</span>()
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rds</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="self">self</span>.<span class="ident">command_tube</span>.<span class="ident">as_raw_descriptor</span>()];
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inflate_tube</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inflate_tube</span> {
+            <span class="ident">rds</span>.<span class="ident">push</span>(<span class="ident">inflate_tube</span>.<span class="ident">as_raw_descriptor</span>());
+        }
+        <span class="ident">rds</span>
     }
 
     <span class="kw">fn</span> <span class="ident">device_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceType</span> {
@@ -1587,12 +1483,8 @@
 
         <span class="kw">if</span> <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">&amp;&amp;</span> <span class="ident">state</span>.<span class="ident">actual_pages</span> <span class="op">==</span> <span class="ident">state</span>.<span class="ident">num_pages</span> {
             <span class="ident">state</span>.<span class="ident">failable_update</span> <span class="op">=</span> <span class="bool-val">false</span>;
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">command_tube</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">command_tube</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">send_adjusted_response</span>(<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">num_pages</span>) {
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to send response {:?}&quot;</span>, <span class="ident">e</span>);
-                }
-            } <span class="kw">else</span> {
-                <span class="macro">panic!</span>(<span class="string">&quot;Command tube missing!&quot;</span>);
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">send_adjusted_response</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">command_tube</span>, <span class="ident">state</span>.<span class="ident">num_pages</span>) {
+                <span class="macro">error!</span>(<span class="string">&quot;Failed to send response {:?}&quot;</span>, <span class="ident">e</span>);
             }
         }
     }
@@ -1609,21 +1501,6 @@
         <span class="self">self</span>.<span class="ident">acked_features</span> <span class="op">|</span><span class="op">=</span> <span class="ident">value</span>;
     }
 
-    <span class="kw">fn</span> <span class="ident">on_device_sandboxed</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">command_tube</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">command_tube</span>.<span class="ident">take</span>() {
-            <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
-
-            <span class="kw">let</span> <span class="ident">worker_stub_thread</span> <span class="op">=</span> <span class="ident">thread::Builder::new</span>()
-                .<span class="ident">name</span>(<span class="string">&quot;virtio_balloon_stub&quot;</span>.<span class="ident">to_string</span>())
-                .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="ident">run_stub_worker</span>(<span class="ident">rx</span>, <span class="ident">command_tube</span>))
-                .<span class="ident">expect</span>(<span class="string">&quot;Failed to spawn balloon stub worker thread&quot;</span>);
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stub_worker_thread</span>.<span class="ident">insert</span>(<span class="ident">worker_stub_thread</span>);
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stub_signal</span>.<span class="ident">insert</span>(<span class="ident">tx</span>);
-        } <span class="kw">else</span> {
-            <span class="macro">panic!</span>(<span class="string">&quot;Command tube missing!&quot;</span>);
-        }
-    }
-
     <span class="kw">fn</span> <span class="ident">activate</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
@@ -1631,13 +1508,6 @@
         <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
         <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     ) {
-        <span class="comment">// Kill stub thread</span>
-        <span class="ident">std::mem::drop</span>(<span class="self">self</span>.<span class="ident">stub_signal</span>.<span class="ident">take</span>());
-
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">handle</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">stub_worker_thread</span>.<span class="ident">take</span>().<span class="ident">map</span>(<span class="ident">thread::JoinHandle::join</span>) {
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">command_tube</span>.<span class="ident">insert</span>(<span class="ident">handle</span>);
-        }
-
         <span class="kw">let</span> <span class="ident">expected_queues</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">event_queue_enabled</span>() { <span class="number">4</span> } <span class="kw">else</span> { <span class="number">3</span> };
         <span class="kw">if</span> <span class="ident">queues</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">expected_queues</span> <span class="op">|</span><span class="op">|</span> <span class="ident">queue_evts</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">expected_queues</span> {
             <span class="kw">return</span>;
@@ -1653,18 +1523,12 @@
         <span class="self">self</span>.<span class="ident">kill_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">self_kill_evt</span>);
 
         <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">clone</span>();
-        <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">command_tube</span> {
-            <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">tube</span>) =&gt; <span class="ident">tube</span>,
-            <span class="prelude-val">None</span> =&gt; {
-                <span class="macro">panic!</span>(<span class="string">&quot;Command tube missing!&quot;</span>);
-            }
-        };
-
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
-        <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">command_tube</span>.<span class="ident">try_clone</span>() {
+        <span class="kw">let</span> <span class="ident">command_tube</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">command_tube</span>.<span class="ident">try_clone</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">tube</span>) =&gt; <span class="ident">tube</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">panic!</span>(<span class="string">&quot;failed to clone command tube {:?}&quot;</span>, <span class="ident">e</span>);
+                <span class="macro">error!</span>(<span class="string">&quot;failed to clone command tube {:?}&quot;</span>, <span class="ident">e</span>);
+                <span class="kw">return</span>;
             }
         };
         <span class="kw">let</span> <span class="ident">inflate_tube</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inflate_tube</span>.<span class="ident">take</span>();
@@ -1685,7 +1549,7 @@
 
         <span class="kw">match</span> <span class="ident">worker_result</span> {
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">panic!</span>(<span class="string">&quot;failed to spawn virtio_balloon worker: {}&quot;</span>, <span class="ident">e</span>);
+                <span class="macro">error!</span>(<span class="string">&quot;failed to spawn virtio_balloon worker: {}&quot;</span>, <span class="ident">e</span>);
             }
             <span class="prelude-val">Ok</span>(<span class="ident">join_handle</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">worker_thread</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">join_handle</span>);
