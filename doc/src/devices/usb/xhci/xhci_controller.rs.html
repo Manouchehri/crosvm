@@ -325,8 +325,8 @@
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>,
-    <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PciInterruptPin</span>,
+    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciClassCode</span>,
+    <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PciInterruptPin</span>,
     <span class="ident">PciProgrammingInterface</span>, <span class="ident">PciSerialBusSubClass</span>,
 };
 
@@ -574,7 +574,7 @@
             )
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoAllocationFailed</span>(<span class="ident">XHCI_BAR0_SIZE</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">bar0_config</span> <span class="op">=</span> <span class="ident">PciBarConfiguration::new</span>(
-            <span class="ident">PciBarIndex::Bar0</span>,
+            <span class="number">0</span>,
             <span class="ident">XHCI_BAR0_SIZE</span>,
             <span class="ident">PciBarRegionType::Memory32BitRegion</span>,
             <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,
@@ -590,7 +590,7 @@
         }])
     }
 
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
     }
 
@@ -603,7 +603,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">read_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">PciBarIndex::Bar0</span>);
+        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="number">0</span>);
         <span class="kw">if</span> <span class="ident">addr</span> <span class="op">&lt;</span> <span class="ident">bar0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">addr</span> <span class="op">&gt;</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">XHCI_BAR0_SIZE</span> {
             <span class="kw">return</span>;
         }
@@ -619,7 +619,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">PciBarIndex::Bar0</span>);
+        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="number">0</span>);
         <span class="kw">if</span> <span class="ident">addr</span> <span class="op">&lt;</span> <span class="ident">bar0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">addr</span> <span class="op">&gt;</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">XHCI_BAR0_SIZE</span> {
             <span class="kw">return</span>;
         }

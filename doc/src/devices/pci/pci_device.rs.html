@@ -627,8 +627,6 @@
 <span id="626">626</span>
 <span id="627">627</span>
 <span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -644,8 +642,8 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::bus</span>::{<span class="ident">BusDeviceObj</span>, <span class="ident">BusRange</span>, <span class="ident">BusType</span>, <span class="ident">ConfigWriteResult</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{
-    <span class="self">self</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">BAR0_REG</span>, <span class="ident">COMMAND_REG</span>, <span class="ident">COMMAND_REG_IO_SPACE_MASK</span>,
-    <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>, <span class="ident">PCI_ID_REG</span>, <span class="ident">ROM_BAR_REG</span>,
+    <span class="self">self</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">BAR0_REG</span>, <span class="ident">COMMAND_REG</span>, <span class="ident">COMMAND_REG_IO_SPACE_MASK</span>,
+    <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>, <span class="ident">NUM_BAR_REGS</span>, <span class="ident">PCI_ID_REG</span>, <span class="ident">ROM_BAR_REG</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciAddress</span>, <span class="ident">PciAddressError</span>, <span class="ident">PciInterruptPin</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::ipc_memory_mapper::IpcMemoryMapper</span>;
@@ -746,7 +744,7 @@
     }
 
     <span class="doccomment">/// Returns the configuration of a base address register, if present.</span>
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Register any capabilties specified by the device.</span>
     <span class="kw">fn</span> <span class="ident">register_device_capabilities</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -960,8 +958,7 @@
 
     <span class="kw">fn</span> <span class="ident">get_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">BusRange</span>, <span class="ident">BusType</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bar_idx</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">PciBarIndex::Bar0</span>);
-        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">bar_num</span>) <span class="op">=</span> <span class="ident">bar_idx</span> {
+        <span class="kw">for</span> <span class="ident">bar_num</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">NUM_BAR_REGS</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">bar</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>) {
                 <span class="kw">let</span> <span class="ident">bus_type</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">bar</span>.<span class="ident">is_memory</span>() {
                     <span class="ident">BusType::Mmio</span>
@@ -976,7 +973,6 @@
                     <span class="ident">bus_type</span>,
                 ));
             }
-            <span class="ident">bar_idx</span> <span class="op">=</span> <span class="ident">bar_num</span>.<span class="ident">next</span>();
         }
         <span class="ident">ranges</span>
     }
@@ -1011,7 +1007,7 @@
     <span class="kw">fn</span> <span class="ident">allocate_device_bars</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BarRange</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">allocate_device_bars</span>(<span class="ident">resources</span>)
     }
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
         (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
     }
     <span class="kw">fn</span> <span class="ident">register_device_capabilities</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1118,7 +1114,7 @@
             <span class="prelude-val">Err</span>(<span class="ident">Error::PciAllocationFailed</span>)
         }
 
-        <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
             <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
         }
     }
@@ -1141,7 +1137,7 @@
 
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">test_dev</span>.<span class="ident">config_regs</span>.<span class="ident">add_pci_bar</span>(
             <span class="ident">PciBarConfiguration::new</span>(
-                <span class="ident">PciBarIndex::Bar0</span>,
+                <span class="number">0</span>,
                 <span class="ident">BAR0_SIZE</span>,
                 <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
                 <span class="ident">PciBarPrefetchable::Prefetchable</span>,
@@ -1150,7 +1146,7 @@
         );
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">test_dev</span>.<span class="ident">config_regs</span>.<span class="ident">add_pci_bar</span>(
             <span class="ident">PciBarConfiguration::new</span>(
-                <span class="ident">PciBarIndex::Bar2</span>,
+                <span class="number">2</span>,
                 <span class="ident">BAR2_SIZE</span>,
                 <span class="ident">PciBarRegionType::IoRegion</span>,
                 <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,

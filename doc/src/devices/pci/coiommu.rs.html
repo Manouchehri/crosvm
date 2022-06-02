@@ -1609,6 +1609,10 @@
 <span id="1608">1608</span>
 <span id="1609">1609</span>
 <span id="1610">1610</span>
+<span id="1611">1611</span>
+<span id="1612">1612</span>
+<span id="1613">1613</span>
+<span id="1614">1614</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1651,8 +1655,8 @@
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{
-    <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciClassCode</span>,
-    <span class="ident">PciConfiguration</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PciOtherSubclass</span>, <span class="ident">COMMAND_REG</span>, <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>,
+    <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarPrefetchable</span>, <span class="ident">PciBarRegionType</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>,
+    <span class="ident">PciHeaderType</span>, <span class="ident">PciOtherSubclass</span>, <span class="ident">COMMAND_REG</span>, <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_device</span>::{<span class="ident">BarRange</span>, <span class="ident">PciDevice</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">PciResult</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciAddress</span>, <span class="ident">PciDeviceError</span>};
@@ -1666,11 +1670,11 @@
 <span class="kw">const</span> <span class="ident">COIOMMU_CMD_PARK_UNPIN</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">const</span> <span class="ident">COIOMMU_CMD_UNPARK_UNPIN</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">3</span>;
 <span class="kw">const</span> <span class="ident">COIOMMU_REVISION_ID</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x10</span>;
-<span class="kw">const</span> <span class="ident">COIOMMU_MMIO_BAR</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar0</span>;
+<span class="kw">const</span> <span class="ident">COIOMMU_MMIO_BAR</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0</span>;
 <span class="kw">const</span> <span class="ident">COIOMMU_MMIO_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x2000</span>;
-<span class="kw">const</span> <span class="ident">COIOMMU_NOTIFYMAP_BAR</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar2</span>;
+<span class="kw">const</span> <span class="ident">COIOMMU_NOTIFYMAP_BAR</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="kw">const</span> <span class="ident">COIOMMU_NOTIFYMAP_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x2000</span>;
-<span class="kw">const</span> <span class="ident">COIOMMU_TOPOLOGYMAP_BAR</span>: <span class="ident">PciBarIndex</span> <span class="op">=</span> <span class="ident">PciBarIndex::Bar4</span>;
+<span class="kw">const</span> <span class="ident">COIOMMU_TOPOLOGYMAP_BAR</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">4</span>;
 <span class="kw">const</span> <span class="ident">COIOMMU_TOPOLOGYMAP_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x2000</span>;
 <span class="kw">const</span> <span class="ident">PAGE_SIZE_4K</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">4096</span>;
 <span class="kw">const</span> <span class="ident">PAGE_SHIFT_4K</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">12</span>;
@@ -2860,7 +2864,7 @@
         <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
         <span class="ident">address</span>: <span class="ident">PciAddress</span>,
         <span class="ident">size</span>: <span class="ident">u64</span>,
-        <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>,
+        <span class="ident">bar_num</span>: <span class="ident">u8</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     ) -&gt; <span class="ident">PciResult</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">resources</span>
@@ -2871,7 +2875,7 @@
                     <span class="ident">bus</span>: <span class="ident">address</span>.<span class="ident">bus</span>,
                     <span class="ident">dev</span>: <span class="ident">address</span>.<span class="ident">dev</span>,
                     <span class="ident">func</span>: <span class="ident">address</span>.<span class="ident">func</span>,
-                    <span class="ident">bar</span>: <span class="ident">bar_num</span>.<span class="ident">into</span>(),
+                    <span class="ident">bar</span>: <span class="ident">bar_num</span>,
                 },
                 <span class="ident">name</span>.<span class="ident">to_string</span>(),
                 <span class="ident">size</span>,
@@ -2879,7 +2883,7 @@
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">PciDeviceError::IoAllocationFailed</span>(<span class="ident">size</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="ident">PciBarConfiguration::new</span>(
-            <span class="ident">bar_num</span>,
+            <span class="ident">bar_num</span> <span class="kw">as</span> <span class="ident">usize</span>,
             <span class="ident">size</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="ident">PciBarPrefetchable::Prefetchable</span>,
@@ -2894,7 +2898,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">read_mmio</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span>);
+        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>;
         <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">CoIommuReg</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u64</span> {
             <span class="macro">error!</span>(
@@ -2929,7 +2933,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">write_mmio</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span>);
+        <span class="kw">let</span> <span class="ident">bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="ident">mmio_len</span> <span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">CoIommuReg</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">addr</span> <span class="op">-</span> <span class="ident">bar</span>;
         <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">mmio_len</span> {
@@ -3146,8 +3150,10 @@
     }
 
     <span class="kw">fn</span> <span class="ident">read_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">mmio_bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span>);
-        <span class="kw">let</span> <span class="ident">notifymap</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_NOTIFYMAP_BAR</span>);
+        <span class="kw">let</span> <span class="ident">mmio_bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="kw">let</span> <span class="ident">notifymap</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">config_regs</span>
+            .<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_NOTIFYMAP_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">match</span> <span class="ident">addr</span> {
             <span class="ident">o</span> <span class="kw">if</span> <span class="ident">mmio_bar</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">mmio_bar</span> <span class="op">+</span> <span class="ident">COIOMMU_MMIO_BAR_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">read_mmio</span>(<span class="ident">addr</span>, <span class="ident">data</span>);
@@ -3163,8 +3169,10 @@
     }
 
     <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">u64</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {
-        <span class="kw">let</span> <span class="ident">mmio_bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span>);
-        <span class="kw">let</span> <span class="ident">notifymap</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_NOTIFYMAP_BAR</span>);
+        <span class="kw">let</span> <span class="ident">mmio_bar</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="kw">let</span> <span class="ident">notifymap</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">config_regs</span>
+            .<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_NOTIFYMAP_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">match</span> <span class="ident">addr</span> {
             <span class="ident">o</span> <span class="kw">if</span> <span class="ident">mmio_bar</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">o</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span> <span class="op">&lt;</span> <span class="ident">mmio_bar</span> <span class="op">+</span> <span class="ident">COIOMMU_MMIO_BAR_SIZE</span> <span class="kw">as</span> <span class="ident">u64</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">write_mmio</span>(<span class="ident">addr</span>, <span class="ident">data</span>);
@@ -3180,7 +3188,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">ioevents</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="ident">u64</span>, <span class="ident">Datamatch</span>)<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span>);
+        <span class="kw">let</span> <span class="ident">bar0</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_addr</span>(<span class="ident">COIOMMU_MMIO_BAR</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="ident">notify_base</span> <span class="op">=</span> <span class="ident">bar0</span> <span class="op">+</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">CoIommuReg</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="self">self</span>.<span class="ident">ioevents</span>
             .<span class="ident">iter</span>()
@@ -3189,7 +3197,7 @@
             .<span class="ident">collect</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
     }
 }

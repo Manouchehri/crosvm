@@ -448,8 +448,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::msi</span>::{<span class="ident">MsiCap</span>, <span class="ident">MsiConfig</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{<span class="ident">PciBridgeSubclass</span>, <span class="ident">PciSubclass</span>, <span class="ident">CLASS_REG</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>,
-    <span class="ident">PciDevice</span>, <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
+    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>,
+    <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::PciInterruptPin</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>};
@@ -655,7 +655,7 @@
         <span class="prelude-val">Some</span>((<span class="ident">gsi</span>, <span class="ident">pin</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">PciBarIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_bar_configuration</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bar_num</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciBarConfiguration</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">get_bar_configuration</span>(<span class="ident">bar_num</span>)
     }
 

@@ -660,7 +660,7 @@
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vm_control</span>::{<span class="ident">VmIrqRequest</span>, <span class="ident">VmIrqResponse</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciBarIndex</span>, <span class="ident">PciCapability</span>, <span class="ident">PciCapabilityID</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciCapability</span>, <span class="ident">PciCapabilityID</span>};
 
 <span class="kw">const</span> <span class="ident">MAX_MSIX_VECTORS_PER_DEVICE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">2048</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MSIX_TABLE_ENTRIES_MODULO</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">16</span>;
@@ -1269,10 +1269,10 @@
 
 <span class="kw">impl</span> <span class="ident">MsixCap</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">table_pci_bar</span>: <span class="ident">PciBarIndex</span>,
+        <span class="ident">table_pci_bar</span>: <span class="ident">u8</span>,
         <span class="ident">table_size</span>: <span class="ident">u16</span>,
         <span class="ident">table_off</span>: <span class="ident">u32</span>,
-        <span class="ident">pba_pci_bar</span>: <span class="ident">PciBarIndex</span>,
+        <span class="ident">pba_pci_bar</span>: <span class="ident">u8</span>,
         <span class="ident">pba_off</span>: <span class="ident">u32</span>,
     ) -&gt; <span class="self">Self</span> {
         <span class="macro">assert!</span>(<span class="ident">table_size</span> <span class="op">&lt;</span> <span class="ident">MAX_MSIX_VECTORS_PER_DEVICE</span>);
@@ -1287,8 +1287,8 @@
             <span class="ident">_cap_vndr</span>: <span class="number">0</span>,
             <span class="ident">_cap_next</span>: <span class="number">0</span>,
             <span class="ident">msg_ctl</span>,
-            <span class="ident">table</span>: (<span class="ident">table_off</span> <span class="op">&amp;</span> <span class="number">0xffff_fff8u32</span>) <span class="op">|</span> <span class="ident">u32::from</span>(<span class="ident">table_pci_bar</span>),
-            <span class="ident">pba</span>: (<span class="ident">pba_off</span> <span class="op">&amp;</span> <span class="number">0xffff_fff8u32</span>) <span class="op">|</span> <span class="ident">u32::from</span>(<span class="ident">pba_pci_bar</span>),
+            <span class="ident">table</span>: (<span class="ident">table_off</span> <span class="op">&amp;</span> <span class="number">0xffff_fff8u32</span>) <span class="op">|</span> <span class="ident">u32::from</span>(<span class="ident">table_pci_bar</span> <span class="op">&amp;</span> <span class="number">0x7u8</span>),
+            <span class="ident">pba</span>: (<span class="ident">pba_off</span> <span class="op">&amp;</span> <span class="number">0xffff_fff8u32</span>) <span class="op">|</span> <span class="ident">u32::from</span>(<span class="ident">pba_pci_bar</span> <span class="op">&amp;</span> <span class="number">0x7u8</span>),
         }
     }
 
