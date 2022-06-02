@@ -1,4 +1,4 @@
 (function() {var implementors = {};
-implementors["crosvm"] = [{"text":"impl TopLevelCommand for <a class=\"struct\" href=\"crosvm/crosvm/struct.DevicesArgs.html\" title=\"struct crosvm::crosvm::DevicesArgs\">DevicesArgs</a>","synthetic":false,"types":["crosvm::crosvm::DevicesArgs"]}];
-implementors["crosvm_direct"] = [{"text":"impl TopLevelCommand for <a class=\"struct\" href=\"crosvm_direct/crosvm/struct.DevicesArgs.html\" title=\"struct crosvm_direct::crosvm::DevicesArgs\">DevicesArgs</a>","synthetic":false,"types":["crosvm_direct::crosvm::DevicesArgs"]}];
+implementors["crosvm"] = [{"text":"impl TopLevelCommand for <a class=\"struct\" href=\"crosvm/crosvm/struct.CrosvmCmdlineArgs.html\" title=\"struct crosvm::crosvm::CrosvmCmdlineArgs\">CrosvmCmdlineArgs</a>","synthetic":false,"types":["crosvm::crosvm::CrosvmCmdlineArgs"]}];
+implementors["crosvm_direct"] = [{"text":"impl TopLevelCommand for <a class=\"struct\" href=\"crosvm_direct/crosvm/struct.CrosvmCmdlineArgs.html\" title=\"struct crosvm_direct::crosvm::CrosvmCmdlineArgs\">CrosvmCmdlineArgs</a>","synthetic":false,"types":["crosvm_direct::crosvm::CrosvmCmdlineArgs"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,1 +1,1 @@
-initSidebarItems({"derive":[["FlattenSubcommand",""]]});
+initSidebarItems({"attr":[["generate_catchall_args","attribute macro to allow using `catch-all` style subcommand structs to use temporarily before migrating to real ones Note: USE ONLY ON EMPTY STRUCTS Adds a field ‘pub args: Vec’ containing all remaining arguments."]],"derive":[["FlattenSubcommand","A helper derive proc macro to flatten multiple subcommand enums into one Note that it is unable to check for duplicate commands and they will be tried in order of declaration"]]});
