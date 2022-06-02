@@ -6174,14 +6174,14 @@
             ));
         }
 
-        <span class="kw">let</span> <span class="ident">pcpu_count</span> <span class="op">=</span> <span class="ident">sys::get_vcpu_count</span>()<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">vcpu_count</span>.<span class="ident">is_some</span>() {
-            <span class="kw">if</span> <span class="ident">pcpu_count</span> <span class="op">!</span><span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">vcpu_count</span>.<span class="ident">unwrap</span>() {
+        <span class="kw">let</span> <span class="ident">pcpu_count</span> <span class="op">=</span>
+            <span class="ident">base::number_of_logical_cores</span>().<span class="ident">expect</span>(<span class="string">&quot;Could not read number of logical cores&quot;</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">vcpu_count</span>) <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">vcpu_count</span> {
+            <span class="kw">if</span> <span class="ident">pcpu_count</span> <span class="op">!</span><span class="op">=</span> <span class="ident">vcpu_count</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">argument::Error::ExpectedArgument</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;`host-cpu-topology` requires the count of vCPUs({}) to equal the \
                             count of CPUs({}) on host.&quot;</span>,
-                    <span class="ident">cfg</span>.<span class="ident">vcpu_count</span>.<span class="ident">unwrap</span>(),
-                    <span class="ident">pcpu_count</span>
+                    <span class="ident">vcpu_count</span>, <span class="ident">pcpu_count</span>
                 )));
             }
         } <span class="kw">else</span> {
