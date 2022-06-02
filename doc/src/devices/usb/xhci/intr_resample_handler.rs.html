@@ -67,7 +67,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::utils</span>::{<span class="ident">EventHandler</span>, <span class="ident">EventLoop</span>};
 
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">EventType</span>};
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
@@ -91,7 +91,7 @@
         <span class="kw">let</span> <span class="ident">tmp_handler</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">EventHandler</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">handler</span>.<span class="ident">clone</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">event_loop</span>.<span class="ident">add_event</span>(
             <span class="kw-2">&amp;</span><span class="ident">handler</span>.<span class="ident">resample_evt</span>,
-            <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>(),
+            <span class="ident">EventType::Read</span>,
             <span class="ident">Arc::downgrade</span>(<span class="kw-2">&amp;</span><span class="ident">tmp_handler</span>),
         ) {
             <span class="macro">error!</span>(<span class="string">&quot;cannot add intr resample handler to event loop: {}&quot;</span>, <span class="ident">e</span>);
