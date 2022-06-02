@@ -1458,15 +1458,6 @@
 <span id="1457">1457</span>
 <span id="1458">1458</span>
 <span id="1459">1459</span>
-<span id="1460">1460</span>
-<span id="1461">1461</span>
-<span id="1462">1462</span>
-<span id="1463">1463</span>
-<span id="1464">1464</span>
-<span id="1465">1465</span>
-<span id="1466">1466</span>
-<span id="1467">1467</span>
-<span id="1468">1468</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1615,16 +1606,7 @@
             .<span class="ident">open</span>(<span class="string">&quot;/dev/vfio/vfio&quot;</span>)
             .<span class="ident">map_err</span>(<span class="ident">VfioError::OpenContainer</span>)<span class="question-mark">?</span>;
 
-        <span class="comment">// Safe as file is vfio container descriptor and ioctl is defined by kernel.</span>
-        <span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">ioctl</span>(<span class="kw-2">&amp;</span><span class="ident">container</span>, <span class="ident">VFIO_GET_API_VERSION</span>()) };
-        <span class="kw">if</span> <span class="ident">version</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">!</span><span class="op">=</span> <span class="ident">VFIO_API_VERSION</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VfioError::VfioApiVersion</span>);
-        }
-
-        <span class="prelude-val">Ok</span>(<span class="ident">VfioContainer</span> {
-            <span class="ident">container</span>,
-            <span class="ident">groups</span>: <span class="ident">HashMap::new</span>(),
-        })
+        <span class="ident"><span class="self">Self</span>::new_from_container</span>(<span class="ident">container</span>)
     }
 
     <span class="comment">// Construct a VfioContainer from an exist container file.</span>
