@@ -621,6 +621,21 @@
     }
 }
 
+<span class="doccomment">/// Writes the available data from the reader into the given output queue.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Arguments</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// * `reader` - The Reader with the data we want to write.</span>
+<span class="doccomment">/// * `output` - The output sink we are going to write the data to.</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_transmit_request</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">Reader</span>, <span class="ident">output</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">io::Write</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">available_bytes</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">len</span>];
+    <span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;mut</span> <span class="ident">data</span>)<span class="question-mark">?</span>;
+    <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>)<span class="question-mark">?</span>;
+    <span class="ident">output</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(())
+}
+
 <span class="doccomment">/// Processes the data taken from the given transmit queue into the output sink.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Arguments</span>
@@ -724,21 +739,6 @@
         <span class="kw">return</span> <span class="prelude-val">None</span>;
     }
     <span class="prelude-val">Some</span>(<span class="ident">buffer_cloned</span>)
-}
-
-<span class="doccomment">/// Writes the available data from the reader into the given output queue.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # Arguments</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// * `reader` - The Reader with the data we want to write.</span>
-<span class="doccomment">/// * `output` - The output sink we are going to write the data to.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">process_transmit_request</span>(<span class="kw-2">mut</span> <span class="ident">reader</span>: <span class="ident">Reader</span>, <span class="ident">output</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">io::Write</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">available_bytes</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">len</span>];
-    <span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;mut</span> <span class="ident">data</span>)<span class="question-mark">?</span>;
-    <span class="ident">output</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>)<span class="question-mark">?</span>;
-    <span class="ident">output</span>.<span class="ident">flush</span>()<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">impl</span> <span class="ident">Worker</span> {
