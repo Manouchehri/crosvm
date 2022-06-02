@@ -1,3 +1,4 @@
 (function() {var implementors = {};
+implementors["crosvm"] = [{"text":"impl SubCommands for <a class=\"enum\" href=\"crosvm/sys/unix/main/enum.DevicesSubcommand.html\" title=\"enum crosvm::sys::unix::main::DevicesSubcommand\">DevicesSubcommand</a>","synthetic":false,"types":["crosvm::sys::unix::main::DevicesSubcommand"]}];
 implementors["crosvm_direct"] = [{"text":"impl SubCommands for <a class=\"enum\" href=\"crosvm_direct/sys/unix/main/enum.DevicesSubcommand.html\" title=\"enum crosvm_direct::sys::unix::main::DevicesSubcommand\">DevicesSubcommand</a>","synthetic":false,"types":["crosvm_direct::sys::unix::main::DevicesSubcommand"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

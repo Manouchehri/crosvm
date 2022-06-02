@@ -4053,6 +4053,7 @@
 <span id="4052">4052</span>
 <span id="4053">4053</span>
 <span id="4054">4054</span>
+<span id="4055">4055</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4080,6 +4081,7 @@
 };
 <span class="kw">use</span> <span class="ident">base::syslog::LogConfig</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">getpid</span>, <span class="ident">info</span>, <span class="ident">pagesize</span>, <span class="ident">syslog</span>};
+<span class="kw">mod</span> <span class="ident">crosvm</span>;
 <span class="kw">use</span> <span class="ident">crosvm</span>::{
     <span class="ident">argument</span>::{<span class="self">self</span>, <span class="ident">parse_hex_or_decimal</span>, <span class="ident">print_help</span>, <span class="ident">set_arguments</span>, <span class="ident">Argument</span>},
     <span class="ident">platform</span>, <span class="ident">BindMount</span>, <span class="ident">Config</span>, <span class="ident">Executable</span>, <span class="ident">FileBackedMappingParameters</span>, <span class="ident">GidMap</span>,
