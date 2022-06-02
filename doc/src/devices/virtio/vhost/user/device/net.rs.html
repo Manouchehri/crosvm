@@ -171,9 +171,6 @@
 <span id="170">170</span>
 <span id="171">171</span>
 <span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-<span id="175">175</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -196,6 +193,8 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::net</span>::{<span class="ident">build_config</span>, <span class="ident">process_ctrl</span>, <span class="ident">process_tx</span>, <span class="ident">virtio_features_to_tap_offload</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>};
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys</span>::{<span class="ident">start_device</span> <span class="kw">as</span> <span class="ident">run_net_device</span>, <span class="ident">Options</span>};
 
 <span class="macro">thread_local!</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">static</span> <span class="ident">NET_EXECUTOR</span>: <span class="ident">OnceCell</span><span class="op">&lt;</span><span class="ident">Executor</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">OnceCell::new</span>();
@@ -343,11 +342,6 @@
             <span class="ident">handle</span>.<span class="ident">abort</span>();
         }
     }
-}
-
-<span class="doccomment">/// Starts a vhost-user net device.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run_net_device</span>(<span class="ident">program_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="ident">sys::start_device</span>(<span class="ident">program_name</span>, <span class="ident">args</span>)
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>

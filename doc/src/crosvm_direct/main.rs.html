@@ -4054,6 +4054,7 @@
 <span id="4053">4053</span>
 <span id="4054">4054</span>
 <span id="4055">4055</span>
+<span id="4056">4056</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4079,6 +4080,7 @@
     <span class="ident">set_default_serial_parameters</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrRWType</span>, <span class="ident">MsrValueFrom</span>, <span class="ident">Pstore</span>,
     <span class="ident">VcpuAffinity</span>,
 };
+<span class="kw">use</span> <span class="ident">argh::FromArgs</span>;
 <span class="kw">use</span> <span class="ident">base::syslog::LogConfig</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">getpid</span>, <span class="ident">info</span>, <span class="ident">pagesize</span>, <span class="ident">syslog</span>};
 <span class="kw">mod</span> <span class="ident">crosvm</span>;
@@ -7025,29 +7027,29 @@ with a &#39;--backing_file&#39;.&quot;</span>
 }
 
 <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">args</span>: <span class="ident">std::env::Args</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">print_usage</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> {
-        <span class="ident">print_help</span>(
-            <span class="string">&quot;crosvm device&quot;</span>,
-            <span class="string">&quot; (block|console|cras-snd|fs|gpu|net|wl) &lt;device-specific arguments&gt;&quot;</span>,
-            <span class="kw-2">&amp;</span>[],
-        );
-    };
-
-    <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
-        <span class="ident">print_usage</span>();
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
-    }
-
     <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
     <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Deref::deref</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
     <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">as_slice</span>();
 
-    <span class="kw">let</span> <span class="ident">program_name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;crosvm device {}&quot;</span>, <span class="ident">args</span>[<span class="number">0</span>]);
+    <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">crosvm::DevicesArgs::from_args</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;crosvm&quot;</span>, <span class="string">&quot;device&quot;</span>], <span class="ident">args</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">opts</span>) =&gt; <span class="ident">opts</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+            <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">status</span>.<span class="ident">is_err</span>() {
+                <span class="macro">error!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">output</span>);
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+            } <span class="kw">else</span> {
+                <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">output</span>);
+            }
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+        }
+    };
 
-    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">args</span>[<span class="number">0</span>] {
-        <span class="string">&quot;block&quot;</span> =&gt; <span class="ident">run_block_device</span>(<span class="kw-2">&amp;</span><span class="ident">program_name</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>[<span class="number">1</span>..]),
-        <span class="string">&quot;net&quot;</span> =&gt; <span class="ident">run_net_device</span>(<span class="kw-2">&amp;</span><span class="ident">program_name</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>[<span class="number">1</span>..]),
-        <span class="kw">_</span> =&gt; <span class="ident">sys::start_device</span>(<span class="kw-2">&amp;</span><span class="ident">program_name</span>, <span class="ident">args</span>),
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">opts</span>.<span class="ident">command</span> {
+        <span class="ident">crosvm::DevicesSubcommand::CrossPlatform</span>(<span class="ident">command</span>) =&gt; <span class="kw">match</span> <span class="ident">command</span> {
+            <span class="ident">crosvm::CrossPlatformDevicesCommands::Block</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_block_device</span>(<span class="ident">cfg</span>),
+            <span class="ident">crosvm::CrossPlatformDevicesCommands::Net</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_net_device</span>(<span class="ident">cfg</span>),
+        },
+        <span class="ident">crosvm::DevicesSubcommand::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::start_device</span>(<span class="ident">command</span>),
     };
 
     <span class="ident">result</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {

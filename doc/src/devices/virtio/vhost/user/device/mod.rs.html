@@ -47,7 +47,7 @@
 <span class="kw">mod</span> <span class="ident">block</span>;
 <span class="kw">mod</span> <span class="ident">handler</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">block::run_block_device</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">block</span>::{<span class="ident">run_block_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">BlockOptions</span>};
 
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
@@ -62,15 +62,15 @@
         <span class="kw">mod</span> <span class="ident">vvu</span>;
         <span class="kw">mod</span> <span class="ident">wl</span>;
 
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">vsock::run_vsock_device</span>, <span class="ident">vsock::Options</span> <span class="kw">as</span> <span class="ident">VsockOptions</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">wl::run_wl_device</span>, <span class="ident">wl::Options</span> <span class="kw">as</span> <span class="ident">WlOptions</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">console::run_console_device</span>, <span class="ident">console::Options</span> <span class="kw">as</span> <span class="ident">ConsoleOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vsock</span>::{<span class="ident">run_vsock_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">VsockOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl</span>::{<span class="ident">run_wl_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">WlOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">console</span>::{<span class="ident">run_console_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">ConsoleOptions</span>};
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">cras_snd::run_cras_snd_device</span>, <span class="ident">cras_snd::Options</span> <span class="kw">as</span> <span class="ident">CrasSndOptions</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">fs::run_fs_device</span>, <span class="ident">fs::Options</span> <span class="kw">as</span> <span class="ident">FsOptions</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net::run_net_device</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cras_snd</span>::{<span class="ident">run_cras_snd_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">CrasSndOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fs</span>::{<span class="ident">run_fs_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">FsOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">net</span>::{<span class="ident">run_net_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">NetOptions</span>};
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> {<span class="ident">gpu::run_gpu_device</span>, <span class="ident">gpu::Options</span> <span class="kw">as</span> <span class="ident">GpuOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gpu</span>::{<span class="ident">run_gpu_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">GpuOptions</span>};
     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
         <span class="kw">mod</span> <span class="ident">net</span>;
