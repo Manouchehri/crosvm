@@ -938,6 +938,16 @@
 <span id="937">937</span>
 <span id="938">938</span>
 <span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1819,7 +1829,7 @@
 }
 
 <span class="doccomment">/// Handler types for userspace-msr</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrAction</span> {
     <span class="doccomment">/// Read and write from host directly, and the control of MSR will</span>
     <span class="doccomment">/// take effect on host.</span>
@@ -1855,6 +1865,16 @@
     }
 }
 
+<span class="doccomment">/// Whether to force KVM-filtered MSRs.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">MsrFilter</span> {
+    <span class="doccomment">/// Leave it to hypervisor (KVM) default.</span>
+    <span class="ident">Default</span>,
+    <span class="doccomment">/// Don&#39;t let KVM do the default thing and use our userspace MSR</span>
+    <span class="doccomment">/// implementation.</span>
+    <span class="ident">Override</span>,
+}
+
 <span class="doccomment">/// Config option for userspace-msr handing</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// MsrConfig will be collected with its corresponding MSR&#39;s index.</span>
@@ -1868,7 +1888,7 @@
     <span class="doccomment">/// MSR source CPU.</span>
     <span class="kw">pub</span> <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
     <span class="doccomment">/// Whether to override KVM MSR emulation.</span>
-    <span class="kw">pub</span> <span class="ident">filter</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">filter</span>: <span class="ident">MsrFilter</span>,
 }
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>

@@ -1944,6 +1944,11 @@
 <span id="1943">1943</span>
 <span id="1944">1944</span>
 <span id="1945">1945</span>
+<span id="1946">1946</span>
+<span id="1947">1947</span>
+<span id="1948">1948</span>
+<span id="1949">1949</span>
+<span id="1950">1950</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2008,8 +2013,8 @@
 <span class="kw">use</span> <span class="ident">acpi_tables::sdt::SDT</span>;
 <span class="kw">use</span> <span class="ident">acpi_tables</span>::{<span class="ident">aml</span>, <span class="ident">aml::Aml</span>};
 <span class="kw">use</span> <span class="ident">arch</span>::{
-    <span class="ident">get_serial_cmdline</span>, <span class="ident">GetSerialCmdlineError</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrRWType</span>, <span class="ident">MsrValueFrom</span>,
-    <span class="ident">RunnableLinuxVm</span>, <span class="ident">VmComponents</span>, <span class="ident">VmImage</span>,
+    <span class="ident">get_serial_cmdline</span>, <span class="ident">GetSerialCmdlineError</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrConfig</span>, <span class="ident">MsrFilter</span>, <span class="ident">MsrRWType</span>,
+    <span class="ident">MsrValueFrom</span>, <span class="ident">RunnableLinuxVm</span>, <span class="ident">VmComponents</span>, <span class="ident">VmImage</span>,
 };
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">SendTube</span>, <span class="ident">TubeError</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
@@ -3599,27 +3604,33 @@
 <span class="kw">fn</span> <span class="ident">insert_msr</span>(
     <span class="ident">msr_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
     <span class="ident">key</span>: <span class="ident">u32</span>,
-    <span class="ident">rw_type</span>: <span class="ident">MsrRWType</span>,
-    <span class="ident">action</span>: <span class="ident">MsrAction</span>,
-    <span class="ident">from</span>: <span class="ident">MsrValueFrom</span>,
-    <span class="ident">filter</span>: <span class="ident">bool</span>,
+    <span class="ident">msr_config</span>: <span class="ident">MsrConfig</span>,
 ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">MsrError</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">msr_map</span>
-        .<span class="ident">insert</span>(
-            <span class="ident">key</span>,
-            <span class="ident">MsrConfig</span> {
-                <span class="ident">rw_type</span>,
-                <span class="ident">action</span>,
-                <span class="ident">from</span>,
-                <span class="ident">filter</span>,
-            },
-        )
-        .<span class="ident">is_some</span>()
-    {
+    <span class="kw">if</span> <span class="ident">msr_map</span>.<span class="ident">insert</span>(<span class="ident">key</span>, <span class="ident">msr_config</span>).<span class="ident">is_some</span>() {
         <span class="prelude-val">Err</span>(<span class="ident">MsrError::MsrDuplicate</span>(<span class="ident">key</span>))
     } <span class="kw">else</span> {
         <span class="prelude-val">Ok</span>(())
     }
+}
+
+<span class="kw">fn</span> <span class="ident">insert_msrs</span>(
+    <span class="ident">msr_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MsrConfig</span><span class="op">&gt;</span>,
+    <span class="ident">msrs</span>: <span class="kw-2">&amp;</span>[(<span class="ident">u32</span>, <span class="ident">MsrRWType</span>, <span class="ident">MsrAction</span>, <span class="ident">MsrValueFrom</span>, <span class="ident">MsrFilter</span>)],
+) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">MsrError</span><span class="op">&gt;</span> {
+    <span class="kw">for</span> <span class="ident">msr</span> <span class="kw">in</span> <span class="ident">msrs</span> {
+        <span class="ident">insert_msr</span>(
+            <span class="ident">msr_map</span>,
+            <span class="ident">msr</span>.<span class="number">0</span>,
+            <span class="ident">MsrConfig</span> {
+                <span class="ident">rw_type</span>: <span class="ident">msr</span>.<span class="number">1</span>,
+                <span class="ident">action</span>: <span class="ident">msr</span>.<span class="number">2</span>,
+                <span class="ident">from</span>: <span class="ident">msr</span>.<span class="number">3</span>,
+                <span class="ident">filter</span>: <span class="ident">msr</span>.<span class="number">4</span>,
+            },
+        )<span class="question-mark">?</span>;
+    }
+
+    <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_enable_pnp_data_msr_config</span>(
@@ -3632,60 +3643,61 @@
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_IA32_MPERF</span>,
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
     ];
 
     <span class="comment">// When itmt is enabled, the following 5 MSRs are already</span>
     <span class="comment">// passed through or emulated, so just skip here.</span>
     <span class="kw">if</span> <span class="op">!</span><span class="ident">itmt</span> {
-        <span class="ident">msrs</span>.<span class="ident">push</span>((
-            <span class="ident">MSR_PLATFORM_INFO</span>,
-            <span class="ident">MsrRWType::ReadOnly</span>,
-            <span class="ident">MsrAction::MsrPassthrough</span>,
-            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">true</span>,
-        ));
-        <span class="ident">msrs</span>.<span class="ident">push</span>((
-            <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
-            <span class="ident">MsrRWType::ReadOnly</span>,
-            <span class="ident">MsrAction::MsrPassthrough</span>,
-            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
-        ));
-        <span class="ident">msrs</span>.<span class="ident">push</span>((
-            <span class="ident">MSR_PM_ENABLE</span>,
-            <span class="ident">MsrRWType::ReadOnly</span>,
-            <span class="ident">MsrAction::MsrPassthrough</span>,
-            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
-        ));
-        <span class="ident">msrs</span>.<span class="ident">push</span>((
-            <span class="ident">MSR_HWP_CAPABILITIES</span>,
-            <span class="ident">MsrRWType::ReadOnly</span>,
-            <span class="ident">MsrAction::MsrPassthrough</span>,
-            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
-        ));
-        <span class="ident">msrs</span>.<span class="ident">push</span>((
-            <span class="ident">MSR_HWP_REQUEST</span>,
-            <span class="ident">MsrRWType::ReadOnly</span>,
-            <span class="ident">MsrAction::MsrPassthrough</span>,
-            <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
-        ));
+        <span class="ident">msrs</span>.<span class="ident">extend</span>([
+            (
+                <span class="ident">MSR_PLATFORM_INFO</span>,
+                <span class="ident">MsrRWType::ReadOnly</span>,
+                <span class="ident">MsrAction::MsrPassthrough</span>,
+                <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+                <span class="ident">MsrFilter::Override</span>,
+            ),
+            (
+                <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
+                <span class="ident">MsrRWType::ReadOnly</span>,
+                <span class="ident">MsrAction::MsrPassthrough</span>,
+                <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+                <span class="ident">MsrFilter::Default</span>,
+            ),
+            (
+                <span class="ident">MSR_PM_ENABLE</span>,
+                <span class="ident">MsrRWType::ReadOnly</span>,
+                <span class="ident">MsrAction::MsrPassthrough</span>,
+                <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+                <span class="ident">MsrFilter::Default</span>,
+            ),
+            (
+                <span class="ident">MSR_HWP_CAPABILITIES</span>,
+                <span class="ident">MsrRWType::ReadOnly</span>,
+                <span class="ident">MsrAction::MsrPassthrough</span>,
+                <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+                <span class="ident">MsrFilter::Default</span>,
+            ),
+            (
+                <span class="ident">MSR_HWP_REQUEST</span>,
+                <span class="ident">MsrRWType::ReadOnly</span>,
+                <span class="ident">MsrAction::MsrPassthrough</span>,
+                <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
+                <span class="ident">MsrFilter::Default</span>,
+            ),
+        ]);
     }
 
-    <span class="kw">for</span> <span class="ident">msr</span> <span class="kw">in</span> <span class="ident">msrs</span> {
-        <span class="ident">insert_msr</span>(<span class="ident">msr_map</span>, <span class="ident">msr</span>.<span class="number">0</span>, <span class="ident">msr</span>.<span class="number">1</span>, <span class="ident">msr</span>.<span class="number">2</span>, <span class="ident">msr</span>.<span class="number">3</span>, <span class="ident">msr</span>.<span class="number">4</span>)<span class="question-mark">?</span>;
-    }
+    <span class="ident">insert_msrs</span>(<span class="ident">msr_map</span>, <span class="kw-2">&amp;</span><span class="ident">msrs</span>)<span class="question-mark">?</span>;
+
     <span class="prelude-val">Ok</span>(())
 }
 
@@ -3715,47 +3727,45 @@
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_PM_ENABLE</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_HWP_REQUEST</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_TURBO_RATIO_LIMIT</span>,
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_PLATFORM_INFO</span>,
             <span class="ident">MsrRWType::ReadOnly</span>,
             <span class="ident">MsrAction::MsrPassthrough</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
         (
             <span class="ident">MSR_IA32_PERF_CTL</span>,
             <span class="ident">MsrRWType::ReadWrite</span>,
             <span class="ident">MsrAction::MsrEmulate</span>,
             <span class="ident">MsrValueFrom::RWFromRunningCPU</span>,
-            <span class="bool-val">false</span>,
+            <span class="ident">MsrFilter::Default</span>,
         ),
     ];
-    <span class="kw">for</span> <span class="ident">msr</span> <span class="kw">in</span> <span class="ident">msrs</span> {
-        <span class="ident">insert_msr</span>(<span class="ident">msr_map</span>, <span class="ident">msr</span>.<span class="number">0</span>, <span class="ident">msr</span>.<span class="number">1</span>, <span class="ident">msr</span>.<span class="number">2</span>, <span class="ident">msr</span>.<span class="number">3</span>, <span class="ident">msr</span>.<span class="number">4</span>)<span class="question-mark">?</span>;
-    }
+    <span class="ident">insert_msrs</span>(<span class="ident">msr_map</span>, <span class="kw-2">&amp;</span><span class="ident">msrs</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(())
 }
