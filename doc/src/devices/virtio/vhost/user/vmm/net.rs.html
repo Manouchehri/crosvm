@@ -152,6 +152,7 @@
 <span id="151">151</span>
 <span id="152">152</span>
 <span id="153">153</span>
+<span id="154">154</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -171,7 +172,7 @@
 
 <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
-<span class="kw">const</span> <span class="ident">QUEUE_SIZE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">256</span>;
+<span class="kw">const</span> <span class="ident">QUEUE_SIZE</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1024</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Net</span> {
     <span class="ident">kill_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
@@ -191,6 +192,7 @@
             <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_net::VIRTIO_NET_F_GUEST_UFO</span>
             <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_net::VIRTIO_NET_F_HOST_TSO4</span>
             <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_net::VIRTIO_NET_F_HOST_UFO</span>
+            <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_net::VIRTIO_NET_F_MAC</span>
             <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">virtio_net::VIRTIO_NET_F_MQ</span>
             <span class="op">|</span> <span class="ident">VhostUserVirtioFeatures::PROTOCOL_FEATURES</span>.<span class="ident">bits</span>();
         <span class="kw">let</span> <span class="ident">init_features</span> <span class="op">=</span> <span class="ident">base_features</span> <span class="op">|</span> <span class="ident">VhostUserVirtioFeatures::PROTOCOL_FEATURES</span>.<span class="ident">bits</span>();

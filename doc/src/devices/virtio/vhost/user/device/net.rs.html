@@ -203,7 +203,7 @@
 <span class="comment">// TODO(b/188947559): Come up with better way to include these constants. Compiler errors happen</span>
 <span class="comment">// if they are kept in the trait.</span>
 <span class="kw">const</span> <span class="ident">MAX_QUEUE_NUM</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">3</span>; <span class="comment">/* rx, tx, ctrl */</span>
-<span class="kw">const</span> <span class="ident">MAX_VRING_LEN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">256</span>;
+<span class="kw">const</span> <span class="ident">MAX_VRING_LEN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">1024</span>;
 
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_tx_queue</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TapT</span><span class="op">&gt;</span>(
     <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">virtio::Queue</span>,
