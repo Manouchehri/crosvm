@@ -183,7 +183,7 @@
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_io_nr</span>, <span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_iowr_nr</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">flexible_array_impl</span>, <span class="ident">FlexibleArray</span>};
+<span class="kw">use</span> <span class="ident">data_model::flexible_array_impl</span>;
 <span class="comment">// Each of the below modules defines ioctls specific to their platform.</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
