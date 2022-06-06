@@ -1002,6 +1002,12 @@
 <span id="1001">1001</span>
 <span id="1002">1002</span>
 <span id="1003">1003</span>
+<span id="1004">1004</span>
+<span id="1005">1005</span>
+<span id="1006">1006</span>
+<span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1015,11 +1021,14 @@
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">result</span>, <span class="ident">thread</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">acpi_tables::sdt::SDT</span>;
 <span class="kw">use</span> <span class="ident">anyhow::Context</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident">base::warn</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>,
-    <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">Tube</span>, <span class="ident">TubeError</span>,
+    <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>,
+    <span class="ident">Tube</span>, <span class="ident">TubeError</span>,
 };
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">AsyncError</span>, <span class="ident">AsyncTube</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le64</span>};
@@ -1032,6 +1041,7 @@
 };
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>, <span class="ident">GuestMemoryError</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::PciAddress</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
     <span class="ident">async_utils</span>, <span class="ident">copy_config</span>, <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>,
@@ -1058,7 +1068,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">const</span> <span class="ident">IOMMU_PROBE_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">virtio_iommu_probe_resv_mem</span><span class="op">&gt;</span>();
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">const</span> <span class="ident">VIRTIO_IOMMU_VIOT_NODE_PCI_RANGE</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">1</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">const</span> <span class="ident">VIRTIO_IOMMU_VIOT_NODE_VIRTIO_IOMMU_PCI</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">3</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>

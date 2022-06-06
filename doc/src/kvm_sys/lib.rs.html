@@ -170,6 +170,7 @@
 <span id="169">169</span>
 <span id="170">170</span>
 <span id="171">171</span>
+<span id="172">172</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -181,6 +182,7 @@
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_io_nr</span>, <span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_iowr_nr</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">flexible_array_impl</span>, <span class="ident">FlexibleArray</span>};
 <span class="comment">// Each of the below modules defines ioctls specific to their platform.</span>
 

@@ -25,6 +25,9 @@
 <span id="24">24</span>
 <span id="25">25</span>
 <span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -40,8 +43,11 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform::main</span>::{
     <span class="ident">check_serial_params</span>, <span class="ident">cleanup</span>, <span class="ident">get_arguments</span>, <span class="ident">net_vq_pairs_expected</span>, <span class="ident">set_arguments</span>,
-    <span class="ident">start_device</span>, <span class="ident">use_host_cpu_topology</span>, <span class="ident">DevicesSubcommand</span>,
+    <span class="ident">start_device</span>, <span class="ident">DevicesSubcommand</span>,
 };
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform::main::use_host_cpu_topology</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform::main::is_gpu_backend_deprecated</span>;

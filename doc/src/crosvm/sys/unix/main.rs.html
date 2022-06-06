@@ -679,6 +679,7 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
+<span id="681">681</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -770,6 +771,7 @@
     <span class="bool-val">false</span>
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_host_cpu_topology</span>() -&gt; <span class="ident">bool</span> {
     <span class="bool-val">true</span>
 }
