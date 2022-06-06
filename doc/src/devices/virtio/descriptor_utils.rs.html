@@ -1475,79 +1475,6 @@
 <span id="1474">1474</span>
 <span id="1475">1475</span>
 <span id="1476">1476</span>
-<span id="1477">1477</span>
-<span id="1478">1478</span>
-<span id="1479">1479</span>
-<span id="1480">1480</span>
-<span id="1481">1481</span>
-<span id="1482">1482</span>
-<span id="1483">1483</span>
-<span id="1484">1484</span>
-<span id="1485">1485</span>
-<span id="1486">1486</span>
-<span id="1487">1487</span>
-<span id="1488">1488</span>
-<span id="1489">1489</span>
-<span id="1490">1490</span>
-<span id="1491">1491</span>
-<span id="1492">1492</span>
-<span id="1493">1493</span>
-<span id="1494">1494</span>
-<span id="1495">1495</span>
-<span id="1496">1496</span>
-<span id="1497">1497</span>
-<span id="1498">1498</span>
-<span id="1499">1499</span>
-<span id="1500">1500</span>
-<span id="1501">1501</span>
-<span id="1502">1502</span>
-<span id="1503">1503</span>
-<span id="1504">1504</span>
-<span id="1505">1505</span>
-<span id="1506">1506</span>
-<span id="1507">1507</span>
-<span id="1508">1508</span>
-<span id="1509">1509</span>
-<span id="1510">1510</span>
-<span id="1511">1511</span>
-<span id="1512">1512</span>
-<span id="1513">1513</span>
-<span id="1514">1514</span>
-<span id="1515">1515</span>
-<span id="1516">1516</span>
-<span id="1517">1517</span>
-<span id="1518">1518</span>
-<span id="1519">1519</span>
-<span id="1520">1520</span>
-<span id="1521">1521</span>
-<span id="1522">1522</span>
-<span id="1523">1523</span>
-<span id="1524">1524</span>
-<span id="1525">1525</span>
-<span id="1526">1526</span>
-<span id="1527">1527</span>
-<span id="1528">1528</span>
-<span id="1529">1529</span>
-<span id="1530">1530</span>
-<span id="1531">1531</span>
-<span id="1532">1532</span>
-<span id="1533">1533</span>
-<span id="1534">1534</span>
-<span id="1535">1535</span>
-<span id="1536">1536</span>
-<span id="1537">1537</span>
-<span id="1538">1538</span>
-<span id="1539">1539</span>
-<span id="1540">1540</span>
-<span id="1541">1541</span>
-<span id="1542">1542</span>
-<span id="1543">1543</span>
-<span id="1544">1544</span>
-<span id="1545">1545</span>
-<span id="1546">1546</span>
-<span id="1547">1547</span>
-<span id="1548">1548</span>
-<span id="1549">1549</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2360,9 +2287,8 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">std::fs::File</span>;
     <span class="kw">use</span> <span class="ident">std::io::Read</span>;
-    <span class="kw">use</span> <span class="ident">tempfile::tempfile</span>;
 
-    <span class="kw">use</span> <span class="ident">cros_async::Executor</span>;
+    <span class="kw">use</span> <span class="ident">tempfile::tempfile</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">reader_test_simple_chain</span>() {
@@ -3023,78 +2949,6 @@
             .<span class="ident">fold</span>(<span class="number">0usize</span>, <span class="op">|</span><span class="ident">total</span>, <span class="ident">iov</span><span class="op">|</span> <span class="ident">total</span> <span class="op">+</span> <span class="ident">iov</span>.<span class="ident">size</span>());
         <span class="macro">assert!</span>(<span class="ident">first</span> <span class="op">&gt;</span> <span class="number">0</span>);
         <span class="macro">assert!</span>(<span class="ident">first</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">8</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">region_reader_failing_io</span>() {
-        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">unwrap</span>();
-        <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">region_reader_failing_io_async</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>)).<span class="ident">unwrap</span>();
-    }
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">region_reader_failing_io_async</span>(<span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) {
-        <span class="kw">use</span> <span class="ident">DescriptorType</span>::<span class="kw-2">*</span>;
-
-        <span class="kw">let</span> <span class="ident">memory_start_addr</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x0</span>);
-        <span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="ident">GuestMemory::new</span>(<span class="kw-2">&amp;</span>[(<span class="ident">memory_start_addr</span>, <span class="number">0x10000</span>)]).<span class="ident">unwrap</span>();
-
-        <span class="kw">let</span> <span class="ident">chain</span> <span class="op">=</span> <span class="ident">create_descriptor_chain</span>(
-            <span class="kw-2">&amp;</span><span class="ident">memory</span>,
-            <span class="ident">GuestAddress</span>(<span class="number">0x0</span>),
-            <span class="ident">GuestAddress</span>(<span class="number">0x100</span>),
-            <span class="macro">vec!</span>[(<span class="ident">Readable</span>, <span class="number">256</span>), (<span class="ident">Readable</span>, <span class="number">256</span>)],
-            <span class="number">0</span>,
-        )
-        .<span class="ident">expect</span>(<span class="string">&quot;create_descriptor_chain failed&quot;</span>);
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Reader::new</span>(<span class="ident">memory</span>.<span class="ident">clone</span>(), <span class="ident">chain</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create Reader&quot;</span>);
-
-        <span class="comment">// Open a file in read-only mode so writes to it to trigger an I/O error.</span>
-        <span class="kw">let</span> <span class="ident">ro_file</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="string">&quot;/dev/zero&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to open /dev/zero&quot;</span>);
-        <span class="kw">let</span> <span class="ident">async_ro_file</span> <span class="op">=</span> <span class="ident">disk::SingleFileDisk::new</span>(<span class="ident">ro_file</span>, <span class="ident">ex</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to crate SFD&quot;</span>);
-
-        <span class="ident">reader</span>
-            .<span class="ident">read_exact_to_at_fut</span>(<span class="kw-2">&amp;</span><span class="ident">async_ro_file</span>, <span class="number">512</span>, <span class="number">0</span>)
-            .<span class="kw">await</span>
-            .<span class="ident">expect_err</span>(<span class="string">&quot;successfully read more bytes than SharedMemory size&quot;</span>);
-
-        <span class="comment">// The write above should have failed entirely, so we end up not writing any bytes at all.</span>
-        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">available_bytes</span>(), <span class="number">512</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">reader</span>.<span class="ident">bytes_read</span>(), <span class="number">0</span>);
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">region_writer_failing_io</span>() {
-        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">unwrap</span>();
-        <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">region_writer_failing_io_async</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>)).<span class="ident">unwrap</span>()
-    }
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">region_writer_failing_io_async</span>(<span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>) {
-        <span class="kw">use</span> <span class="ident">DescriptorType</span>::<span class="kw-2">*</span>;
-
-        <span class="kw">let</span> <span class="ident">memory_start_addr</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x0</span>);
-        <span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="ident">GuestMemory::new</span>(<span class="kw-2">&amp;</span>[(<span class="ident">memory_start_addr</span>, <span class="number">0x10000</span>)]).<span class="ident">unwrap</span>();
-
-        <span class="kw">let</span> <span class="ident">chain</span> <span class="op">=</span> <span class="ident">create_descriptor_chain</span>(
-            <span class="kw-2">&amp;</span><span class="ident">memory</span>,
-            <span class="ident">GuestAddress</span>(<span class="number">0x0</span>),
-            <span class="ident">GuestAddress</span>(<span class="number">0x100</span>),
-            <span class="macro">vec!</span>[(<span class="ident">Writable</span>, <span class="number">256</span>), (<span class="ident">Writable</span>, <span class="number">256</span>)],
-            <span class="number">0</span>,
-        )
-        .<span class="ident">expect</span>(<span class="string">&quot;create_descriptor_chain failed&quot;</span>);
-
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">Writer::new</span>(<span class="ident">memory</span>.<span class="ident">clone</span>(), <span class="ident">chain</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create Writer&quot;</span>);
-
-        <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">tempfile</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create temp file&quot;</span>);
-
-        <span class="ident">file</span>.<span class="ident">set_len</span>(<span class="number">384</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">async_file</span> <span class="op">=</span> <span class="ident">disk::SingleFileDisk::new</span>(<span class="ident">file</span>, <span class="ident">ex</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to crate SFD&quot;</span>);
-
-        <span class="ident">writer</span>
-            .<span class="ident">write_all_from_at_fut</span>(<span class="kw-2">&amp;</span><span class="ident">async_file</span>, <span class="number">512</span>, <span class="number">0</span>)
-            .<span class="kw">await</span>
-            .<span class="ident">expect_err</span>(<span class="string">&quot;successfully wrote more bytes than in SharedMemory&quot;</span>);
-
-        <span class="macro">assert_eq!</span>(<span class="ident">writer</span>.<span class="ident">available_bytes</span>(), <span class="number">128</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">writer</span>.<span class="ident">bytes_written</span>(), <span class="number">384</span>);
     }
 }
 </code></pre></div>
