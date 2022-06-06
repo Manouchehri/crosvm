@@ -1270,7 +1270,7 @@
 };
 
 <span class="kw">use</span> <span class="ident">async_task::Task</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WatchingEvents</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">trace</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">EventType</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">futures::task::noop_waker</span>;
 <span class="kw">use</span> <span class="ident">io_uring::URingContext</span>;
 <span class="kw">use</span> <span class="ident">once_cell::sync::Lazy</span>;
@@ -1439,10 +1439,10 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_fd_readable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PendingOperation</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="ident">WatchingEvents::empty</span>().<span class="ident">set_read</span>();
+        <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="ident">EventType::Read</span>;
 
         <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ex</span>.<span class="ident">upgrade</span>().<span class="ident">ok_or</span>(<span class="ident">Error::ExecutorGone</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ex</span>.<span class="ident">submit_poll</span>(<span class="self">self</span>, <span class="kw-2">&amp;</span><span class="ident">events</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">ex</span>.<span class="ident">submit_poll</span>(<span class="self">self</span>, <span class="ident">events</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="ident">PendingOperation</span> {
             <span class="ident">waker_token</span>: <span class="prelude-val">Some</span>(<span class="ident">token</span>),
@@ -1741,7 +1741,7 @@
     <span class="kw">fn</span> <span class="ident">submit_poll</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">RegisteredSource</span>,
-        <span class="ident">events</span>: <span class="kw-2">&amp;</span><span class="ident">base::WatchingEvents</span>,
+        <span class="ident">events</span>: <span class="ident">base::EventType</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WakerToken</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ring</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ring</span>.<span class="ident">lock</span>();
         <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">ring</span>

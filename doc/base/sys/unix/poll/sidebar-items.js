@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["POLL_CONTEXT_MAX_EVENTS",""]],"struct":[["PollContext","Used to poll multiple objects that have file descriptors."],["WatchingEvents","Watching events taken by PollContext."]]});
+initSidebarItems({"constant":[["EVENT_CONTEXT_MAX_EVENTS",""]],"struct":[["EventContext","Used to poll multiple objects that have file descriptors."]]});
