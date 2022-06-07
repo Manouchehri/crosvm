@@ -30,14 +30,14 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">windows</span>;
 
 <span class="macro">cfg_if::cfg_if!</span> {
-     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">unix</span> <span class="kw">as</span> <span class="ident">platform</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::<span class="kw-2">*</span>;
-     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">windows</span> <span class="kw">as</span> <span class="ident">platform</span>;
-     } <span class="kw">else</span> {
+    } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);
-     }
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="base" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
