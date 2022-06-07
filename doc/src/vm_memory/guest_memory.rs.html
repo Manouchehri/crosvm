@@ -1835,14 +1835,14 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// # use vm_memory::{GuestAddress, GuestMemory};</span>
-    <span class="doccomment">/// let addr_a = GuestAddress(0x1000);</span>
-    <span class="doccomment">/// let addr_b = GuestAddress(0x8000);</span>
+    <span class="doccomment">/// let addr_a = GuestAddress(0x10000);</span>
+    <span class="doccomment">/// let addr_b = GuestAddress(0x80000);</span>
     <span class="doccomment">/// let mut gm = GuestMemory::new(&amp;vec![</span>
-    <span class="doccomment">///     (addr_a, 0x2000),</span>
-    <span class="doccomment">///     (addr_b, 0x3000)]).expect(&quot;failed to create GuestMemory&quot;);</span>
-    <span class="doccomment">/// let offset = gm.offset_from_base(GuestAddress(0x9500))</span>
+    <span class="doccomment">///     (addr_a, 0x20000),</span>
+    <span class="doccomment">///     (addr_b, 0x30000)]).expect(&quot;failed to create GuestMemory&quot;);</span>
+    <span class="doccomment">/// let offset = gm.offset_from_base(GuestAddress(0x95000))</span>
     <span class="doccomment">///                .expect(&quot;failed to get offset&quot;);</span>
-    <span class="doccomment">/// assert_eq!(offset, 0x3500);</span>
+    <span class="doccomment">/// assert_eq!(offset, 0x35000);</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">offset_from_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">guest_addr</span>: <span class="ident">GuestAddress</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">regions</span>
@@ -2006,26 +2006,26 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">guest_to_host_range</span>() {
         <span class="kw">let</span> <span class="ident">start_addr1</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x0</span>);
-        <span class="kw">let</span> <span class="ident">start_addr2</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x1000</span>);
-        <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">GuestMemory::new</span>(<span class="kw-2">&amp;</span>[(<span class="ident">start_addr1</span>, <span class="number">0x1000</span>), (<span class="ident">start_addr2</span>, <span class="number">0x4000</span>)]).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">start_addr2</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x10000</span>);
+        <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="ident">GuestMemory::new</span>(<span class="kw-2">&amp;</span>[(<span class="ident">start_addr1</span>, <span class="number">0x10000</span>), (<span class="ident">start_addr2</span>, <span class="number">0x40000</span>)]).<span class="ident">unwrap</span>();
 
         <span class="comment">// Verify the host addresses match what we expect from the mappings.</span>
         <span class="kw">let</span> <span class="ident">addr1_base</span> <span class="op">=</span> <span class="ident">get_mapping</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="ident">start_addr1</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">addr2_base</span> <span class="op">=</span> <span class="ident">get_mapping</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="ident">start_addr2</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">host_addr1</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr1</span>, <span class="number">0x1000</span>).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">host_addr2</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr2</span>, <span class="number">0x1000</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">host_addr1</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr1</span>, <span class="number">0x10000</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">host_addr2</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr2</span>, <span class="number">0x10000</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">host_addr1</span>, <span class="ident">addr1_base</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">host_addr2</span>, <span class="ident">addr2_base</span>);
 
-        <span class="kw">let</span> <span class="ident">host_addr3</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr2</span>, <span class="number">0x2000</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">host_addr3</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr2</span>, <span class="number">0x20000</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">host_addr3</span>, <span class="ident">addr2_base</span>);
 
         <span class="comment">// Check that a valid guest address with an invalid size returns an error.</span>
-        <span class="macro">assert!</span>(<span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr1</span>, <span class="number">0x2000</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">start_addr1</span>, <span class="number">0x20000</span>).<span class="ident">is_err</span>());
 
         <span class="comment">// Check that a bad address returns an error.</span>
         <span class="kw">let</span> <span class="ident">bad_addr</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0x123456</span>);
-        <span class="macro">assert!</span>(<span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">bad_addr</span>, <span class="number">0x1000</span>).<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">mem</span>.<span class="ident">get_host_address_range</span>(<span class="ident">bad_addr</span>, <span class="number">0x10000</span>).<span class="ident">is_err</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
