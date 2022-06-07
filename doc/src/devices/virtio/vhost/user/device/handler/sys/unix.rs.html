@@ -379,16 +379,6 @@
 <span id="378">378</span>
 <span id="379">379</span>
 <span id="380">380</span>
-<span id="381">381</span>
-<span id="382">382</span>
-<span id="383">383</span>
-<span id="384">384</span>
-<span id="385">385</span>
-<span id="386">386</span>
-<span id="387">387</span>
-<span id="388">388</span>
-<span id="389">389</span>
-<span id="390">390</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -548,18 +538,8 @@
             <span class="ident">caps</span>,
             ..
         } =&gt; {
-            <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">caps</span>.<span class="ident">doorbell_base_addr</span>();
-            <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">VfioRegionAddr</span> {
-                <span class="ident">index</span>: <span class="ident">base</span>.<span class="ident">index</span>,
-                <span class="ident">addr</span>: <span class="ident">base</span>.<span class="ident">addr</span> <span class="op">+</span> (<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="ident">caps</span>.<span class="ident">doorbell_off_multiplier</span>() <span class="kw">as</span> <span class="ident">u64</span>),
-            };
-            <span class="prelude-val">Ok</span>(<span class="ident">Doorbell::SystemDoorbell</span>(<span class="ident">DoorbellSys::Vfio</span>(
-                <span class="ident">DoorbellRegion</span> {
-                    <span class="ident">vfio</span>: <span class="ident">Arc::clone</span>(<span class="ident">device</span>),
-                    <span class="ident">index</span>,
-                    <span class="ident">addr</span>,
-                },
-            )))
+            <span class="kw">let</span> <span class="ident">doorbell</span> <span class="op">=</span> <span class="ident">DoorbellRegion::new</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">device</span>, <span class="ident">caps</span>)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(<span class="ident">Doorbell::SystemDoorbell</span>(<span class="ident">DoorbellSys::Vfio</span>(<span class="ident">doorbell</span>)))
         }
     }
 }

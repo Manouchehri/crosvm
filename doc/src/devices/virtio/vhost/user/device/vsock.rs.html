@@ -604,20 +604,6 @@
 <span id="603">603</span>
 <span id="604">604</span>
 <span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -657,23 +643,20 @@
 };
 <span class="kw">use</span> <span class="ident">vmm_vhost</span>::{<span class="ident">Protocol</span>, <span class="ident">SlaveListener</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">vfio::VfioRegionAddr</span>,
-    <span class="ident">virtio</span>::{
-        <span class="ident">base_features</span>,
-        <span class="ident">vhost</span>::{
-            <span class="ident">user::device</span>::{
-                <span class="ident">handler</span>::{
-                    <span class="ident">create_guest_memory</span>,
-                    <span class="ident">sys</span>::{<span class="ident">create_vvu_guest_memory</span>, <span class="ident">run_handler</span>, <span class="ident">HandlerTypeSys</span>},
-                    <span class="ident">vmm_va_to_gpa</span>, <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>,
-                },
-                <span class="ident">vvu</span>::{<span class="ident">doorbell::DoorbellRegion</span>, <span class="ident">pci::VvuPciDevice</span>, <span class="ident">VvuDevice</span>},
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
+    <span class="ident">base_features</span>,
+    <span class="ident">vhost</span>::{
+        <span class="ident">user::device</span>::{
+            <span class="ident">handler</span>::{
+                <span class="ident">create_guest_memory</span>,
+                <span class="ident">sys</span>::{<span class="ident">create_vvu_guest_memory</span>, <span class="ident">run_handler</span>, <span class="ident">HandlerTypeSys</span>},
+                <span class="ident">vmm_va_to_gpa</span>, <span class="ident">HandlerType</span>, <span class="ident">MappingInfo</span>,
             },
-            <span class="ident">vsock</span>,
+            <span class="ident">vvu</span>::{<span class="ident">doorbell::DoorbellRegion</span>, <span class="ident">pci::VvuPciDevice</span>, <span class="ident">VvuDevice</span>},
         },
-        <span class="ident">Queue</span>, <span class="ident">SignalableInterrupt</span>,
+        <span class="ident">vsock</span>,
     },
+    <span class="ident">Queue</span>, <span class="ident">SignalableInterrupt</span>,
 };
 
 <span class="kw">const</span> <span class="ident">MAX_VRING_LEN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">vsock::QUEUE_SIZE</span>;
@@ -983,18 +966,7 @@
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handler_type</span> {
             <span class="ident">HandlerType::SystemHandlerType</span>(<span class="ident">HandlerTypeSys::Vvu</span> { <span class="ident">vfio_dev</span>, <span class="ident">caps</span>, .. }) =&gt; {
-                <span class="kw">let</span> <span class="ident">vfio</span> <span class="op">=</span> <span class="ident">Arc::clone</span>(<span class="ident">vfio_dev</span>);
-                <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">caps</span>.<span class="ident">doorbell_base_addr</span>();
-                <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">VfioRegionAddr</span> {
-                    <span class="ident">index</span>: <span class="ident">base</span>.<span class="ident">index</span>,
-                    <span class="ident">addr</span>: <span class="ident">base</span>.<span class="ident">addr</span> <span class="op">+</span> (<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="ident">caps</span>.<span class="ident">doorbell_off_multiplier</span>() <span class="kw">as</span> <span class="ident">u64</span>),
-                };
-
-                <span class="kw">let</span> <span class="ident">doorbell</span> <span class="op">=</span> <span class="ident">DoorbellRegion</span> {
-                    <span class="ident">vfio</span>,
-                    <span class="ident">index</span>: <span class="ident">index</span> <span class="kw">as</span> <span class="ident">u8</span>,
-                    <span class="ident">addr</span>,
-                };
+                <span class="kw">let</span> <span class="ident">doorbell</span> <span class="op">=</span> <span class="ident">DoorbellRegion::new</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">vfio_dev</span>, <span class="ident">caps</span>)<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">call_evt</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">call_evts</span>[<span class="ident">index</span>].<span class="ident">as_ref</span>() {
                     <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">doorbell</span>));

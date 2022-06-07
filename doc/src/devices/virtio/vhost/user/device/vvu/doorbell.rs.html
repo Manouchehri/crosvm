@@ -32,29 +32,107 @@
 <span id="31">31</span>
 <span id="32">32</span>
 <span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="ident">base::Event</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>};
+<span class="kw">use</span> <span class="ident">vmm_vhost</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">VhostError</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">VhostResult</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio</span>::{<span class="ident">VfioDevice</span>, <span class="ident">VfioRegionAddr</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio::VfioDevice</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::vvu::pci::VvuPciCaps</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::SignalableInterrupt</span>;
 
 <span class="doccomment">/// Doorbell region in the VVU device&#39;s additional BAR.</span>
 <span class="doccomment">/// Writing to this area will sends a signal to the sibling VM&#39;s vhost-user device.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DoorbellRegion</span> {
-    <span class="kw">pub</span> <span class="ident">vfio</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">VfioDevice</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">index</span>: <span class="ident">u8</span>,
-    <span class="kw">pub</span> <span class="ident">addr</span>: <span class="ident">VfioRegionAddr</span>,
+    <span class="kw">pub</span> <span class="ident">addr</span>: <span class="ident">u64</span>,
+    <span class="kw">pub</span> <span class="ident">mmap</span>: <span class="ident">MemoryMapping</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">DoorbellRegion</span> {
+    <span class="doccomment">/// Initialize a new DoorbellRegion structure given a queue index, the vfio</span>
+    <span class="doccomment">/// device, and the VvuPciCaps.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">queue_index</span>: <span class="ident">u8</span>,
+        <span class="ident">device</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">VfioDevice</span><span class="op">&gt;</span>,
+        <span class="ident">caps</span>: <span class="kw-2">&amp;</span><span class="ident">VvuPciCaps</span>,
+    ) -&gt; <span class="ident">VhostResult</span><span class="op">&lt;</span><span class="ident">DoorbellRegion</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">caps</span>.<span class="ident">doorbell_base_addr</span>();
+        <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">base</span>.<span class="ident">addr</span> <span class="op">+</span> (<span class="ident">queue_index</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="ident">caps</span>.<span class="ident">doorbell_off_multiplier</span>() <span class="kw">as</span> <span class="ident">u64</span>);
+        <span class="kw">let</span> <span class="ident">mmap_region</span> <span class="op">=</span> <span class="ident">device</span>.<span class="ident">get_region_mmap</span>(<span class="ident">base</span>.<span class="ident">index</span>);
+        <span class="kw">let</span> <span class="ident">region_offset</span> <span class="op">=</span> <span class="ident">device</span>.<span class="ident">get_region_offset</span>(<span class="ident">base</span>.<span class="ident">index</span>);
+        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">region_offset</span> <span class="op">+</span> <span class="ident">mmap_region</span>[<span class="number">0</span>].<span class="ident">offset</span>;
+
+        <span class="kw">let</span> <span class="ident">mmap</span> <span class="op">=</span> <span class="ident">MemoryMappingBuilder::new</span>(<span class="ident">mmap_region</span>[<span class="number">0</span>].<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">from_file</span>(<span class="ident">device</span>.<span class="ident">device_file</span>())
+            .<span class="ident">offset</span>(<span class="ident">offset</span>)
+            .<span class="ident">build</span>()
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                <span class="macro">error!</span>(<span class="string">&quot;Failed to mmap vfio memory region: {}&quot;</span>, <span class="ident">e</span>);
+                <span class="ident">VhostError::InvalidOperation</span>
+            })<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">doorbell</span> <span class="op">=</span> <span class="ident">DoorbellRegion</span> {
+            <span class="ident">index</span>: <span class="ident">queue_index</span>,
+            <span class="ident">addr</span>,
+            <span class="ident">mmap</span>,
+        };
+
+        <span class="prelude-val">Ok</span>(<span class="ident">doorbell</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">SignalableInterrupt</span> <span class="kw">for</span> <span class="ident">DoorbellRegion</span> {
     <span class="kw">fn</span> <span class="ident">signal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_vector</span>: <span class="ident">u16</span>, <span class="ident">_interrupt_status_mask</span>: <span class="ident">u32</span>) {
         <span class="comment">// Write `1` to the doorbell, which will be forwarded to the sibling&#39;s call FD.</span>
-        <span class="self">self</span>.<span class="ident">vfio</span>.<span class="ident">region_write_to_addr</span>(<span class="kw-2">&amp;</span><span class="number">1</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">addr</span>, <span class="number">0</span>);
+        <span class="comment">// It&#39;s okay to not handle a failure here because if this fails we cannot recover</span>
+        <span class="comment">// anyway. The mmap address should be correct as initialized in the &#39;new()&#39; function</span>
+        <span class="comment">// according to the given vfio device.</span>
+        <span class="self">self</span>.<span class="ident">mmap</span>
+            .<span class="ident">write_obj</span>(<span class="number">1_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;unable to write to mmap area&quot;</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">signal_config_changed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {}
