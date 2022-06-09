@@ -967,6 +967,8 @@
 <span id="966">966</span>
 <span id="967">967</span>
 <span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1122,14 +1124,16 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromArgs</span>)]</span>
 <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">subcommand</span>, <span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;create_qcow2&quot;</span>)]</span>
 <span class="doccomment">/// Create Qcow2 image given path and size</span>
-<span class="doccomment">/// Either SIZE or --backing-file need to be specified</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CreateQcow2Command</span> {
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">positional</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// path to the new qcow2 file to create</span>
     <span class="kw">pub</span> <span class="ident">file_path</span>: <span class="ident">String</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">positional</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;SIZE&quot;</span>)]</span>
+    <span class="doccomment">/// desired size of the image in bytes; required if not using --backing-file</span>
     <span class="kw">pub</span> <span class="ident">size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>)]</span>
-    <span class="doccomment">/// path to backing file</span>
+    <span class="doccomment">/// path to backing file; if specified, the image will be the same size as the backing file, and</span>
+    <span class="doccomment">/// SIZE may not be specified</span>
     <span class="kw">pub</span> <span class="ident">backing_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
