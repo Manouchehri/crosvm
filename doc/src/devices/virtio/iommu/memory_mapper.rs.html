@@ -741,6 +741,8 @@
 <span id="740">740</span>
 <span id="741">741</span>
 <span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -760,6 +762,7 @@
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemoryError</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio::VfioError</span>;
 
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
@@ -802,6 +805,7 @@
     <span class="ident">Tube</span>(<span class="ident">TubeError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unimplemented&quot;</span>)]</span>
     <span class="ident">Unimplemented</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">error</span>{<span class="string">&quot;vfio error: {0}&quot;</span>}]</span>
     <span class="ident">Vfio</span>(<span class="ident">VfioError</span>),
 }

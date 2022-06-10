@@ -144,6 +144,9 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -284,9 +287,12 @@
                     <span class="ident">perm</span>: <span class="ident">Permission::RW</span>,
                 }]))
                 .<span class="ident">unwrap</span>();
+            <span class="comment">// This join needs to be here because on Windows, if `response_tx`</span>
+            <span class="comment">// is dropped before `response_rx` can read, the connection will</span>
+            <span class="comment">// be severed and this test will fail.</span>
+            <span class="ident">user_handle</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
         });
         <span class="ident">iommu_handle</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
-        <span class="ident">user_handle</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
     }
 }
 </code></pre></div>
