@@ -1345,6 +1345,7 @@
 <span id="1344">1344</span>
 <span id="1345">1345</span>
 <span id="1346">1346</span>
+<span id="1347">1347</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1424,7 +1425,6 @@
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_NUM</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">4</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GPU_BAR_SIZE</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VirtioScanoutBlobData</span> {
@@ -2308,6 +2308,7 @@
     <span class="ident">display_params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GpuDisplayParameters</span><span class="op">&gt;</span>,
     <span class="ident">rutabaga_builder</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RutabagaBuilder</span><span class="op">&gt;</span>,
     <span class="ident">pci_bar</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Alloc</span><span class="op">&gt;</span>,
+    <span class="ident">pci_bar_size</span>: <span class="ident">u64</span>,
     <span class="ident">map_request</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ExternalMapping</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">external_blob</span>: <span class="ident">bool</span>,
     <span class="ident">rutabaga_component</span>: <span class="ident">RutabagaComponentType</span>,
@@ -2387,6 +2388,7 @@
             <span class="ident">display_params</span>: <span class="ident">gpu_parameters</span>.<span class="ident">displays</span>.<span class="ident">clone</span>(),
             <span class="ident">rutabaga_builder</span>: <span class="prelude-val">Some</span>(<span class="ident">rutabaga_builder</span>),
             <span class="ident">pci_bar</span>: <span class="prelude-val">None</span>,
+            <span class="ident">pci_bar_size</span>: <span class="ident">gpu_parameters</span>.<span class="ident">pci_bar_size</span>,
             <span class="ident">map_request</span>,
             <span class="ident">external_blob</span>,
             <span class="ident">rutabaga_component</span>: <span class="ident">component</span>,
@@ -2675,7 +2677,7 @@
         });
         <span class="macro">vec!</span>[<span class="ident">PciBarConfiguration::new</span>(
             <span class="ident">GPU_BAR_NUM</span> <span class="kw">as</span> <span class="ident">usize</span>,
-            <span class="ident">GPU_BAR_SIZE</span>,
+            <span class="self">self</span>.<span class="ident">pci_bar_size</span>,
             <span class="ident">PciBarRegionType::Memory64BitRegion</span>,
             <span class="ident">PciBarPrefetchable::NotPrefetchable</span>,
         )]
@@ -2686,7 +2688,7 @@
             <span class="ident">PciCapabilityType::SharedMemoryConfig</span>,
             <span class="ident">GPU_BAR_NUM</span>,
             <span class="ident">GPU_BAR_OFFSET</span>,
-            <span class="ident">GPU_BAR_SIZE</span>,
+            <span class="self">self</span>.<span class="ident">pci_bar_size</span>,
             <span class="ident">VIRTIO_GPU_SHM_ID_HOST_VISIBLE</span>,
         ))]
     }

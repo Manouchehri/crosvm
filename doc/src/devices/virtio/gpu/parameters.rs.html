@@ -73,6 +73,8 @@
 <span id="72">72</span>
 <span id="73">73</span>
 <span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -119,6 +121,7 @@
     <span class="kw">pub</span> <span class="ident">mode</span>: <span class="ident">GpuMode</span>,
     <span class="kw">pub</span> <span class="ident">cache_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cache_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">pci_bar_size</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">context_mask</span>: <span class="ident">u64</span>,
 }
 
@@ -142,6 +145,7 @@
             <span class="ident">wsi</span>: <span class="prelude-val">None</span>,
             <span class="ident">cache_path</span>: <span class="prelude-val">None</span>,
             <span class="ident">cache_size</span>: <span class="prelude-val">None</span>,
+            <span class="ident">pci_bar_size</span>: (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">33</span>),
             <span class="ident">udmabuf</span>: <span class="bool-val">false</span>,
             <span class="ident">context_mask</span>: <span class="number">0</span>,
         }

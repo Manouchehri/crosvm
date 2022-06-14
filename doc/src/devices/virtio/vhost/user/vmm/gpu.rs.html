@@ -258,6 +258,10 @@
 <span id="257">257</span>
 <span id="258">258</span>
 <span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -274,7 +278,7 @@
         <span class="ident">gpu::QUEUE_SIZES</span>,
         <span class="ident">vhost::user::vmm</span>::{<span class="ident">worker::Worker</span>, <span class="prelude-ty">Result</span>, <span class="ident">VhostUserHandler</span>},
         <span class="ident">virtio_gpu_config</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">PciCapabilityType</span>, <span class="ident">Queue</span>, <span class="ident">VirtioDevice</span>,
-        <span class="ident">VirtioPciShmCap</span>, <span class="ident">GPU_BAR_NUM</span>, <span class="ident">GPU_BAR_OFFSET</span>, <span class="ident">GPU_BAR_SIZE</span>, <span class="ident">VIRTIO_GPU_F_CONTEXT_INIT</span>,
+        <span class="ident">VirtioPciShmCap</span>, <span class="ident">GPU_BAR_NUM</span>, <span class="ident">GPU_BAR_OFFSET</span>, <span class="ident">VIRTIO_GPU_F_CONTEXT_INIT</span>,
         <span class="ident">VIRTIO_GPU_F_CREATE_GUEST_HANDLE</span>, <span class="ident">VIRTIO_GPU_F_RESOURCE_BLOB</span>, <span class="ident">VIRTIO_GPU_F_RESOURCE_SYNC</span>,
         <span class="ident">VIRTIO_GPU_F_RESOURCE_UUID</span>, <span class="ident">VIRTIO_GPU_F_VIRGL</span>, <span class="ident">VIRTIO_GPU_SHM_ID_HOST_VISIBLE</span>,
     },
@@ -301,6 +305,7 @@
     <span class="ident">handler</span>: <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">VhostUserHandler</span><span class="op">&gt;</span>,
     <span class="ident">state</span>: <span class="ident">GpuState</span>,
     <span class="ident">queue_sizes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
+    <span class="ident">pci_bar_size</span>: <span class="ident">u64</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Gpu</span> {
@@ -312,11 +317,13 @@
     <span class="doccomment">/// the initial configuration of the GPU device.</span>
     <span class="doccomment">/// `device_control_tube` is the device-side tube to be passed to the GPU device so it can</span>
     <span class="doccomment">/// perform `VmRequest`s.</span>
+    <span class="doccomment">/// `pci_bar_size` is the size for the PCI BAR in bytes</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="ident">base_features</span>: <span class="ident">u64</span>,
         <span class="ident">socket_path</span>: <span class="ident">P</span>,
         <span class="ident">gpu_tubes</span>: (<span class="ident">Tube</span>, <span class="ident">Tube</span>),
         <span class="ident">device_control_tube</span>: <span class="ident">Tube</span>,
+        <span class="ident">pci_bar_size</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Gpu</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">default_queue_size</span> <span class="op">=</span> <span class="ident">QUEUE_SIZES</span>.<span class="ident">len</span>();
 
@@ -351,6 +358,7 @@
                 <span class="ident">device_control_tube</span>,
             },
             <span class="ident">queue_sizes</span>: <span class="ident">QUEUE_SIZES</span>[..].<span class="ident">to_vec</span>(),
+            <span class="ident">pci_bar_size</span>,
         })
     }
 }
@@ -489,7 +497,7 @@
             <span class="ident">PciCapabilityType::SharedMemoryConfig</span>,
             <span class="ident">GPU_BAR_NUM</span>,
             <span class="ident">GPU_BAR_OFFSET</span>,
-            <span class="ident">GPU_BAR_SIZE</span>,
+            <span class="self">self</span>.<span class="ident">pci_bar_size</span>,
             <span class="ident">VIRTIO_GPU_SHM_ID_HOST_VISIBLE</span>,
         ))]
     }
