@@ -63,7 +63,7 @@
         <span class="kw">mod</span> <span class="ident">wl</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vsock</span>::{<span class="ident">run_vsock_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">VsockOptions</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl</span>::{<span class="ident">run_wl_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">WlOptions</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">wl</span>::{<span class="ident">run_wl_device</span>, <span class="ident">parse_wayland_sock</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">WlOptions</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">console</span>::{<span class="ident">run_console_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">ConsoleOptions</span>};
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">cras_snd</span>::{<span class="ident">run_cras_snd_device</span>, <span class="ident">Options</span> <span class="kw">as</span> <span class="ident">CrasSndOptions</span>};

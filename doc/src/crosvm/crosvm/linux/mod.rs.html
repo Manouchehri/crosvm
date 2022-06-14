@@ -2453,18 +2453,18 @@
 <span class="kw">use</span> <span class="ident">vm_control</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>, <span class="ident">MemoryPolicy</span>};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::gdb</span>::{<span class="ident">gdb_thread</span>, <span class="ident">GdbStub</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm</span>::{
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config</span>::{
     <span class="ident">Config</span>, <span class="ident">Executable</span>, <span class="ident">FileBackedMappingParameters</span>, <span class="ident">SharedDir</span>, <span class="ident">SharedDirKind</span>, <span class="ident">VfioType</span>,
 };
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gdb&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::gdb</span>::{<span class="ident">gdb_thread</span>, <span class="ident">GdbStub</span>};
 <span class="kw">use</span> <span class="ident">arch</span>::{
     <span class="self">self</span>, <span class="ident">LinuxArch</span>, <span class="ident">RunnableLinuxVm</span>, <span class="ident">VcpuAffinity</span>, <span class="ident">VirtioDeviceStub</span>, <span class="ident">VmComponents</span>, <span class="ident">VmImage</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> {
-    <span class="ident"><span class="kw">crate</span>::crosvm::HostPcieRootPortParameters</span>,
+    <span class="ident"><span class="kw">crate</span>::crosvm::config::HostPcieRootPortParameters</span>,
     <span class="ident">devices</span>::{
         <span class="ident">IrqChipX86_64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>, <span class="ident">KvmSplitIrqChip</span>, <span class="ident">PciBridge</span>, <span class="ident">PcieHostRootPort</span>, <span class="ident">PcieRootPort</span>,
     },
@@ -3290,7 +3290,7 @@
         <span class="ident">cpu_clusters</span>: <span class="ident">cfg</span>.<span class="ident">cpu_clusters</span>.<span class="ident">clone</span>(),
         <span class="ident">cpu_capacity</span>: <span class="ident">cfg</span>.<span class="ident">cpu_capacity</span>.<span class="ident">clone</span>(),
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="ident">direct_gpe</span>: <span class="ident">cfg</span>.<span class="ident">direct_gpe</span>.<span class="ident">clone</span>(),
+        <span class="ident">direct_gpe</span>: <span class="ident">cfg</span>.<span class="ident">direct_gpe</span>,
         <span class="ident">no_smt</span>: <span class="ident">cfg</span>.<span class="ident">no_smt</span>,
         <span class="ident">hugepages</span>: <span class="ident">cfg</span>.<span class="ident">hugepages</span>,
         <span class="ident">vm_image</span>,

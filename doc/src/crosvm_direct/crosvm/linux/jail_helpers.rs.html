@@ -217,7 +217,7 @@
 <span class="kw">use</span> <span class="ident">base</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::JailConfig</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config::JailConfig</span>;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">SandboxConfig</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">limit_caps</span>: <span class="ident">bool</span>,

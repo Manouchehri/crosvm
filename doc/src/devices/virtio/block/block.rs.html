@@ -1284,7 +1284,7 @@
     <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">ret</span>))
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>, <span class="ident">serde_keyvalue::FromKeyValues</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">deny_unknown_fields</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DiskOption</span> {
     <span class="kw">pub</span> <span class="ident">path</span>: <span class="ident">PathBuf</span>,

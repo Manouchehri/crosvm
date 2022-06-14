@@ -1260,15 +1260,15 @@
 <span class="kw">use</span> <span class="ident">std::str</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">Config</span>, <span class="ident">DiskOption</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>,
-    <span class="ident">VvuOption</span>,
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config</span>::{
+    <span class="ident">Config</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>, <span class="ident">VvuOption</span>,
 };
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">arch</span>::{<span class="self">self</span>, <span class="ident">VirtioDeviceStub</span>};
 <span class="kw">use</span> <span class="ident">base</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>};
 <span class="kw">use</span> <span class="ident">devices::vfio</span>::{<span class="ident">VfioCommonSetup</span>, <span class="ident">VfioCommonTrait</span>};
+<span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::ipc_memory_mapper</span>::{<span class="ident">create_ipc_mapper</span>, <span class="ident">CreateIpcMapperRet</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::memory_mapper</span>::{<span class="ident">BasicMemoryMapper</span>, <span class="ident">MemoryMapperTrait</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
