@@ -244,7 +244,7 @@
     <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">opts</span>.<span class="ident">vfio</span> {
         <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         <span class="prelude-val">Some</span>(<span class="ident">vfio</span>) =&gt; {
-            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">FsBackend::MAX_QUEUE_NUM</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">fs_device</span>.<span class="ident">max_queue_num</span>())<span class="question-mark">?</span>;
             <span class="ident">keep_rds</span>.<span class="ident">extend</span>(<span class="ident">d</span>.<span class="ident">irqs</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">as_raw_descriptor</span>()));
             <span class="ident">keep_rds</span>.<span class="ident">extend</span>(<span class="ident">d</span>.<span class="ident">notification_evts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">as_raw_descriptor</span>()));
             <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">d</span>.<span class="ident">vfio_dev</span>.<span class="ident">device_file</span>().<span class="ident">as_raw_fd</span>());
@@ -253,7 +253,7 @@
     };
     <span class="ident">base::syslog::push_descriptors</span>(<span class="kw-2">&amp;mut</span> <span class="ident">keep_rds</span>);
 
-    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">fs_device</span>);
+    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">fs_device</span>));
 
     <span class="kw">let</span> <span class="ident">pid</span> <span class="op">=</span> <span class="ident">jail_and_fork</span>(<span class="ident">keep_rds</span>, <span class="ident">opts</span>.<span class="ident">shared_dir</span>, <span class="ident">opts</span>.<span class="ident">uid_map</span>, <span class="ident">opts</span>.<span class="ident">gid_map</span>)<span class="question-mark">?</span>;
 

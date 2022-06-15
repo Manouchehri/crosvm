@@ -349,7 +349,6 @@
 <span id="348">348</span>
 <span id="349">349</span>
 <span id="350">350</span>
-<span id="351">351</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -670,8 +669,8 @@
         <span class="kw">match</span> <span class="ident">conn</span> {
             <span class="ident">Connection::Socket</span>(<span class="ident">socket</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">backend</span>);
                 <span class="ident">threads</span>.<span class="ident">push</span>(<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+                    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
                     <span class="ident">NET_EXECUTOR</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">thread_ex</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">thread_ex</span>.<span class="ident">set</span>(<span class="ident">ex</span>.<span class="ident">clone</span>());
                     });
@@ -679,11 +678,10 @@
                 }));
             }
             <span class="ident">Connection::Vfio</span>(<span class="ident">device_name</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span>
-                    <span class="ident">VvuPciDevice::new</span>(<span class="ident">device_name</span>.<span class="ident">as_str</span>(), <span class="ident">NetBackend</span>::<span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="ident">::MAX_QUEUE_NUM</span>)<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">backend</span>);
+                <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="ident">device_name</span>.<span class="ident">as_str</span>(), <span class="ident">backend</span>.<span class="ident">max_queue_num</span>())<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
                 <span class="ident">threads</span>.<span class="ident">push</span>(<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+                    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
                     <span class="ident">NET_EXECUTOR</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">thread_ex</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">thread_ex</span>.<span class="ident">set</span>(<span class="ident">ex</span>.<span class="ident">clone</span>());
                     });

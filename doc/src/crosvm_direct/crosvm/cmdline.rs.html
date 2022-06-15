@@ -1589,6 +1589,11 @@
 <span id="1588">1588</span>
 <span id="1589">1589</span>
 <span id="1590">1590</span>
+<span id="1591">1591</span>
+<span id="1592">1592</span>
+<span id="1593">1593</span>
+<span id="1594">1594</span>
+<span id="1595">1595</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2284,7 +2289,12 @@
     <span class="doccomment">/// base and length for PCIE Enhanced Configuration Access Mechanism</span>
     <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;pcie-root-port&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH[,hp_gpe=NUM]&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(
+        <span class="ident">option</span>,
+        <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;pcie-root-port&quot;</span>,
+        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH[,hp_gpe=NUM]&quot;</span>,
+        <span class="ident">from_str_fn</span>(<span class="ident">parse_pcie_root_port_params</span>)
+    )]</span>
     <span class="doccomment">/// path to sysfs of host pcie root port and host pcie root port hotplug gpe number</span>
     <span class="kw">pub</span> <span class="ident">pcie_rp</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HostPcieRootPortParameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
@@ -3144,7 +3154,7 @@
             <span class="ident">cfg</span>.<span class="ident">direct_edge_irq</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">direct_edge_irq</span>;
             <span class="ident">cfg</span>.<span class="ident">direct_gpe</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">direct_gpe</span>;
             <span class="ident">cfg</span>.<span class="ident">pcie_rp</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">pcie_rp</span>;
-            <span class="ident">cfg</span>.<span class="ident">mmio_address_ranges</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">mmio_address_ranges</span>;
+            <span class="ident">cfg</span>.<span class="ident">mmio_address_ranges</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">mmio_address_ranges</span>.<span class="ident">unwrap_or_default</span>();
         }
 
         <span class="ident">cfg</span>.<span class="ident">dmi_path</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">dmi_path</span>;
