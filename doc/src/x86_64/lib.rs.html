@@ -3406,7 +3406,7 @@
         <span class="kw">let</span> <span class="ident">bat_control</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">battery_type</span>) <span class="op">=</span> <span class="ident">battery</span>.<span class="number">0</span> {
             <span class="kw">match</span> <span class="ident">battery_type</span> {
                 <span class="ident">BatteryType::Goldfish</span> =&gt; {
-                    <span class="kw">let</span> <span class="ident">control_tube</span> <span class="op">=</span> <span class="ident">arch::add_goldfish_battery</span>(
+                    <span class="kw">let</span> (<span class="ident">control_tube</span>, <span class="ident">_mmio_base</span>) <span class="op">=</span> <span class="ident">arch::add_goldfish_battery</span>(
                         <span class="kw-2">&amp;mut</span> <span class="ident">amls</span>, <span class="ident">battery</span>.<span class="number">1</span>, <span class="ident">mmio_bus</span>, <span class="ident">irq_chip</span>, <span class="ident">sci_irq</span>, <span class="ident">resources</span>,
                     )
                     .<span class="ident">map_err</span>(<span class="ident">Error::CreateBatDevices</span>)<span class="question-mark">?</span>;
