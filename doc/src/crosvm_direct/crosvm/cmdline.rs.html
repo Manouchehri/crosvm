@@ -2640,7 +2640,7 @@
         <span class="ident">from_str_fn</span>(<span class="ident">parse_video_options</span>)
     )]</span>
     <span class="doccomment">/// (EXPERIMENTAL) enable virtio-video decoder device</span>
-    <span class="comment">// Possible backend values: libvda</span>
+    <span class="comment">// Possible backend values: libvda, ffmpeg</span>
     <span class="kw">pub</span> <span class="ident">video_dec</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VideoBackendType</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(
