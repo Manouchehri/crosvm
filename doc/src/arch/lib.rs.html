@@ -948,6 +948,7 @@
 <span id="947">947</span>
 <span id="948">948</span>
 <span id="949">949</span>
+<span id="950">950</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1051,7 +1052,8 @@
     <span class="kw">pub</span> <span class="ident">initrd_image</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">memory_size</span>: <span class="ident">u64</span>,
-    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_i8042</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_rtc</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
     <span class="kw">pub</span> <span class="ident">pci_low_start</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,

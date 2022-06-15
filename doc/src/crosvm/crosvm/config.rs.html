@@ -2898,6 +2898,8 @@
 <span id="2897">2897</span>
 <span id="2898">2898</span>
 <span id="2899">2899</span>
+<span id="2900">2900</span>
+<span id="2901">2901</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4615,7 +4617,8 @@
     <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">net_vq_pairs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">netmask</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">no_legacy</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_i8042</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">no_rtc</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">no_smt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
@@ -4745,7 +4748,8 @@
             <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">net_vq_pairs</span>: <span class="prelude-val">None</span>,
             <span class="ident">netmask</span>: <span class="prelude-val">None</span>,
-            <span class="ident">no_legacy</span>: <span class="bool-val">false</span>,
+            <span class="ident">no_i8042</span>: <span class="bool-val">false</span>,
+            <span class="ident">no_rtc</span>: <span class="bool-val">false</span>,
             <span class="ident">no_smt</span>: <span class="bool-val">false</span>,
             <span class="ident">params</span>: <span class="ident">Vec::new</span>(),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
