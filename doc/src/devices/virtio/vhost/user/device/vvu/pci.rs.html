@@ -515,6 +515,35 @@
 <span id="514">514</span>
 <span id="515">515</span>
 <span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -526,7 +555,7 @@
 <span class="kw">use</span> <span class="ident">std::time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">info</span>, <span class="ident">Event</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">info</span>, <span class="ident">Event</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>};
 <span class="kw">use</span> <span class="ident">data_model::DataInit</span>;
 <span class="kw">use</span> <span class="ident">memoffset::offset_of</span>;
 <span class="kw">use</span> <span class="ident">resources::Alloc</span>;
@@ -731,12 +760,41 @@
     };
 }
 
-<span class="doccomment">/// A wrapper of VVU&#39;s notification resource which works as an interrupt for a virtqueue.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">QueueNotifier</span>(<span class="ident">VfioRegionAddr</span>);
+<span class="doccomment">/// A VVU notification resource which works as an interrupt for a virtqueue.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">QueueNotifier</span> {
+    <span class="ident">addr</span>: <span class="ident">u64</span>,
+    <span class="ident">mmap</span>: <span class="ident">MemoryMapping</span>,
+}
 
 <span class="kw">impl</span> <span class="ident">QueueNotifier</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">vfio_dev</span>: <span class="kw-2">&amp;</span><span class="ident">VfioDevice</span>, <span class="ident">index</span>: <span class="ident">u16</span>) {
-        <span class="ident">vfio_dev</span>.<span class="ident">region_write_to_addr</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="number">0</span>);
+    <span class="doccomment">/// Initialize a new QueueNotifier structure given the queue index, the vfio</span>
+    <span class="doccomment">/// device, and the VvuPciCaps.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">queue_type</span>: <span class="ident">QueueType</span>,
+        <span class="ident">device</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">VfioDevice</span><span class="op">&gt;</span>,
+        <span class="ident">caps</span>: <span class="kw-2">&amp;</span><span class="ident">VvuPciCaps</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">QueueNotifier</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span>
+            <span class="ident">caps</span>.<span class="ident">notify_base_addr</span>.<span class="ident">addr</span> <span class="op">+</span> (<span class="ident">queue_type</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="ident">caps</span>.<span class="ident">notify_off_multiplier</span> <span class="kw">as</span> <span class="ident">u64</span>);
+        <span class="kw">let</span> <span class="ident">mmap_region</span> <span class="op">=</span> <span class="ident">device</span>.<span class="ident">get_region_mmap</span>(<span class="ident">caps</span>.<span class="ident">notify_base_addr</span>.<span class="ident">index</span>);
+        <span class="kw">let</span> <span class="ident">region_offset</span> <span class="op">=</span> <span class="ident">device</span>.<span class="ident">get_region_offset</span>(<span class="ident">caps</span>.<span class="ident">notify_base_addr</span>.<span class="ident">index</span>);
+        <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">region_offset</span> <span class="op">+</span> <span class="ident">mmap_region</span>[<span class="number">0</span>].<span class="ident">offset</span>;
+
+        <span class="kw">let</span> <span class="ident">mmap</span> <span class="op">=</span> <span class="ident">MemoryMappingBuilder::new</span>(<span class="ident">mmap_region</span>[<span class="number">0</span>].<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">from_file</span>(<span class="ident">device</span>.<span class="ident">device_file</span>())
+            .<span class="ident">offset</span>(<span class="ident">offset</span>)
+            .<span class="ident">build</span>()<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="ident">QueueNotifier</span> { <span class="ident">addr</span>, <span class="ident">mmap</span> })
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+        <span class="comment">// It&#39;s okay to not handle a failure here because if this fails we cannot recover</span>
+        <span class="comment">// anyway. The mmap address should be correct as initialized in the &#39;new()&#39; function</span>
+        <span class="comment">// according to the given vfio device.</span>
+        <span class="self">self</span>.<span class="ident">mmap</span>
+            .<span class="ident">write_obj</span>(<span class="number">0_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;unable to write to mmap area&quot;</span>);
     }
 }
 
@@ -856,7 +914,7 @@
         <span class="kw">let</span> <span class="ident">notify_off</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="macro">read_common_cfg_field!</span>(<span class="self">self</span>, <span class="ident">queue_notify_off</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">notify_addr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">caps</span>.<span class="ident">notify_base_addr</span>.<span class="ident">clone</span>();
         <span class="ident">notify_addr</span>.<span class="ident">addr</span> <span class="op">+</span><span class="op">=</span> <span class="ident">notify_off</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">caps</span>.<span class="ident">notify_off_multiplier</span> <span class="kw">as</span> <span class="ident">u64</span>;
-        <span class="kw">let</span> <span class="ident">notifier</span> <span class="op">=</span> <span class="ident">QueueNotifier</span>(<span class="ident">notify_addr</span>);
+        <span class="kw">let</span> <span class="ident">notifier</span> <span class="op">=</span> <span class="ident">QueueNotifier::new</span>(<span class="ident">typ</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">vfio_dev</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">caps</span>)<span class="question-mark">?</span>;
 
         <span class="macro">write_common_cfg_field!</span>(<span class="self">self</span>, <span class="ident">queue_enable</span>, <span class="number">1_u16</span>);
 
@@ -866,10 +924,10 @@
     <span class="doccomment">/// Creates the VVU&#39;s rxq and txq.</span>
     <span class="kw">fn</span> <span class="ident">create_queues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">UserQueue</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">QueueNotifier</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">rxq</span>, <span class="ident">rxq_notifier</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_queue</span>(<span class="ident">QueueType::Rx</span>)<span class="question-mark">?</span>;
-        <span class="ident">rxq_notifier</span>.<span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">vfio_dev</span>, <span class="ident">QueueType::Rx</span> <span class="kw">as</span> <span class="ident">u16</span>);
+        <span class="ident">rxq_notifier</span>.<span class="ident">notify</span>();
 
         <span class="kw">let</span> (<span class="ident">txq</span>, <span class="ident">txq_notifier</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_queue</span>(<span class="ident">QueueType::Tx</span>)<span class="question-mark">?</span>;
-        <span class="ident">txq_notifier</span>.<span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">vfio_dev</span>, <span class="ident">QueueType::Tx</span> <span class="kw">as</span> <span class="ident">u16</span>);
+        <span class="ident">txq_notifier</span>.<span class="ident">notify</span>();
 
         <span class="prelude-val">Ok</span>((<span class="macro">vec!</span>[<span class="ident">rxq</span>, <span class="ident">txq</span>], <span class="macro">vec!</span>[<span class="ident">rxq_notifier</span>, <span class="ident">txq_notifier</span>]))
     }
