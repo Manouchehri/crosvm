@@ -2624,7 +2624,7 @@
                         <span class="ident">cap_info</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">cap_type_info</span>.<span class="ident">type_</span>, <span class="ident">cap_type_info</span>.<span class="ident">subtype</span>));
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">cap_header</span>.<span class="ident">id</span> <span class="kw">as</span> <span class="ident">u32</span> <span class="op">==</span> <span class="ident">VFIO_REGION_INFO_CAP_MSIX_MAPPABLE</span> {
                         <span class="ident">mmaps</span>.<span class="ident">push</span>(<span class="ident">vfio_region_sparse_mmap_area</span> {
-                            <span class="ident">offset</span>: <span class="ident">region_with_cap</span>[<span class="number">0</span>].<span class="ident">region_info</span>.<span class="ident">offset</span>,
+                            <span class="ident">offset</span>: <span class="number">0</span>,
                             <span class="ident">size</span>: <span class="ident">region_with_cap</span>[<span class="number">0</span>].<span class="ident">region_info</span>.<span class="ident">size</span>,
                         });
                     }
