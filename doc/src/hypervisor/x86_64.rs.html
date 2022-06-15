@@ -650,18 +650,12 @@
 <span id="649">649</span>
 <span id="650">650</span>
 <span id="651">651</span>
-<span id="652">652</span>
-<span id="653">653</span>
-<span id="654">654</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;haxm&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident">std::arch::x86_64::_rdtsc</span>;
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;haxm&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident">std::arch::x86_64::__cpuid</span>;
+<span class="kw">use</span> <span class="ident">std::arch::x86_64</span>::{<span class="ident">__cpuid</span>, <span class="ident">_rdtsc</span>};
 
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
@@ -816,7 +810,7 @@
 }
 
 <span class="doccomment">/// Gets host cpu max physical address bits.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;haxm&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;haxm&quot;</span>))]</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">host_phys_addr_bits</span>() -&gt; <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">highest_ext_function</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">__cpuid</span>(<span class="number">0x80000000</span>) };
     <span class="kw">if</span> <span class="ident">highest_ext_function</span>.<span class="ident">eax</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80000008</span> {

@@ -1745,21 +1745,9 @@
 <span id="1744">1744</span>
 <span id="1745">1745</span>
 <span id="1746">1746</span>
-<span id="1747">1747</span>
-<span id="1748">1748</span>
-<span id="1749">1749</span>
-<span id="1750">1750</span>
-<span id="1751">1751</span>
-<span id="1752">1752</span>
-<span id="1753">1753</span>
-<span id="1754">1754</span>
-<span id="1755">1755</span>
-<span id="1756">1756</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
-
-<span class="kw">use</span> <span class="ident">std::arch::x86_64::__cpuid</span>;
 
 <span class="kw">use</span> <span class="ident">base::IoctlNr</span>;
 
@@ -1775,11 +1763,11 @@
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Kvm</span>, <span class="ident">KvmVcpu</span>, <span class="ident">KvmVm</span>};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-    <span class="ident">get_tsc_offset_from_msr</span>, <span class="ident">set_tsc_offset_via_msr</span>, <span class="ident">ClockState</span>, <span class="ident">CpuId</span>, <span class="ident">CpuIdEntry</span>, <span class="ident">DebugRegs</span>,
-    <span class="ident">DescriptorTable</span>, <span class="ident">DeviceKind</span>, <span class="ident">Fpu</span>, <span class="ident">HypervisorX86_64</span>, <span class="ident">IoapicRedirectionTableEntry</span>, <span class="ident">IoapicState</span>,
-    <span class="ident">IrqSourceChip</span>, <span class="ident">LapicState</span>, <span class="ident">PicSelect</span>, <span class="ident">PicState</span>, <span class="ident">PitChannelState</span>, <span class="ident">PitState</span>, <span class="ident">ProtectionType</span>,
-    <span class="ident">Register</span>, <span class="ident">Regs</span>, <span class="ident">Segment</span>, <span class="ident">Sregs</span>, <span class="ident">VcpuExit</span>, <span class="ident">VcpuX86_64</span>, <span class="ident">VmCap</span>, <span class="ident">VmX86_64</span>, <span class="ident">MAX_IOAPIC_PINS</span>,
-    <span class="ident">NUM_IOAPIC_PINS</span>,
+    <span class="ident">get_tsc_offset_from_msr</span>, <span class="ident">host_phys_addr_bits</span>, <span class="ident">set_tsc_offset_via_msr</span>, <span class="ident">ClockState</span>, <span class="ident">CpuId</span>,
+    <span class="ident">CpuIdEntry</span>, <span class="ident">DebugRegs</span>, <span class="ident">DescriptorTable</span>, <span class="ident">DeviceKind</span>, <span class="ident">Fpu</span>, <span class="ident">HypervisorX86_64</span>,
+    <span class="ident">IoapicRedirectionTableEntry</span>, <span class="ident">IoapicState</span>, <span class="ident">IrqSourceChip</span>, <span class="ident">LapicState</span>, <span class="ident">PicSelect</span>, <span class="ident">PicState</span>,
+    <span class="ident">PitChannelState</span>, <span class="ident">PitState</span>, <span class="ident">ProtectionType</span>, <span class="ident">Register</span>, <span class="ident">Regs</span>, <span class="ident">Segment</span>, <span class="ident">Sregs</span>, <span class="ident">VcpuExit</span>,
+    <span class="ident">VcpuX86_64</span>, <span class="ident">VmCap</span>, <span class="ident">VmX86_64</span>, <span class="ident">MAX_IOAPIC_PINS</span>, <span class="ident">NUM_IOAPIC_PINS</span>,
 };
 
 <span class="kw">type</span> <span class="ident">KvmCpuId</span> <span class="op">=</span> <span class="ident">kvm::CpuId</span>;
@@ -1837,16 +1825,8 @@
 
     <span class="doccomment">/// Get the size of guest physical addresses in bits.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_guest_phys_addr_bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
-        <span class="comment">// Get host cpu max physical address bits.</span>
         <span class="comment">// Assume the guest physical address size is the same as the host.</span>
-        <span class="kw">let</span> <span class="ident">highest_ext_function</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">__cpuid</span>(<span class="number">0x80000000</span>) };
-        <span class="kw">if</span> <span class="ident">highest_ext_function</span>.<span class="ident">eax</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">0x80000008</span> {
-            <span class="kw">let</span> <span class="ident">addr_size</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">__cpuid</span>(<span class="number">0x80000008</span>) };
-            <span class="comment">// Low 8 bits of 0x80000008 leaf: host physical address size in bits.</span>
-            <span class="ident">addr_size</span>.<span class="ident">eax</span> <span class="kw">as</span> <span class="ident">u8</span>
-        } <span class="kw">else</span> {
-            <span class="number">36</span>
-        }
+        <span class="ident">host_phys_addr_bits</span>()
     }
 }
 
