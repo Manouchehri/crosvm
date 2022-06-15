@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["FsMappingRequest",""],["VmMsyncRequest",""],["VmMsyncResponse",""]],"fn":[["handle_request",""],["kill_handle",""],["raw_descriptor_from_path",""]]});
+initSidebarItems({"enum":[["FsMappingRequest",""],["VmMsyncRequest",""],["VmMsyncResponse",""]],"fn":[["handle_request",""],["kill_handle",""]]});
