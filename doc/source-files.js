@@ -38,6 +38,7 @@ sourcesIndex["serde_keyvalue"] = {"name":"","files":["key_values.rs","lib.rs"]};
 sourcesIndex["serde_keyvalue_derive"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["tpm2"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["tpm2_sys"] = {"name":"","files":["lib.rs"]};
+sourcesIndex["tracing"] = {"name":"","files":["lib.rs","noop.rs"]};
 sourcesIndex["usb_sys"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["usb_util"] = {"name":"","files":["descriptor.rs","device.rs","error.rs","lib.rs","types.rs"]};
 sourcesIndex["vfio_sys"] = {"name":"","files":["lib.rs","plat.rs","vfio.rs"]};
