@@ -317,7 +317,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">MemRegion</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
+    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
 
     <span class="kw">const</span> <span class="ident">CONFIG</span>: <span class="ident">StubPciParameters</span> <span class="op">=</span> <span class="ident">StubPciParameters</span> {
         <span class="ident">address</span>: <span class="ident">PciAddress</span> {
@@ -348,17 +348,17 @@
     <span class="kw">fn</span> <span class="ident">address_allocation</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">allocator</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
             <span class="ident">SystemAllocatorConfig</span> {
-                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1000</span>,
-                    <span class="ident">size</span>: <span class="number">0x2000</span>,
+                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1000</span>,
+                    <span class="ident">end</span>: <span class="number">0x2fff</span>,
                 }),
-                <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x2000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1000_0000</span>,
+                <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x2000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x2fff_ffff</span>,
                 },
-                <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1_0000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1000_0000</span>,
+                <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1_0000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x1_0fff_ffff</span>,
                 },
                 <span class="ident">platform_mmio</span>: <span class="prelude-val">None</span>,
                 <span class="ident">first_irq</span>: <span class="number">5</span>,

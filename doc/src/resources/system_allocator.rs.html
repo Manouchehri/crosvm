@@ -424,16 +424,29 @@
 <span id="423">423</span>
 <span id="424">424</span>
 <span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
+
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
-<span class="kw">use</span> <span class="ident">std::ops::RangeInclusive</span>;
 
 <span class="kw">use</span> <span class="ident">base::pagesize</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::address_allocator</span>::{<span class="ident">AddressAllocator</span>, <span class="ident">AddressAllocatorSet</span>};
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Alloc</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">AddressRange</span>, <span class="ident">Alloc</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
 
 <span class="doccomment">/// Manages allocating system resources such as address space and interrupt numbers.</span>
 
@@ -446,30 +459,23 @@
     <span class="ident">High</span>,
 }
 
-<span class="doccomment">/// Region of memory.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemRegion</span> {
-    <span class="kw">pub</span> <span class="ident">base</span>: <span class="ident">u64</span>,
-    <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">u64</span>,
-}
-
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SystemAllocatorConfig</span> {
     <span class="doccomment">/// IO ports. Only for x86_64.</span>
-    <span class="kw">pub</span> <span class="ident">io</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">io</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
     <span class="doccomment">/// Low (&lt;=4GB) MMIO region.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Parts of this region may be reserved or otherwise excluded from the</span>
     <span class="doccomment">/// created SystemAllocator&#39;s MmioType::Low allocator. However, no new</span>
     <span class="doccomment">/// regions will be added.</span>
-    <span class="kw">pub</span> <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span>,
+    <span class="kw">pub</span> <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span>,
     <span class="doccomment">/// High (&gt;4GB) MMIO region.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Parts of this region may be reserved or otherwise excluded from the</span>
     <span class="doccomment">/// created SystemAllocator&#39;s MmioType::High allocator. However, no new</span>
     <span class="doccomment">/// regions will be added.</span>
-    <span class="kw">pub</span> <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span>,
+    <span class="kw">pub</span> <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span>,
     <span class="doccomment">/// Platform MMIO space. Only for ARM.</span>
-    <span class="kw">pub</span> <span class="ident">platform_mmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">platform_mmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
     <span class="doccomment">/// The first IRQ number to give out.</span>
     <span class="kw">pub</span> <span class="ident">first_irq</span>: <span class="ident">u32</span>,
 }
@@ -482,26 +488,12 @@
     <span class="ident">mmio_address_spaces</span>: [<span class="ident">AddressAllocator</span>; <span class="number">2</span>],
     <span class="ident">mmio_platform_address_spaces</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressAllocator</span><span class="op">&gt;</span>,
 
-    <span class="ident">reserved_region</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="ident">reserved_region</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
 
     <span class="comment">// Each bus number has a AddressAllocator</span>
     <span class="ident">pci_allocator</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u8</span>, <span class="ident">AddressAllocator</span><span class="op">&gt;</span>,
     <span class="ident">irq_allocator</span>: <span class="ident">AddressAllocator</span>,
     <span class="ident">next_anon_id</span>: <span class="ident">usize</span>,
-}
-
-<span class="kw">fn</span> <span class="ident">to_range_inclusive</span>(<span class="ident">base</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="ident">base</span>
-        .<span class="ident">checked_add</span>(<span class="ident">size</span>.<span class="ident">checked_sub</span>(<span class="number">1</span>).<span class="ident">ok_or</span>(<span class="ident">Error::PoolSizeZero</span>)<span class="question-mark">?</span>)
-        .<span class="ident">ok_or</span>(<span class="ident">Error::PoolOverflow</span> { <span class="ident">base</span>, <span class="ident">size</span> })<span class="question-mark">?</span>;
-    <span class="prelude-val">Ok</span>(<span class="ident">RangeInclusive::new</span>(<span class="ident">base</span>, <span class="ident">end</span>))
-}
-
-<span class="kw">fn</span> <span class="ident">range_intersect</span>(<span class="ident">r1</span>: <span class="kw-2">&amp;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">r2</span>: <span class="kw-2">&amp;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) -&gt; <span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
-    <span class="ident">RangeInclusive::new</span>(
-        <span class="ident">u64::max</span>(<span class="kw-2">*</span><span class="ident">r1</span>.<span class="ident">start</span>(), <span class="kw-2">*</span><span class="ident">r2</span>.<span class="ident">start</span>()),
-        <span class="ident">u64::min</span>(<span class="kw-2">*</span><span class="ident">r1</span>.<span class="ident">end</span>(), <span class="kw-2">*</span><span class="ident">r2</span>.<span class="ident">end</span>()),
-    )
 }
 
 <span class="kw">impl</span> <span class="ident">SystemAllocator</span> {
@@ -517,37 +509,41 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">config</span>: <span class="ident">SystemAllocatorConfig</span>,
         <span class="ident">reserve_region_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-        <span class="ident">mmio_address_ranges</span>: <span class="kw-2">&amp;</span>[<span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>],
+        <span class="ident">mmio_address_ranges</span>: <span class="kw-2">&amp;</span>[<span class="ident">AddressRange</span>],
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">page_size</span> <span class="op">=</span> <span class="ident">pagesize</span>() <span class="kw">as</span> <span class="ident">u64</span>;
 
         <span class="kw">let</span> (<span class="ident">high_mmio</span>, <span class="ident">reserved_region</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">reserve_region_size</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">len</span>) =&gt; {
-                <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">size</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">reserved_len</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">high_mmio_len</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">len</span>().<span class="ident">ok_or</span>(<span class="ident">Error::OutOfBounds</span>)<span class="question-mark">?</span>;
+                <span class="kw">if</span> <span class="ident">reserved_len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">high_mmio_len</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::PoolSizeZero</span>);
                 }
+                <span class="kw">let</span> <span class="ident">reserved_start</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">start</span>;
+                <span class="kw">let</span> <span class="ident">reserved_end</span> <span class="op">=</span> <span class="ident">reserved_start</span> <span class="op">+</span> <span class="ident">reserved_len</span> <span class="op">-</span> <span class="number">1</span>;
+                <span class="kw">let</span> <span class="ident">high_mmio_start</span> <span class="op">=</span> <span class="ident">reserved_end</span> <span class="op">+</span> <span class="number">1</span>;
+                <span class="kw">let</span> <span class="ident">high_mmio_end</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">end</span>;
                 (
-                    <span class="ident">MemRegion</span> {
-                        <span class="ident">base</span>: <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">base</span> <span class="op">+</span> <span class="ident">len</span>,
-                        <span class="ident">size</span>: <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">size</span> <span class="op">-</span> <span class="ident">len</span>,
+                    <span class="ident">AddressRange</span> {
+                        <span class="ident">start</span>: <span class="ident">high_mmio_start</span>,
+                        <span class="ident">end</span>: <span class="ident">high_mmio_end</span>,
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                        <span class="ident">base</span>: <span class="ident">config</span>.<span class="ident">high_mmio</span>.<span class="ident">base</span>,
-                        <span class="ident">size</span>: <span class="ident">len</span>,
+                    <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                        <span class="ident">start</span>: <span class="ident">reserved_start</span>,
+                        <span class="ident">end</span>: <span class="ident">reserved_end</span>,
                     }),
                 )
             }
             <span class="prelude-val">None</span> =&gt; (<span class="ident">config</span>.<span class="ident">high_mmio</span>, <span class="prelude-val">None</span>),
         };
 
-        <span class="kw">let</span> <span class="ident">intersect_mmio_range</span> <span class="op">=</span> <span class="op">|</span><span class="ident">src</span>: <span class="ident">MemRegion</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-            <span class="kw">let</span> <span class="ident">src_range</span> <span class="op">=</span> <span class="ident">to_range_inclusive</span>(<span class="ident">src</span>.<span class="ident">base</span>, <span class="ident">src</span>.<span class="ident">size</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">intersect_mmio_range</span> <span class="op">=</span> <span class="op">|</span><span class="ident">src_range</span>: <span class="ident">AddressRange</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span><span class="op">&gt;</span> {
             <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">mmio_address_ranges</span>.<span class="ident">is_empty</span>() {
                 <span class="macro">vec!</span>[<span class="ident">src_range</span>]
             } <span class="kw">else</span> {
                 <span class="ident">mmio_address_ranges</span>
                     .<span class="ident">iter</span>()
-                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">range_intersect</span>(<span class="ident">r</span>, <span class="kw-2">&amp;</span><span class="ident">src_range</span>))
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">intersect</span>(<span class="ident">src_range</span>))
                     .<span class="ident">collect</span>()
             })
         };
@@ -556,14 +552,10 @@
             <span class="ident">io_address_space</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">io</span>) <span class="op">=</span> <span class="ident">config</span>.<span class="ident">io</span> {
                 <span class="comment">// TODO make sure we don&#39;t overlap with existing well known</span>
                 <span class="comment">// ports such as 0xcf8 (serial ports).</span>
-                <span class="kw">if</span> <span class="ident">io</span>.<span class="ident">base</span> <span class="op">&gt;</span> <span class="number">0x1_0000</span> <span class="op">|</span><span class="op">|</span> <span class="ident">io</span>.<span class="ident">size</span> <span class="op">+</span> <span class="ident">io</span>.<span class="ident">base</span> <span class="op">&gt;</span> <span class="number">0x1_0000</span> {
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::IOPortOutOfRange</span>(<span class="ident">io</span>.<span class="ident">base</span>, <span class="ident">io</span>.<span class="ident">size</span>));
+                <span class="kw">if</span> <span class="ident">io</span>.<span class="ident">end</span> <span class="op">&gt;</span> <span class="number">0xffff</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::IOPortOutOfRange</span>(<span class="ident">io</span>));
                 }
-                <span class="prelude-val">Some</span>(<span class="ident">AddressAllocator::new</span>(
-                    <span class="ident">to_range_inclusive</span>(<span class="ident">io</span>.<span class="ident">base</span>, <span class="ident">io</span>.<span class="ident">size</span>)<span class="question-mark">?</span>,
-                    <span class="prelude-val">Some</span>(<span class="number">0x400</span>),
-                    <span class="prelude-val">None</span>,
-                )<span class="question-mark">?</span>)
+                <span class="prelude-val">Some</span>(<span class="ident">AddressAllocator::new</span>(<span class="ident">io</span>, <span class="prelude-val">Some</span>(<span class="number">0x400</span>), <span class="prelude-val">None</span>)<span class="question-mark">?</span>)
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
             },
@@ -585,11 +577,7 @@
             <span class="ident">pci_allocator</span>: <span class="ident">BTreeMap::new</span>(),
 
             <span class="ident">mmio_platform_address_spaces</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">platform</span>) <span class="op">=</span> <span class="ident">config</span>.<span class="ident">platform_mmio</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">AddressAllocator::new</span>(
-                    <span class="ident">to_range_inclusive</span>(<span class="ident">platform</span>.<span class="ident">base</span>, <span class="ident">platform</span>.<span class="ident">size</span>)<span class="question-mark">?</span>,
-                    <span class="prelude-val">Some</span>(<span class="ident">page_size</span>),
-                    <span class="prelude-val">None</span>,
-                )<span class="question-mark">?</span>)
+                <span class="prelude-val">Some</span>(<span class="ident">AddressAllocator::new</span>(<span class="ident">platform</span>, <span class="prelude-val">Some</span>(<span class="ident">page_size</span>), <span class="prelude-val">None</span>)<span class="question-mark">?</span>)
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
             },
@@ -597,7 +585,10 @@
             <span class="ident">reserved_region</span>,
 
             <span class="ident">irq_allocator</span>: <span class="ident">AddressAllocator::new</span>(
-                <span class="ident">RangeInclusive::new</span>(<span class="ident">config</span>.<span class="ident">first_irq</span> <span class="kw">as</span> <span class="ident">u64</span>, <span class="number">1023</span>),
+                <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="ident">config</span>.<span class="ident">first_irq</span> <span class="kw">as</span> <span class="ident">u64</span>,
+                    <span class="ident">end</span>: <span class="number">1023</span>,
+                },
                 <span class="prelude-val">Some</span>(<span class="number">1</span>),
                 <span class="prelude-val">None</span>,
             )<span class="question-mark">?</span>,
@@ -623,7 +614,14 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserve_irq</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irq</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_anon_alloc</span>();
         <span class="self">self</span>.<span class="ident">irq_allocator</span>
-            .<span class="ident">allocate_at</span>(<span class="ident">irq</span> <span class="kw">as</span> <span class="ident">u64</span>, <span class="number">1</span>, <span class="ident">id</span>, <span class="string">&quot;irq-fixed&quot;</span>.<span class="ident">to_string</span>())
+            .<span class="ident">allocate_at</span>(
+                <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="ident">irq</span>.<span class="ident">into</span>(),
+                    <span class="ident">end</span>: <span class="ident">irq</span>.<span class="ident">into</span>(),
+                },
+                <span class="ident">id</span>,
+                <span class="string">&quot;irq-fixed&quot;</span>.<span class="ident">to_string</span>(),
+            )
             .<span class="ident">is_ok</span>()
     }
 
@@ -636,7 +634,14 @@
             <span class="comment">// Each bus supports up to 32 (devices) x 8 (functions).</span>
             <span class="comment">// Prefer allocating at device granularity (preferred_align = 8), but fall back to</span>
             <span class="comment">// allocating individual functions (min_align = 1) when we run out of devices.</span>
-            <span class="kw">match</span> <span class="ident">AddressAllocator::new</span>(<span class="ident">RangeInclusive::new</span>(<span class="ident">base</span>, (<span class="number">32</span> <span class="op">*</span> <span class="number">8</span>) <span class="op">-</span> <span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">Some</span>(<span class="number">8</span>)) {
+            <span class="kw">match</span> <span class="ident">AddressAllocator::new</span>(
+                <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="ident">base</span>,
+                    <span class="ident">end</span>: (<span class="number">32</span> <span class="op">*</span> <span class="number">8</span>) <span class="op">-</span> <span class="number">1</span>,
+                },
+                <span class="prelude-val">Some</span>(<span class="number">1</span>),
+                <span class="prelude-val">Some</span>(<span class="number">8</span>),
+            ) {
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="self">self</span>.<span class="ident">pci_allocator</span>.<span class="ident">insert</span>(<span class="ident">bus</span>, <span class="ident">v</span>),
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
             };
@@ -686,7 +691,9 @@
                     <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
                 };
                 <span class="kw">let</span> <span class="ident">df</span> <span class="op">=</span> ((<span class="ident">dev</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>) <span class="op">|</span> (<span class="ident">func</span> <span class="kw">as</span> <span class="ident">u64</span>);
-                <span class="ident">allocator</span>.<span class="ident">allocate_at</span>(<span class="ident">df</span>, <span class="number">1</span>, <span class="ident">id</span>, <span class="ident">tag</span>).<span class="ident">is_ok</span>()
+                <span class="ident">allocator</span>
+                    .<span class="ident">allocate_at</span>(<span class="ident">AddressRange</span> { <span class="ident">start</span>: <span class="ident">df</span>, <span class="ident">end</span>: <span class="ident">df</span> }, <span class="ident">id</span>, <span class="ident">tag</span>)
+                    .<span class="ident">is_ok</span>()
             }
             <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
         }
@@ -706,24 +713,22 @@
     <span class="doccomment">/// range with mmio pools, exclude the overlap from mmio allocator.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If any part of the specified range has been allocated, return Error.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserve_mmio</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">u64</span>, <span class="ident">len</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">to_range_inclusive</span>(<span class="ident">start</span>, <span class="ident">len</span>)<span class="question-mark">?</span>;
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserve_mmio</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">range</span>: <span class="ident">AddressRange</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pools</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="ident">pool</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">mmio_pools</span>() {
-            <span class="ident">pools</span>.<span class="ident">push</span>(<span class="ident">RangeInclusive::new</span>(<span class="kw-2">*</span><span class="ident">pool</span>.<span class="ident">start</span>(), <span class="kw-2">*</span><span class="ident">pool</span>.<span class="ident">end</span>()));
+            <span class="ident">pools</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">pool</span>);
         }
-        <span class="ident">pools</span>.<span class="ident">sort_by</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">start</span>().<span class="ident">cmp</span>(<span class="ident">b</span>.<span class="ident">start</span>()));
+        <span class="ident">pools</span>.<span class="ident">sort_by</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">start</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">start</span>));
         <span class="kw">for</span> <span class="ident">pool</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">pools</span> {
-            <span class="kw">if</span> <span class="ident">pool</span>.<span class="ident">start</span>() <span class="op">&gt;</span> <span class="ident">target</span>.<span class="ident">end</span>() {
+            <span class="kw">if</span> <span class="ident">pool</span>.<span class="ident">start</span> <span class="op">&gt;</span> <span class="ident">range</span>.<span class="ident">end</span> {
                 <span class="kw">break</span>;
             }
 
-            <span class="kw">let</span> <span class="ident">overlap</span> <span class="op">=</span> <span class="ident">range_intersect</span>(<span class="ident">pool</span>, <span class="kw-2">&amp;</span><span class="ident">target</span>);
+            <span class="kw">let</span> <span class="ident">overlap</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">intersect</span>(<span class="ident">range</span>);
             <span class="kw">if</span> <span class="op">!</span><span class="ident">overlap</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_anon_alloc</span>();
                 <span class="self">self</span>.<span class="ident">mmio_allocator_any</span>().<span class="ident">allocate_at</span>(
-                    <span class="kw-2">*</span><span class="ident">overlap</span>.<span class="ident">start</span>(),
-                    <span class="kw-2">*</span><span class="ident">overlap</span>.<span class="ident">end</span>() <span class="op">-</span> <span class="kw-2">*</span><span class="ident">overlap</span>.<span class="ident">start</span>() <span class="op">+</span> <span class="number">1</span>,
+                    <span class="ident">overlap</span>,
                     <span class="ident">id</span>,
                     <span class="string">&quot;pci mmio reserve&quot;</span>.<span class="ident">to_string</span>(),
                 )<span class="question-mark">?</span>;
@@ -757,7 +762,7 @@
     }
 
     <span class="doccomment">/// Gets the pools of all mmio allocators.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmio_pools</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmio_pools</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AddressRange</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mmio_address_spaces</span>
             .<span class="ident">iter</span>()
             .<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">mmio_as</span><span class="op">|</span> <span class="ident">mmio_as</span>.<span class="ident">pools</span>())
@@ -765,8 +770,8 @@
     }
 
     <span class="doccomment">/// Gets the reserved address space region.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserved_region</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">MemRegion</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">reserved_region</span>.<span class="ident">as_ref</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserved_region</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">reserved_region</span>
     }
 
     <span class="doccomment">/// Gets a unique anonymous allocation</span>
@@ -784,17 +789,17 @@
     <span class="kw">fn</span> <span class="ident">example</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
             <span class="ident">SystemAllocatorConfig</span> {
-                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1000</span>,
-                    <span class="ident">size</span>: <span class="number">0xf000</span>,
+                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1000</span>,
+                    <span class="ident">end</span>: <span class="number">0xffff</span>,
                 }),
-                <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x3000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1_0000</span>,
+                <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x3000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x3000_ffff</span>,
                 },
-                <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1000_0000</span>,
+                <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x1fffffff</span>,
                 },
                 <span class="ident">platform_mmio</span>: <span class="prelude-val">None</span>,
                 <span class="ident">first_irq</span>: <span class="number">5</span>,
@@ -826,24 +831,45 @@
                 <span class="ident">func</span>: <span class="number">0</span>,
                 <span class="ident">bar</span>: <span class="number">0</span>
             }),
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(<span class="number">0x10000000</span>, <span class="number">0x100</span>, <span class="string">&quot;bar0&quot;</span>.<span class="ident">to_string</span>()))
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>(
+                <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x10000000</span>,
+                    <span class="ident">end</span>: <span class="number">0x100000ff</span>
+                },
+                <span class="string">&quot;bar0&quot;</span>.<span class="ident">to_string</span>()
+            ))
         );
 
         <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">get_anon_alloc</span>();
         <span class="macro">assert_eq!</span>(
             <span class="ident">a</span>.<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::Low</span>).<span class="ident">allocate_at</span>(
-                <span class="number">0x3000_5000</span>,
-                <span class="number">0x5000</span>,
+                <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x3000_5000</span>,
+                    <span class="ident">end</span>: <span class="number">0x30009fff</span>
+                },
                 <span class="ident">id</span>,
                 <span class="string">&quot;Test&quot;</span>.<span class="ident">to_string</span>()
             ),
             <span class="prelude-val">Ok</span>(())
         );
         <span class="macro">assert_eq!</span>(<span class="ident">a</span>.<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::Low</span>).<span class="ident">release</span>(<span class="ident">id</span>), <span class="prelude-val">Ok</span>(()));
-        <span class="macro">assert_eq!</span>(<span class="ident">a</span>.<span class="ident">reserve_mmio</span>(<span class="number">0x3000_2000</span>, <span class="number">0x4000</span>), <span class="prelude-val">Ok</span>(()));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">a</span>.<span class="ident">reserve_mmio</span>(<span class="ident">AddressRange</span> {
+                <span class="ident">start</span>: <span class="number">0x3000_2000</span>,
+                <span class="ident">end</span>: <span class="number">0x30005fff</span>
+            }),
+            <span class="prelude-val">Ok</span>(())
+        );
         <span class="macro">assert_eq!</span>(
             <span class="ident">a</span>.<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::Low</span>)
-                .<span class="ident">allocate_at</span>(<span class="number">0x3000_5000</span>, <span class="number">0x5000</span>, <span class="ident">id</span>, <span class="string">&quot;Test&quot;</span>.<span class="ident">to_string</span>())
+                .<span class="ident">allocate_at</span>(
+                    <span class="ident">AddressRange</span> {
+                        <span class="ident">start</span>: <span class="number">0x3000_5000</span>,
+                        <span class="ident">end</span>: <span class="number">0x3000_9fff</span>
+                    },
+                    <span class="ident">id</span>,
+                    <span class="string">&quot;Test&quot;</span>.<span class="ident">to_string</span>()
+                )
                 .<span class="ident">is_err</span>(),
             <span class="bool-val">true</span>
         );

@@ -1456,8 +1456,6 @@
 <span id="1455">1455</span>
 <span id="1456">1456</span>
 <span id="1457">1457</span>
-<span id="1458">1458</span>
-<span id="1459">1459</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1486,7 +1484,7 @@
 <span class="kw">use</span> <span class="ident">once_cell::sync::OnceCell</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">resources::address_allocator::AddressAllocator</span>;
-<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ResourcesError</span>};
+<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">Alloc</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ResourcesError</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vfio_sys</span>::<span class="kw-2">*</span>;
@@ -1702,7 +1700,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">iommu_info</span>.<span class="ident">iova_pgsizes</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vfio_iommu_iova_get_iova_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">vfio_iova_range</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vfio_iommu_iova_get_iova_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// Query the buffer size needed fetch the capabilities.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iommu_info_argsz</span> <span class="op">=</span> <span class="ident">vfio_iommu_type1_info</span> {
             <span class="ident">argsz</span>: <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">vfio_iommu_type1_info</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span>,
@@ -1763,7 +1761,13 @@
                         <span class="ident">range_offset</span> <span class="op">+</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">*</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">vfio_iova_range</span><span class="op">&gt;</span>(),
                     ));
                 }
-                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ret</span>);
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ret</span>
+                    .<span class="ident">iter</span>()
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">range</span><span class="op">|</span> <span class="ident">AddressRange</span> {
+                        <span class="ident">start</span>: <span class="ident">range</span>.<span class="ident">start</span>,
+                        <span class="ident">end</span>: <span class="ident">range</span>.<span class="ident">end</span>,
+                    })
+                    .<span class="ident">collect</span>());
             }
             <span class="ident">offset</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">next</span> <span class="kw">as</span> <span class="ident">usize</span>;
         }
@@ -2217,11 +2221,7 @@
         <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">add_device_num</span>();
         <span class="kw">let</span> <span class="ident">group_descriptor</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">as_raw_descriptor</span>();
 
-        <span class="kw">let</span> <span class="ident">iova_ranges</span> <span class="op">=</span> <span class="ident">container</span>
-            .<span class="ident">lock</span>()
-            .<span class="ident">vfio_iommu_iova_get_iova_ranges</span>()<span class="question-mark">?</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">std::ops::RangeInclusive::new</span>(<span class="ident">r</span>.<span class="ident">start</span>, <span class="ident">r</span>.<span class="ident">end</span>));
+        <span class="kw">let</span> <span class="ident">iova_ranges</span> <span class="op">=</span> <span class="ident">container</span>.<span class="ident">lock</span>().<span class="ident">vfio_iommu_iova_get_iova_ranges</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">iova_alloc</span> <span class="op">=</span> <span class="ident">AddressAllocator::new_from_list</span>(<span class="ident">iova_ranges</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
             .<span class="ident">map_err</span>(<span class="ident">VfioError::Resources</span>)<span class="question-mark">?</span>;
 
@@ -2266,11 +2266,7 @@
         <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">add_device_num</span>();
         <span class="kw">let</span> <span class="ident">group_descriptor</span> <span class="op">=</span> <span class="ident">group</span>.<span class="ident">lock</span>().<span class="ident">as_raw_descriptor</span>();
 
-        <span class="kw">let</span> <span class="ident">iova_ranges</span> <span class="op">=</span> <span class="ident">container</span>
-            .<span class="ident">lock</span>()
-            .<span class="ident">vfio_iommu_iova_get_iova_ranges</span>()<span class="question-mark">?</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">std::ops::RangeInclusive::new</span>(<span class="ident">r</span>.<span class="ident">start</span>, <span class="ident">r</span>.<span class="ident">end</span>));
+        <span class="kw">let</span> <span class="ident">iova_ranges</span> <span class="op">=</span> <span class="ident">container</span>.<span class="ident">lock</span>().<span class="ident">vfio_iommu_iova_get_iova_ranges</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">iova_alloc</span> <span class="op">=</span> <span class="ident">AddressAllocator::new_from_list</span>(<span class="ident">iova_ranges</span>, <span class="prelude-val">None</span>, <span class="prelude-val">None</span>)
             .<span class="ident">map_err</span>(<span class="ident">VfioError::Resources</span>)<span class="question-mark">?</span>;
 

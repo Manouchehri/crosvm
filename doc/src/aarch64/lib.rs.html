@@ -739,10 +739,6 @@
 <span id="738">738</span>
 <span id="739">739</span>
 <span id="740">740</span>
-<span id="741">741</span>
-<span id="742">742</span>
-<span id="743">743</span>
-<span id="744">744</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -770,7 +766,7 @@
 };
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
-<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">range_inclusive_len</span>, <span class="ident">MemRegion</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
+<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vm_control</span>::{<span class="ident">BatControl</span>, <span class="ident">BatteryType</span>};
@@ -1209,9 +1205,9 @@
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">range</span><span class="op">|</span> <span class="ident">fdt::PciRange</span> {
                 <span class="ident">space</span>: <span class="ident">fdt::PciAddressSpace::Memory64</span>,
-                <span class="ident">bus_address</span>: <span class="kw-2">*</span><span class="ident">range</span>.<span class="ident">start</span>(),
-                <span class="ident">cpu_physical_address</span>: <span class="kw-2">*</span><span class="ident">range</span>.<span class="ident">start</span>(),
-                <span class="ident">size</span>: <span class="ident">range_inclusive_len</span>(<span class="ident">range</span>).<span class="ident">unwrap</span>(),
+                <span class="ident">bus_address</span>: <span class="ident">range</span>.<span class="ident">start</span>,
+                <span class="ident">cpu_physical_address</span>: <span class="ident">range</span>.<span class="ident">start</span>,
+                <span class="ident">size</span>: <span class="ident">range</span>.<span class="ident">len</span>().<span class="ident">unwrap</span>(),
                 <span class="ident">prefetchable</span>: <span class="bool-val">false</span>,
             })
             .<span class="ident">collect</span>();
@@ -1347,18 +1343,14 @@
             });
         <span class="ident">SystemAllocatorConfig</span> {
             <span class="ident">io</span>: <span class="prelude-val">None</span>,
-            <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                <span class="ident">base</span>: <span class="ident">AARCH64_MMIO_BASE</span>,
-                <span class="ident">size</span>: <span class="ident">AARCH64_MMIO_SIZE</span>,
-            },
-            <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                <span class="ident">base</span>: <span class="ident">high_mmio_base</span>,
-                <span class="ident">size</span>: <span class="ident">high_mmio_size</span>,
-            },
-            <span class="ident">platform_mmio</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                <span class="ident">base</span>: <span class="ident">plat_mmio_base</span>,
-                <span class="ident">size</span>: <span class="ident">plat_mmio_size</span>,
-            }),
+            <span class="ident">low_mmio</span>: <span class="ident">AddressRange::from_start_and_size</span>(<span class="ident">AARCH64_MMIO_BASE</span>, <span class="ident">AARCH64_MMIO_SIZE</span>)
+                .<span class="ident">expect</span>(<span class="string">&quot;invalid mmio region&quot;</span>),
+            <span class="ident">high_mmio</span>: <span class="ident">AddressRange::from_start_and_size</span>(<span class="ident">high_mmio_base</span>, <span class="ident">high_mmio_size</span>)
+                .<span class="ident">expect</span>(<span class="string">&quot;invalid high mmio region&quot;</span>),
+            <span class="ident">platform_mmio</span>: <span class="prelude-val">Some</span>(
+                <span class="ident">AddressRange::from_start_and_size</span>(<span class="ident">plat_mmio_base</span>, <span class="ident">plat_mmio_size</span>)
+                    .<span class="ident">expect</span>(<span class="string">&quot;invalid platform mmio region&quot;</span>),
+            ),
             <span class="ident">first_irq</span>: <span class="ident">AARCH64_IRQ_BASE</span>,
         }
     }

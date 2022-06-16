@@ -1966,7 +1966,7 @@
     <span class="kw">use</span> <span class="ident">hypervisor</span>::{
         <span class="ident">kvm::Kvm</span>, <span class="ident">IoapicRedirectionTableEntry</span>, <span class="ident">PitRWMode</span>, <span class="ident">ProtectionType</span>, <span class="ident">TriggerMode</span>, <span class="ident">Vm</span>, <span class="ident">VmX86_64</span>,
     };
-    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">MemRegion</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
+    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">SystemAllocator</span>, <span class="ident">SystemAllocatorConfig</span>};
     <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::irqchip::tests</span>::<span class="kw-2">*</span>;
@@ -2149,17 +2149,17 @@
         <span class="kw">let</span> <span class="ident">io_bus</span> <span class="op">=</span> <span class="ident">Bus::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resources</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
             <span class="ident">SystemAllocatorConfig</span> {
-                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0xc000</span>,
-                    <span class="ident">size</span>: <span class="number">0x4000</span>,
+                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0xc000</span>,
+                    <span class="ident">end</span>: <span class="number">0xffff</span>,
                 }),
-                <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0</span>,
-                    <span class="ident">size</span>: <span class="number">2048</span>,
+                <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0</span>,
+                    <span class="ident">end</span>: <span class="number">2047</span>,
                 },
-                <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1_0000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x2_0000_0000</span>,
+                <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1_0000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x2_ffff_ffff</span>,
                 },
                 <span class="ident">platform_mmio</span>: <span class="prelude-val">None</span>,
                 <span class="ident">first_irq</span>: <span class="number">5</span>,
@@ -2282,17 +2282,17 @@
         <span class="kw">let</span> <span class="ident">io_bus</span> <span class="op">=</span> <span class="ident">Bus::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">resources</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
             <span class="ident">SystemAllocatorConfig</span> {
-                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0xc000</span>,
-                    <span class="ident">size</span>: <span class="number">0x4000</span>,
+                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0xc000</span>,
+                    <span class="ident">end</span>: <span class="number">0xffff</span>,
                 }),
-                <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0</span>,
-                    <span class="ident">size</span>: <span class="number">2048</span>,
+                <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0</span>,
+                    <span class="ident">end</span>: <span class="number">2047</span>,
                 },
-                <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x1_0000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x2_0000_0000</span>,
+                <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x1_0000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x2_ffff_ffff</span>,
                 },
                 <span class="ident">platform_mmio</span>: <span class="prelude-val">None</span>,
                 <span class="ident">first_irq</span>: <span class="number">5</span>,

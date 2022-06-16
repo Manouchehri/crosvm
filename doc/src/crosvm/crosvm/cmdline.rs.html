@@ -1603,15 +1603,12 @@
 <span id="1602">1602</span>
 <span id="1603">1603</span>
 <span id="1604">1604</span>
-<span id="1605">1605</span>
-<span id="1606">1606</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::net</span>;
-<span class="kw">use</span> <span class="ident">std::ops::RangeInclusive</span>;
 <span class="kw">use</span> <span class="ident">std::os::unix::prelude::RawFd</span>;
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
@@ -1645,8 +1642,7 @@
 <span class="kw">use</span> <span class="ident">devices::SerialParameters</span>;
 <span class="kw">use</span> <span class="ident">devices::StubPciParameters</span>;
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-<span class="kw">use</span> <span class="ident">resources::MemRegion</span>;
+<span class="kw">use</span> <span class="ident">resources::AddressRange</span>;
 <span class="kw">use</span> <span class="ident">vm_control::BatteryType</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromArgs</span>)]</span>
@@ -2259,7 +2255,7 @@
         <span class="ident">from_str_fn</span>(<span class="ident">parse_mmio_address_range</span>)
     )]</span>
     <span class="doccomment">/// MMIO address ranges</span>
-    <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;N&quot;</span>)]</span>
     <span class="doccomment">/// virtio net virtual queue pairs. (default: 1)</span>
@@ -2305,8 +2301,8 @@
         <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;mmio_base,mmio_length&quot;</span>,
         <span class="ident">from_str_fn</span>(<span class="ident">parse_memory_region</span>)
     )]</span>
-    <span class="doccomment">/// base and length for PCIE Enhanced Configuration Access Mechanism</span>
-    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// region for PCIe Enhanced Configuration Access Mechanism</span>
+    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,

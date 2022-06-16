@@ -916,7 +916,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">audio_streams::shm_streams::MockShmStreamSource</span>;
-    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">MemRegion</span>, <span class="ident">SystemAllocatorConfig</span>};
+    <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">SystemAllocatorConfig</span>};
     <span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -926,17 +926,17 @@
             <span class="ident">Ac97Dev::new</span>(<span class="ident">mem</span>, <span class="ident">Ac97Backend::NULL</span>, <span class="ident">Box::new</span>(<span class="ident">MockShmStreamSource::new</span>()));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">allocator</span> <span class="op">=</span> <span class="ident">SystemAllocator::new</span>(
             <span class="ident">SystemAllocatorConfig</span> {
-                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0xc000</span>,
-                    <span class="ident">size</span>: <span class="number">0x4000</span>,
+                <span class="ident">io</span>: <span class="prelude-val">Some</span>(<span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0xc000</span>,
+                    <span class="ident">end</span>: <span class="number">0xffff</span>,
                 }),
-                <span class="ident">low_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x2000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1000_0000</span>,
+                <span class="ident">low_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x2000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x2fff_ffff</span>,
                 },
-                <span class="ident">high_mmio</span>: <span class="ident">MemRegion</span> {
-                    <span class="ident">base</span>: <span class="number">0x3000_0000</span>,
-                    <span class="ident">size</span>: <span class="number">0x1000_0000</span>,
+                <span class="ident">high_mmio</span>: <span class="ident">AddressRange</span> {
+                    <span class="ident">start</span>: <span class="number">0x3000_0000</span>,
+                    <span class="ident">end</span>: <span class="number">0x3fff_ffff</span>,
                 },
                 <span class="ident">platform_mmio</span>: <span class="prelude-val">None</span>,
                 <span class="ident">first_irq</span>: <span class="number">5</span>,

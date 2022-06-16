@@ -2398,6 +2398,7 @@
 <span id="2397">2397</span>
 <span id="2398">2398</span>
 <span id="2399">2399</span>
+<span id="2400">2400</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2448,7 +2449,7 @@
 <span class="kw">use</span> <span class="ident">hypervisor::kvm</span>::{<span class="ident">Kvm</span>, <span class="ident">KvmVcpu</span>, <span class="ident">KvmVm</span>};
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">HypervisorCap</span>, <span class="ident">ProtectionType</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>};
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
-<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">SystemAllocator</span>};
+<span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">AddressRange</span>, <span class="ident">Alloc</span>, <span class="ident">SystemAllocator</span>};
 <span class="kw">use</span> <span class="ident">rutabaga_gfx::RutabagaGralloc</span>;
 <span class="kw">use</span> <span class="ident">sync</span>::{<span class="ident">Condvar</span>, <span class="ident">Mutex</span>};
 <span class="kw">use</span> <span class="ident">vm_control</span>::<span class="kw-2">*</span>;
@@ -3080,9 +3081,10 @@
             .<span class="ident">build</span>()
             .<span class="ident">context</span>(<span class="string">&quot;failed to map backing file for file-backed mapping&quot;</span>)<span class="question-mark">?</span>;
 
+        <span class="kw">let</span> <span class="ident">mapping_range</span> <span class="op">=</span> <span class="ident">AddressRange::from_start_and_size</span>(<span class="ident">mapping</span>.<span class="ident">address</span>, <span class="ident">mapping</span>.<span class="ident">size</span>)
+            .<span class="ident">context</span>(<span class="string">&quot;failed to convert to AddressRange&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">match</span> <span class="ident">resources</span>.<span class="ident">mmio_allocator_any</span>().<span class="ident">allocate_at</span>(
-            <span class="ident">mapping</span>.<span class="ident">address</span>,
-            <span class="ident">mapping</span>.<span class="ident">size</span>,
+            <span class="ident">mapping_range</span>,
             <span class="ident">Alloc::FileBacked</span>(<span class="ident">mapping</span>.<span class="ident">address</span>),
             <span class="string">&quot;file-backed mapping&quot;</span>.<span class="ident">to_owned</span>(),
         ) {

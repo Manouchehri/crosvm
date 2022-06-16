@@ -999,7 +999,7 @@
 <span class="kw">use</span> {
     <span class="ident">devices::IrqChipX86_64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>,
     <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span> <span class="kw">as</span> <span class="ident">HypervisorArch</span>, <span class="ident">VcpuX86_64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>, <span class="ident">VmX86_64</span> <span class="kw">as</span> <span class="ident">VmArch</span>},
-    <span class="ident">resources::MemRegion</span>,
+    <span class="ident">resources::AddressRange</span>,
 };
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">serial</span>::{
@@ -1058,7 +1058,7 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
     <span class="kw">pub</span> <span class="ident">pci_low_start</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">pcie_ecam</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
     <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
     <span class="doccomment">/// A file to load as pVM firmware. Must be `Some` iff</span>
