@@ -529,6 +529,29 @@
 <span id="528">528</span>
 <span id="529">529</span>
 <span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -542,6 +565,8 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">haxm</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">kvm</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">windows</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;whpx&quot;</span>))]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">whpx</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">x86_64</span>;
 
@@ -959,6 +984,27 @@
         <span class="ident">index</span>: <span class="ident">u32</span>,
         <span class="ident">data</span>: <span class="ident">u64</span>,
     },
+    <span class="doccomment">/// An invalid vcpu register was set while running.</span>
+    <span class="ident">InvalidVpRegister</span>,
+    <span class="doccomment">/// incorrect setup for vcpu requiring an unsupported feature</span>
+    <span class="ident">UnsupportedFeature</span>,
+    <span class="doccomment">/// vcpu run was user cancelled</span>
+    <span class="ident">Canceled</span>,
+    <span class="doccomment">/// an unrecoverable exception was encountered (different from Exception)</span>
+    <span class="ident">UnrecoverableException</span>,
+    <span class="doccomment">/// vcpu stopped due to an msr access.</span>
+    <span class="ident">MsrAccess</span>,
+    <span class="doccomment">/// vcpu stopped due to a cpuid request.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+    <span class="ident">Cpuid</span> {
+        <span class="ident">entry</span>: <span class="ident">CpuIdEntry</span>,
+    },
+    <span class="doccomment">/// vcpu stopped due to calling rdtsc</span>
+    <span class="ident">RdTsc</span>,
+    <span class="doccomment">/// vcpu stopped for an apic smi trap</span>
+    <span class="ident">ApicSmiTrap</span>,
+    <span class="doccomment">/// vcpu stopped due to an apic trap</span>
+    <span class="ident">ApicInitSipiTrap</span>,
 }
 
 <span class="doccomment">/// A hypercall with parameters being made from the guest.</span>
