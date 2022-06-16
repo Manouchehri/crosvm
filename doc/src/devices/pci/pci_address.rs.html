@@ -458,7 +458,7 @@
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// PCI Device Address, AKA Bus:Device.Function</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">PartialOrd</span>, <span class="ident">Ord</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Hash</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PciAddress</span> {
     <span class="doccomment">/// Bus number, in the range `0..=255`.</span>
     <span class="kw">pub</span> <span class="ident">bus</span>: <span class="ident">u8</span>,

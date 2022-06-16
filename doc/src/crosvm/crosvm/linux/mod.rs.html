@@ -2468,7 +2468,7 @@
 <span class="kw">use</span> {
     <span class="ident"><span class="kw">crate</span>::crosvm::config::HostPcieRootPortParameters</span>,
     <span class="ident">devices</span>::{
-        <span class="ident">IrqChipX86_64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>, <span class="ident">KvmSplitIrqChip</span>, <span class="ident">PciBridge</span>, <span class="ident">PcieHostRootPort</span>, <span class="ident">PcieRootPort</span>,
+        <span class="ident">IrqChipX86_64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>, <span class="ident">KvmSplitIrqChip</span>, <span class="ident">PciBridge</span>, <span class="ident">PcieHostPort</span>, <span class="ident">PcieRootPort</span>,
     },
     <span class="ident">hypervisor</span>::{<span class="ident">VcpuX86_64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>, <span class="ident">VmX86_64</span> <span class="kw">as</span> <span class="ident">VmArch</span>},
     <span class="ident">x86_64::msr::get_override_msr_list</span>,
@@ -3172,7 +3172,7 @@
         <span class="comment">// reserve the host pci BDF and create a virtual pcie RP with some attrs same as host</span>
         <span class="kw">for</span> <span class="ident">host_pcie</span> <span class="kw">in</span> <span class="ident">host_pcie_rp</span>.<span class="ident">iter</span>() {
             <span class="kw">let</span> (<span class="ident">vm_host_tube</span>, <span class="ident">vm_device_tube</span>) <span class="op">=</span> <span class="ident">Tube::pair</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create tube&quot;</span>)<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">pcie_host</span> <span class="op">=</span> <span class="ident">PcieHostRootPort::new</span>(<span class="ident">host_pcie</span>.<span class="ident">host_path</span>.<span class="ident">as_path</span>(), <span class="ident">vm_device_tube</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">pcie_host</span> <span class="op">=</span> <span class="ident">PcieHostPort::new</span>(<span class="ident">host_pcie</span>.<span class="ident">host_path</span>.<span class="ident">as_path</span>(), <span class="ident">vm_device_tube</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">bus_range</span> <span class="op">=</span> <span class="ident">pcie_host</span>.<span class="ident">get_bus_range</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slot_implemented</span> <span class="op">=</span> <span class="bool-val">true</span>;
             <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="ident">bus_range</span>.<span class="ident">secondary</span>..<span class="op">=</span><span class="ident">bus_range</span>.<span class="ident">subordinate</span> {

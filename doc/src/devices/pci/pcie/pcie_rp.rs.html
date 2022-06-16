@@ -554,7 +554,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pci_bridge::PciBridgeBusRange</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pcie_device</span>::{<span class="ident">PciPmcCap</span>, <span class="ident">PcieCap</span>, <span class="ident">PcieDevice</span>, <span class="ident">PmcConfig</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pcie_host::PcieHostRootPort</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie::pcie_host::PcieHostPort</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pcie</span>::<span class="kw-2">*</span>;
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="prelude-ty">Result</span>};
@@ -586,7 +586,7 @@
     <span class="ident">hotplug_out_begin</span>: <span class="ident">bool</span>,
     <span class="ident">removed_downstream</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
     <span class="ident">removed_downstream_valid</span>: <span class="ident">bool</span>,
-    <span class="ident">pcie_host</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PcieHostRootPort</span><span class="op">&gt;</span>,
+    <span class="ident">pcie_host</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PcieHostPort</span><span class="op">&gt;</span>,
     <span class="ident">prepare_hotplug</span>: <span class="ident">bool</span>,
 }
 
@@ -625,7 +625,7 @@
     }
 
     <span class="doccomment">/// Constructs a new PCIE root port which associated with the host physical pcie RP</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_host</span>(<span class="ident">pcie_host</span>: <span class="ident">PcieHostRootPort</span>, <span class="ident">slot_implemented</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_host</span>(<span class="ident">pcie_host</span>: <span class="ident">PcieHostPort</span>, <span class="ident">slot_implemented</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">bus_range</span> <span class="op">=</span> <span class="ident">pcie_host</span>.<span class="ident">get_bus_range</span>();
         <span class="comment">// if physical pcie root port isn&#39;t on bus 0, ignore this physical pcie root port.</span>
         <span class="kw">if</span> <span class="ident">bus_range</span>.<span class="ident">primary</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {

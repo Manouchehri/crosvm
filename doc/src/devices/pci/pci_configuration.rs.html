@@ -1288,6 +1288,7 @@
 <span id="1287">1287</span>
 <span id="1288">1288</span>
 <span id="1289">1289</span>
+<span id="1290">1290</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1311,6 +1312,7 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">COMMAND_REG_MEMORY_SPACE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0000_0002</span>;
 <span class="kw">const</span> <span class="ident">STATUS_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STATUS_REG_CAPABILITIES_USED_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x0010_0000</span>;
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CLASS_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>

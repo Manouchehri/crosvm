@@ -438,6 +438,50 @@
 <span id="437">437</span>
 <span id="438">438</span>
 <span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -446,9 +490,9 @@
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::msi</span>::{<span class="ident">MsiCap</span>, <span class="ident">MsiConfig</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration</span>::{<span class="ident">PciBridgeSubclass</span>, <span class="ident">PciSubclass</span>, <span class="ident">CLASS_REG</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::pci_configuration::PciBridgeSubclass</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{
-    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>,
+    <span class="ident">BarRange</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBus</span>, <span class="ident">PciClassCode</span>, <span class="ident">PciConfiguration</span>, <span class="ident">PciDevice</span>,
     <span class="ident">PciDeviceError</span>, <span class="ident">PciHeaderType</span>, <span class="ident">PCI_VENDOR_ID_INTEL</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::PciInterruptPin</span>;
@@ -460,6 +504,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqLevelEvent</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_BUS_NUMBER_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x6</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_BUS_SUBORDINATE_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x2</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_MEM_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x8</span>;
 <span class="comment">// bit[15:4] is memory base[31:20] and alignment to 1MB</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_MEM_BASE_MASK</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xFFF0</span>;
@@ -472,6 +517,7 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_PREF_MEM_BASE_HIGH_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0xa</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_PREF_MEM_LIMIT_HIGH_REG</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0xb</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_WINDOW_ALIGNMENT</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x10_0000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_WINDOW_MASK</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="op">!</span>(<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>);
 <span class="comment">// Kernel allocate at least 2MB mmio for each bridge memory window</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BR_MEM_MINIMUM</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x20_0000</span>;
 
@@ -491,6 +537,7 @@
     <span class="ident">device</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">PcieDevice</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">config</span>: <span class="ident">PciConfiguration</span>,
     <span class="ident">pci_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span>,
+    <span class="ident">pci_bus</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">PciBus</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">bus_range</span>: <span class="ident">PciBridgeBusRange</span>,
     <span class="ident">msi_config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">MsiConfig</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">msi_cap_offset</span>: <span class="ident">u32</span>,
@@ -541,22 +588,15 @@
             <span class="ident">device</span>,
             <span class="ident">config</span>,
             <span class="ident">pci_address</span>: <span class="prelude-val">None</span>,
+            <span class="ident">pci_bus</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">PciBus::new</span>(
+                <span class="ident">bus_range</span>.<span class="ident">secondary</span>,
+                <span class="ident">bus_range</span>.<span class="ident">primary</span>,
+            ))),
             <span class="ident">bus_range</span>,
             <span class="ident">msi_config</span>,
             <span class="ident">msi_cap_offset</span>,
             <span class="ident">interrupt_evt</span>: <span class="prelude-val">None</span>,
         }
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_pci_bridge</span>(<span class="ident">dev</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">PciDevice</span>) -&gt; <span class="ident">bool</span> {
-        <span class="kw">let</span> <span class="ident">class_reg</span> <span class="op">=</span> <span class="ident">dev</span>.<span class="ident">read_config_register</span>(<span class="ident">CLASS_REG</span>);
-        <span class="ident">class_reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>
-            <span class="op">==</span> ((<span class="ident">PciClassCode::BridgeDevice</span>.<span class="ident">get_register_value</span>() <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>)
-                <span class="op">|</span> <span class="ident">PciBridgeSubclass::PciToPciBridge</span>.<span class="ident">get_register_value</span>() <span class="kw">as</span> <span class="ident">u32</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_secondary_bus_num</span>(<span class="ident">dev</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">PciDevice</span>) -&gt; <span class="ident">u8</span> {
-        (<span class="ident">dev</span>.<span class="ident">read_config_register</span>(<span class="ident">BR_BUS_NUMBER_REG</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">8</span>) <span class="kw">as</span> <span class="ident">u8</span>
     }
 
     <span class="kw">fn</span> <span class="ident">write_bridge_window</span>(
@@ -749,18 +789,27 @@
     <span class="kw">fn</span> <span class="ident">write_bar</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_addr</span>: <span class="ident">u64</span>, <span class="ident">_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) {}
 
     <span class="kw">fn</span> <span class="ident">get_removed_children_devices</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">get_removed_devices</span>()
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">removed_devices</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">let</span> <span class="ident">devices</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">get_removed_devices</span>();
+        <span class="kw">for</span> <span class="ident">device</span> <span class="kw">in</span> <span class="ident">devices</span>.<span class="ident">iter</span>() {
+            <span class="ident">removed_devices</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">device</span>);
+            <span class="ident">removed_devices</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pci_bus</span>.<span class="ident">lock</span>().<span class="ident">get_downstream_devices</span>());
+        }
+        <span class="ident">removed_devices</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_new_pci_bus</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">PciBus</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">pci_bus</span>.<span class="ident">clone</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">configure_bridge_window</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
         <span class="ident">bar_ranges</span>: <span class="kw-2">&amp;</span>[<span class="ident">BarRange</span>],
-    ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BarRange</span><span class="op">&gt;</span>, <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">address</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">pci_address</span>
             .<span class="ident">expect</span>(<span class="string">&quot;allocate_address must be called prior to configure_bridge_window&quot;</span>);
-
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">window_base</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">u64::MAX</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">window_size</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pref_window_base</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">u64::MAX</span>;
@@ -770,14 +819,11 @@
             <span class="comment">// Bridge for children hotplug, get desired bridge window size and reserve</span>
             <span class="comment">// it for guest OS use</span>
             <span class="kw">let</span> (<span class="ident">win_size</span>, <span class="ident">pref_win_size</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">lock</span>().<span class="ident">get_bridge_window_size</span>();
-            <span class="kw">if</span> <span class="ident">win_size</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">window_size</span> <span class="op">=</span> <span class="ident">win_size</span>;
-            }
-
-            <span class="kw">if</span> <span class="ident">pref_win_size</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">pref_window_size</span> <span class="op">=</span> <span class="ident">pref_win_size</span>;
-            }
+            <span class="ident">window_size</span> <span class="op">=</span> <span class="ident">win_size</span>;
+            <span class="ident">pref_window_size</span> <span class="op">=</span> <span class="ident">pref_win_size</span>;
         } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">window_end</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pref_window_end</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
             <span class="comment">// Bridge has children connected, get bridge window size from children</span>
             <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">BarRange</span> {
                 <span class="ident">addr</span>,
@@ -787,11 +833,17 @@
             {
                 <span class="kw">if</span> <span class="ident">prefetchable</span> {
                     <span class="ident">pref_window_base</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">pref_window_base</span>, <span class="ident">addr</span>);
-                    <span class="ident">pref_window_size</span> <span class="op">=</span> <span class="ident">max</span>(<span class="ident">pref_window_size</span>, <span class="ident">addr</span> <span class="op">+</span> <span class="ident">size</span> <span class="op">-</span> <span class="ident">pref_window_base</span>);
+                    <span class="ident">pref_window_end</span> <span class="op">=</span> <span class="ident">max</span>(<span class="ident">pref_window_end</span>, <span class="ident">addr</span> <span class="op">+</span> <span class="ident">size</span>);
                 } <span class="kw">else</span> {
                     <span class="ident">window_base</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">window_base</span>, <span class="ident">addr</span>);
-                    <span class="ident">window_size</span> <span class="op">=</span> <span class="ident">max</span>(<span class="ident">window_size</span>, <span class="ident">addr</span> <span class="op">+</span> <span class="ident">size</span> <span class="op">-</span> <span class="ident">window_base</span>);
+                    <span class="ident">window_end</span> <span class="op">=</span> <span class="ident">max</span>(<span class="ident">window_end</span>, <span class="ident">addr</span> <span class="op">+</span> <span class="ident">size</span>);
                 }
+            }
+            <span class="kw">if</span> <span class="ident">window_end</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                <span class="ident">window_size</span> <span class="op">=</span> <span class="ident">window_end</span> <span class="op">-</span> <span class="ident">window_base</span>;
+            }
+            <span class="kw">if</span> <span class="ident">pref_window_end</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                <span class="ident">pref_window_size</span> <span class="op">=</span> <span class="ident">pref_window_end</span> <span class="op">-</span> <span class="ident">pref_window_base</span>;
             }
         }
 
@@ -799,12 +851,12 @@
             <span class="comment">// Allocate at least 2MB bridge winodw</span>
             <span class="ident">window_size</span> <span class="op">=</span> <span class="ident">BR_MEM_MINIMUM</span>;
         }
-        <span class="comment">// align window_size to 1MB</span>
-        <span class="kw">if</span> <span class="ident">window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">window_size</span> <span class="op">=</span> (<span class="ident">window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> (<span class="op">!</span>(<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>));
-        }
         <span class="comment">// if window_base isn&#39;t set, allocate a new one</span>
         <span class="kw">if</span> <span class="ident">window_base</span> <span class="op">==</span> <span class="ident">u64::MAX</span> {
+            <span class="comment">// align window_size to 1MB</span>
+            <span class="kw">if</span> <span class="ident">window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="ident">window_size</span> <span class="op">=</span> (<span class="ident">window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>;
+            }
             <span class="kw">match</span> <span class="ident">resources</span>.<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::Low</span>).<span class="ident">allocate_with_align</span>(
                 <span class="ident">window_size</span>,
                 <span class="ident">Alloc::PciBridgeWindow</span> {
@@ -825,8 +877,12 @@
         } <span class="kw">else</span> {
             <span class="comment">// align window_base to 1MB</span>
             <span class="kw">if</span> <span class="ident">window_base</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">window_base</span> <span class="op">=</span>
-                    (<span class="ident">window_base</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> (<span class="op">!</span>(<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>));
+                <span class="ident">window_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">window_base</span> <span class="op">-</span> (<span class="ident">window_base</span> <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>);
+                <span class="comment">// align window_size to 1MB</span>
+                <span class="kw">if</span> <span class="ident">window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="ident">window_size</span> <span class="op">=</span> (<span class="ident">window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>;
+                }
+                <span class="ident">window_base</span> <span class="op">&amp;=</span> <span class="ident">BR_WINDOW_MASK</span>;
             }
         }
 
@@ -834,13 +890,12 @@
             <span class="comment">// Allocate at least 2MB prefetch bridge window</span>
             <span class="ident">pref_window_size</span> <span class="op">=</span> <span class="ident">BR_MEM_MINIMUM</span>;
         }
-        <span class="comment">// align pref_window_size to 1MB</span>
-        <span class="kw">if</span> <span class="ident">pref_window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">pref_window_size</span> <span class="op">=</span>
-                (<span class="ident">pref_window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> (<span class="op">!</span>(<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>));
-        }
         <span class="comment">// if pref_window_base isn&#39;t set, allocate a new one</span>
         <span class="kw">if</span> <span class="ident">pref_window_base</span> <span class="op">==</span> <span class="ident">u64::MAX</span> {
+            <span class="comment">// align pref_window_size to 1MB</span>
+            <span class="kw">if</span> <span class="ident">pref_window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="ident">pref_window_size</span> <span class="op">=</span> (<span class="ident">pref_window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>;
+            }
             <span class="kw">match</span> <span class="ident">resources</span>
                 .<span class="ident">mmio_allocator</span>(<span class="ident">MmioType::High</span>)
                 .<span class="ident">allocate_with_align</span>(
@@ -863,8 +918,13 @@
         } <span class="kw">else</span> {
             <span class="comment">// align pref_window_base to 1MB</span>
             <span class="kw">if</span> <span class="ident">pref_window_base</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-                <span class="ident">pref_window_base</span> <span class="op">=</span>
-                    (<span class="ident">window_base</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> (<span class="op">!</span>(<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>));
+                <span class="ident">pref_window_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">pref_window_base</span> <span class="op">-</span> (<span class="ident">pref_window_base</span> <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>);
+                <span class="comment">// align pref_window_size to 1MB</span>
+                <span class="kw">if</span> <span class="ident">pref_window_size</span> <span class="op">&amp;</span> (<span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="ident">pref_window_size</span> <span class="op">=</span>
+                        (<span class="ident">pref_window_size</span> <span class="op">+</span> <span class="ident">BR_WINDOW_ALIGNMENT</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">&amp;</span> <span class="ident">BR_WINDOW_MASK</span>;
+                }
+                <span class="ident">pref_window_base</span> <span class="op">&amp;=</span> <span class="ident">BR_WINDOW_MASK</span>;
             }
         }
 
@@ -874,7 +934,35 @@
             <span class="ident">pref_window_base</span>,
             <span class="ident">pref_window_size</span>,
         );
-        <span class="prelude-val">Ok</span>(())
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">windows</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">if</span> <span class="ident">window_size</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="ident">windows</span>.<span class="ident">push</span>(<span class="ident">BarRange</span> {
+                <span class="ident">addr</span>: <span class="ident">window_base</span>,
+                <span class="ident">size</span>: <span class="ident">window_size</span>,
+                <span class="ident">prefetchable</span>: <span class="bool-val">false</span>,
+            })
+        }
+        <span class="kw">if</span> <span class="ident">pref_window_size</span> <span class="op">&gt;</span> <span class="number">0</span> {
+            <span class="ident">windows</span>.<span class="ident">push</span>(<span class="ident">BarRange</span> {
+                <span class="ident">addr</span>: <span class="ident">pref_window_base</span>,
+                <span class="ident">size</span>: <span class="ident">pref_window_size</span>,
+                <span class="ident">prefetchable</span>: <span class="bool-val">true</span>,
+            })
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">windows</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">set_subordinate_bus</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">bus_no</span>: <span class="ident">u8</span>) {
+        <span class="kw">let</span> <span class="ident">bus_reg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_config_register</span>(<span class="ident">BR_BUS_NUMBER_REG</span>);
+        <span class="comment">// Keep the maxmium bus number here because this bridge could have reserved</span>
+        <span class="comment">// subordinate bus number earlier</span>
+        <span class="kw">let</span> <span class="ident">subordinate_bus</span> <span class="op">=</span> <span class="ident">u8::max</span>((<span class="ident">bus_reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> (<span class="ident">BR_BUS_SUBORDINATE_OFFSET</span> <span class="op">*</span> <span class="number">8</span>)) <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">bus_no</span>);
+        <span class="self">self</span>.<span class="ident">write_config_register</span>(
+            <span class="ident">BR_BUS_NUMBER_REG</span>,
+            <span class="ident">BR_BUS_SUBORDINATE_OFFSET</span> <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="kw-2">&amp;</span>[<span class="ident">subordinate_bus</span>],
+        );
     }
 }
 </code></pre></div>
