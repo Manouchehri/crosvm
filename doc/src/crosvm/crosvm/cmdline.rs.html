@@ -2518,7 +2518,7 @@
     <span class="doccomment">/// path to put the control socket. If PATH is a directory, a name will be generated</span>
     <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// enable a software emulated trusted platform module device</span>
     <span class="kw">pub</span> <span class="ident">software_tpm</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
