@@ -1245,6 +1245,116 @@
 <span id="1244">1244</span>
 <span id="1245">1245</span>
 <span id="1246">1246</span>
+<span id="1247">1247</span>
+<span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
+<span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
+<span id="1344">1344</span>
+<span id="1345">1345</span>
+<span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1261,7 +1371,7 @@
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config</span>::{
-    <span class="ident">Config</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>, <span class="ident">VvuOption</span>,
+    <span class="ident">JailConfig</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>, <span class="ident">VvuOption</span>,
 };
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">arch</span>::{<span class="self">self</span>, <span class="ident">VirtioDeviceStub</span>};
@@ -1292,7 +1402,7 @@
 <span class="kw">use</span> <span class="ident">devices</span>::{
     <span class="self">self</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">PciAddress</span>, <span class="ident">PciDevice</span>, <span class="ident">VfioDevice</span>, <span class="ident">VfioPciDevice</span>, <span class="ident">VfioPlatformDevice</span>,
 };
-<span class="kw">use</span> <span class="ident">hypervisor::Vm</span>;
+<span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">ProtectionType</span>, <span class="ident">Vm</span>};
 <span class="kw">use</span> <span class="ident">minijail</span>::{<span class="self">self</span>, <span class="ident">Minijail</span>};
 <span class="kw">use</span> <span class="ident">net_util</span>::{<span class="ident">sys::unix::Tap</span>, <span class="ident">MacAddress</span>};
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
@@ -1353,7 +1463,8 @@
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">DeviceResult</span><span class="op">&lt;</span><span class="ident">T</span> <span class="op">=</span> <span class="ident">VirtioDeviceStub</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_block_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">disk</span>: <span class="kw-2">&amp;</span><span class="ident">DiskOption</span>,
     <span class="ident">disk_device_tube</span>: <span class="ident">Tube</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1381,7 +1492,7 @@
             .<span class="ident">context</span>(<span class="string">&quot;failed to create async virtual disk&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">Box::new</span>(
             <span class="ident">virtio::BlockAsync::new</span>(
-                <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+                <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
                 <span class="ident">async_file</span>,
                 <span class="ident">disk</span>.<span class="ident">read_only</span>,
                 <span class="ident">disk</span>.<span class="ident">sparse</span>,
@@ -1397,7 +1508,7 @@
                 .<span class="ident">context</span>(<span class="string">&quot;failed to create virtual disk&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">Box::new</span>(
             <span class="ident">virtio::Block::new</span>(
-                <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+                <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
                 <span class="ident">disk_file</span>,
                 <span class="ident">disk</span>.<span class="ident">read_only</span>,
                 <span class="ident">disk</span>.<span class="ident">sparse</span>,
@@ -1411,12 +1522,15 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>,
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;block_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;block_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_block_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserBlock::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_block_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserBlock::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user block device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1426,8 +1540,11 @@
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_console_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserConsole::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_console_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserConsole::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user console device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1437,9 +1554,12 @@
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_fs_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">option</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserFsOption</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_fs_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">option</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserFsOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserFs::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="kw-2">&amp;</span><span class="ident">option</span>.<span class="ident">socket</span>,
         <span class="kw-2">&amp;</span><span class="ident">option</span>.<span class="ident">tag</span>,
     )
@@ -1453,10 +1573,10 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_mac80211_hwsim_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
     <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserMac80211Hwsim::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserMac80211Hwsim::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user mac80211_hwsim device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1467,8 +1587,11 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_snd_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">option</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserSnd::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">option</span>.<span class="ident">socket</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_snd_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">option</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserSnd::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">option</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user snd device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1479,7 +1602,8 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vvu_proxy_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VvuOption</span>,
     <span class="ident">tube</span>: <span class="ident">Tube</span>,
     <span class="ident">max_sibling_mem_size</span>: <span class="ident">u64</span>,
@@ -1490,7 +1614,7 @@
     })<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VirtioVhostUser::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="ident">listener</span>,
         <span class="ident">tube</span>,
         <span class="ident">opt</span>.<span class="ident">addr</span>,
@@ -1501,29 +1625,36 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vvu_proxy_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vvu_proxy_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_rng_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Rng::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
-        .<span class="ident">context</span>(<span class="string">&quot;failed to set up rng&quot;</span>)<span class="question-mark">?</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_rng_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span>
+        <span class="ident">virtio::Rng::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>)).<span class="ident">context</span>(<span class="string">&quot;failed to set up rng&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;rng_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;rng_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cras_snd_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">cras_snd</span>: <span class="ident">CrasSndParameters</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cras_snd_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">cras_snd</span>: <span class="ident">CrasSndParameters</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::snd::cras_backend::VirtioSndCras::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="ident">cras_snd</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to create cras sound device&quot;</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;cras_snd_device&quot;</span>)<span class="question-mark">?</span> {
+    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;cras_snd_device&quot;</span>)<span class="question-mark">?</span> {
         <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">jail</span>) =&gt; {
             <span class="comment">// Create a tmpfs in the device&#39;s root directory for cras_snd_device.</span>
             <span class="comment">// The size is 20*1024, or 20 KB.</span>
@@ -1552,13 +1683,13 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_software_tpm_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_software_tpm_device</span>(<span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">use</span> <span class="ident">std::ffi::CString</span>;
     <span class="kw">use</span> <span class="ident">std::fs</span>;
     <span class="kw">use</span> <span class="ident">std::process</span>;
 
     <span class="kw">let</span> <span class="ident">tpm_storage</span>: <span class="ident">PathBuf</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tpm_jail</span> <span class="op">=</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;tpm_device&quot;</span>)<span class="question-mark">?</span>;
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tpm_jail</span> <span class="op">=</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;tpm_device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">match</span> <span class="kw-2">&amp;mut</span> <span class="ident">tpm_jail</span> {
         <span class="prelude-val">Some</span>(<span class="ident">jail</span>) =&gt; {
@@ -1602,7 +1733,8 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_single_touch_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">single_touch_spec</span>: <span class="kw-2">&amp;</span><span class="ident">TouchDeviceOption</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1620,17 +1752,18 @@
         <span class="ident">socket</span>,
         <span class="ident">width</span>,
         <span class="ident">height</span>,
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_multi_touch_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">multi_touch_spec</span>: <span class="kw-2">&amp;</span><span class="ident">TouchDeviceOption</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1648,18 +1781,19 @@
         <span class="ident">socket</span>,
         <span class="ident">width</span>,
         <span class="ident">height</span>,
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_trackpad_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">trackpad_spec</span>: <span class="kw-2">&amp;</span><span class="ident">TouchDeviceOption</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1674,18 +1808,19 @@
         <span class="ident">socket</span>,
         <span class="ident">width</span>,
         <span class="ident">height</span>,
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_mouse_device</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoUnixStream</span><span class="op">&gt;</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">mouse_socket</span>: <span class="ident">T</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1694,17 +1829,18 @@
         <span class="ident">e</span>
     })<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_mouse</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_mouse</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>))
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_keyboard_device</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoUnixStream</span><span class="op">&gt;</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">keyboard_socket</span>: <span class="ident">T</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1713,17 +1849,18 @@
         <span class="ident">e</span>
     })<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_keyboard</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_keyboard</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>))
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_switches_device</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoUnixStream</span><span class="op">&gt;</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">switches_socket</span>: <span class="ident">T</span>,
     <span class="ident">idx</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
@@ -1732,43 +1869,49 @@
         <span class="ident">e</span>
     })<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_switches</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_switches</span>(<span class="ident">idx</span>, <span class="ident">socket</span>, <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>))
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vinput_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">dev_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vinput_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">dev_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">dev_file</span> <span class="op">=</span> <span class="ident">OpenOptions::new</span>()
         .<span class="ident">read</span>(<span class="bool-val">true</span>)
         .<span class="ident">write</span>(<span class="bool-val">true</span>)
         .<span class="ident">open</span>(<span class="ident">dev_path</span>)
         .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to open vinput device {}&quot;</span>, <span class="ident">dev_path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_evdev</span>(<span class="ident">dev_file</span>, <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_evdev</span>(<span class="ident">dev_file</span>, <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>))
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up input device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;input_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_balloon_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
     <span class="ident">tube</span>: <span class="ident">Tube</span>,
     <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">init_balloon_size</span>: <span class="ident">u64</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Balloon::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="ident">tube</span>,
         <span class="ident">inflate_tube</span>,
         <span class="ident">init_balloon_size</span>,
-        <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">strict_balloon</span> {
+        <span class="kw">if</span> <span class="ident">strict_balloon</span> {
             <span class="ident">BalloonMode::Strict</span>
         } <span class="kw">else</span> {
             <span class="ident">BalloonMode::Relaxed</span>
@@ -1778,92 +1921,138 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;balloon_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;balloon_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="doccomment">/// Generic method for creating a network device. `create_device` is a closure that takes the virtio</span>
 <span class="doccomment">/// features and number of queue pairs as parameters, and is responsible for creating the device</span>
 <span class="doccomment">/// itself.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_net_device</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">policy</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">create_device</span>: <span class="ident">F</span>) -&gt; <span class="ident">DeviceResult</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_net_device</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="kw-2">mut</span> <span class="ident">vq_pairs</span>: <span class="ident">u16</span>,
+    <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="ident">policy</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+    <span class="ident">create_device</span>: <span class="ident">F</span>,
+) -&gt; <span class="ident">DeviceResult</span>
 <span class="kw">where</span>
     <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">u64</span>, <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="ident">T</span>: <span class="ident">VirtioDevice</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vq_pairs</span> <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">net_vq_pairs</span>.<span class="ident">unwrap_or</span>(<span class="number">1</span>);
-    <span class="kw">let</span> <span class="ident">vcpu_count</span> <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">vcpu_count</span>.<span class="ident">unwrap_or</span>(<span class="number">1</span>);
     <span class="kw">if</span> <span class="ident">vcpu_count</span> <span class="op">&lt;</span> <span class="ident">vq_pairs</span> <span class="kw">as</span> <span class="ident">usize</span> {
         <span class="macro">warn!</span>(<span class="string">&quot;the number of net vq pairs must not exceed the vcpu count, falling back to single queue mode&quot;</span>);
         <span class="ident">vq_pairs</span> <span class="op">=</span> <span class="number">1</span>;
     }
-    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>);
+    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>);
 
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">create_device</span>(<span class="ident">features</span>, <span class="ident">vq_pairs</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">VirtioDevice</span><span class="op">&gt;</span>,
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="ident">policy</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="ident">policy</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="doccomment">/// Returns a network device created from a new TAP interface configured with `host_ip`, `netmask`,</span>
 <span class="doccomment">/// and `mac_address`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_net_device_from_config</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">vq_pairs</span>: <span class="ident">u16</span>,
+    <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="ident">vhost_net</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="ident">host_ip</span>: <span class="ident">Ipv4Addr</span>,
     <span class="ident">netmask</span>: <span class="ident">Ipv4Addr</span>,
     <span class="ident">mac_address</span>: <span class="ident">MacAddress</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">vhost_net</span> {
-        <span class="string">&quot;vhost_net_device&quot;</span>
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">vhost_net_device_path</span>) <span class="op">=</span> <span class="ident">vhost_net</span> {
+        <span class="ident">create_net_device</span>(
+            <span class="ident">protected_vm</span>,
+            <span class="ident">jail_config</span>,
+            <span class="ident">vq_pairs</span>,
+            <span class="ident">vcpu_count</span>,
+            <span class="string">&quot;vhost_net_device&quot;</span>,
+            <span class="op">|</span><span class="ident">features</span>, <span class="ident">_vq_pairs</span><span class="op">|</span> {
+                <span class="ident">virtio::vhost::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span>, <span class="ident">vhost::Net</span><span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(
+                    <span class="kw-2">&amp;</span><span class="ident">vhost_net_device_path</span>,
+                    <span class="ident">features</span>,
+                    <span class="ident">host_ip</span>,
+                    <span class="ident">netmask</span>,
+                    <span class="ident">mac_address</span>,
+                )
+                .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost networking&quot;</span>)
+            },
+        )
     } <span class="kw">else</span> {
-        <span class="string">&quot;net_device&quot;</span>
-    };
-
-    <span class="kw">if</span> <span class="ident">cfg</span>.<span class="ident">vhost_net</span> {
-        <span class="ident">create_net_device</span>(<span class="ident">cfg</span>, <span class="ident">policy</span>, <span class="op">|</span><span class="ident">features</span>, <span class="ident">_vq_pairs</span><span class="op">|</span> {
-            <span class="ident">virtio::vhost::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span>, <span class="ident">vhost::Net</span><span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(
-                <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">vhost_net_device_path</span>,
-                <span class="ident">features</span>,
-                <span class="ident">host_ip</span>,
-                <span class="ident">netmask</span>,
-                <span class="ident">mac_address</span>,
-            )
-            .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost networking&quot;</span>)
-        })
-    } <span class="kw">else</span> {
-        <span class="ident">create_net_device</span>(<span class="ident">cfg</span>, <span class="ident">policy</span>, <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
-            <span class="ident">virtio::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">features</span>, <span class="ident">host_ip</span>, <span class="ident">netmask</span>, <span class="ident">mac_address</span>, <span class="ident">vq_pairs</span>)
-                .<span class="ident">context</span>(<span class="string">&quot;failed to create virtio network device&quot;</span>)
-        })
+        <span class="ident">create_net_device</span>(
+            <span class="ident">protected_vm</span>,
+            <span class="ident">jail_config</span>,
+            <span class="ident">vq_pairs</span>,
+            <span class="ident">vcpu_count</span>,
+            <span class="string">&quot;net_device&quot;</span>,
+            <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
+                <span class="ident">virtio::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">features</span>, <span class="ident">host_ip</span>, <span class="ident">netmask</span>, <span class="ident">mac_address</span>, <span class="ident">vq_pairs</span>)
+                    .<span class="ident">context</span>(<span class="string">&quot;failed to create virtio network device&quot;</span>)
+            },
+        )
     }
 }
 
 <span class="doccomment">/// Returns a network device from a file descriptor to a configured TAP interface.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_tap_net_device_from_fd</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">tap_fd</span>: <span class="ident">RawDescriptor</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="ident">create_net_device</span>(<span class="ident">cfg</span>, <span class="string">&quot;net_device&quot;</span>, <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
-        <span class="comment">// Safe because we ensure that we get a unique handle to the fd.</span>
-        <span class="kw">let</span> <span class="ident">tap</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-            <span class="ident">Tap::from_raw_descriptor</span>(
-                <span class="ident">validate_raw_descriptor</span>(<span class="ident">tap_fd</span>).<span class="ident">context</span>(<span class="string">&quot;failed to validate tap descriptor&quot;</span>)<span class="question-mark">?</span>,
-            )
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create tap device&quot;</span>)<span class="question-mark">?</span>
-        };
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_tap_net_device_from_fd</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">vq_pairs</span>: <span class="ident">u16</span>,
+    <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="ident">tap_fd</span>: <span class="ident">RawDescriptor</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="ident">create_net_device</span>(
+        <span class="ident">protected_vm</span>,
+        <span class="ident">jail_config</span>,
+        <span class="ident">vq_pairs</span>,
+        <span class="ident">vcpu_count</span>,
+        <span class="string">&quot;net_device&quot;</span>,
+        <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
+            <span class="comment">// Safe because we ensure that we get a unique handle to the fd.</span>
+            <span class="kw">let</span> <span class="ident">tap</span> <span class="op">=</span> <span class="kw">unsafe</span> {
+                <span class="ident">Tap::from_raw_descriptor</span>(
+                    <span class="ident">validate_raw_descriptor</span>(<span class="ident">tap_fd</span>).<span class="ident">context</span>(<span class="string">&quot;failed to validate tap descriptor&quot;</span>)<span class="question-mark">?</span>,
+                )
+                .<span class="ident">context</span>(<span class="string">&quot;failed to create tap device&quot;</span>)<span class="question-mark">?</span>
+            };
 
-        <span class="ident">virtio::Net::from</span>(<span class="ident">features</span>, <span class="ident">tap</span>, <span class="ident">vq_pairs</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create tap net device&quot;</span>)
-    })
+            <span class="ident">virtio::Net::from</span>(<span class="ident">features</span>, <span class="ident">tap</span>, <span class="ident">vq_pairs</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create tap net device&quot;</span>)
+        },
+    )
 }
 
 <span class="doccomment">/// Returns a network device created by opening the persistent, configured TAP interface `tap_name`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_tap_net_device_from_name</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">tap_name</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="ident">create_net_device</span>(<span class="ident">cfg</span>, <span class="string">&quot;net_device&quot;</span>, <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
-        <span class="ident">virtio::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="ident">::new_from_name</span>(<span class="ident">features</span>, <span class="ident">tap_name</span>, <span class="ident">vq_pairs</span>)
-            .<span class="ident">context</span>(<span class="string">&quot;failed to create configured virtio network device&quot;</span>)
-    })
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_tap_net_device_from_name</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">vq_pairs</span>: <span class="ident">u16</span>,
+    <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="ident">tap_name</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="ident">create_net_device</span>(
+        <span class="ident">protected_vm</span>,
+        <span class="ident">jail_config</span>,
+        <span class="ident">vq_pairs</span>,
+        <span class="ident">vcpu_count</span>,
+        <span class="string">&quot;net_device&quot;</span>,
+        <span class="op">|</span><span class="ident">features</span>, <span class="ident">vq_pairs</span><span class="op">|</span> {
+            <span class="ident">virtio::Net</span>::<span class="op">&lt;</span><span class="ident">Tap</span><span class="op">&gt;</span><span class="ident">::new_from_name</span>(<span class="ident">features</span>, <span class="ident">tap_name</span>, <span class="ident">vq_pairs</span>)
+                .<span class="ident">context</span>(<span class="string">&quot;failed to create configured virtio network device&quot;</span>)
+        },
+    )
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_net_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserNet::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_net_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserNet::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user net device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1873,8 +2062,11 @@
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_vsock_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserVsock::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_vsock_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserVsock::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user vsock device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1884,10 +2076,13 @@
     })
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_wl_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserWlOption</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_user_wl_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">opt</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserWlOption</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="comment">// The crosvm wl device expects us to connect the tube before it will accept a vhost-user</span>
     <span class="comment">// connection.</span>
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserWl::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">VhostUserWl::new</span>(<span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>), <span class="kw-2">&amp;</span><span class="ident">opt</span>.<span class="ident">socket</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up vhost-user wl device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
@@ -1898,27 +2093,28 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_wayland_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">wayland_socket_paths</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="ident">control_tube</span>: <span class="ident">Tube</span>,
     <span class="ident">resource_bridge</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">wayland_socket_dirs</span> <span class="op">=</span> <span class="ident">cfg</span>
-        .<span class="ident">wayland_socket_paths</span>
+    <span class="kw">let</span> <span class="ident">wayland_socket_dirs</span> <span class="op">=</span> <span class="ident">wayland_socket_paths</span>
         .<span class="ident">iter</span>()
         .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">_name</span>, <span class="ident">path</span>)<span class="op">|</span> <span class="ident">path</span>.<span class="ident">parent</span>())
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>()
         .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;wayland socket path has no parent or file name&quot;</span>))<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>);
+    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>);
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Wl::new</span>(
         <span class="ident">features</span>,
-        <span class="ident">cfg</span>.<span class="ident">wayland_socket_paths</span>.<span class="ident">clone</span>(),
+        <span class="ident">wayland_socket_paths</span>.<span class="ident">clone</span>(),
         <span class="ident">control_tube</span>,
         <span class="ident">resource_bridge</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to create wayland device&quot;</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;wl_device&quot;</span>)<span class="question-mark">?</span> {
+    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;wl_device&quot;</span>)<span class="question-mark">?</span> {
         <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">jail</span>) =&gt; {
             <span class="comment">// Create a tmpfs in the device&#39;s root directory so that we can bind mount the wayland</span>
             <span class="comment">// socket directory into it. The size=67108864 is size=64*1024*1024 or size=64MB.</span>
@@ -1953,11 +2149,12 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_video_device</span>(
     <span class="ident">backend</span>: <span class="ident">VideoBackendType</span>,
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">typ</span>: <span class="ident">devices::virtio::VideoDeviceType</span>,
     <span class="ident">resource_bridge</span>: <span class="ident">Tube</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;video_device&quot;</span>)<span class="question-mark">?</span> {
+    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;video_device&quot;</span>)<span class="question-mark">?</span> {
         <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">jail</span>) =&gt; {
             <span class="kw">match</span> <span class="ident">typ</span> {
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>)]</span>
@@ -2017,7 +2214,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">devices::virtio::VideoDevice::new</span>(
-            <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+            <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
             <span class="ident">typ</span>,
             <span class="ident">backend</span>,
             <span class="prelude-val">Some</span>(<span class="ident">resource_bridge</span>),
@@ -2031,27 +2228,39 @@
     <span class="ident">backend</span>: <span class="ident">VideoBackendType</span>,
     <span class="ident">devs</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtioDeviceStub</span><span class="op">&gt;</span>,
     <span class="ident">video_tube</span>: <span class="ident">Tube</span>,
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">typ</span>: <span class="ident">devices::virtio::VideoDeviceType</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-    <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_video_device</span>(<span class="ident">backend</span>, <span class="ident">cfg</span>, <span class="ident">typ</span>, <span class="ident">video_tube</span>)<span class="question-mark">?</span>);
+    <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_video_device</span>(
+        <span class="ident">backend</span>,
+        <span class="ident">protected_vm</span>,
+        <span class="ident">jail_config</span>,
+        <span class="ident">typ</span>,
+        <span class="ident">video_tube</span>,
+    )<span class="question-mark">?</span>);
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_vsock_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">vhost_config</span>: <span class="kw-2">&amp;</span><span class="ident">VhostVsockConfig</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>);
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vhost_vsock_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">vhost_config</span>: <span class="kw-2">&amp;</span><span class="ident">VhostVsockConfig</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>);
 
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::vhost::Vsock::new</span>(<span class="ident">features</span>, <span class="ident">vhost_config</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to set up virtual socket device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vhost_vsock_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vhost_vsock_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_fs_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">uid_map</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">gid_map</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
@@ -2061,7 +2270,7 @@
 ) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">max_open_files</span> <span class="op">=</span>
         <span class="ident">base::get_max_open_files</span>().<span class="ident">context</span>(<span class="string">&quot;failed to get max number of open files&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">j</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span> {
+    <span class="kw">let</span> <span class="ident">j</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="ident">jail_config</span> {
         <span class="kw">let</span> <span class="ident">seccomp_policy</span> <span class="op">=</span> <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span>.<span class="ident">join</span>(<span class="string">&quot;fs_device&quot;</span>);
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">SandboxConfig</span> {
             <span class="ident">limit_caps</span>: <span class="bool-val">false</span>,
@@ -2078,7 +2287,7 @@
         <span class="ident">create_base_minijail</span>(<span class="ident">src</span>, <span class="prelude-val">Some</span>(<span class="ident">max_open_files</span>), <span class="prelude-val">None</span>)<span class="question-mark">?</span>
     };
 
-    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>);
+    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>);
     <span class="comment">// TODO(chirantan): Use more than one worker once the kernel driver has been fixed to not panic</span>
     <span class="comment">// when num_queues &gt; 1.</span>
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::fs::Fs::new</span>(<span class="ident">features</span>, <span class="ident">tag</span>, <span class="number">1</span>, <span class="ident">fs_cfg</span>, <span class="ident">device_tube</span>)
@@ -2091,7 +2300,8 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_9p_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">uid_map</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">gid_map</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
@@ -2100,7 +2310,7 @@
 ) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">max_open_files</span> <span class="op">=</span>
         <span class="ident">base::get_max_open_files</span>().<span class="ident">context</span>(<span class="string">&quot;failed to get max number of open files&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> (<span class="ident">jail</span>, <span class="ident">root</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span> {
+    <span class="kw">let</span> (<span class="ident">jail</span>, <span class="ident">root</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">jail_config</span>) <span class="op">=</span> <span class="ident">jail_config</span> {
         <span class="kw">let</span> <span class="ident">seccomp_policy</span> <span class="op">=</span> <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span>.<span class="ident">join</span>(<span class="string">&quot;9p_device&quot;</span>);
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">SandboxConfig</span> {
             <span class="ident">limit_caps</span>: <span class="bool-val">false</span>,
@@ -2124,7 +2334,7 @@
         (<span class="prelude-val">None</span>, <span class="ident">src</span>)
     };
 
-    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>);
+    <span class="kw">let</span> <span class="ident">features</span> <span class="op">=</span> <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>);
     <span class="ident">p9_cfg</span>.<span class="ident">root</span> <span class="op">=</span> <span class="ident">root</span>.<span class="ident">into</span>();
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::P9::new</span>(<span class="ident">features</span>, <span class="ident">tag</span>, <span class="ident">p9_cfg</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create 9p device&quot;</span>)<span class="question-mark">?</span>;
 
@@ -2135,7 +2345,8 @@
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_pmem_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">vm</span>: <span class="kw-2">&amp;mut</span> <span class="kw">impl</span> <span class="ident">Vm</span>,
     <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
     <span class="ident">disk</span>: <span class="kw-2">&amp;</span><span class="ident">DiskOption</span>,
@@ -2227,7 +2438,7 @@
         .<span class="ident">context</span>(<span class="string">&quot;failed to add pmem device memory&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Pmem::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="ident">fd</span>,
         <span class="ident">GuestAddress</span>(<span class="ident">mapping_address</span>),
         <span class="ident">slot</span>,
@@ -2238,12 +2449,13 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>) <span class="kw">as</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">VirtioDevice</span><span class="op">&gt;</span>,
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;pmem_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;pmem_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_iommu_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">iova_max_addr</span>: <span class="ident">u64</span>,
     <span class="ident">endpoints</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MemoryMapperTrait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">hp_endpoints_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeInclusive</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -2252,7 +2464,7 @@
     <span class="ident">iommu_device_tube</span>: <span class="ident">Tube</span>,
 ) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Iommu::new</span>(
-        <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>),
+        <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>),
         <span class="ident">endpoints</span>,
         <span class="ident">iova_max_addr</span>,
         <span class="ident">hp_endpoints_ranges</span>,
@@ -2264,7 +2476,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;iommu_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;iommu_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
@@ -2282,14 +2494,18 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_console_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>, <span class="ident">param</span>: <span class="kw-2">&amp;</span><span class="ident">SerialParameters</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_console_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="ident">param</span>: <span class="kw-2">&amp;</span><span class="ident">SerialParameters</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">keep_rds</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">param</span>
-        .<span class="ident">create_serial_device</span>::<span class="op">&lt;</span><span class="ident">Console</span><span class="op">&gt;</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="kw-2">&amp;mut</span> <span class="ident">keep_rds</span>)
+        .<span class="ident">create_serial_device</span>::<span class="op">&lt;</span><span class="ident">Console</span><span class="op">&gt;</span>(<span class="ident">protected_vm</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="kw-2">&amp;mut</span> <span class="ident">keep_rds</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to create console device&quot;</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;serial&quot;</span>)<span class="question-mark">?</span> {
+    <span class="kw">let</span> <span class="ident">jail</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;serial_device&quot;</span>)<span class="question-mark">?</span> {
         <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">jail</span>) =&gt; {
             <span class="comment">// Create a tmpfs in the device&#39;s root directory so that we can bind mount the</span>
             <span class="comment">// log socket directory into it.</span>
@@ -2318,18 +2534,22 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_sound_device</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_sound</span>(<span class="ident">path</span>, <span class="ident">virtio::base_features</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>))
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_sound_device</span>(
+    <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::new_sound</span>(<span class="ident">path</span>, <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>))
         .<span class="ident">context</span>(<span class="string">&quot;failed to create sound device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
-        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vios_audio_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">jail</span>: <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vios_audio_device&quot;</span>)<span class="question-mark">?</span>,
     })
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vfio_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">vm</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">Vm</span>,
     <span class="ident">resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
     <span class="ident">control_tubes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TaggedControlTube</span><span class="op">&gt;</span>,
@@ -2407,14 +2627,14 @@
     } <span class="kw">else</span> {
         <span class="prelude-val">Ok</span>((
             <span class="ident">vfio_pci_device</span>,
-            <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vfio_device&quot;</span>)<span class="question-mark">?</span>,
+            <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vfio_device&quot;</span>)<span class="question-mark">?</span>,
             <span class="ident">viommu_mapper</span>,
         ))
     }
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vfio_platform_device</span>(
-    <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
     <span class="ident">vm</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">Vm</span>,
     <span class="ident">_resources</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SystemAllocator</span>,
     <span class="ident">control_tubes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TaggedControlTube</span><span class="op">&gt;</span>,
@@ -2440,7 +2660,7 @@
 
     <span class="prelude-val">Ok</span>((
         <span class="ident">vfio_plat_dev</span>,
-        <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vfio_platform_device&quot;</span>)<span class="question-mark">?</span>,
+        <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vfio_platform_device&quot;</span>)<span class="question-mark">?</span>,
     ))
 }
 

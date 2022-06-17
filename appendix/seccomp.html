@@ -143,6 +143,8 @@ and each architecture has slightly different naming for similar syscalls. The Ch
 useful
 <a href="https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md">listing of syscalls</a>.</p>
 <h2 id="writing-a-policy-for-crosvm"><a class="header" href="#writing-a-policy-for-crosvm">Writing a Policy for crosvm</a></h2>
+<p>The detailed rules for naming policy files can be found in
+<a href="https://chromium.googlesource.com/chromiumos/platform/crosvm/+/refs/heads/main/seccomp/README.md">seccomp/README.md</a></p>
 <p>Most policy files will include the <code>common_device.policy</code> from a given architecture using this
 directive near the top:</p>
 <pre><code>@include /usr/share/policy/crosvm/common_device.policy
