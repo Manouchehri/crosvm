@@ -1924,6 +1924,7 @@
 <span id="1923">1923</span>
 <span id="1924">1924</span>
 <span id="1925">1925</span>
+<span id="1926">1926</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3829,6 +3830,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">ignore</span>]</span> <span class="comment">// TODO(b/236253615): Fix and re-enable this test.</span>
     <span class="kw">fn</span> <span class="ident">end_addr_before_32bits</span>() {
         <span class="ident">setup</span>();
         <span class="comment">// On volteer, type16 (coreboot) region is at 0x00000000769f3000-0x0000000076ffffff.</span>
