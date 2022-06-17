@@ -333,7 +333,7 @@
                     <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">poll_ctx</span>.<span class="ident">wait</span>() {
                         <span class="prelude-val">Ok</span>(<span class="ident">events</span>) =&gt; <span class="ident">events</span>,
                         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                            <span class="macro">error!</span>(<span class="string">&quot;cannot poll {:?}&quot;</span>, <span class="ident">e</span>);
+                            <span class="macro">error!</span>(<span class="string">&quot;cannot wait on events {:?}&quot;</span>, <span class="ident">e</span>);
                             <span class="ident">fail_handle</span>.<span class="ident">fail</span>();
                             <span class="kw">return</span>;
                         }
@@ -413,7 +413,7 @@
     <span class="doccomment">/// Removes event for this `descriptor`. This function returns false if it fails.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// EventLoop does not guarantee all events for `descriptor` is handled.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_event_for_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_event_for_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">fail_handle</span>.<span class="ident">failed</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::EventLoopAlreadyFailed</span>);
         }

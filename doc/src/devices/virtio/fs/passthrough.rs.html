@@ -2604,6 +2604,7 @@
 <span id="2603">2603</span>
 <span id="2604">2604</span>
 <span id="2605">2605</span>
+<span id="2606">2606</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2638,6 +2639,7 @@
 };
 <span class="kw">use</span> <span class="ident">fuse::sys::WRITE_KILL_PRIV</span>;
 <span class="kw">use</span> <span class="ident">fuse::Mapper</span>;
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>)]</span>
@@ -3007,7 +3009,7 @@
 <span class="doccomment">/// The caching policy that the file system should report to the FUSE client. By default the FUSE</span>
 <span class="doccomment">/// protocol uses close-to-open consistency. This means that any cached contents of the file are</span>
 <span class="doccomment">/// invalidated the next time that file is opened.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">CachePolicy</span> {
     <span class="doccomment">/// The client should never cache file data and all I/O should be directly forwarded to the</span>
     <span class="doccomment">/// server. This policy must be selected when file contents may change without the knowledge of</span>
@@ -3045,7 +3047,7 @@
 }
 
 <span class="doccomment">/// Options that configure the behavior of the file system.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
     <span class="doccomment">/// How long the FUSE client should consider directory entries to be valid. If the contents of a</span>
     <span class="doccomment">/// directory can only be modified by the FUSE client (i.e., the file system has exclusive</span>

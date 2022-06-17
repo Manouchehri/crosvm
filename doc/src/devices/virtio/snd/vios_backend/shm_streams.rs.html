@@ -370,6 +370,7 @@
 <span id="369">369</span>
 <span id="370">370</span>
 <span id="371">371</span>
+<span id="372">372</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -390,13 +391,14 @@
 <span class="kw">use</span> <span class="ident">audio_streams</span>::{<span class="ident">BoxError</span>, <span class="ident">SampleFormat</span>, <span class="ident">StreamDirection</span>, <span class="ident">StreamEffect</span>};
 
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">SharedMemory</span>, <span class="ident">SharedMemoryUnix</span>,
+    <span class="ident">error</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SharedMemory</span>,
+    <span class="ident">SharedMemoryUnix</span>,
 };
 <span class="kw">use</span> <span class="ident">data_model::VolatileMemory</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
-<span class="kw">use</span> <span class="ident">std::os::unix::io</span>::{<span class="ident">FromRawFd</span>, <span class="ident">RawFd</span>};
+<span class="kw">use</span> <span class="ident">std::os::unix::io::FromRawFd</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">std::time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
@@ -543,7 +545,7 @@
     <span class="doccomment">/// Returns any open file descriptors needed by the implementation.</span>
     <span class="doccomment">/// This list helps users of the ShmStreamSource enter Linux jails without</span>
     <span class="doccomment">/// closing needed file descriptors.</span>
-    <span class="kw">fn</span> <span class="ident">keep_fds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawFd</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">keep_fds</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">vios_client</span>.<span class="ident">keep_fds</span>()
     }
 }

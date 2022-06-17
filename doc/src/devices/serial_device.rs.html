@@ -335,6 +335,16 @@
 <span id="334">334</span>
 <span id="335">335</span>
 <span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -453,7 +463,7 @@
     <span class="number">0xe9</span>
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Deserialize</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">deny_unknown_fields</span>, <span class="ident">default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SerialParameters</span> {
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;type&quot;</span>)]</span>
@@ -585,7 +595,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">type_</span>, <span class="ident">SerialType::Syslog</span>);
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
         <span class="kw">let</span> <span class="ident">opt</span> <span class="op">=</span> <span class="string">&quot;type=unix&quot;</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">window</span>)]</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
         <span class="kw">let</span> <span class="ident">opt</span> <span class="op">=</span> <span class="string">&quot;type=namedpipe&quot;</span>;
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="ident">opt</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">params</span>.<span class="ident">type_</span>, <span class="ident">SerialType::SystemSerialType</span>);
@@ -642,6 +652,16 @@
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;stdin=false&quot;</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">params</span>.<span class="ident">stdin</span>);
         <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;stdin=foobar&quot;</span>);
+        <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">is_err</span>());
+
+        <span class="comment">// out_timestamp parameter</span>
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;out_timestamp&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">out_timestamp</span>);
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;out_timestamp=true&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">out_timestamp</span>);
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;out_timestamp=false&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">params</span>.<span class="ident">out_timestamp</span>);
+        <span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">from_serial_arg</span>(<span class="string">&quot;out_timestamp=foobar&quot;</span>);
         <span class="macro">assert!</span>(<span class="ident">params</span>.<span class="ident">is_err</span>());
 
         <span class="comment">// debugcon port parameter</span>

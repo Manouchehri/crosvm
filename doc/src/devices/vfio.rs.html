@@ -1997,7 +1997,7 @@
             },
         };
 
-        <span class="comment">// Safe as we are the owner of vfio_dev_fd and vfio_dev_attr which are valid value,</span>
+        <span class="comment">// Safe as we are the owner of vfio_dev_descriptor and vfio_dev_attr which are valid value,</span>
         <span class="comment">// and we verify the return value.</span>
         <span class="kw">if</span> <span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">ioctl_with_ref</span>(
@@ -2022,7 +2022,7 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VfioError::GroupGetDeviceFD</span>(<span class="ident">get_error</span>()));
         }
 
-        <span class="comment">// Safe as ret is valid FD</span>
+        <span class="comment">// Safe as ret is valid descriptor</span>
         <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="ident">File::from_raw_descriptor</span>(<span class="ident">ret</span>) })
     }
 

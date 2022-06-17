@@ -260,7 +260,9 @@
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_with_mut_ref</span>, <span class="ident">ioctl_with_ptr</span>, <span class="ident">ioctl_with_ref</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">ioctl_ior_nr</span>, <span class="ident">ioctl_iow_nr</span>, <span class="ident">ioctl_with_mut_ref</span>, <span class="ident">ioctl_with_ptr</span>, <span class="ident">ioctl_with_ref</span>, <span class="ident">AsRawDescriptor</span>,
+};
 <span class="kw">use</span> <span class="ident">data_model::Le32</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::constants</span>::<span class="kw-2">*</span>;
@@ -273,8 +275,6 @@
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::os::raw::c_uint</span>;
 <span class="kw">use</span> <span class="ident">std::ptr::null</span>;
-
-<span class="kw">use</span> <span class="ident">base::AsRawDescriptor</span>;
 
 <span class="kw">const</span> <span class="ident">EVDEV</span>: <span class="ident">c_uint</span> <span class="op">=</span> <span class="number">69</span>;
 

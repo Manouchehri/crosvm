@@ -2639,7 +2639,7 @@
         <span class="self">self</span>.<span class="ident">guest_shared_memory</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">shm</span><span class="op">|</span> <span class="ident">shm</span>.<span class="ident">size</span>())
     }
 
-    <span class="comment">// The FD that gets sent if this VFD is sent over a socket.</span>
+    <span class="comment">// The descriptor that gets sent if this VFD is sent over a socket.</span>
     <span class="kw">fn</span> <span class="ident">send_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">guest_shared_memory</span>
             .<span class="ident">as_ref</span>()
@@ -2950,7 +2950,7 @@
         <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">wait_ctx</span>.<span class="ident">wait_timeout</span>(<span class="ident">Duration::from_secs</span>(<span class="number">0</span>)) {
             <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
             <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;failed polling for vfd evens: {}&quot;</span>, <span class="ident">e</span>);
+                <span class="macro">error!</span>(<span class="string">&quot;failed waiting for vfd evens: {}&quot;</span>, <span class="ident">e</span>);
                 <span class="kw">return</span>;
             }
         };
@@ -3562,7 +3562,7 @@
             <span class="kw">let</span> <span class="ident">events</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">wait_ctx</span>.<span class="ident">wait</span>() {
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                    <span class="macro">error!</span>(<span class="string">&quot;failed polling for events: {}&quot;</span>, <span class="ident">e</span>);
+                    <span class="macro">error!</span>(<span class="string">&quot;failed waiting for events: {}&quot;</span>, <span class="ident">e</span>);
                     <span class="kw">break</span>;
                 }
             };
