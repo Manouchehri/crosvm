@@ -1008,6 +1008,15 @@
 <span id="1007">1007</span>
 <span id="1008">1008</span>
 <span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1052,12 +1061,18 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>))]</span>
 <span class="kw">use</span> {
     <span class="ident">devices::IrqChipAArch64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>,
-    <span class="ident">hypervisor</span>::{<span class="ident">Hypervisor</span> <span class="kw">as</span> <span class="ident">HypervisorArch</span>, <span class="ident">VcpuAArch64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>, <span class="ident">VmAArch64</span> <span class="kw">as</span> <span class="ident">VmArch</span>},
+    <span class="ident">hypervisor</span>::{
+        <span class="ident">Hypervisor</span> <span class="kw">as</span> <span class="ident">HypervisorArch</span>, <span class="ident">VcpuAArch64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>, <span class="ident">VcpuInitAArch64</span> <span class="kw">as</span> <span class="ident">VcpuInitArch</span>,
+        <span class="ident">VmAArch64</span> <span class="kw">as</span> <span class="ident">VmArch</span>,
+    },
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> {
     <span class="ident">devices::IrqChipX86_64</span> <span class="kw">as</span> <span class="ident">IrqChipArch</span>,
-    <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span> <span class="kw">as</span> <span class="ident">HypervisorArch</span>, <span class="ident">VcpuX86_64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>, <span class="ident">VmX86_64</span> <span class="kw">as</span> <span class="ident">VmArch</span>},
+    <span class="ident">hypervisor</span>::{
+        <span class="ident">HypervisorX86_64</span> <span class="kw">as</span> <span class="ident">HypervisorArch</span>, <span class="ident">VcpuInitX86_64</span> <span class="kw">as</span> <span class="ident">VcpuInitArch</span>, <span class="ident">VcpuX86_64</span> <span class="kw">as</span> <span class="ident">VcpuArch</span>,
+        <span class="ident">VmX86_64</span> <span class="kw">as</span> <span class="ident">VmArch</span>,
+    },
     <span class="ident">resources::AddressRange</span>,
 };
 
@@ -1152,6 +1167,7 @@
     <span class="kw">pub</span> <span class="ident">suspend_evt</span>: <span class="ident">Event</span>,
     <span class="kw">pub</span> <span class="ident">vcpu_affinity</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VcpuAffinity</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">vcpu_count</span>: <span class="ident">usize</span>,
+    <span class="kw">pub</span> <span class="ident">vcpu_init</span>: <span class="ident">VcpuInitArch</span>,
     <span class="doccomment">/// If vcpus is None, then it&#39;s the responsibility of the vcpu thread to create vcpus.</span>
     <span class="doccomment">/// If it&#39;s Some, then `build_vm` already created the vcpus.</span>
     <span class="kw">pub</span> <span class="ident">vcpus</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vcpu</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -1233,6 +1249,7 @@
     <span class="doccomment">/// * `hypervisor` - The `Hypervisor` that created the vcpu.</span>
     <span class="doccomment">/// * `irq_chip` - The `IrqChip` associated with this vm.</span>
     <span class="doccomment">/// * `vcpu` - The VCPU object to configure.</span>
+    <span class="doccomment">/// * `vcpu_init` - The data required to initialize VCPU registers and other state.</span>
     <span class="doccomment">/// * `vcpu_id` - The id of the given `vcpu`.</span>
     <span class="doccomment">/// * `num_cpus` - Number of virtual CPUs the guest will have.</span>
     <span class="doccomment">/// * `has_bios` - Whether the `VmImage` is a `Bios` image</span>
@@ -1245,6 +1262,7 @@
         <span class="ident">hypervisor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">HypervisorArch</span>,
         <span class="ident">irq_chip</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">IrqChipArch</span>,
         <span class="ident">vcpu</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">VcpuArch</span>,
+        <span class="ident">vcpu_init</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuInitArch</span>,
         <span class="ident">vcpu_id</span>: <span class="ident">usize</span>,
         <span class="ident">num_cpus</span>: <span class="ident">usize</span>,
         <span class="ident">has_bios</span>: <span class="ident">bool</span>,

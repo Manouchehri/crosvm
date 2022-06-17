@@ -749,6 +749,8 @@
 <span id="748">748</span>
 <span id="749">749</span>
 <span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -773,7 +775,7 @@
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{
     <span class="ident">DeviceKind</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuAArch64</span>, <span class="ident">VcpuFeature</span>,
-    <span class="ident">VcpuRegAArch64</span>, <span class="ident">Vm</span>, <span class="ident">VmAArch64</span>,
+    <span class="ident">VcpuInitAArch64</span>, <span class="ident">VcpuRegAArch64</span>, <span class="ident">Vm</span>, <span class="ident">VmAArch64</span>,
 };
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
@@ -1279,6 +1281,7 @@
             <span class="ident">vm</span>,
             <span class="ident">vcpu_count</span>,
             <span class="ident">vcpus</span>: <span class="prelude-val">Some</span>(<span class="ident">vcpus</span>),
+            <span class="ident">vcpu_init</span>: <span class="ident">VcpuInitAArch64</span> {},
             <span class="ident">vcpu_affinity</span>: <span class="ident">components</span>.<span class="ident">vcpu_affinity</span>,
             <span class="ident">no_smt</span>: <span class="ident">components</span>.<span class="ident">no_smt</span>,
             <span class="ident">irq_chip</span>: <span class="ident">irq_chip</span>.<span class="ident">try_box_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneIrqChip</span>)<span class="question-mark">?</span>,
@@ -1302,6 +1305,7 @@
         <span class="ident">_hypervisor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Hypervisor</span>,
         <span class="ident">_irq_chip</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">IrqChipAArch64</span>,
         <span class="ident">_vcpu</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">VcpuAArch64</span>,
+        <span class="ident">_vcpu_init</span>: <span class="kw-2">&amp;</span><span class="ident">VcpuInitAArch64</span>,
         <span class="ident">_vcpu_id</span>: <span class="ident">usize</span>,
         <span class="ident">_num_cpus</span>: <span class="ident">usize</span>,
         <span class="ident">_has_bios</span>: <span class="ident">bool</span>,

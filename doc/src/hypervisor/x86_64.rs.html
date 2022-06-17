@@ -650,6 +650,10 @@
 <span id="649">649</span>
 <span id="650">650</span>
 <span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -821,6 +825,10 @@
         <span class="number">36</span>
     }
 }
+
+<span class="doccomment">/// Initial state for x86_64 VCPUs.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VcpuInitX86_64</span> {}
 
 <span class="doccomment">/// A CpuId Entry contains supported feature information for the given processor.</span>
 <span class="doccomment">/// This can be modified by the hypervisor to pass additional information to the guest kernel</span>

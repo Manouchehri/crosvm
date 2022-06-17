@@ -2513,6 +2513,7 @@
 <span id="2512">2512</span>
 <span id="2513">2513</span>
 <span id="2514">2514</span>
+<span id="2515">2515</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4434,6 +4435,7 @@
             <span class="ident">cpu_id</span>,
             <span class="ident">vcpu_ids</span>[<span class="ident">cpu_id</span>],
             <span class="ident">vcpu</span>,
+            <span class="ident">linux</span>.<span class="ident">vcpu_init</span>,
             <span class="ident">linux</span>.<span class="ident">vm</span>.<span class="ident">try_clone</span>().<span class="ident">context</span>(<span class="string">&quot;failed to clone vm&quot;</span>)<span class="question-mark">?</span>,
             <span class="ident">linux</span>
                 .<span class="ident">irq_chip</span>
