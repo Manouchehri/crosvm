@@ -324,7 +324,7 @@ passed to crosvm as well.</p>
 # the kernel which partition to use (vda5 in case of ubuntu-20.04).
 cargo run --features=all-linux -- run \
     --disable-sandbox \
-    --rwroot ./rootfs \
+    --rwdisk ./rootfs \
     --initrd ./initrd.img-* \
     -p &quot;root=/dev/vda5&quot; \
     ./vmlinuz-*
@@ -342,7 +342,7 @@ instructions for <a href="running_crosvm/./advanced_usage.html#network-device">n
 <pre><code class="language-bash"># Use the previously configured crosvm_tap device for networking.
 cargo run -- run \
     --disable-sandbox \
-    --rwroot ./rootfs \
+    --rwdisk ./rootfs \
     --initrd ./initrd.img-* \
     --tap-name crosvm_tap \
     -p &quot;root=/dev/vda5&quot; \
@@ -418,7 +418,7 @@ cargo run --features=gpu,x,virgl_renderer -- run \
     --display-window-keyboard \
     --display-window-mouse \
     --tap-name crosvm_tap \
-    --rwroot ./rootfs \
+    --rwdisk ./rootfs \
     --initrd ./initrd.img-* \
     -p &quot;root=/dev/vda5&quot; \
     ./vmlinuz-*
