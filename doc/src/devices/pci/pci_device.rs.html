@@ -742,6 +742,9 @@
 <span id="741">741</span>
 <span id="742">742</span>
 <span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -768,7 +771,9 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::ipc_memory_mapper::IpcMemoryMapper</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::snd::vios_backend::Error</span> <span class="kw">as</span> <span class="ident">VioSError</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">IrqLevelEvent</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>, <span class="ident">IrqLevelEvent</span>};
+
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::PciId</span>;
 
 <span class="attribute">#[<span class="ident">sorted</span>]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
@@ -1054,9 +1059,10 @@
         <span class="ident">PciDevice::debug_label</span>(<span class="self">self</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
         <span class="comment">// Use the PCI ID for PCI devices, which contains the PCI vendor ID and the PCI device ID</span>
-        <span class="ident">PciDevice::read_config_register</span>(<span class="self">self</span>, <span class="ident">PCI_ID_REG</span>)
+        <span class="kw">let</span> <span class="ident">pci_id</span>: <span class="ident">PciId</span> <span class="op">=</span> <span class="ident">PciDevice::read_config_register</span>(<span class="self">self</span>, <span class="ident">PCI_ID_REG</span>).<span class="ident">into</span>();
+        <span class="ident">pci_id</span>.<span class="ident">into</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">info</span>: <span class="ident">BusAccessInfo</span>, <span class="ident">data</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>]) {

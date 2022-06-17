@@ -491,11 +491,15 @@
 <span id="490">490</span>
 <span id="491">491</span>
 <span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">IrqLevelEvent</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">pci::CrosvmDeviceId</span>, <span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>, <span class="ident">IrqLevelEvent</span>};
 <span class="kw">use</span> <span class="ident">acpi_tables</span>::{<span class="ident">aml</span>, <span class="ident">aml::Aml</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">error</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
@@ -893,6 +897,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">GoldfishBattery</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::GoldfishBattery</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;GoldfishBattery&quot;</span>.<span class="ident">to_owned</span>()
     }

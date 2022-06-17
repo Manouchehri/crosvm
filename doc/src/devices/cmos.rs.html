@@ -120,6 +120,10 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -128,7 +132,7 @@
 <span class="kw">use</span> <span class="ident">std::cmp::min</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>;
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">pci::CrosvmDeviceId</span>, <span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>};
 
 <span class="kw">const</span> <span class="ident">INDEX_MASK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x7f</span>;
 <span class="kw">const</span> <span class="ident">INDEX_OFFSET</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0x0</span>;
@@ -169,6 +173,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">Cmos</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::Cmos</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;cmos&quot;</span>.<span class="ident">to_owned</span>()
     }

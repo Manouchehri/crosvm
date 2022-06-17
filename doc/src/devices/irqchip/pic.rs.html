@@ -1156,6 +1156,10 @@
 <span id="1155">1155</span>
 <span id="1156">1156</span>
 <span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1170,8 +1174,8 @@
 <span class="comment">// For the purposes of both using more descriptive terms and avoiding terms with lots of charged</span>
 <span class="comment">// emotional context, this file refers to them instead as &quot;primary&quot; and &quot;secondary&quot; PICs.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::bus::BusAccessInfo</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::BusDevice</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">bus::BusAccessInfo</span>, <span class="ident">pci::CrosvmDeviceId</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">warn</span>, <span class="ident">Event</span>};
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">PicInitState</span>, <span class="ident">PicSelect</span>, <span class="ident">PicState</span>};
 
@@ -1242,6 +1246,10 @@
 <span class="kw">const</span> <span class="ident">OCW3_SPECIAL_MASK_VALUE</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0x20</span>;
 
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">Pic</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::Pic</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;userspace PIC&quot;</span>.<span class="ident">to_string</span>()
     }

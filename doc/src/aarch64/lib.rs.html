@@ -739,6 +739,16 @@
 <span id="738">738</span>
 <span id="739">739</span>
 <span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -758,7 +768,8 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Event</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">SendTube</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices</span>::{
-    <span class="ident">Bus</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusError</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipAArch64</span>, <span class="ident">PciAddress</span>, <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>,
+    <span class="ident">Bus</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusError</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipAArch64</span>, <span class="ident">IrqEventSource</span>, <span class="ident">PciAddress</span>,
+    <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>, <span class="ident">Serial</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{
     <span class="ident">DeviceKind</span>, <span class="ident">Hypervisor</span>, <span class="ident">HypervisorCap</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuAArch64</span>, <span class="ident">VcpuFeature</span>,
@@ -1170,11 +1181,16 @@
         )
         .<span class="ident">map_err</span>(<span class="ident">Error::CreateSerialDevices</span>)<span class="question-mark">?</span>;
 
+        <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">Serial::device_id</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="ident">Serial::debug_label</span>(),
+        };
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_SERIAL_1_3_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_1_3</span>)
+            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_SERIAL_1_3_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_1_3</span>, <span class="ident">source</span>.<span class="ident">clone</span>())
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_SERIAL_2_4_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_2_4</span>)
+            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_SERIAL_2_4_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_2_4</span>, <span class="ident">source</span>)
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
 
         <span class="ident">mmio_bus</span>
@@ -1363,13 +1379,17 @@
     <span class="doccomment">/// * `bus` - The bus to add devices to.</span>
     <span class="kw">fn</span> <span class="ident">add_arch_devs</span>(<span class="ident">irq_chip</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">IrqChip</span>, <span class="ident">bus</span>: <span class="kw-2">&amp;</span><span class="ident">Bus</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">rtc_evt</span> <span class="op">=</span> <span class="ident">devices::IrqEdgeEvent::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">rtc</span> <span class="op">=</span> <span class="ident">devices::pl030::Pl030::new</span>(<span class="ident">rtc_evt</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)<span class="question-mark">?</span>);
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_RTC_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">rtc_evt</span>)
+            .<span class="ident">register_edge_irq_event</span>(<span class="ident">AARCH64_RTC_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">rtc_evt</span>, <span class="ident">IrqEventSource::from_device</span>(<span class="kw-2">&amp;</span><span class="ident">rtc</span>))
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">rtc</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">devices::pl030::Pl030::new</span>(<span class="ident">rtc_evt</span>)));
-        <span class="ident">bus</span>.<span class="ident">insert</span>(<span class="ident">rtc</span>, <span class="ident">AARCH64_RTC_ADDR</span>, <span class="ident">AARCH64_RTC_SIZE</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;failed to add rtc device&quot;</span>);
+        <span class="ident">bus</span>.<span class="ident">insert</span>(
+            <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">rtc</span>)),
+            <span class="ident">AARCH64_RTC_ADDR</span>,
+            <span class="ident">AARCH64_RTC_SIZE</span>,
+        )
+        .<span class="ident">expect</span>(<span class="string">&quot;failed to add rtc device&quot;</span>);
 
         <span class="prelude-val">Ok</span>(())
     }

@@ -47,13 +47,17 @@
 <span id="46">46</span>
 <span id="47">47</span>
 <span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">SendTube</span>, <span class="ident">VmEventType</span>};
 
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">pci::CrosvmDeviceId</span>, <span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>};
 
 <span class="doccomment">/// A i8042 PS/2 controller that emulates just enough to shutdown the machine.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">I8042Device</span> {
@@ -70,6 +74,10 @@
 <span class="comment">// i8042 device is mapped I/O address 0x61. We partially implement two 8-bit</span>
 <span class="comment">// registers: port 0x61 (I8042_PORT_B_REG), and port 0x64 (I8042_COMMAND_REG).</span>
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">I8042Device</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::I8042</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;i8042&quot;</span>.<span class="ident">to_owned</span>()
     }

@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["IrqChipX86_64",""]]});
+initSidebarItems({"constant":[["EMPTY_ROUTE",""]],"struct":[["DelayedIoApicIrqEvents",""],["Routes","A container for x86 IrqRoutes, grouped by GSI."]],"trait":[["IrqChipX86_64",""]]});

@@ -1180,6 +1180,35 @@
 <span id="1179">1179</span>
 <span id="1180">1180</span>
 <span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1206,7 +1235,10 @@
     <span class="ident">Ioapic</span>, <span class="ident">IrqEvent</span>, <span class="ident">IrqEventIndex</span>, <span class="ident">Pic</span>, <span class="ident">VcpuRunState</span>, <span class="ident">IOAPIC_BASE_ADDRESS</span>,
     <span class="ident">IOAPIC_MEM_LENGTH_BYTES</span>,
 };
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Bus</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipCap</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">IrqEdgeEvent</span>, <span class="ident">IrqLevelEvent</span>, <span class="ident">Pit</span>, <span class="ident">PitError</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">Bus</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipCap</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">IrqEdgeEvent</span>, <span class="ident">IrqEventSource</span>, <span class="ident">IrqLevelEvent</span>, <span class="ident">Pit</span>,
+    <span class="ident">PitError</span>,
+};
 
 <span class="doccomment">/// PIT tube 0 timer is connected to IRQ 0</span>
 <span class="kw">const</span> <span class="ident">PIT_CHANNEL0_IRQ</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0</span>;
@@ -1386,26 +1418,24 @@
         <span class="kw">let</span> <span class="ident">ioapic_pins</span> <span class="op">=</span> <span class="ident">ioapic_pins</span>.<span class="ident">unwrap_or</span>(<span class="ident">vm</span>.<span class="ident">get_ioapic_num_pins</span>()<span class="question-mark">?</span>);
         <span class="ident">vm</span>.<span class="ident">enable_split_irqchip</span>(<span class="ident">ioapic_pins</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">pit_evt</span> <span class="op">=</span> <span class="ident">IrqEdgeEvent::new</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">pit</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(
-            <span class="ident">Pit::new</span>(
-                <span class="ident">pit_evt</span>.<span class="ident">get_trigger</span>().<span class="ident">try_clone</span>()<span class="question-mark">?</span>,
-                <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Clock::new</span>())),
-            )
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">e</span> {
+        <span class="kw">let</span> <span class="ident">pit</span> <span class="op">=</span> <span class="ident">Pit::new</span>(<span class="ident">pit_evt</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>, <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Clock::new</span>()))).<span class="ident">map_err</span>(
+            <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">e</span> {
                 <span class="ident">PitError::CloneEvent</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
                 <span class="ident">PitError::CreateEvent</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
                 <span class="ident">PitError::CreateWaitContext</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
                 <span class="ident">PitError::WaitError</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
                 <span class="ident">PitError::TimerCreateError</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
                 <span class="ident">PitError::SpawnThread</span>(<span class="kw">_</span>) =&gt; <span class="ident">Error::new</span>(<span class="ident">libc::EIO</span>),
-            })<span class="question-mark">?</span>,
-        ));
+            },
+        )<span class="question-mark">?</span>;
+
+        <span class="kw">let</span> <span class="ident">pit_event_source</span> <span class="op">=</span> <span class="ident">IrqEventSource::from_device</span>(<span class="kw-2">&amp;</span><span class="ident">pit</span>);
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chip</span> <span class="op">=</span> <span class="ident">KvmSplitIrqChip</span> {
             <span class="ident">vm</span>,
             <span class="ident">vcpus</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>((<span class="number">0</span>..<span class="ident">num_vcpus</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">None</span>).<span class="ident">collect</span>())),
             <span class="ident">routes</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Vec::new</span>())),
-            <span class="ident">pit</span>,
+            <span class="ident">pit</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">pit</span>)),
             <span class="ident">pic</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Pic::new</span>())),
             <span class="ident">ioapic</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">Ioapic::new</span>(<span class="ident">irq_tube</span>, <span class="ident">ioapic_pins</span>)<span class="question-mark">?</span>)),
             <span class="ident">ioapic_pins</span>,
@@ -1431,7 +1461,7 @@
         <span class="comment">// Set the routes so they get sent to KVM</span>
         <span class="ident">chip</span>.<span class="ident">set_irq_routes</span>(<span class="kw-2">&amp;</span><span class="ident">routes</span>)<span class="question-mark">?</span>;
 
-        <span class="ident">chip</span>.<span class="ident">register_edge_irq_event</span>(<span class="ident">PIT_CHANNEL0_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">pit_evt</span>)<span class="question-mark">?</span>;
+        <span class="ident">chip</span>.<span class="ident">register_edge_irq_event</span>(<span class="ident">PIT_CHANNEL0_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">pit_evt</span>, <span class="ident">pit_event_source</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">chip</span>)
     }
 }
@@ -1490,12 +1520,14 @@
         <span class="ident">irq</span>: <span class="ident">u32</span>,
         <span class="ident">irq_event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span>,
         <span class="ident">resample_event</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Event</span><span class="op">&gt;</span>,
+        <span class="ident">source</span>: <span class="ident">IrqEventSource</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqEventIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">irq</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">ioapic_pins</span> <span class="kw">as</span> <span class="ident">u32</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">IrqEvent</span> {
                 <span class="ident">gsi</span>: <span class="ident">irq</span>,
                 <span class="ident">event</span>: <span class="ident">irq_event</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>,
                 <span class="ident">resample_event</span>: <span class="prelude-val">None</span>,
+                <span class="ident">source</span>,
             };
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">resample_event</span>) <span class="op">=</span> <span class="ident">resample_event</span> {
@@ -1577,8 +1609,9 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">irq</span>: <span class="ident">u32</span>,
         <span class="ident">irq_event</span>: <span class="kw-2">&amp;</span><span class="ident">IrqEdgeEvent</span>,
+        <span class="ident">source</span>: <span class="ident">IrqEventSource</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqEventIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">register_irq_event</span>(<span class="ident">irq</span>, <span class="ident">irq_event</span>.<span class="ident">get_trigger</span>(), <span class="prelude-val">None</span>)
+        <span class="self">self</span>.<span class="ident">register_irq_event</span>(<span class="ident">irq</span>, <span class="ident">irq_event</span>.<span class="ident">get_trigger</span>(), <span class="prelude-val">None</span>, <span class="ident">source</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">unregister_edge_irq_event</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irq</span>: <span class="ident">u32</span>, <span class="ident">irq_event</span>: <span class="kw-2">&amp;</span><span class="ident">IrqEdgeEvent</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1589,8 +1622,14 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">irq</span>: <span class="ident">u32</span>,
         <span class="ident">irq_event</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>,
+        <span class="ident">source</span>: <span class="ident">IrqEventSource</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqEventIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">register_irq_event</span>(<span class="ident">irq</span>, <span class="ident">irq_event</span>.<span class="ident">get_trigger</span>(), <span class="prelude-val">Some</span>(<span class="ident">irq_event</span>.<span class="ident">get_resample</span>()))
+        <span class="self">self</span>.<span class="ident">register_irq_event</span>(
+            <span class="ident">irq</span>,
+            <span class="ident">irq_event</span>.<span class="ident">get_trigger</span>(),
+            <span class="prelude-val">Some</span>(<span class="ident">irq_event</span>.<span class="ident">get_resample</span>()),
+            <span class="ident">source</span>,
+        )
     }
 
     <span class="kw">fn</span> <span class="ident">unregister_level_irq_event</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irq</span>: <span class="ident">u32</span>, <span class="ident">irq_event</span>: <span class="kw-2">&amp;</span><span class="ident">IrqLevelEvent</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -1625,11 +1664,11 @@
 
     <span class="doccomment">/// Return a vector of all registered irq numbers and their associated events and event</span>
     <span class="doccomment">/// indices. These should be used by the main thread to wait for irq events.</span>
-    <span class="kw">fn</span> <span class="ident">irq_event_tokens</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">IrqEventIndex</span>, <span class="ident">u32</span>, <span class="ident">Event</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokens</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">IrqEventIndex</span>, <span class="ident">u32</span>, <span class="ident">Event</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="kw">fn</span> <span class="ident">irq_event_tokens</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">IrqEventIndex</span>, <span class="ident">IrqEventSource</span>, <span class="ident">Event</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">vec!</span>[];
         <span class="kw">for</span> (<span class="ident">index</span>, <span class="ident">evt</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">irq_events</span>.<span class="ident">lock</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">evt</span>) <span class="op">=</span> <span class="ident">evt</span> {
-                <span class="ident">tokens</span>.<span class="ident">push</span>((<span class="ident">index</span>, <span class="ident">evt</span>.<span class="ident">gsi</span>, <span class="ident">evt</span>.<span class="ident">event</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>));
+                <span class="ident">tokens</span>.<span class="ident">push</span>((<span class="ident">index</span>, <span class="ident">evt</span>.<span class="ident">source</span>.<span class="ident">clone</span>(), <span class="ident">evt</span>.<span class="ident">event</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>));
             }
         }
         <span class="prelude-val">Ok</span>(<span class="ident">tokens</span>)
@@ -1970,7 +2009,8 @@
     <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::irqchip::tests</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::IrqChip</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::CrosvmDeviceId</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">DeviceId</span>, <span class="ident">IrqChip</span>};
 
     <span class="doccomment">/// Helper function for setting up a KvmKernelIrqChip</span>
     <span class="kw">fn</span> <span class="ident">get_kernel_chip</span>() -&gt; <span class="ident">KvmKernelIrqChip</span> {
@@ -2123,11 +2163,16 @@
 
         <span class="comment">// there should be one token on a fresh split irqchip, for the pit</span>
         <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>.<span class="ident">len</span>(), <span class="number">1</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">0</span>].<span class="number">1</span>, <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">0</span>].<span class="number">1</span>.<span class="ident">device_name</span>, <span class="string">&quot;userspace PIT&quot;</span>);
 
         <span class="comment">// register another irq event</span>
         <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">IrqEdgeEvent::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create event&quot;</span>);
-        <span class="ident">chip</span>.<span class="ident">register_edge_irq_event</span>(<span class="number">6</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>)
+        <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">CrosvmDeviceId::Cmos</span>.<span class="ident">into</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="string">&quot;test&quot;</span>.<span class="ident">into</span>(),
+        };
+        <span class="ident">chip</span>.<span class="ident">register_edge_irq_event</span>(<span class="number">6</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="ident">source</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to register irq event&quot;</span>);
 
         <span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="ident">chip</span>
@@ -2136,8 +2181,11 @@
 
         <span class="comment">// now there should be two tokens</span>
         <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">0</span>].<span class="number">1</span>, <span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">1</span>].<span class="number">1</span>, <span class="number">6</span>);
+        <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">0</span>].<span class="number">1</span>.<span class="ident">device_name</span>, <span class="string">&quot;userspace PIT&quot;</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">tokens</span>[<span class="number">1</span>].<span class="number">1</span>.<span class="ident">device_id</span>,
+            <span class="ident">DeviceId::PlatformDeviceId</span>(<span class="ident">CrosvmDeviceId::Cmos</span>)
+        );
         <span class="macro">assert_eq!</span>(<span class="ident">tokens</span>[<span class="number">1</span>].<span class="number">2</span>, <span class="kw-2">*</span><span class="ident">evt</span>.<span class="ident">get_trigger</span>());
     }
 
@@ -2171,8 +2219,14 @@
 
         <span class="comment">// Set up a level-triggered interrupt line 1</span>
         <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">IrqLevelEvent::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create event&quot;</span>);
+
+        <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">CrosvmDeviceId::Cmos</span>.<span class="ident">into</span>(),
+            <span class="ident">device_name</span>: <span class="string">&quot;test&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+        };
         <span class="kw">let</span> <span class="ident">evt_index</span> <span class="op">=</span> <span class="ident">chip</span>
-            .<span class="ident">register_level_irq_event</span>(<span class="number">1</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>)
+            .<span class="ident">register_level_irq_event</span>(<span class="number">1</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="ident">source</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;failed to register irq event&quot;</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;register_irq_event should not return None&quot;</span>);
 
@@ -2302,12 +2356,16 @@
         )
         .<span class="ident">expect</span>(<span class="string">&quot;failed to create SystemAllocator&quot;</span>);
 
+        <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">CrosvmDeviceId::Cmos</span>.<span class="ident">into</span>(),
+            <span class="ident">device_name</span>: <span class="string">&quot;test&quot;</span>.<span class="ident">into</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+        };
         <span class="comment">// setup an event and a resample event for irq line 1</span>
-        <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create event&quot;</span>);
-        <span class="kw">let</span> <span class="ident">resample_evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create event&quot;</span>);
+        <span class="kw">let</span> <span class="ident">evt</span> <span class="op">=</span> <span class="ident">IrqLevelEvent::new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create event&quot;</span>);
 
-        <span class="ident">chip</span>.<span class="ident">register_irq_event</span>(<span class="number">1</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">resample_evt</span>))
-            .<span class="ident">expect</span>(<span class="string">&quot;failed to register_irq_event&quot;</span>);
+        <span class="ident">chip</span>.<span class="ident">register_level_irq_event</span>(<span class="number">1</span>, <span class="kw-2">&amp;</span><span class="ident">evt</span>, <span class="ident">source</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;failed to register_level_irq_event&quot;</span>);
 
         <span class="comment">// Once we finalize devices, the pic/pit/ioapic should be attached to io and mmio busses</span>
         <span class="ident">chip</span>.<span class="ident">finalize_devices</span>(<span class="kw-2">&amp;mut</span> <span class="ident">resources</span>, <span class="kw-2">&amp;</span><span class="ident">io_bus</span>, <span class="kw-2">&amp;</span><span class="ident">mmio_bus</span>)
@@ -2335,7 +2393,7 @@
 
         <span class="comment">// resample event should not be written to</span>
         <span class="macro">assert_eq!</span>(
-            <span class="ident">resample_evt</span>
+            <span class="ident">evt</span>.<span class="ident">get_resample</span>()
                 .<span class="ident">read_timeout</span>(<span class="ident">std::time::Duration::from_millis</span>(<span class="number">10</span>))
                 .<span class="ident">expect</span>(<span class="string">&quot;failed to read_timeout&quot;</span>),
             <span class="ident">EventReadResult::Timeout</span>
@@ -2354,7 +2412,7 @@
 
         <span class="comment">// resample event should be written to by ioapic</span>
         <span class="macro">assert_eq!</span>(
-            <span class="ident">resample_evt</span>
+            <span class="ident">evt</span>.<span class="ident">get_resample</span>()
                 .<span class="ident">read_timeout</span>(<span class="ident">std::time::Duration::from_millis</span>(<span class="number">10</span>))
                 .<span class="ident">expect</span>(<span class="string">&quot;failed to read_timeout&quot;</span>),
             <span class="ident">EventReadResult::Count</span>(<span class="number">1</span>)

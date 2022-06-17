@@ -136,6 +136,11 @@
 <span id="135">135</span>
 <span id="136">136</span>
 <span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -145,8 +150,9 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">FileSync</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::CrosvmDeviceId</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serial_device::SerialInput</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">SerialDevice</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>, <span class="ident">SerialDevice</span>};
 
 <span class="kw">const</span> <span class="ident">BOCHS_DEBUGCON_READBACK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0xe9</span>;
 
@@ -169,6 +175,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">Debugcon</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::DebugConsole</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;debugcon&quot;</span>.<span class="ident">to_owned</span>()
     }

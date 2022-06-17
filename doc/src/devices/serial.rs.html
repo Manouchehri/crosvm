@@ -467,6 +467,21 @@
 <span id="466">466</span>
 <span id="467">467</span>
 <span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -482,8 +497,9 @@
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::bus::BusAccessInfo</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::CrosvmDeviceId</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::serial_device::SerialInput</span>;
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusDevice</span>, <span class="ident">SerialDevice</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>, <span class="ident">SerialDevice</span>};
 
 <span class="kw">const</span> <span class="ident">LOOP_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0x40</span>;
 
@@ -582,6 +598,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Serial</span> {
+    <span class="doccomment">/// Returns a unique ID for the serial device.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">device_id</span>() -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::Serial</span>.<span class="ident">into</span>()
+    }
+
+    <span class="doccomment">/// Returns a debug label for the serial device. Used when setting up `IrqEventSource`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">debug_label</span>() -&gt; <span class="ident">String</span> {
+        <span class="string">&quot;serial&quot;</span>.<span class="ident">to_owned</span>()
+    }
+
     <span class="doccomment">/// Queues raw bytes for the guest to read and signals the interrupt if the line status would</span>
     <span class="doccomment">/// change. These bytes will be read by the guest before any bytes from the input stream that</span>
     <span class="doccomment">/// have not already been queued.</span>
@@ -780,6 +806,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">BusDevice</span> <span class="kw">for</span> <span class="ident">Serial</span> {
+    <span class="kw">fn</span> <span class="ident">device_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DeviceId</span> {
+        <span class="ident">CrosvmDeviceId::Serial</span>.<span class="ident">into</span>()
+    }
+
     <span class="kw">fn</span> <span class="ident">debug_label</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="string">&quot;serial&quot;</span>.<span class="ident">to_owned</span>()
     }

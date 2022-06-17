@@ -1929,6 +1929,15 @@
 <span id="1928">1928</span>
 <span id="1929">1929</span>
 <span id="1930">1930</span>
+<span id="1931">1931</span>
+<span id="1932">1932</span>
+<span id="1933">1933</span>
+<span id="1934">1934</span>
+<span id="1935">1935</span>
+<span id="1936">1936</span>
+<span id="1937">1937</span>
+<span id="1938">1938</span>
+<span id="1939">1939</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1999,8 +2008,8 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">warn</span>, <span class="ident">Event</span>, <span class="ident">SendTube</span>, <span class="ident">TubeError</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices</span>::{
-    <span class="ident">BusDevice</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">Debugcon</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">PciAddress</span>,
-    <span class="ident">PciConfigIo</span>, <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>, <span class="ident">PciVirtualConfigMmio</span>, <span class="ident">ProxyDevice</span>,
+    <span class="ident">BusDevice</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">Debugcon</span>, <span class="ident">IrqChip</span>, <span class="ident">IrqChipX86_64</span>, <span class="ident">IrqEventSource</span>,
+    <span class="ident">PciAddress</span>, <span class="ident">PciConfigIo</span>, <span class="ident">PciConfigMmio</span>, <span class="ident">PciDevice</span>, <span class="ident">PciVirtualConfigMmio</span>, <span class="ident">ProxyDevice</span>, <span class="ident">Serial</span>,
 };
 <span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">HypervisorX86_64</span>, <span class="ident">ProtectionType</span>, <span class="ident">VcpuX86_64</span>, <span class="ident">Vm</span>, <span class="ident">VmCap</span>, <span class="ident">VmX86_64</span>};
 <span class="kw">use</span> <span class="ident">minijail::Minijail</span>;
@@ -3374,11 +3383,6 @@
         <span class="kw">let</span> <span class="ident">pcie_vcfg</span> <span class="op">=</span> <span class="ident">aml::Name::new</span>(<span class="string">&quot;VCFG&quot;</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::get_pcie_vcfg_mmio_range</span>(<span class="ident">mem</span>).<span class="ident">start</span>);
         <span class="ident">pcie_vcfg</span>.<span class="ident">to_aml_bytes</span>(<span class="kw-2">&amp;mut</span> <span class="ident">amls</span>);
 
-        <span class="kw">let</span> <span class="ident">pm_sci_evt</span> <span class="op">=</span> <span class="ident">devices::IrqLevelEvent::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
-        <span class="ident">irq_chip</span>
-            .<span class="ident">register_level_irq_event</span>(<span class="ident">sci_irq</span>, <span class="kw-2">&amp;</span><span class="ident">pm_sci_evt</span>)
-            .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
-
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
         <span class="kw">let</span> <span class="ident">direct_gpe_info</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">direct_gpe</span>.<span class="ident">is_empty</span>() {
             <span class="prelude-val">None</span>
@@ -3398,14 +3402,23 @@
             <span class="prelude-val">Some</span>((<span class="ident">direct_sci_evt</span>, <span class="ident">direct_gpe</span>))
         };
 
+        <span class="kw">let</span> <span class="ident">pm_sci_evt</span> <span class="op">=</span> <span class="ident">devices::IrqLevelEvent::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
+
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pmresource</span> <span class="op">=</span> <span class="ident">devices::ACPIPMResource::new</span>(
-            <span class="ident">pm_sci_evt</span>,
+            <span class="ident">pm_sci_evt</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneEvent</span>)<span class="question-mark">?</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
             <span class="ident">direct_gpe_info</span>,
             <span class="ident">suspend_evt</span>,
             <span class="ident">vm_evt_wrtube</span>,
         );
         <span class="ident">pmresource</span>.<span class="ident">to_aml_bytes</span>(<span class="kw-2">&amp;mut</span> <span class="ident">amls</span>);
+        <span class="ident">irq_chip</span>
+            .<span class="ident">register_level_irq_event</span>(
+                <span class="ident">sci_irq</span>,
+                <span class="kw-2">&amp;</span><span class="ident">pm_sci_evt</span>,
+                <span class="ident">IrqEventSource::from_device</span>(<span class="kw-2">&amp;</span><span class="ident">pmresource</span>),
+            )
+            .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
         <span class="ident">pmresource</span>.<span class="ident">start</span>();
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">crs_entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Aml</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[
@@ -3503,11 +3516,16 @@
         )
         .<span class="ident">map_err</span>(<span class="ident">Error::CreateSerialDevices</span>)<span class="question-mark">?</span>;
 
+        <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">Serial::device_id</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="ident">Serial::debug_label</span>(),
+        };
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="ident">X86_64_SERIAL_1_3_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_1_3</span>)
+            .<span class="ident">register_edge_irq_event</span>(<span class="ident">X86_64_SERIAL_1_3_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_1_3</span>, <span class="ident">source</span>.<span class="ident">clone</span>())
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="ident">X86_64_SERIAL_2_4_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_2_4</span>)
+            .<span class="ident">register_edge_irq_event</span>(<span class="ident">X86_64_SERIAL_2_4_IRQ</span>, <span class="kw-2">&amp;</span><span class="ident">com_evt_2_4</span>, <span class="ident">source</span>)
             .<span class="ident">map_err</span>(<span class="ident">Error::RegisterIrqfd</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
