@@ -1351,10 +1351,6 @@
 <span id="1350">1350</span>
 <span id="1351">1351</span>
 <span id="1352">1352</span>
-<span id="1353">1353</span>
-<span id="1354">1354</span>
-<span id="1355">1355</span>
-<span id="1356">1356</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1901,7 +1897,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_balloon_device</span>(
     <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
     <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
-    <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
+    <span class="ident">mode</span>: <span class="ident">BalloonMode</span>,
     <span class="ident">tube</span>: <span class="ident">Tube</span>,
     <span class="ident">inflate_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="ident">init_balloon_size</span>: <span class="ident">u64</span>,
@@ -1911,11 +1907,7 @@
         <span class="ident">tube</span>,
         <span class="ident">inflate_tube</span>,
         <span class="ident">init_balloon_size</span>,
-        <span class="kw">if</span> <span class="ident">strict_balloon</span> {
-            <span class="ident">BalloonMode::Strict</span>
-        } <span class="kw">else</span> {
-            <span class="ident">BalloonMode::Relaxed</span>
-        },
+        <span class="ident">mode</span>,
     )
     .<span class="ident">context</span>(<span class="string">&quot;failed to create balloon&quot;</span>)<span class="question-mark">?</span>;
 
