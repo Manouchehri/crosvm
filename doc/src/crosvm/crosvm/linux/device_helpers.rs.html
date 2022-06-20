@@ -1766,8 +1766,8 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vtpm_proxy_device</span>(<span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>) -&gt; <span class="ident">DeviceResult</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tpm_jail</span> <span class="op">=</span> <span class="ident">simple_jail</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>, <span class="string">&quot;vtpm_proxy_device&quot;</span>)<span class="question-mark">?</span>;
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vtpm_proxy_device</span>(<span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>) -&gt; <span class="ident">DeviceResult</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tpm_jail</span> <span class="op">=</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vtpm_proxy_device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">match</span> <span class="kw-2">&amp;mut</span> <span class="ident">tpm_jail</span> {
         <span class="prelude-val">Some</span>(<span class="ident">jail</span>) =&gt; {
