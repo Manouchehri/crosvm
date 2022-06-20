@@ -2526,6 +2526,18 @@
 <span id="2525">2525</span>
 <span id="2526">2526</span>
 <span id="2527">2527</span>
+<span id="2528">2528</span>
+<span id="2529">2529</span>
+<span id="2530">2530</span>
+<span id="2531">2531</span>
+<span id="2532">2532</span>
+<span id="2533">2533</span>
+<span id="2534">2534</span>
+<span id="2535">2535</span>
+<span id="2536">2536</span>
+<span id="2537">2537</span>
+<span id="2538">2538</span>
+<span id="2539">2539</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -3940,9 +3952,15 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">sys_allocator</span>.<span class="ident">reserve_irq</span>(<span class="kw-2">*</span><span class="ident">irq</span>) {
             <span class="macro">warn!</span>(<span class="string">&quot;irq {} already reserved.&quot;</span>, <span class="ident">irq</span>);
         }
+        <span class="kw">use</span> <span class="ident">devices::CrosvmDeviceId</span>;
+        <span class="kw">let</span> <span class="ident">irq_event_source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">CrosvmDeviceId::DirectIo</span>.<span class="ident">into</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="macro">format!</span>(<span class="string">&quot;direct edge irq {}&quot;</span>, <span class="ident">irq</span>),
+        };
         <span class="kw">let</span> <span class="ident">irq_evt</span> <span class="op">=</span> <span class="ident">devices::IrqLevelEvent::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_level_irq_event</span>(<span class="kw-2">*</span><span class="ident">irq</span>, <span class="kw-2">&amp;</span><span class="ident">irq_evt</span>, <span class="ident">IrqEventSource::empty</span>())
+            .<span class="ident">register_level_irq_event</span>(<span class="kw-2">*</span><span class="ident">irq</span>, <span class="kw-2">&amp;</span><span class="ident">irq_evt</span>, <span class="ident">irq_event_source</span>)
             .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">direct_irq</span> <span class="op">=</span> <span class="ident">devices::DirectIrq::new_level</span>(<span class="kw-2">&amp;</span><span class="ident">irq_evt</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to enable interrupt forwarding&quot;</span>)<span class="question-mark">?</span>;
@@ -3957,9 +3975,15 @@
         <span class="kw">if</span> <span class="op">!</span><span class="ident">sys_allocator</span>.<span class="ident">reserve_irq</span>(<span class="kw-2">*</span><span class="ident">irq</span>) {
             <span class="macro">warn!</span>(<span class="string">&quot;irq {} already reserved.&quot;</span>, <span class="ident">irq</span>);
         }
+        <span class="kw">use</span> <span class="ident">devices::CrosvmDeviceId</span>;
+        <span class="kw">let</span> <span class="ident">irq_event_source</span> <span class="op">=</span> <span class="ident">IrqEventSource</span> {
+            <span class="ident">device_id</span>: <span class="ident">CrosvmDeviceId::DirectIo</span>.<span class="ident">into</span>(),
+            <span class="ident">queue_id</span>: <span class="number">0</span>,
+            <span class="ident">device_name</span>: <span class="macro">format!</span>(<span class="string">&quot;direct level irq {}&quot;</span>, <span class="ident">irq</span>),
+        };
         <span class="kw">let</span> <span class="ident">irq_evt</span> <span class="op">=</span> <span class="ident">devices::IrqEdgeEvent::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create event&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">irq_chip</span>
-            .<span class="ident">register_edge_irq_event</span>(<span class="kw-2">*</span><span class="ident">irq</span>, <span class="kw-2">&amp;</span><span class="ident">irq_evt</span>, <span class="ident">IrqEventSource::empty</span>())
+            .<span class="ident">register_edge_irq_event</span>(<span class="kw-2">*</span><span class="ident">irq</span>, <span class="kw-2">&amp;</span><span class="ident">irq_evt</span>, <span class="ident">irq_event_source</span>)
             .<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">direct_irq</span> <span class="op">=</span> <span class="ident">devices::DirectIrq::new_edge</span>(<span class="kw-2">&amp;</span><span class="ident">irq_evt</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to enable interrupt forwarding&quot;</span>)<span class="question-mark">?</span>;
