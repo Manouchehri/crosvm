@@ -2908,6 +2908,12 @@
 <span id="2907">2907</span>
 <span id="2908">2908</span>
 <span id="2909">2909</span>
+<span id="2910">2910</span>
+<span id="2911">2911</span>
+<span id="2912">2912</span>
+<span id="2913">2913</span>
+<span id="2914">2914</span>
+<span id="2915">2915</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4658,6 +4664,7 @@
     <span class="kw">pub</span> <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">SerialHardware</span>, <span class="ident">u8</span>), <span class="ident">SerialParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">shared_dirs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SharedDir</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">software_tpm</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">sound</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
@@ -4699,6 +4706,8 @@
     <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_trackpad</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+    <span class="kw">pub</span> <span class="ident">vtpm_proxy</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">vvu_proxy</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VvuOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">wayland_socket_paths</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">x_display</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
@@ -4788,6 +4797,7 @@
             <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap::new</span>(),
             <span class="ident">shared_dirs</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">socket_path</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
             <span class="ident">software_tpm</span>: <span class="bool-val">false</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
             <span class="ident">sound</span>: <span class="prelude-val">None</span>,
@@ -4829,6 +4839,8 @@
             <span class="ident">virtio_single_touch</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_switches</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_trackpad</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+            <span class="ident">vtpm_proxy</span>: <span class="bool-val">false</span>,
             <span class="ident">vvu_proxy</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">wayland_socket_paths</span>: <span class="ident">BTreeMap::new</span>(),
             <span class="ident">x_display</span>: <span class="prelude-val">None</span>,

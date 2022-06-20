@@ -1603,6 +1603,15 @@
 <span id="1602">1602</span>
 <span id="1603">1603</span>
 <span id="1604">1604</span>
+<span id="1605">1605</span>
+<span id="1606">1606</span>
+<span id="1607">1607</span>
+<span id="1608">1608</span>
+<span id="1609">1609</span>
+<span id="1610">1610</span>
+<span id="1611">1611</span>
+<span id="1612">1612</span>
+<span id="1613">1613</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2698,6 +2707,10 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;trackpad&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH:WIDTH:HEIGHT&quot;</span>)]</span>
     <span class="doccomment">/// path to a socket from where to read trackpad input events and write status updates to, optionally followed by screen width and height (defaults to 800x1280)</span>
     <span class="kw">pub</span> <span class="ident">virtio_trackpad</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
+    <span class="doccomment">/// enable the virtio-tpm connection to vtpm daemon</span>
+    <span class="kw">pub</span> <span class="ident">vtpm_proxy</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
         <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;SOCKET_PATH[,addr=DOMAIN:BUS:DEVICE.FUNCTION,uuid=UUID]&quot;</span>
@@ -2975,6 +2988,11 @@
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
         {
             <span class="ident">cfg</span>.<span class="ident">software_tpm</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">software_tpm</span>;
+        }
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+        {
+            <span class="ident">cfg</span>.<span class="ident">vtpm_proxy</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">vtpm_proxy</span>;
         }
 
         <span class="ident">cfg</span>.<span class="ident">virtio_single_touch</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">virtio_single_touch</span>;
