@@ -3165,8 +3165,8 @@
             <span class="ident">bzimage::load_bzimage</span>(<span class="ident">mem</span>, <span class="ident">GuestAddress</span>(<span class="ident">KERNEL_START_OFFSET</span>), <span class="ident">kernel_image</span>)
                 .<span class="ident">map_err</span>(<span class="ident">Error::LoadBzImage</span>)
         } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">kernel_end</span> <span class="op">=</span> <span class="ident">elf_result</span>.<span class="ident">map_err</span>(<span class="ident">Error::LoadKernel</span>)<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>((<span class="ident">Default::default</span>(), <span class="ident">kernel_end</span>))
+            <span class="kw">let</span> <span class="ident">loaded_kernel</span> <span class="op">=</span> <span class="ident">elf_result</span>.<span class="ident">map_err</span>(<span class="ident">Error::LoadKernel</span>)<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>((<span class="ident">Default::default</span>(), <span class="ident">loaded_kernel</span>.<span class="ident">end</span>.<span class="ident">offset</span>()))
         }
     }
 
