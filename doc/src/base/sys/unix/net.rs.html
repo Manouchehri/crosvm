@@ -1098,10 +1098,24 @@
 <span id="1097">1097</span>
 <span id="1098">1098</span>
 <span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
+<span class="kw">use</span> <span class="ident">cvt::cvt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">cmp::Ordering</span>,
     <span class="ident">convert::TryFrom</span>,
@@ -1694,6 +1708,12 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_write_timeout</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">set_timeout</span>(<span class="ident">timeout</span>, <span class="ident">libc::SO_SNDTIMEO</span>)
     }
+
+    <span class="doccomment">/// Sets the blocking mode for this socket.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_nonblocking</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nonblocking</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nonblocking</span> <span class="op">=</span> <span class="ident">nonblocking</span> <span class="kw">as</span> <span class="ident">libc::c_int</span>;
+        <span class="ident">cvt</span>(<span class="kw">unsafe</span> { <span class="ident">libc::ioctl</span>(<span class="self">self</span>.<span class="ident">fd</span>, <span class="ident">libc::FIONBIO</span>, <span class="kw-2">&amp;mut</span> <span class="ident">nonblocking</span>) }).<span class="ident">map</span>(<span class="ident">drop</span>)
+    }
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">UnixSeqpacket</span> {
@@ -1886,6 +1906,12 @@
                 .<span class="ident">collect</span>(),
         );
         <span class="prelude-val">Ok</span>(<span class="ident">path_os_str</span>.<span class="ident">into</span>())
+    }
+
+    <span class="doccomment">/// Sets the blocking mode for this socket.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_nonblocking</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">nonblocking</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nonblocking</span> <span class="op">=</span> <span class="ident">nonblocking</span> <span class="kw">as</span> <span class="ident">libc::c_int</span>;
+        <span class="ident">cvt</span>(<span class="kw">unsafe</span> { <span class="ident">libc::ioctl</span>(<span class="self">self</span>.<span class="ident">fd</span>, <span class="ident">libc::FIONBIO</span>, <span class="kw-2">&amp;mut</span> <span class="ident">nonblocking</span>) }).<span class="ident">map</span>(<span class="ident">drop</span>)
     }
 }
 
