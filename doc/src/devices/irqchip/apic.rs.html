@@ -1845,7 +1845,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">frequency</span>() -&gt; <span class="ident">u32</span> {
         <span class="comment">// Our Apic implementation will try to use the host&#39;s bus frequency if it</span>
         <span class="comment">// can be determined from cpuid, otherwise it uses 100MHz (cycle length of 10 nanos)</span>
-        <span class="kw">match</span> <span class="ident"><span class="kw">crate</span>::tsc::bus_freq_hz</span>() {
+        <span class="kw">match</span> <span class="ident"><span class="kw">crate</span>::tsc::bus_freq_hz</span>(<span class="ident">std::arch::x86_64::__cpuid_count</span>) {
             <span class="prelude-val">Some</span>(<span class="ident">hz</span>) =&gt; <span class="ident">hz</span>,
             <span class="prelude-val">None</span> =&gt; (<span class="number">1_000_000_000u128</span> <span class="op">/</span> <span class="ident">CYCLE_LENGTH_FALLBACK</span>.<span class="ident">as_nanos</span>()) <span class="kw">as</span> <span class="ident">u32</span>,
         }
