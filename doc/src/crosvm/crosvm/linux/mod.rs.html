@@ -4154,7 +4154,7 @@
             <span class="ident">linux</span>
                 .<span class="ident">io_bus</span>
                 .<span class="ident">insert_sync</span>(<span class="ident">direct_io</span>.<span class="ident">clone</span>(), <span class="ident">range</span>.<span class="ident">base</span>, <span class="ident">range</span>.<span class="ident">len</span>)
-                .<span class="ident">unwrap</span>();
+                .<span class="ident">context</span>(<span class="string">&quot;Error with pmio&quot;</span>)<span class="question-mark">?</span>;
         }
     };
 
@@ -4169,7 +4169,7 @@
             <span class="ident">linux</span>
                 .<span class="ident">mmio_bus</span>
                 .<span class="ident">insert_sync</span>(<span class="ident">direct_mmio</span>.<span class="ident">clone</span>(), <span class="ident">range</span>.<span class="ident">base</span>, <span class="ident">range</span>.<span class="ident">len</span>)
-                .<span class="ident">unwrap</span>();
+                .<span class="ident">context</span>(<span class="string">&quot;Error with mmio&quot;</span>)<span class="question-mark">?</span>;
         }
     };
 
