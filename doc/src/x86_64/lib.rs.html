@@ -1935,6 +1935,15 @@
 <span id="1934">1934</span>
 <span id="1935">1935</span>
 <span id="1936">1936</span>
+<span id="1937">1937</span>
+<span id="1938">1938</span>
+<span id="1939">1939</span>
+<span id="1940">1940</span>
+<span id="1941">1941</span>
+<span id="1942">1942</span>
+<span id="1943">1943</span>
+<span id="1944">1944</span>
+<span id="1945">1945</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2528,13 +2537,15 @@
         <span class="comment">// Event used to notify crosvm that guest OS is trying to suspend.</span>
         <span class="kw">let</span> <span class="ident">suspend_evt</span> <span class="op">=</span> <span class="ident">Event::new</span>().<span class="ident">map_err</span>(<span class="ident">Error::CreateEvent</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">components</span>.<span class="ident">no_legacy</span> {
-            <span class="ident"><span class="self">Self</span>::setup_legacy_devices</span>(
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">components</span>.<span class="ident">no_i8042</span> {
+            <span class="ident"><span class="self">Self</span>::setup_legacy_i8042_device</span>(
                 <span class="kw-2">&amp;</span><span class="ident">io_bus</span>,
                 <span class="ident">irq_chip</span>.<span class="ident">pit_uses_speaker_port</span>(),
                 <span class="ident">vm_evt_wrtube</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneTube</span>)<span class="question-mark">?</span>,
-                <span class="ident">components</span>.<span class="ident">memory_size</span>,
             )<span class="question-mark">?</span>;
+        }
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">components</span>.<span class="ident">no_rtc</span> {
+            <span class="ident"><span class="self">Self</span>::setup_legacy_cmos_device</span>(<span class="kw-2">&amp;</span><span class="ident">io_bus</span>, <span class="ident">components</span>.<span class="ident">memory_size</span>)<span class="question-mark">?</span>;
         }
         <span class="ident"><span class="self">Self</span>::setup_serial_devices</span>(
             <span class="ident">components</span>.<span class="ident">protected_vm</span>,
@@ -3264,20 +3275,37 @@
         <span class="ident">cmdline</span>
     }
 
-    <span class="doccomment">/// Sets up the legacy x86 IO platform devices</span>
+    <span class="doccomment">/// Sets up the legacy x86 i8042/KBD platform device</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Arguments</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// * - `io_bus` - the IO bus object</span>
     <span class="doccomment">/// * - `pit_uses_speaker_port` - does the PIT use port 0x61 for the PC speaker</span>
-    <span class="doccomment">/// * - `vm_evt_wrtube` - Tube for sending exit events</span>
-    <span class="doccomment">/// * - `mem_size` - the size in bytes of physical ram for the guest</span>
-    <span class="kw">fn</span> <span class="ident">setup_legacy_devices</span>(
+    <span class="doccomment">/// * - `vm_evt_wrtube` - the event object which should receive exit events</span>
+    <span class="kw">fn</span> <span class="ident">setup_legacy_i8042_device</span>(
         <span class="ident">io_bus</span>: <span class="kw-2">&amp;</span><span class="ident">devices::Bus</span>,
         <span class="ident">pit_uses_speaker_port</span>: <span class="ident">bool</span>,
         <span class="ident">vm_evt_wrtube</span>: <span class="ident">SendTube</span>,
-        <span class="ident">mem_size</span>: <span class="ident">u64</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">i8042</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">devices::I8042Device::new</span>(
+            <span class="ident">vm_evt_wrtube</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneTube</span>)<span class="question-mark">?</span>,
+        )));
+
+        <span class="kw">if</span> <span class="ident">pit_uses_speaker_port</span> {
+            <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">i8042</span>, <span class="number">0x062</span>, <span class="number">0x3</span>).<span class="ident">unwrap</span>();
+        } <span class="kw">else</span> {
+            <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">i8042</span>, <span class="number">0x061</span>, <span class="number">0x4</span>).<span class="ident">unwrap</span>();
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Sets up the legacy x86 CMOS/RTC platform device</span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// * - `io_bus` - the IO bus object</span>
+    <span class="doccomment">/// * - `mem_size` - the size in bytes of physical ram for the guest</span>
+    <span class="kw">fn</span> <span class="ident">setup_legacy_cmos_device</span>(<span class="ident">io_bus</span>: <span class="kw-2">&amp;</span><span class="ident">devices::Bus</span>, <span class="ident">mem_size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mem_regions</span> <span class="op">=</span> <span class="ident">arch_memory_regions</span>(<span class="ident">mem_size</span>, <span class="prelude-val">None</span>);
 
         <span class="kw">let</span> <span class="ident">mem_below_4g</span> <span class="op">=</span> <span class="ident">mem_regions</span>
@@ -3299,16 +3327,6 @@
                 <span class="number">0x2</span>,
             )
             .<span class="ident">unwrap</span>();
-
-        <span class="kw">let</span> <span class="ident">i8042</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">devices::I8042Device::new</span>(
-            <span class="ident">vm_evt_wrtube</span>.<span class="ident">try_clone</span>().<span class="ident">map_err</span>(<span class="ident">Error::CloneTube</span>)<span class="question-mark">?</span>,
-        )));
-
-        <span class="kw">if</span> <span class="ident">pit_uses_speaker_port</span> {
-            <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">i8042</span>, <span class="number">0x062</span>, <span class="number">0x3</span>).<span class="ident">unwrap</span>();
-        } <span class="kw">else</span> {
-            <span class="ident">io_bus</span>.<span class="ident">insert</span>(<span class="ident">i8042</span>, <span class="number">0x061</span>, <span class="number">0x4</span>).<span class="ident">unwrap</span>();
-        }
 
         <span class="prelude-val">Ok</span>(())
     }
