@@ -368,7 +368,7 @@
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">info</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>};
 <span class="kw">use</span> <span class="ident">lazy_static::lazy_static</span>;
 <span class="kw">use</span> <span class="ident">std::arch::x86_64::_rdtsc</span>;
 
@@ -388,9 +388,9 @@
 <span class="macro">lazy_static!</span> {
     <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">TSC_STATE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TscState</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">calibrate_tsc_state</span>(<span class="ident">rdtsc_safe</span>) {
         <span class="prelude-val">Ok</span>(<span class="ident">tsc_state</span>) =&gt; {
-            <span class="macro">info!</span>(<span class="string">&quot;Using calibrated tsc frequency: {} Hz&quot;</span>, <span class="ident">tsc_state</span>.<span class="ident">frequency</span>);
+            <span class="macro">debug!</span>(<span class="string">&quot;Using calibrated tsc frequency: {} Hz&quot;</span>, <span class="ident">tsc_state</span>.<span class="ident">frequency</span>);
             <span class="kw">for</span> (<span class="ident">core</span>, <span class="ident">offset</span>) <span class="kw">in</span> <span class="ident">tsc_state</span>.<span class="ident">offsets</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-                <span class="macro">info!</span>(<span class="string">&quot;Core {} has tsc offset of {:?} ns&quot;</span>, <span class="ident">core</span>, <span class="ident">offset</span>);
+                <span class="macro">debug!</span>(<span class="string">&quot;Core {} has tsc offset of {:?} ns&quot;</span>, <span class="ident">core</span>, <span class="ident">offset</span>);
             }
             <span class="prelude-val">Some</span>(<span class="ident">tsc_state</span>)
         }
