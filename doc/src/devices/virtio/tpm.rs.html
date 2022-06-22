@@ -293,6 +293,7 @@
 <span id="292">292</span>
 <span id="293">293</span>
 <span id="294">294</span>
+<span id="295">295</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -302,14 +303,13 @@
 <span class="kw">use</span> <span class="ident">std::thread</span>;
 
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">RawDescriptor</span>, <span class="ident">WaitContext</span>};
-<span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::{
-    <span class="ident">base_features</span>, <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>,
-    <span class="ident">SignalableInterrupt</span>, <span class="ident">VirtioDevice</span>, <span class="ident">Writer</span>,
+    <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>, <span class="ident">Reader</span>, <span class="ident">SignalableInterrupt</span>,
+    <span class="ident">VirtioDevice</span>, <span class="ident">Writer</span>,
 };
 
 <span class="comment">// A single queue of size 2. The guest kernel driver will enqueue a single</span>
@@ -457,14 +457,16 @@
     <span class="ident">backend</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TpmBackend</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">kill_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">features</span>: <span class="ident">u64</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Tpm</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">backend</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TpmBackend</span><span class="op">&gt;</span>) -&gt; <span class="ident">Tpm</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">backend</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TpmBackend</span><span class="op">&gt;</span>, <span class="ident">base_features</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Tpm</span> {
         <span class="ident">Tpm</span> {
             <span class="ident">backend</span>: <span class="prelude-val">Some</span>(<span class="ident">backend</span>),
             <span class="ident">kill_evt</span>: <span class="prelude-val">None</span>,
             <span class="ident">worker_thread</span>: <span class="prelude-val">None</span>,
+            <span class="ident">features</span>: <span class="ident">base_features</span>,
         }
     }
 }
@@ -495,7 +497,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="ident">base_features</span>(<span class="ident">ProtectionType::Unprotected</span>)
+        <span class="self">self</span>.<span class="ident">features</span>
     }
 
     <span class="kw">fn</span> <span class="ident">activate</span>(

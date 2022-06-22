@@ -1386,6 +1386,12 @@
 <span id="1385">1385</span>
 <span id="1386">1386</span>
 <span id="1387">1387</span>
+<span id="1388">1388</span>
+<span id="1389">1389</span>
+<span id="1390">1390</span>
+<span id="1391">1391</span>
+<span id="1392">1392</span>
+<span id="1393">1393</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1716,7 +1722,10 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_software_tpm_device</span>(<span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_software_tpm_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">use</span> <span class="ident">std::ffi::CString</span>;
     <span class="kw">use</span> <span class="ident">std::fs</span>;
     <span class="kw">use</span> <span class="ident">std::process</span>;
@@ -1757,7 +1766,7 @@
     }
 
     <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">SoftwareTpm::new</span>(<span class="ident">tpm_storage</span>).<span class="ident">context</span>(<span class="string">&quot;failed to create SoftwareTpm&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Tpm::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Tpm::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>), <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>));
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
@@ -1766,7 +1775,10 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vtpm_proxy_device</span>(<span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>) -&gt; <span class="ident">DeviceResult</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_vtpm_proxy_device</span>(
+    <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
+    <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">DeviceResult</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tpm_jail</span> <span class="op">=</span> <span class="ident">simple_jail</span>(<span class="ident">jail_config</span>, <span class="string">&quot;vtpm_proxy_device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">match</span> <span class="kw-2">&amp;mut</span> <span class="ident">tpm_jail</span> {
@@ -1790,7 +1802,7 @@
     }
 
     <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">VtpmProxy::new</span>();
-    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Tpm::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
+    <span class="kw">let</span> <span class="ident">dev</span> <span class="op">=</span> <span class="ident">virtio::Tpm::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>), <span class="ident">virtio::base_features</span>(<span class="ident">protected_vm</span>));
 
     <span class="prelude-val">Ok</span>(<span class="ident">VirtioDeviceStub</span> {
         <span class="ident">dev</span>: <span class="ident">Box::new</span>(<span class="ident">dev</span>),
