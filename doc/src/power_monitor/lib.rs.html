@@ -52,6 +52,7 @@
 <span id="51">51</span>
 <span id="52">52</span>
 <span id="53">53</span>
+<span id="54">54</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -61,10 +62,11 @@
 <span class="doccomment">//! &lt;https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/power_manager/README.md&gt;</span>
 
 <span class="kw">use</span> <span class="ident">std::error::Error</span>;
-<span class="kw">use</span> <span class="ident">std::os::unix::io::RawFd</span>;
+
+<span class="kw">use</span> <span class="ident">base::RawDescriptor</span>;
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">PowerMonitor</span> {
-    <span class="kw">fn</span> <span class="ident">poll_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawFd</span>;
+    <span class="kw">fn</span> <span class="ident">poll_fd</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span>;
     <span class="kw">fn</span> <span class="ident">read_message</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PowerData</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
