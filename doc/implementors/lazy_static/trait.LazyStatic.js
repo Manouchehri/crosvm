@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["devices"] = [{"text":"impl <a class=\"trait\" href=\"https://docs.rs/lazy_static/1.4.0/lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"devices/tsc/struct.TSC_STATE.html\" title=\"struct devices::tsc::TSC_STATE\">TSC_STATE</a>","synthetic":false,"types":["devices::tsc::TSC_STATE"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

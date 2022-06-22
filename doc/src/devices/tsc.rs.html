@@ -354,10 +354,6 @@
 <span id="353">353</span>
 <span id="354">354</span>
 <span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
-<span id="359">359</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -369,7 +365,7 @@
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">error</span>};
-<span class="kw">use</span> <span class="ident">lazy_static::lazy_static</span>;
+<span class="kw">use</span> <span class="ident">once_cell::sync::Lazy</span>;
 <span class="kw">use</span> <span class="ident">std::arch::x86_64::_rdtsc</span>;
 
 <span class="kw">mod</span> <span class="ident">calibrate</span>;
@@ -385,24 +381,21 @@
 }
 
 <span class="comment">// Singleton for getting the state of the host TSCs, to avoid calibrating multiple times.</span>
-<span class="macro">lazy_static!</span> {
-    <span class="kw">static</span> <span class="kw-2">ref</span> <span class="ident">TSC_STATE</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TscState</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">calibrate_tsc_state</span>(<span class="ident">rdtsc_safe</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">tsc_state</span>) =&gt; {
-            <span class="macro">debug!</span>(<span class="string">&quot;Using calibrated tsc frequency: {} Hz&quot;</span>, <span class="ident">tsc_state</span>.<span class="ident">frequency</span>);
-            <span class="kw">for</span> (<span class="ident">core</span>, <span class="ident">offset</span>) <span class="kw">in</span> <span class="ident">tsc_state</span>.<span class="ident">offsets</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-                <span class="macro">debug!</span>(<span class="string">&quot;Core {} has tsc offset of {:?} ns&quot;</span>, <span class="ident">core</span>, <span class="ident">offset</span>);
-            }
-            <span class="prelude-val">Some</span>(<span class="ident">tsc_state</span>)
+<span class="kw">static</span> <span class="ident">TSC_STATE</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TscState</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">calibrate_tsc_state</span>(<span class="ident">rdtsc_safe</span>) {
+    <span class="prelude-val">Ok</span>(<span class="ident">tsc_state</span>) =&gt; {
+        <span class="macro">debug!</span>(<span class="string">&quot;Using calibrated tsc frequency: {} Hz&quot;</span>, <span class="ident">tsc_state</span>.<span class="ident">frequency</span>);
+        <span class="kw">for</span> (<span class="ident">core</span>, <span class="ident">offset</span>) <span class="kw">in</span> <span class="ident">tsc_state</span>.<span class="ident">offsets</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
+            <span class="macro">debug!</span>(<span class="string">&quot;Core {} has tsc offset of {:?} ns&quot;</span>, <span class="ident">core</span>, <span class="ident">offset</span>);
         }
-        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-            <span class="macro">error!</span>(<span class="string">&quot;Failed to calibrate tsc state: {:#}&quot;</span>, <span class="ident">e</span>);
-            <span class="prelude-val">None</span>
-        }
-    };
-}
+        <span class="prelude-val">Some</span>(<span class="ident">tsc_state</span>)
+    }
+    <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+        <span class="macro">error!</span>(<span class="string">&quot;Failed to calibrate tsc state: {:#}&quot;</span>, <span class="ident">e</span>);
+        <span class="prelude-val">None</span>
+    }
+});
 
-<span class="doccomment">/// Returns the frequency of the host TSC. Uses the TSC_STATE lazy_static ref, so the calibration</span>
-<span class="doccomment">/// only happens once.</span>
+<span class="doccomment">/// Returns the frequency of the host TSC. Calibration only happens once.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tsc_frequency</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">TSC_STATE</span>
         .<span class="ident">as_ref</span>()
@@ -410,8 +403,7 @@
     <span class="prelude-val">Ok</span>(<span class="ident">state</span>.<span class="ident">frequency</span>)
 }
 
-<span class="doccomment">/// Returns the state of the host TSCs. Uses the TSC_STATE lazy_static ref, so the calibration</span>
-<span class="doccomment">/// only happens once.</span>
+<span class="doccomment">/// Returns the state of the host TSCs. Calibration only happens once.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tsc_state</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TscState</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="ident">TSC_STATE</span>
         .<span class="ident">as_ref</span>()
