@@ -1617,6 +1617,7 @@
 <span id="1616">1616</span>
 <span id="1617">1617</span>
 <span id="1618">1618</span>
+<span id="1619">1619</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2123,6 +2124,7 @@
     <span class="kw">pub</span> <span class="ident">disable_virtio_intx</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
+        <span class="ident">short</span> <span class="op">=</span> <span class="string">&#39;d&#39;</span>,
         <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;disk&quot;</span>,
         <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH[,key=value[,key=value[,...]]&quot;</span>,
         <span class="ident">from_str_fn</span>(<span class="ident">numbered_disk_option</span>)
