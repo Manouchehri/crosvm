@@ -1745,6 +1745,9 @@
 <span id="1744">1744</span>
 <span id="1745">1745</span>
 <span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1752,6 +1755,7 @@
 <span class="kw">use</span> <span class="ident">base::IoctlNr</span>;
 
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">E2BIG</span>, <span class="ident">ENXIO</span>};
+<span class="kw">use</span> <span class="ident">std::arch::x86_64::CpuidResult</span>;
 
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">errno_result</span>, <span class="ident">error</span>, <span class="ident">ioctl</span>, <span class="ident">ioctl_with_mut_ptr</span>, <span class="ident">ioctl_with_mut_ref</span>, <span class="ident">ioctl_with_ptr</span>,
@@ -2558,10 +2562,12 @@
                 <span class="ident">function</span>: <span class="ident">entry</span>.<span class="ident">function</span>,
                 <span class="ident">index</span>: <span class="ident">entry</span>.<span class="ident">index</span>,
                 <span class="ident">flags</span>: <span class="ident">entry</span>.<span class="ident">flags</span>,
-                <span class="ident">eax</span>: <span class="ident">entry</span>.<span class="ident">eax</span>,
-                <span class="ident">ebx</span>: <span class="ident">entry</span>.<span class="ident">ebx</span>,
-                <span class="ident">ecx</span>: <span class="ident">entry</span>.<span class="ident">ecx</span>,
-                <span class="ident">edx</span>: <span class="ident">entry</span>.<span class="ident">edx</span>,
+                <span class="ident">cpuid</span>: <span class="ident">CpuidResult</span> {
+                    <span class="ident">eax</span>: <span class="ident">entry</span>.<span class="ident">eax</span>,
+                    <span class="ident">ebx</span>: <span class="ident">entry</span>.<span class="ident">ebx</span>,
+                    <span class="ident">ecx</span>: <span class="ident">entry</span>.<span class="ident">ecx</span>,
+                    <span class="ident">edx</span>: <span class="ident">entry</span>.<span class="ident">edx</span>,
+                },
             };
             <span class="ident">cpu_id_entries</span>.<span class="ident">push</span>(<span class="ident">cpu_id_entry</span>)
         }
@@ -2578,10 +2584,10 @@
                 <span class="ident">function</span>: <span class="ident">e</span>.<span class="ident">function</span>,
                 <span class="ident">index</span>: <span class="ident">e</span>.<span class="ident">index</span>,
                 <span class="ident">flags</span>: <span class="ident">e</span>.<span class="ident">flags</span>,
-                <span class="ident">eax</span>: <span class="ident">e</span>.<span class="ident">eax</span>,
-                <span class="ident">ebx</span>: <span class="ident">e</span>.<span class="ident">ebx</span>,
-                <span class="ident">ecx</span>: <span class="ident">e</span>.<span class="ident">ecx</span>,
-                <span class="ident">edx</span>: <span class="ident">e</span>.<span class="ident">edx</span>,
+                <span class="ident">eax</span>: <span class="ident">e</span>.<span class="ident">cpuid</span>.<span class="ident">eax</span>,
+                <span class="ident">ebx</span>: <span class="ident">e</span>.<span class="ident">cpuid</span>.<span class="ident">ebx</span>,
+                <span class="ident">ecx</span>: <span class="ident">e</span>.<span class="ident">cpuid</span>.<span class="ident">ecx</span>,
+                <span class="ident">edx</span>: <span class="ident">e</span>.<span class="ident">cpuid</span>.<span class="ident">edx</span>,
                 ..<span class="ident">Default::default</span>()
             };
         }
