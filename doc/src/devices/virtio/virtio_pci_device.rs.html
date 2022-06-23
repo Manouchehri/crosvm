@@ -806,6 +806,11 @@
 <span id="805">805</span>
 <span id="806">806</span>
 <span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1050,6 +1055,7 @@
 
     <span class="ident">device</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">VirtioDevice</span><span class="op">&gt;</span>,
     <span class="ident">device_activated</span>: <span class="ident">bool</span>,
+    <span class="ident">disable_intx</span>: <span class="ident">bool</span>,
 
     <span class="ident">interrupt_status</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AtomicUsize</span><span class="op">&gt;</span>,
     <span class="ident">interrupt_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqLevelEvent</span><span class="op">&gt;</span>,
@@ -1070,6 +1076,7 @@
         <span class="ident">mem</span>: <span class="ident">GuestMemory</span>,
         <span class="ident">device</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">VirtioDevice</span><span class="op">&gt;</span>,
         <span class="ident">msi_device_tube</span>: <span class="ident">Tube</span>,
+        <span class="ident">disable_intx</span>: <span class="ident">bool</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">queue_evts</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="ident">device</span>.<span class="ident">queue_max_sizes</span>() {
@@ -1122,6 +1129,7 @@
             <span class="ident">pci_address</span>: <span class="ident">device</span>.<span class="ident">pci_address</span>(),
             <span class="ident">device</span>,
             <span class="ident">device_activated</span>: <span class="bool-val">false</span>,
+            <span class="ident">disable_intx</span>,
             <span class="ident">interrupt_status</span>: <span class="ident">Arc::new</span>(<span class="ident">AtomicUsize::new</span>(<span class="number">0</span>)),
             <span class="ident">interrupt_evt</span>: <span class="prelude-val">None</span>,
             <span class="ident">queues</span>,
@@ -1333,7 +1341,9 @@
             <span class="ident">PciInterruptPin::IntA</span>,
             <span class="ident">PciConfiguration::suggested_interrupt_pin</span>,
         );
-        <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">set_irq</span>(<span class="ident">gsi</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">pin</span>);
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">disable_intx</span> {
+            <span class="self">self</span>.<span class="ident">config_regs</span>.<span class="ident">set_irq</span>(<span class="ident">gsi</span> <span class="kw">as</span> <span class="ident">u8</span>, <span class="ident">pin</span>);
+        }
         <span class="prelude-val">Some</span>((<span class="ident">gsi</span>, <span class="ident">pin</span>))
     }
 

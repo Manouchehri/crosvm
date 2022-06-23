@@ -1612,6 +1612,11 @@
 <span id="1611">1611</span>
 <span id="1612">1612</span>
 <span id="1613">1613</span>
+<span id="1614">1614</span>
+<span id="1615">1615</span>
+<span id="1616">1616</span>
+<span id="1617">1617</span>
+<span id="1618">1618</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2113,6 +2118,9 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// run all devices in one, non-sandboxed process</span>
     <span class="kw">pub</span> <span class="ident">disable_sandbox</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
+    <span class="doccomment">/// disable INTx in virtio devices</span>
+    <span class="kw">pub</span> <span class="ident">disable_virtio_intx</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
         <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;disk&quot;</span>,
@@ -3192,6 +3200,8 @@
             <span class="ident">cfg</span>.<span class="ident">pcie_rp</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">pcie_rp</span>;
             <span class="ident">cfg</span>.<span class="ident">mmio_address_ranges</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">mmio_address_ranges</span>.<span class="ident">unwrap_or_default</span>();
         }
+
+        <span class="ident">cfg</span>.<span class="ident">disable_virtio_intx</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">disable_virtio_intx</span>;
 
         <span class="ident">cfg</span>.<span class="ident">dmi_path</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">dmi_path</span>;
 

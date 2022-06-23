@@ -2915,6 +2915,8 @@
 <span id="2914">2914</span>
 <span id="2915">2915</span>
 <span id="2916">2916</span>
+<span id="2917">2917</span>
+<span id="2918">2918</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -4613,6 +4615,7 @@
     <span class="kw">pub</span> <span class="ident">direct_mmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">direct_pmio</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DirectIoOption</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">disable_virtio_intx</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">disks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DiskOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">display_window_keyboard</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">display_window_mouse</span>: <span class="ident">bool</span>,
@@ -4744,6 +4747,7 @@
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
             <span class="ident">direct_pmio</span>: <span class="prelude-val">None</span>,
             <span class="ident">disks</span>: <span class="ident">Vec::new</span>(),
+            <span class="ident">disable_virtio_intx</span>: <span class="bool-val">false</span>,
             <span class="ident">display_window_keyboard</span>: <span class="bool-val">false</span>,
             <span class="ident">display_window_mouse</span>: <span class="bool-val">false</span>,
             <span class="ident">dmi_path</span>: <span class="prelude-val">None</span>,
