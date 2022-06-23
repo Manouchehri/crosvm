@@ -211,10 +211,12 @@
 <span id="210">210</span>
 <span id="211">211</span>
 <span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
-
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
@@ -326,6 +328,10 @@
 
     <span class="kw">fn</span> <span class="ident">hotplug_implemented</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">pcie_port</span>.<span class="ident">hotplug_implemented</span>()
+    }
+
+    <span class="kw">fn</span> <span class="ident">hotplugged</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="bool-val">false</span>
     }
 
     <span class="kw">fn</span> <span class="ident">get_bridge_window_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">u64</span>, <span class="ident">u64</span>) {
