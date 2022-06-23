@@ -1659,7 +1659,7 @@
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">device_ranges</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io_ranges</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
-    <span class="kw">let</span> <span class="ident">root_bus</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">PciBus::new</span>(<span class="number">0</span>, <span class="number">0</span>)));
+    <span class="kw">let</span> <span class="ident">root_bus</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">PciBus::new</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="bool-val">false</span>)));
 
     <span class="ident">generate_pci_topology</span>(
         <span class="ident">root_bus</span>.<span class="ident">clone</span>(),
