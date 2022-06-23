@@ -652,6 +652,34 @@
 <span id="651">651</span>
 <span id="652">652</span>
 <span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -826,8 +854,11 @@
 }
 
 <span class="doccomment">/// Initial state for x86_64 VCPUs.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VcpuInitX86_64</span> {}
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VcpuInitX86_64</span> {
+    <span class="doccomment">/// General-purpose registers.</span>
+    <span class="kw">pub</span> <span class="ident">regs</span>: <span class="ident">Regs</span>,
+}
 
 <span class="doccomment">/// A CpuId Entry contains supported feature information for the given processor.</span>
 <span class="doccomment">/// This can be modified by the hypervisor to pass additional information to the guest kernel</span>
@@ -1201,7 +1232,7 @@
 
 <span class="doccomment">/// State of a VCPU&#39;s general purpose registers.</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Regs</span> {
     <span class="kw">pub</span> <span class="ident">rax</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">rbx</span>: <span class="ident">u64</span>,
@@ -1221,6 +1252,31 @@
     <span class="kw">pub</span> <span class="ident">r15</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">rip</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">rflags</span>: <span class="ident">u64</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Regs</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">Regs</span> {
+            <span class="ident">rax</span>: <span class="number">0</span>,
+            <span class="ident">rbx</span>: <span class="number">0</span>,
+            <span class="ident">rcx</span>: <span class="number">0</span>,
+            <span class="ident">rdx</span>: <span class="number">0</span>,
+            <span class="ident">rsi</span>: <span class="number">0</span>,
+            <span class="ident">rdi</span>: <span class="number">0</span>,
+            <span class="ident">rsp</span>: <span class="number">0</span>,
+            <span class="ident">rbp</span>: <span class="number">0</span>,
+            <span class="ident">r8</span>: <span class="number">0</span>,
+            <span class="ident">r9</span>: <span class="number">0</span>,
+            <span class="ident">r10</span>: <span class="number">0</span>,
+            <span class="ident">r11</span>: <span class="number">0</span>,
+            <span class="ident">r12</span>: <span class="number">0</span>,
+            <span class="ident">r13</span>: <span class="number">0</span>,
+            <span class="ident">r14</span>: <span class="number">0</span>,
+            <span class="ident">r15</span>: <span class="number">0</span>,
+            <span class="ident">rip</span>: <span class="number">0</span>,
+            <span class="ident">rflags</span>: <span class="number">0x2</span>, <span class="comment">// Bit 1 (0x2) is always 1.</span>
+        }
+    }
 }
 
 <span class="doccomment">/// State of a memory segment.</span>

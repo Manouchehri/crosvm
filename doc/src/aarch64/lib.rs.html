@@ -1030,7 +1030,7 @@
                 } <span class="kw">else</span> {
                     <span class="kw">let</span> <span class="ident">loaded_kernel</span> <span class="op">=</span> <span class="ident">elf_result</span>.<span class="ident">map_err</span>(<span class="ident">Error::LoadElfKernel</span>)<span class="question-mark">?</span>;
                     <span class="ident">kernel_size</span> <span class="op">=</span> <span class="ident">loaded_kernel</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span>;
-                    <span class="ident">kernel_end</span> <span class="op">=</span> <span class="ident">loaded_kernel</span>.<span class="ident">end</span>.<span class="ident">offset</span>();
+                    <span class="ident">kernel_end</span> <span class="op">=</span> <span class="ident">loaded_kernel</span>.<span class="ident">address_range</span>.<span class="ident">end</span>;
                 }
                 <span class="ident">initrd</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">components</span>.<span class="ident">initrd_image</span> {
                     <span class="prelude-val">Some</span>(<span class="ident">initrd_file</span>) =&gt; {
