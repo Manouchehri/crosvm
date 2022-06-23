@@ -77,6 +77,7 @@
 <span id="76">76</span>
 <span id="77">77</span>
 <span id="78">78</span>
+<span id="79">79</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -114,9 +115,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns a value that should be dropped when the process exits.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">common_child_setup</span>(<span class="ident">args</span>: <span class="ident">CommonChildStartupArgs</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span><span class="ident">ChildLifecycleCleanup</span><span class="op">&gt;</span> {
-    <span class="comment">// Crash reporting should start as early as possible, in case other startup tasks fail.</span>
-    <span class="ident">init_child_crash_reporting</span>(<span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">product_attrs</span>);
-
+    <span class="comment">// Logging must initialize first in case there are other startup errors.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="ident">syslog::LogConfig::default</span>();
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">log_file_descriptor</span>) <span class="op">=</span> <span class="ident">args</span>.<span class="ident">syslog_file</span> {
         <span class="comment">// Safe because we are taking ownership of a SafeDescriptor.</span>
@@ -128,6 +127,9 @@
         <span class="ident">cfg</span>.<span class="ident">stderr</span> <span class="op">=</span> <span class="bool-val">true</span>;
     }
     <span class="ident">syslog::init_with</span>(<span class="ident">cfg</span>)<span class="question-mark">?</span>;
+
+    <span class="comment">// Crash reporting should start as early as possible, in case other startup tasks fail.</span>
+    <span class="ident">init_child_crash_reporting</span>(<span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">product_attrs</span>);
 
     <span class="comment">// Initialize anything product specific.</span>
     <span class="ident">product_child_setup</span>(<span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">product_attrs</span>)<span class="question-mark">?</span>;
