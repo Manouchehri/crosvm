@@ -1475,9 +1475,14 @@
 <span id="1474">1474</span>
 <span id="1475">1475</span>
 <span id="1476">1476</span>
+<span id="1477">1477</span>
+<span id="1478">1478</span>
+<span id="1479">1479</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
+
+<span class="kw">mod</span> <span class="ident">sys</span>;
 
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
 <span class="kw">use</span> <span class="ident">std::cmp</span>;
@@ -2441,7 +2446,8 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="ident">Reader::new</span>(<span class="ident">memory</span>, <span class="ident">chain</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create Reader&quot;</span>);
 
         <span class="comment">// Open a file in read-only mode so writes to it to trigger an I/O error.</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ro_file</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="string">&quot;/dev/zero&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to open /dev/zero&quot;</span>);
+        <span class="kw">let</span> <span class="ident">device_file</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">windows</span>) { <span class="string">&quot;NUL&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;/dev/zero&quot;</span> };
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ro_file</span> <span class="op">=</span> <span class="ident">File::open</span>(<span class="ident">device_file</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to open device file&quot;</span>);
 
         <span class="ident">reader</span>
             .<span class="ident">read_exact_to</span>(<span class="kw-2">&amp;mut</span> <span class="ident">ro_file</span>, <span class="number">512</span>)

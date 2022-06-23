@@ -769,7 +769,7 @@
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">PciAddress</span>, <span class="ident">PciAddressError</span>, <span class="ident">PciInterruptPin</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::ipc_memory_mapper::IpcMemoryMapper</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::snd::vios_backend::Error</span> <span class="kw">as</span> <span class="ident">VioSError</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">DeviceId</span>, <span class="ident">IrqLevelEvent</span>};
 
@@ -791,11 +791,11 @@
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to add capability {0}&quot;</span>)]</span>
     <span class="ident">CapabilitiesSetup</span>(<span class="ident">pci_configuration::Error</span>),
     <span class="doccomment">/// Create cras client failed.</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>))]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create CRAS Client: {0}&quot;</span>)]</span>
     <span class="ident">CreateCrasClientFailed</span>(<span class="ident">libcras::Error</span>),
     <span class="doccomment">/// Create VioS client failed.</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>))]</span>
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to create VioS Client: {0}&quot;</span>)]</span>
     <span class="ident">CreateViosClientFailed</span>(<span class="ident">VioSError</span>),
     <span class="doccomment">/// Device is already on this bus</span>
