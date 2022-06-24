@@ -345,6 +345,8 @@
 <span id="344">344</span>
 <span id="345">345</span>
 <span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -356,7 +358,9 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
 <span class="kw">use</span> <span class="ident">base::platform::Console</span> <span class="kw">as</span> <span class="ident">WinConsole</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">open_file</span>, <span class="ident">syslog</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">FileSync</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{
+    <span class="ident">error</span>, <span class="ident">open_file</span>, <span class="ident">syslog</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Event</span>, <span class="ident">FileSync</span>, <span class="ident">RawDescriptor</span>, <span class="ident">ReadNotifier</span>,
+};
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
@@ -389,7 +393,7 @@
 }
 
 <span class="doccomment">/// Trait for types that can be used as input for a serial device.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerialInput</span>: <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">AsRawDescriptor</span> <span class="op">+</span> <span class="ident">Send</span> {}
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SerialInput</span>: <span class="ident">io::Read</span> <span class="op">+</span> <span class="ident">ReadNotifier</span> <span class="op">+</span> <span class="ident">Send</span> {}
 <span class="kw">impl</span> <span class="ident">SerialInput</span> <span class="kw">for</span> <span class="ident">File</span> {}
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
 <span class="kw">impl</span> <span class="ident">SerialInput</span> <span class="kw">for</span> <span class="ident">WinConsole</span> {}
@@ -506,7 +510,7 @@
             <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">input_file</span>))
         } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">stdin</span> {
             <span class="ident">keep_rds</span>.<span class="ident">push</span>(<span class="ident">stdin</span>().<span class="ident">as_raw_descriptor</span>());
-            <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ConsoleInput</span>))
+            <span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="ident">ConsoleInput::new</span>()))
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         };

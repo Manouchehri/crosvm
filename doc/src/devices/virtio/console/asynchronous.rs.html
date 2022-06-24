@@ -451,7 +451,7 @@
 <span class="kw">struct</span> <span class="ident">AsyncSerialInput</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SerialInput</span><span class="op">&gt;</span>);
 <span class="kw">impl</span> <span class="ident">AsRawDescriptor</span> <span class="kw">for</span> <span class="ident">AsyncSerialInput</span> {
     <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDescriptor</span> {
-        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_raw_descriptor</span>()
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">get_read_notifier</span>().<span class="ident">as_raw_descriptor</span>()
     }
 }
 <span class="kw">impl</span> <span class="ident">IntoAsync</span> <span class="kw">for</span> <span class="ident">AsyncSerialInput</span> {}
