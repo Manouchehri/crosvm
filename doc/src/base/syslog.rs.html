@@ -988,7 +988,7 @@
                 <span class="macro">writeln!</span>(
                     <span class="ident">buf</span>,
                     <span class="string">&quot;[{} {:5} {}] {}&quot;</span>,
-                    <span class="ident">Local::now</span>().<span class="ident">format</span>(<span class="string">&quot;%Y-%m-%dT%H:%M:%S%:z&quot;</span>),
+                    <span class="ident">Local::now</span>().<span class="ident">format</span>(<span class="string">&quot;%Y-%m-%dT%H:%M:%S%.9f%:z&quot;</span>),
                     <span class="ident">record</span>.<span class="ident">level</span>(),
                     <span class="ident">record</span>.<span class="ident">module_path</span>().<span class="ident">unwrap_or</span>(<span class="string">&quot;&lt;missing module path&gt;&quot;</span>),
                     <span class="ident">record</span>.<span class="ident">args</span>()
