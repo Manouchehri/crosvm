@@ -1618,6 +1618,11 @@
 <span id="1617">1617</span>
 <span id="1618">1618</span>
 <span id="1619">1619</span>
+<span id="1620">1620</span>
+<span id="1621">1621</span>
+<span id="1622">1622</span>
+<span id="1623">1623</span>
+<span id="1624">1624</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2074,7 +2079,8 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
-        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;[capture=true,client=crosvm,socket=unified,num_output_streams=1,num_input_streams=1]&quot;</span>,
+        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;[capture=true,client=crosvm,socket=unified,\
+        num_output_devices=1,num_input_devices=1,num_output_streams=1,num_input_streams=1]&quot;</span>,
         <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;cras-snd&quot;</span>
     )]</span>
     <span class="doccomment">/// comma separated key=value pairs for setting up cras snd</span>
@@ -2082,8 +2088,12 @@
     <span class="doccomment">/// Possible key values:</span>
     <span class="doccomment">///     capture - Enable audio capture. Default to false.</span>
     <span class="doccomment">///     client_type - Set specific client type for cras backend.</span>
+    <span class="doccomment">///     num_output_devices - Set number of output PCM devices.</span>
+    <span class="doccomment">///     num_input_devices - Set number of input PCM devices.</span>
     <span class="doccomment">///     num_output_streams - Set number of output PCM streams</span>
+    <span class="doccomment">///         per device.</span>
     <span class="doccomment">///     num_input_streams - Set number of input PCM streams</span>
+    <span class="doccomment">///         per device.</span>
     <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CrasSndParameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// don&#39;t set VCPUs real-time until make-rt command is run</span>
