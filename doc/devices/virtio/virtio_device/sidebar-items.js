@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["VirtioDevice","Trait for virtio devices to be driven by a virtio transport."]]});
+initSidebarItems({"struct":[["SharedMemoryRegion",""]],"trait":[["SharedMemoryMapper","Trait for mapping memory into the device’s shared memory region."],["VirtioDevice","Trait for virtio devices to be driven by a virtio transport."]]});

@@ -524,6 +524,7 @@
 <span id="523">523</span>
 <span id="524">524</span>
 <span id="525">525</span>
+<span id="526">526</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -531,6 +532,7 @@
 <span class="doccomment">//! Legacy console device that uses a polling thread. This is kept because it is still used by</span>
 <span class="doccomment">//! Windows ; outside of this use-case, please use [[asynchronous::AsyncConsole]] instead.</span>
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">asynchronous</span>;
 <span class="kw">mod</span> <span class="ident">sys</span>;
 

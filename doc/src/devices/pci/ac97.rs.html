@@ -474,6 +474,9 @@
 <span id="473">473</span>
 <span id="474">474</span>
 <span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -488,6 +491,7 @@
 <span class="kw">use</span> <span class="ident">libcras</span>::{<span class="ident">CrasClient</span>, <span class="ident">CrasClientType</span>, <span class="ident">CrasSocketType</span>, <span class="ident">CrasSysError</span>};
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 
@@ -514,7 +518,7 @@
 <span class="doccomment">/// Internally the `Ac97BusMaster` and `Ac97Mixer` structs are used to emulated the bus master and</span>
 <span class="doccomment">/// mixer registers respectively. `Ac97BusMaster` handles moving smaples between guest memory and</span>
 <span class="doccomment">/// the audio backend.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Ac97Backend</span> {
     <span class="ident">NULL</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
@@ -552,14 +556,16 @@
 }
 
 <span class="doccomment">/// Holds the parameters for a AC97 device</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Ac97Parameters</span> {
     <span class="kw">pub</span> <span class="ident">backend</span>: <span class="ident">Ac97Backend</span>,
     <span class="kw">pub</span> <span class="ident">capture</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">vios_server_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
     <span class="ident">client_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CrasClientType</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
     <span class="ident">socket_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CrasSocketType</span><span class="op">&gt;</span>,
 }
 

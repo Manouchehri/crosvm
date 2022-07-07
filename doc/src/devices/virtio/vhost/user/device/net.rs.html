@@ -195,7 +195,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::net</span>::{<span class="ident">build_config</span>, <span class="ident">process_ctrl</span>, <span class="ident">process_tx</span>, <span class="ident">virtio_features_to_tap_offload</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">sys::Doorbell</span>, <span class="ident">VhostUserBackend</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys</span>::{<span class="ident">start_device</span> <span class="kw">as</span> <span class="ident">run_net_device</span>, <span class="ident">Options</span>};
 

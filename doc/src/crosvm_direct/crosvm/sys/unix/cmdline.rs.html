@@ -20,6 +20,11 @@
 <span id="19">19</span>
 <span id="20">20</span>
 <span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -41,6 +46,11 @@
     <span class="ident">Vsock</span>(<span class="ident">device::VsockOptions</span>),
     <span class="ident">Wl</span>(<span class="ident">device::WlOptions</span>),
 }
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">FromArgs</span>)]</span>
+<span class="attribute">#[<span class="ident">argh</span>(<span class="ident">subcommand</span>)]</span>
+<span class="doccomment">/// Unix Commands</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Commands</span> {}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="crosvm_direct" data-search-index-js="../../../../../search-index.js" data-search-js="../../../../../search.js"></div>
 </body></html>

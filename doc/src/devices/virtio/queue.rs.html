@@ -1006,6 +1006,42 @@
 <span id="1005">1005</span>
 <span id="1006">1006</span>
 <span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1018,7 +1054,7 @@
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">Context</span>};
-<span class="kw">use</span> <span class="ident">base::error</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">warn</span>};
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">AsyncError</span>, <span class="ident">EventAsync</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le16</span>, <span class="ident">Le32</span>, <span class="ident">Le64</span>};
 <span class="kw">use</span> <span class="ident">virtio_sys::virtio_ring::VIRTIO_RING_F_EVENT_IDX</span>;
@@ -1267,22 +1303,25 @@
     <span class="kw">pub</span> <span class="ident">max_size</span>: <span class="ident">u16</span>,
 
     <span class="doccomment">/// The queue size in elements the driver selected</span>
-    <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">u16</span>,
+    <span class="ident">size</span>: <span class="ident">u16</span>,
 
     <span class="doccomment">/// Inidcates if the queue is finished with configuration</span>
-    <span class="kw">pub</span> <span class="ident">ready</span>: <span class="ident">bool</span>,
+    <span class="ident">ready</span>: <span class="ident">bool</span>,
+
+    <span class="doccomment">/// Indicates that a ready queue&#39;s configuration has been validated successfully.</span>
+    <span class="ident">validated</span>: <span class="ident">bool</span>,
 
     <span class="doccomment">/// MSI-X vector for the queue. Don&#39;t care for INTx</span>
-    <span class="kw">pub</span> <span class="ident">vector</span>: <span class="ident">u16</span>,
+    <span class="ident">vector</span>: <span class="ident">u16</span>,
 
     <span class="doccomment">/// Guest physical address of the descriptor table</span>
-    <span class="kw">pub</span> <span class="ident">desc_table</span>: <span class="ident">GuestAddress</span>,
+    <span class="ident">desc_table</span>: <span class="ident">GuestAddress</span>,
 
     <span class="doccomment">/// Guest physical address of the available ring</span>
-    <span class="kw">pub</span> <span class="ident">avail_ring</span>: <span class="ident">GuestAddress</span>,
+    <span class="ident">avail_ring</span>: <span class="ident">GuestAddress</span>,
 
     <span class="doccomment">/// Guest physical address of the used ring</span>
-    <span class="kw">pub</span> <span class="ident">used_ring</span>: <span class="ident">GuestAddress</span>,
+    <span class="ident">used_ring</span>: <span class="ident">GuestAddress</span>,
 
     <span class="kw">pub</span> <span class="ident">next_avail</span>: <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">next_used</span>: <span class="ident">Wrapping</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
@@ -1299,6 +1338,22 @@
     <span class="ident">iommu</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">IpcMemoryMapper</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
+<span class="macro">macro_rules!</span> <span class="ident">accessors</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">setter</span>:<span class="ident">ident</span>) =&gt; {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> {
+            <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>
+        }
+
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">setter</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>) {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ready</span> {
+                <span class="macro">warn!</span>(<span class="string">&quot;ignoring write to {} on ready queue&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span>));
+                <span class="kw">return</span>;
+            }
+            <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">var</span> <span class="op">=</span> <span class="ident">val</span>;
+        }
+    };
+}
+
 <span class="kw">impl</span> <span class="ident">Queue</span> {
     <span class="doccomment">/// Constructs an empty virtio queue with the given `max_size`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">max_size</span>: <span class="ident">u16</span>) -&gt; <span class="ident">Queue</span> {
@@ -1306,6 +1361,7 @@
             <span class="ident">max_size</span>,
             <span class="ident">size</span>: <span class="ident">max_size</span>,
             <span class="ident">ready</span>: <span class="bool-val">false</span>,
+            <span class="ident">validated</span>: <span class="bool-val">false</span>,
             <span class="ident">vector</span>: <span class="ident">VIRTIO_MSI_NO_VECTOR</span>,
             <span class="ident">desc_table</span>: <span class="ident">GuestAddress</span>(<span class="number">0</span>),
             <span class="ident">avail_ring</span>: <span class="ident">GuestAddress</span>(<span class="number">0</span>),
@@ -1319,6 +1375,13 @@
         }
     }
 
+    <span class="macro">accessors!</span>(<span class="ident">vector</span>, <span class="ident">u16</span>, <span class="ident">set_vector</span>);
+    <span class="macro">accessors!</span>(<span class="ident">size</span>, <span class="ident">u16</span>, <span class="ident">set_size</span>);
+    <span class="macro">accessors!</span>(<span class="ident">ready</span>, <span class="ident">bool</span>, <span class="ident">set_ready</span>);
+    <span class="macro">accessors!</span>(<span class="ident">desc_table</span>, <span class="ident">GuestAddress</span>, <span class="ident">set_desc_table</span>);
+    <span class="macro">accessors!</span>(<span class="ident">avail_ring</span>, <span class="ident">GuestAddress</span>, <span class="ident">set_avail_ring</span>);
+    <span class="macro">accessors!</span>(<span class="ident">used_ring</span>, <span class="ident">GuestAddress</span>, <span class="ident">set_used_ring</span>);
+
     <span class="doccomment">/// Return the actual size of the queue, as the driver may not set up a</span>
     <span class="doccomment">/// queue as big as the device allows.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">actual_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u16</span> {
@@ -1328,6 +1391,7 @@
     <span class="doccomment">/// Reset queue to a clean state</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reset</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">ready</span> <span class="op">=</span> <span class="bool-val">false</span>;
+        <span class="self">self</span>.<span class="ident">validated</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="self">self</span>.<span class="ident">size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_size</span>;
         <span class="self">self</span>.<span class="ident">vector</span> <span class="op">=</span> <span class="ident">VIRTIO_MSI_NO_VECTOR</span>;
         <span class="self">self</span>.<span class="ident">desc_table</span> <span class="op">=</span> <span class="ident">GuestAddress</span>(<span class="number">0</span>);
@@ -1348,7 +1412,19 @@
         <span class="self">self</span>.<span class="ident">last_used</span> <span class="op">=</span> <span class="ident">Wrapping</span>(<span class="number">0</span>);
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>) -&gt; <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>) -&gt; <span class="ident">bool</span> {
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">ready</span> {
+            <span class="macro">error!</span>(<span class="string">&quot;attempt to use virtio queue that is not marked ready&quot;</span>);
+            <span class="kw">return</span> <span class="bool-val">false</span>;
+        }
+
+        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">validated</span> {
+            <span class="self">self</span>.<span class="ident">validate</span>(<span class="ident">mem</span>);
+        }
+        <span class="self">self</span>.<span class="ident">validated</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">GuestMemory</span>) {
         <span class="kw">let</span> <span class="ident">queue_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">actual_size</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="ident">desc_table</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">desc_table</span>;
         <span class="kw">let</span> <span class="ident">desc_table_size</span> <span class="op">=</span> <span class="number">16</span> <span class="op">*</span> <span class="ident">queue_size</span>;
@@ -1356,13 +1432,9 @@
         <span class="kw">let</span> <span class="ident">avail_ring_size</span> <span class="op">=</span> <span class="number">6</span> <span class="op">+</span> <span class="number">2</span> <span class="op">*</span> <span class="ident">queue_size</span>;
         <span class="kw">let</span> <span class="ident">used_ring</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">used_ring</span>;
         <span class="kw">let</span> <span class="ident">used_ring_size</span> <span class="op">=</span> <span class="number">6</span> <span class="op">+</span> <span class="number">8</span> <span class="op">*</span> <span class="ident">queue_size</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">ready</span> {
-            <span class="macro">error!</span>(<span class="string">&quot;attempt to use virtio queue that is not marked ready&quot;</span>);
-            <span class="kw">return</span> <span class="bool-val">false</span>;
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">size</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">max_size</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> (<span class="self">self</span>.<span class="ident">size</span> <span class="op">&amp;</span> (<span class="self">self</span>.<span class="ident">size</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
-        {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">size</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">max_size</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> (<span class="self">self</span>.<span class="ident">size</span> <span class="op">&amp;</span> (<span class="self">self</span>.<span class="ident">size</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="macro">error!</span>(<span class="string">&quot;virtio queue with invalid size: {}&quot;</span>, <span class="self">self</span>.<span class="ident">size</span>);
-            <span class="kw">return</span> <span class="bool-val">false</span>;
+            <span class="kw">return</span>;
         }
 
         <span class="kw">let</span> <span class="ident">iommu</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iommu</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">lock</span>());
@@ -1380,16 +1452,16 @@
                             <span class="ident">addr</span>.<span class="ident">offset</span>(),
                             <span class="ident">size</span>,
                         );
-                        <span class="kw">return</span> <span class="bool-val">false</span>;
+                        <span class="kw">return</span>;
                     }
                 }
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="macro">error!</span>(<span class="string">&quot;is_valid failed: {:#}&quot;</span>, <span class="ident">e</span>);
-                    <span class="kw">return</span> <span class="bool-val">false</span>;
+                    <span class="kw">return</span>;
                 }
             }
         }
-        <span class="bool-val">true</span>
+        <span class="self">self</span>.<span class="ident">validated</span> <span class="op">=</span> <span class="bool-val">true</span>;
     }
 
     <span class="comment">// Get the index of the first available descriptor chain in the available ring</span>

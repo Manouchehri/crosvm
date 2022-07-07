@@ -1090,17 +1090,29 @@ crosvm run \
 </code></pre>
 <p>Then you can check that the VVU proxy device is allocated at the specified address by running
 <code>lspci</code> in the guest.</p>
-<pre><code class="language-sh"># Inside of the device VM guet.
+<pre><code class="language-sh"># Inside of the device VM guest.
 
 lspci -s $VVU_PCI_ADDR
 # Expected output:
 # &gt; 00:10.0 Unclassified device [00ff]: Red Hat, Inc. Device 107d (rev 01)
 # '107d' is the device ID for the VVU proxy device.
 </code></pre>
-<p>Second, start a VVU block device backend in the guest that you just started. Although the command
+<p>After that you need to make sure that the VVU device is bound to vfio_pci driver by manipulating
+sysfs.</p>
+<pre><code class="language-sh"># Inside of the device VM guest.
+basename `readlink /sys/bus/pci/devices/$VVU_PCI_ADDR/driver`
+# If that shows vfio-pci you are done, otherwise you need to rebind
+# the device to the right driver.
+echo &quot;vfio-pci&quot; &gt; /sys/bus/pci/devices/$VVU_PCI_ADDR/driver_override
+echo &quot;$VVU_PCI_ADDR&quot; &gt; /sys/bus/pci/devices/$VVU_PCI_ADDR/driver/unbind
+echo &quot;$VVU_PCI_ADDR&quot; &gt; /sys/bus/pci/drivers/vfio-pci/bind
+basename `readlink /sys/bus/pci/devices/$VVU_PCI_ADDR/driver`
+# This should show &quot;vfio-pci&quot; now.
+</code></pre>
+<p>Then, start a VVU block device backend in the guest that you just started. Although the command
 <code>crosvm device</code> is the same as <a href="devices/./vhost_user.html">vhost-user's example</a>, you need to use the <code>--vfio</code>
 flag instead of the <code>--socket</code> flag.</p>
-<pre><code class="language-sh"># Inside of the device VM guest
+<pre><code class="language-sh"># Inside of the device VM guest.
 
 crosvm device block \
   --vfio ${VVU_PCI_ADDR} \
@@ -1529,8 +1541,7 @@ structure would look like,</p>
 └── sys.rs
 </code></pre>
 <p>File: <code>print.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub struct PrintInner {
     pub value: u32,
@@ -1557,8 +1568,7 @@ pub trait Print {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/windows/print.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use crate::print::{Print, PrintInner};
 
@@ -1583,8 +1593,7 @@ impl Print for WinPrinter {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/unix/print.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use crate::print::{Print, PrintInner};
 
@@ -1609,8 +1618,7 @@ impl Print for UnixPrinter {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>cfg_if::cfg_if! {
     if #[cfg(unix)] {
@@ -1626,8 +1634,7 @@ impl Print for UnixPrinter {
 <h2 id="imports"><a class="header" href="#imports">Imports</a></h2>
 <p>When conditionally importing and using modules, use <code>cfg(unix)</code> and <code>cfg(windows)</code> for describing
 the platform. Order imports such that common comes first followed by unix and windows dependencies.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// All other imports
 
@@ -1666,8 +1673,7 @@ enum.</li>
 </ul>
 <h3 id="do"><a class="header" href="#do">Do</a></h3>
 <p>File: <code>sys/unix/base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum MyEnumSys {
   Unix1,
@@ -1681,8 +1687,7 @@ fn handle_my_enum_impl(e: MyEnumSys) {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/windows/base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum MyEnumSys {
   Windows1,
@@ -1696,8 +1701,7 @@ fn handle_my_enum_impl(e: MyEnumSys) {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use sys::MyEnumSys;
 enum MyEnum {
@@ -1717,8 +1721,7 @@ fn handle_my_enum(e: MyEnum) {
 </span></code></pre></pre>
 <h3 id="dont"><a class="header" href="#dont">Don't</a></h3>
 <p>File: <code>base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>enum MyEnum {
   Common1,
@@ -1748,8 +1751,7 @@ does most of what the original function was doing and there is no better name fo
 then the new function can be named by appending <code>_impl</code> to the functions name.</p>
 <h3 id="do-1"><a class="header" href="#do-1">Do</a></h3>
 <p>File: <code>base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn my_func() {
   print!(&quot;Hello &quot;);
@@ -1758,8 +1760,7 @@ then the new function can be named by appending <code>_impl</code> to the functi
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/unix/base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn my_func_impl() {
   println!(&quot;unix&quot;);
@@ -1767,8 +1768,7 @@ then the new function can be named by appending <code>_impl</code> to the functi
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/windows/base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn my_func_impl() {
   println!(&quot;windows&quot;);
@@ -1777,8 +1777,7 @@ then the new function can be named by appending <code>_impl</code> to the functi
 </span></code></pre></pre>
 <h3 id="dont-1"><a class="header" href="#dont-1">Don't</a></h3>
 <p>File: <code>base.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn my_func() {
   print!(&quot;Hello &quot;);
@@ -1798,8 +1797,7 @@ then the new function can be named by appending <code>_impl</code> to the functi
 done in the wildcard patter(<code>_</code>) arm of the match statement.</p>
 <h3 id="do-2"><a class="header" href="#do-2">Do</a></h3>
 <p>File: <code>parse.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn parse_args(arg: &amp;str) -&gt; Result&lt;()&gt;{
   match arg {
@@ -1813,8 +1811,7 @@ done in the wildcard patter(<code>_</code>) arm of the match statement.</p>
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/unix/parse.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn parse_args_impl(arg: &amp;str) -&gt; Result&lt;()&gt;{
   match arg {
@@ -1828,8 +1825,7 @@ done in the wildcard patter(<code>_</code>) arm of the match statement.</p>
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>sys/windows/parse.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn parse_args_impl(arg: &amp;str) -&gt; Result&lt;()&gt;{
   match arg {
@@ -1844,8 +1840,7 @@ done in the wildcard patter(<code>_</code>) arm of the match statement.</p>
 </span></code></pre></pre>
 <h3 id="dont-2"><a class="header" href="#dont-2">Don't</a></h3>
 <p>File: <code>parse.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn parse_args(arg: &amp;str) -&gt; Result&lt;()&gt;{
   match arg {
@@ -1874,8 +1869,7 @@ ordered by the target os name i.e. &quot;unix&quot; first and &quot;windows&quot
 other platforms then those symbols should be made public through a namespace that reflects the name
 of the platform.</p>
 <p>File: <code>sys.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>cfg_if::cfg_if! {
     if #[cfg(unix)] {
@@ -1891,8 +1885,7 @@ pub use platform::print;
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>unix.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn print() {
   println!(&quot;Hello unix&quot;);
@@ -1905,8 +1898,7 @@ fn print_u8(val: u8) {
 <span class="boring">}
 </span></code></pre></pre>
 <p>File: <code>windows.rs</code></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn print() {
   println!(&quot;Hello windows&quot;);
@@ -1920,8 +1912,7 @@ fn print_u16(val: u16) {
 </span></code></pre></pre>
 <p>The user of the library, say mylib, now has to do something like below which makes it explicit that
 the functions <code>print_u8</code> and <code>print_u16</code> are platform specific.</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use mylib::sys::print;
 
@@ -2138,7 +2129,7 @@ policy format. If a syscall is not listed in a policy file, it is not allowed.</
 <div style="break-before: page; page-break-before: always;"></div><h1 id="memory-layout"><a class="header" href="#memory-layout">Memory Layout</a></h1>
 <h2 id="x86-64-guest-physical-memory-map"><a class="header" href="#x86-64-guest-physical-memory-map">x86-64 guest physical memory map</a></h2>
 <p>This is a survey of the existing memory layout for crosvm on x86-64 when booting a Linux kernel. Some of these values are different when booting a BIOS image or when compiled with features=direct (ManaTEE); see the source. All addresses are in hexadecimal.</p>
-<table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
 <tr><td></td><td><code>0000</code></td><td><code>7000</code></td><td></td><td>RAM (may start at 0x1000 for crosvm-direct)</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/x86_64/src/lib.rs;l=235?q=ZERO_PAGE_OFFSET"><code>ZERO_PAGE_OFFSET</code></a></td><td><code>7000</code></td><td></td><td></td><td>Linux boot_params structure</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/x86_64/src/lib.rs;l=208?q=BOOT_STACK_POINTER"><code>BOOT_STACK_POINTER</code></a></td><td><code>8000</code></td><td></td><td></td><td>Boot SP value</td></tr>
@@ -2156,11 +2147,12 @@ policy format. If a syscall is not listed in a policy file, it is not allowed.</
 <tr><td></td><td><code>1_0000_0000</code></td><td></td><td></td><td>RAM (&gt;4G)</td></tr>
 <tr><td></td><td>(end of RAM)</td><td></td><td></td><td>High (&gt;4G) MMIO allocation area</td></tr>
 </tbody></table>
+</div>
 <h2 id="aarch64-guest-physical-memory-map"><a class="header" href="#aarch64-guest-physical-memory-map">aarch64 guest physical memory map</a></h2>
 <p>All addresses are IPA in hexadecimal.</p>
 <h3 id="common-layout"><a class="header" href="#common-layout">Common layout</a></h3>
 <p>These apply for all boot modes.</p>
-<table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/arch/src/serial.rs;l=70?q=SERIAL_ADDR"><code>SERIAL_ADDR[3]</code></a></td><td><code>2e8</code></td><td><code>2f0</code></td><td>8 bytes</td><td>Serial port MMIO</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/arch/src/serial.rs;l=70?q=SERIAL_ADDR"><code>SERIAL_ADDR[1]</code></a></td><td><code>2f8</code></td><td><code>300</code></td><td>8 bytes</td><td>Serial port MMIO</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/arch/src/serial.rs;l=70?q=SERIAL_ADDR"><code>SERIAL_ADDR[2]</code></a></td><td><code>3e8</code></td><td><code>3f0</code></td><td>8 bytes</td><td>Serial port MMIO</td></tr>
@@ -2177,20 +2169,22 @@ policy format. If a syscall is not listed in a policy file, it is not allowed.</
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=551?q=plat_mmio_base"><code>plat_mmio_base</code></a></td><td>after RAM</td><td>+0x800000</td><td>8 MiB</td><td>Platform device MMIO region</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=554?q=high_mmio_base"><code>high_mmio_base</code></a></td><td>after plat_mmio</td><td>max phys addr</td><td></td><td>High MMIO allocation area</td></tr>
 </tbody></table>
+</div>
 <h3 id="layout-when-booting-a-kernel"><a class="header" href="#layout-when-booting-a-kernel">Layout when booting a kernel</a></h3>
 <p>These apply when no bootloader is passed, so crosvm boots a kernel directly.</p>
-<table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=35?q=AARCH64_KERNEL_OFFSET"><code>AARCH64_KERNEL_OFFSET</code></a></td><td><code>8080_0000</code></td><td></td><td></td><td>Kernel load location in RAM</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=270?q=initrd_addr"><code>initrd_addr</code></a></td><td>after kernel</td><td></td><td></td><td>Linux initrd location in RAM</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=184?q=fdt_offset"><code>fdt_offset</code></a></td><td>before end of RAM</td><td></td><td>2 MiB</td><td>Flattened device tree in RAM</td></tr>
 </tbody></table>
+</div>
 <h3 id="layout-when-booting-a-bootloader"><a class="header" href="#layout-when-booting-a-bootloader">Layout when booting a bootloader</a></h3>
 <p>These apply when a bootloader is passed with <code>--bios</code>.</p>
-<table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
+<div class="table-wrapper"><table><thead><tr><th>Name/source link</th><th>Address</th><th>End (exclusive)</th><th>Size</th><th>Notes</th></tr></thead><tbody>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=49?q=AARCH64_FDT_OFFSET_IN_BIOS_MODE"><code>AARCH64_FDT_OFFSET_IN_BIOS_MODE</code></a></td><td><code>8000_0000</code></td><td><code>8020_0000</code></td><td>2 MiB</td><td>Flattened device tree in RAM</td></tr>
 <tr><td><a href="https://crsrc.org/o/src/platform/crosvm-upstream/aarch64/src/lib.rs;l=51?q=AARCH64_BIOS_OFFSET"><code>AARCH64_BIOS_OFFSET</code></a></td><td><code>8020_0000</code></td><td></td><td></td><td>Bootloader image in RAM</td></tr>
 </tbody></table>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="minijail"><a class="header" href="#minijail">Minijail</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="minijail"><a class="header" href="#minijail">Minijail</a></h1>
 <p>On Linux hosts, crosvm uses <a href="https://google.github.io/minijail/">minijail</a> to sandbox the child
 devices. The minijail C library is utilized via a
 <a href="https://android.googlesource.com/platform/external/minijail/+/refs/heads/master/rust/minijail/src/lib.rs">Rust wrapper</a>

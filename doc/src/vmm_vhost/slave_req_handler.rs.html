@@ -1385,7 +1385,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">VhostUserSlaveReqHandler</span>, <span class="ident">E</span>: <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SlaveReqHandler</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create a vhost-user slave endpoint.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">endpoint</span>: <span class="ident">E</span>, <span class="ident">backend</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">endpoint</span>: <span class="ident">E</span>, <span class="ident">backend</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">SlaveReqHandler</span> {
             <span class="ident">slave_req_helper</span>: <span class="ident">SlaveReqHelper::new</span>(<span class="ident">endpoint</span>, <span class="ident">backend</span>.<span class="ident">protocol</span>()),
             <span class="ident">backend</span>,

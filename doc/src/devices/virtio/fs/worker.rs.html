@@ -262,7 +262,7 @@
 <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">syscall</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">syscall</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">Protection</span>, <span class="ident">SafeDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>};
 <span class="kw">use</span> <span class="ident">fuse::filesystem</span>::{<span class="ident">FileSystem</span>, <span class="ident">ZeroCopyReader</span>, <span class="ident">ZeroCopyWriter</span>};
 <span class="kw">use</span> <span class="ident">sync::Mutex</span>;
 <span class="kw">use</span> <span class="ident">vm_control</span>::{<span class="ident">FsMappingRequest</span>, <span class="ident">VmResponse</span>};
@@ -351,7 +351,7 @@
             <span class="ident">fd</span>,
             <span class="ident">size</span>,
             <span class="ident">file_offset</span>,
-            <span class="ident">prot</span>,
+            <span class="ident">prot</span>: <span class="ident">Protection::from</span>(<span class="ident">prot</span> <span class="kw">as</span> <span class="ident">libc::c_int</span>),
             <span class="ident">mem_offset</span>,
         };
 

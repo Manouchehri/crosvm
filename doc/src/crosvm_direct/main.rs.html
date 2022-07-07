@@ -531,13 +531,18 @@
 <span id="530">530</span>
 <span id="531">531</span>
 <span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="doccomment">//! Runs a virtual machine</span>
-
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">panic_hook</span>;
 
 <span class="kw">use</span> <span class="ident">std::fs::OpenOptions</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
@@ -550,7 +555,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">crosvm::config::executable_is_plugin</span>;
 <span class="kw">use</span> <span class="ident">crosvm::config::Config</span>;
-<span class="kw">use</span> <span class="ident">crosvm</span>::{<span class="ident">cmdline</span>, <span class="ident">platform</span>};
+<span class="kw">use</span> <span class="ident">crosvm</span>::{<span class="ident">cmdline</span>, <span class="ident">sys</span> <span class="kw">as</span> <span class="ident">platform</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device</span>::{<span class="ident">run_block_device</span>, <span class="ident">run_net_device</span>};
 <span class="kw">use</span> <span class="ident">disk::QcowFile</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;composite-disk&quot;</span>)]</span>
@@ -565,6 +570,8 @@
     },
     <span class="ident">BalloonControlCommand</span>, <span class="ident">DiskControlCommand</span>, <span class="ident">UsbControlResult</span>, <span class="ident">VmRequest</span>, <span class="ident">VmResponse</span>,
 };
+
+<span class="kw">use</span> <span class="ident">crosvm::cmdline</span>::{<span class="ident">Command</span>, <span class="ident">CrossPlatformCommands</span>, <span class="ident">CrossPlatformDevicesCommands</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;scudo&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">global_allocator</span>]</span>
@@ -866,13 +873,13 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">opts</span>: <span class="ident">cmdline::DevicesCommand</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">opts</span>: <span class="ident">cmdline::DeviceCommand</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">opts</span>.<span class="ident">command</span> {
-        <span class="ident">cmdline::DevicesSubcommand::CrossPlatform</span>(<span class="ident">command</span>) =&gt; <span class="kw">match</span> <span class="ident">command</span> {
-            <span class="ident">cmdline::CrossPlatformDevicesCommands::Block</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_block_device</span>(<span class="ident">cfg</span>),
-            <span class="ident">cmdline::CrossPlatformDevicesCommands::Net</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_net_device</span>(<span class="ident">cfg</span>),
+        <span class="ident">cmdline::DeviceSubcommand::CrossPlatform</span>(<span class="ident">command</span>) =&gt; <span class="kw">match</span> <span class="ident">command</span> {
+            <span class="ident">CrossPlatformDevicesCommands::Block</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_block_device</span>(<span class="ident">cfg</span>),
+            <span class="ident">CrossPlatformDevicesCommands::Net</span>(<span class="ident">cfg</span>) =&gt; <span class="ident">run_net_device</span>(<span class="ident">cfg</span>),
         },
-        <span class="ident">cmdline::DevicesSubcommand::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::start_device</span>(<span class="ident">command</span>),
+        <span class="ident">cmdline::DeviceSubcommand::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::start_device</span>(<span class="ident">command</span>),
     };
 
     <span class="ident">result</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
@@ -944,7 +951,7 @@
 }
 
 <span class="kw">fn</span> <span class="ident">crosvm_main</span>() -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span> {
-    <span class="ident">panic_hook::set_panic_hook</span>();
+    <span class="ident">sys::set_panic_hook</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::default</span>();
     <span class="comment">// http://b/235882579</span>
@@ -960,12 +967,10 @@
                 <span class="macro">eprintln!</span>(<span class="string">&quot;Please use `--balloon-bias-mib` instead&quot;</span>);
                 <span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;--balloon-bias-mib&quot;</span>.<span class="ident">to_string</span>());
             }
+            <span class="string">&quot;-h&quot;</span> =&gt; <span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;--help&quot;</span>.<span class="ident">to_string</span>()),
             <span class="ident">arg</span> <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">starts_with</span>(<span class="string">&quot;--&quot;</span>) =&gt; {
+                <span class="comment">// Split `--arg=val` into `--arg val`, since argh doesn&#39;t support the former.</span>
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">split_once</span>(<span class="string">&quot;=&quot;</span>) {
-                    <span class="macro">eprintln!</span>(
-                        <span class="string">&quot;`{}={}` is deprecated, please use `{} {}`&quot;</span>,
-                        <span class="ident">key</span>, <span class="ident">value</span>, <span class="ident">key</span>, <span class="ident">value</span>
-                    );
                     <span class="ident">args</span>.<span class="ident">push</span>(<span class="ident">key</span>.<span class="ident">to_string</span>());
                     <span class="ident">args</span>.<span class="ident">push</span>(<span class="ident">value</span>.<span class="ident">to_string</span>());
                 } <span class="kw">else</span> {
@@ -1006,38 +1011,47 @@
         ..<span class="ident">Default::default</span>()
     };
 
-    <span class="comment">// Past this point, usage of exit is in danger of leaking zombie processes.</span>
-    <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">crosvm::cmdline::Command::Run</span>(<span class="ident">cmd</span>) <span class="op">=</span> <span class="ident">args</span>.<span class="ident">command</span> {
-        <span class="comment">// We handle run_vm separately because it does not simply signal success/error</span>
-        <span class="comment">// but also indicates whether the guest requested reset or stop.</span>
-        <span class="ident">run_vm</span>(<span class="ident">cmd</span>, <span class="ident">log_config</span>)
-    } <span class="kw">else</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">log_config</span>) {
-            <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+    <span class="kw">let</span> <span class="ident">ret</span>: <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">command</span> {
+        <span class="ident">Command::CrossPlatform</span>(<span class="ident">command</span>) =&gt; {
+            <span class="comment">// Past this point, usage of exit is in danger of leaking zombie processes.</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="ident">CrossPlatformCommands::Run</span>(<span class="ident">cmd</span>) <span class="op">=</span> <span class="ident">command</span> {
+                <span class="comment">// We handle run_vm separately because it does not simply signal success/error</span>
+                <span class="comment">// but also indicates whether the guest requested reset or stop.</span>
+                <span class="ident">run_vm</span>(<span class="ident">cmd</span>, <span class="ident">log_config</span>)
+            } <span class="kw">else</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">log_config</span>) {
+                    <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+                }
+                <span class="kw">match</span> <span class="ident">command</span> {
+                    <span class="ident">CrossPlatformCommands::Balloon</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::BalloonStats</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_stats</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Battery</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_battery</span>(<span class="ident">cmd</span>),
+                    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;composite-disk&quot;</span>)]</span>
+                    <span class="ident">CrossPlatformCommands::CreateComposite</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_composite</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::CreateQcow2</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_qcow2</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Device</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">start_device</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Disk</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">disk_cmd</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::MakeRT</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">make_rt</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Resume</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">resume_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Run</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
+                    <span class="ident">CrossPlatformCommands::Stop</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">stop_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Suspend</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">suspend_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Powerbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">powerbtn_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Sleepbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">sleepbtn_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Gpe</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">inject_gpe</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Usb</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_usb</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Version</span>(<span class="kw">_</span>) =&gt; <span class="ident">pkg_version</span>(),
+                    <span class="ident">CrossPlatformCommands::Vfio</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_vfio</span>(<span class="ident">cmd</span>),
+                }
+                .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>)
+            }
         }
-        <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">command</span> {
-            <span class="ident">cmdline::Command::Balloon</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::BalloonStats</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_stats</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Battery</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_battery</span>(<span class="ident">cmd</span>),
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;composite-disk&quot;</span>)]</span>
-            <span class="ident">cmdline::Command::CreateComposite</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_composite</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::CreateQcow2</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_qcow2</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Device</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">start_device</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Disk</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">disk_cmd</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::MakeRT</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">make_rt</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Resume</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">resume_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Run</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
-            <span class="ident">cmdline::Command::Stop</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">stop_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Suspend</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">suspend_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Powerbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">powerbtn_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Sleepbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">sleepbtn_vms</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Gpe</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">inject_gpe</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Usb</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_usb</span>(<span class="ident">cmd</span>),
-            <span class="ident">cmdline::Command::Version</span>(<span class="kw">_</span>) =&gt; <span class="ident">pkg_version</span>(),
-            <span class="ident">cmdline::Command::Vfio</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_vfio</span>(<span class="ident">cmd</span>),
-        }
-        .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>)
+        <span class="ident">cmdline::Command::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::run_command</span>(<span class="ident">command</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>)
+            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+                <span class="macro">error!</span>(<span class="string">&quot;Failed to run command {}&quot;</span>, <span class="ident">e</span>);
+            }),
     };
 
     <span class="ident">sys::cleanup</span>();

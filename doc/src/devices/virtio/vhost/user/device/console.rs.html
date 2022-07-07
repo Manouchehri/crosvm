@@ -227,6 +227,25 @@
 <span id="226">226</span>
 <span id="227">227</span>
 <span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -249,8 +268,10 @@
         <span class="self">self</span>,
         <span class="ident">console</span>::{<span class="ident">asynchronous::ConsoleDevice</span>, <span class="ident">virtio_console_config</span>},
         <span class="ident">copy_config</span>,
-        <span class="ident">vhost::user::device::handler</span>::{<span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>},
-        <span class="ident">vhost::user::device::vvu::pci::VvuPciDevice</span>,
+        <span class="ident">vhost::user::device</span>::{
+            <span class="ident">handler</span>::{<span class="ident">sys::Doorbell</span>, <span class="ident">VhostUserBackend</span>},
+            <span class="ident">listener</span>::{<span class="ident">sys::VhostUserListener</span>, <span class="ident">VhostUserListenerTrait</span>},
+        },
     },
     <span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>,
 };
@@ -258,15 +279,35 @@
 <span class="kw">const</span> <span class="ident">MAX_QUEUE_NUM</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">2</span> <span class="comment">/* transmit and receive queues */</span>;
 <span class="kw">const</span> <span class="ident">MAX_VRING_LEN</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="number">256</span>;
 
+<span class="doccomment">/// Console device for use with vhost-user. Will set stdin back to canon mode if we are getting</span>
+<span class="doccomment">/// input from it.</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VhostUserConsoleDevice</span> {
+    <span class="ident">console</span>: <span class="ident">ConsoleDevice</span>,
+    <span class="doccomment">/// Whether we should set stdin to raw mode because we are getting user input from there.</span>
+    <span class="ident">raw_stdin</span>: <span class="ident">bool</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">VhostUserConsoleDevice</span> {
+    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">raw_stdin</span> {
+            <span class="comment">// Restore terminal capabilities back to what they were before</span>
+            <span class="kw">match</span> <span class="ident">std::io::stdin</span>().<span class="ident">set_canon_mode</span>() {
+                <span class="prelude-val">Ok</span>(()) =&gt; (),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">error!</span>(<span class="string">&quot;failed to restore canonical mode for terminal: {:#}&quot;</span>, <span class="ident">e</span>),
+            }
+        }
+    }
+}
+
 <span class="kw">struct</span> <span class="ident">ConsoleBackend</span> {
     <span class="ident">ex</span>: <span class="ident">Executor</span>,
-    <span class="ident">device</span>: <span class="ident">ConsoleDevice</span>,
+    <span class="ident">device</span>: <span class="ident">VhostUserConsoleDevice</span>,
     <span class="ident">acked_features</span>: <span class="ident">u64</span>,
     <span class="ident">acked_protocol_features</span>: <span class="ident">VhostUserProtocolFeatures</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ConsoleBackend</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>, <span class="ident">device</span>: <span class="ident">ConsoleDevice</span>) -&gt; <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ex</span>: <span class="kw-2">&amp;</span><span class="ident">Executor</span>, <span class="ident">device</span>: <span class="ident">VhostUserConsoleDevice</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">ex</span>: <span class="ident">ex</span>.<span class="ident">clone</span>(),
             <span class="ident">device</span>,
@@ -278,15 +319,15 @@
 
 <span class="kw">impl</span> <span class="ident">VhostUserBackend</span> <span class="kw">for</span> <span class="ident">ConsoleBackend</span> {
     <span class="kw">fn</span> <span class="ident">max_queue_num</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
-        <span class="kw">return</span> <span class="ident">MAX_QUEUE_NUM</span>;
+        <span class="ident">MAX_QUEUE_NUM</span>
     }
 
     <span class="kw">fn</span> <span class="ident">max_vring_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u16</span> {
-        <span class="kw">return</span> <span class="ident">MAX_VRING_LEN</span>;
+        <span class="ident">MAX_VRING_LEN</span>
     }
 
     <span class="kw">fn</span> <span class="ident">features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
-        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">avail_features</span>() <span class="op">|</span> <span class="ident">VhostUserVirtioFeatures::PROTOCOL_FEATURES</span>.<span class="ident">bits</span>()
+        <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">console</span>.<span class="ident">avail_features</span>() <span class="op">|</span> <span class="ident">VhostUserVirtioFeatures::PROTOCOL_FEATURES</span>.<span class="ident">bits</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">ack_features</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">u64</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -349,10 +390,12 @@
             <span class="comment">// ReceiveQueue</span>
             <span class="number">0</span> =&gt; <span class="self">self</span>
                 .<span class="ident">device</span>
+                .<span class="ident">console</span>
                 .<span class="ident">start_receive_queue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>, <span class="ident">mem</span>, <span class="ident">queue</span>, <span class="ident">doorbell</span>, <span class="ident">kick_evt</span>),
             <span class="comment">// TransmitQueue</span>
             <span class="number">1</span> =&gt; <span class="self">self</span>
                 .<span class="ident">device</span>
+                .<span class="ident">console</span>
                 .<span class="ident">start_transmit_queue</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ex</span>, <span class="ident">mem</span>, <span class="ident">queue</span>, <span class="ident">doorbell</span>, <span class="ident">kick_evt</span>),
             <span class="kw">_</span> =&gt; <span class="macro">bail!</span>(<span class="string">&quot;attempted to start unknown queue: {}&quot;</span>, <span class="ident">idx</span>),
         }
@@ -361,12 +404,12 @@
     <span class="kw">fn</span> <span class="ident">stop_queue</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) {
         <span class="kw">match</span> <span class="ident">idx</span> {
             <span class="number">0</span> =&gt; {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">stop_receive_queue</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">console</span>.<span class="ident">stop_receive_queue</span>() {
                     <span class="macro">error!</span>(<span class="string">&quot;error while stopping rx queue: {}&quot;</span>, <span class="ident">e</span>);
                 }
             }
             <span class="number">1</span> =&gt; {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">stop_transmit_queue</span>() {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">device</span>.<span class="ident">console</span>.<span class="ident">stop_transmit_queue</span>() {
                     <span class="macro">error!</span>(<span class="string">&quot;error while stopping tx queue: {}&quot;</span>, <span class="ident">e</span>);
                 }
             }
@@ -427,33 +470,28 @@
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">bail!</span>(<span class="ident">e</span>),
     };
     <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;Failed to create executor&quot;</span>)<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">ConsoleBackend::new</span>(<span class="kw-2">&amp;</span><span class="ident">ex</span>, <span class="ident">console</span>);
-    <span class="kw">let</span> <span class="ident">max_queue_num</span> <span class="op">=</span> <span class="ident">backend</span>.<span class="ident">max_queue_num</span>();
-    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
+    <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">ConsoleBackend::new</span>(
+        <span class="kw-2">&amp;</span><span class="ident">ex</span>,
+        <span class="ident">VhostUserConsoleDevice</span> {
+            <span class="ident">console</span>,
+            <span class="ident">raw_stdin</span>: <span class="bool-val">true</span>,
+        },
+    ));
 
     <span class="comment">// Set stdin() in raw mode so we can send over individual keystrokes unbuffered</span>
     <span class="ident">stdin</span>()
         .<span class="ident">set_raw_mode</span>()
         .<span class="ident">context</span>(<span class="string">&quot;Failed to set terminal raw mode&quot;</span>)<span class="question-mark">?</span>;
 
-    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">opts</span>.<span class="ident">socket</span>, <span class="ident">opts</span>.<span class="ident">vfio</span>) {
-        (<span class="prelude-val">Some</span>(<span class="ident">socket</span>), <span class="prelude-val">None</span>) =&gt; {
-            <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us flatten.</span>
-            <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run</span>(<span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
-        }
-        (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">vfio</span>)) =&gt; {
-            <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">max_queue_num</span>)<span class="question-mark">?</span>;
-            <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run_vvu</span>(<span class="ident">device</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
-        }
-        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;exactly one of `--socket` or `--vfio` is required&quot;</span>)),
-    };
+    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">VhostUserListener::new_from_socket_or_vfio</span>(
+        <span class="kw-2">&amp;</span><span class="ident">opts</span>.<span class="ident">socket</span>,
+        <span class="kw-2">&amp;</span><span class="ident">opts</span>.<span class="ident">vfio</span>,
+        <span class="ident">backend</span>.<span class="ident">max_queue_num</span>(),
+        <span class="prelude-val">None</span>,
+    )<span class="question-mark">?</span>;
 
-    <span class="comment">// Restore terminal capabilities back to what they were before</span>
-    <span class="ident">stdin</span>()
-        .<span class="ident">set_canon_mode</span>()
-        .<span class="ident">context</span>(<span class="string">&quot;Failed to restore canonical mode for terminal&quot;</span>)<span class="question-mark">?</span>;
-
-    <span class="ident">res</span>
+    <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us flatten.</span>
+    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">listener</span>.<span class="ident">run_backend</span>(<span class="ident">backend</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>

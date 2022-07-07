@@ -680,6 +680,25 @@
 <span id="679">679</span>
 <span id="680">680</span>
 <span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -854,10 +873,13 @@
 }
 
 <span class="doccomment">/// Initial state for x86_64 VCPUs.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Default</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VcpuInitX86_64</span> {
     <span class="doccomment">/// General-purpose registers.</span>
     <span class="kw">pub</span> <span class="ident">regs</span>: <span class="ident">Regs</span>,
+
+    <span class="doccomment">/// Floating-point registers.</span>
+    <span class="kw">pub</span> <span class="ident">fpu</span>: <span class="ident">Fpu</span>,
 }
 
 <span class="doccomment">/// A CpuId Entry contains supported feature information for the given processor.</span>
@@ -1333,7 +1355,7 @@
 
 <span class="doccomment">/// State of a VCPU&#39;s floating point unit.</span>
 <span class="attribute">#[<span class="ident">repr</span>(<span class="ident">C</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Fpu</span> {
     <span class="kw">pub</span> <span class="ident">fpr</span>: [[<span class="ident">u8</span>; <span class="number">16usize</span>]; <span class="number">8usize</span>],
     <span class="kw">pub</span> <span class="ident">fcw</span>: <span class="ident">u16</span>,
@@ -1344,6 +1366,22 @@
     <span class="kw">pub</span> <span class="ident">last_dp</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">xmm</span>: [[<span class="ident">u8</span>; <span class="number">16usize</span>]; <span class="number">16usize</span>],
     <span class="kw">pub</span> <span class="ident">mxcsr</span>: <span class="ident">u32</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Fpu</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+        <span class="ident">Fpu</span> {
+            <span class="ident">fpr</span>: <span class="ident">Default::default</span>(),
+            <span class="ident">fcw</span>: <span class="number">0x37f</span>, <span class="comment">// Intel SDM Vol. 1, 13.6</span>
+            <span class="ident">fsw</span>: <span class="number">0</span>,
+            <span class="ident">ftwx</span>: <span class="number">0</span>,
+            <span class="ident">last_opcode</span>: <span class="number">0</span>,
+            <span class="ident">last_ip</span>: <span class="number">0</span>,
+            <span class="ident">last_dp</span>: <span class="number">0</span>,
+            <span class="ident">xmm</span>: <span class="ident">Default::default</span>(),
+            <span class="ident">mxcsr</span>: <span class="number">0x1f80</span>, <span class="comment">// Intel SDM Vol. 1, 11.6.4</span>
+        }
+    }
 }
 
 <span class="doccomment">/// State of a VCPU&#39;s debug registers.</span>

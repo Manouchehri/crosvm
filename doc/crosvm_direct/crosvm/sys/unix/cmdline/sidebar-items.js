@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["DevicesSubcommand","Unix Devices"]]});
+initSidebarItems({"enum":[["Commands","Unix Commands"],["DevicesSubcommand","Unix Devices"]]});

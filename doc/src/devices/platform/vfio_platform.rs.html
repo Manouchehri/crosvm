@@ -299,7 +299,7 @@
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">base</span>::{
     <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">MappedRegion</span>, <span class="ident">MemoryMapping</span>,
-    <span class="ident">MemoryMappingBuilder</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>,
+    <span class="ident">MemoryMappingBuilder</span>, <span class="ident">Protection</span>, <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>,
 };
 <span class="kw">use</span> <span class="ident">resources::SystemAllocator</span>;
 <span class="kw">use</span> <span class="ident">std::fs::File</span>;
@@ -477,7 +477,7 @@
                             <span class="ident">size</span>: <span class="ident">mmap_size</span>,
                         },
                         <span class="ident">dest</span>: <span class="ident">VmMemoryDestination::GuestPhysicalAddress</span>(<span class="ident">guest_map_start</span>),
-                        <span class="ident">read_only</span>: <span class="bool-val">false</span>,
+                        <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>(),
                     })
                     .<span class="ident">is_err</span>()
                 {

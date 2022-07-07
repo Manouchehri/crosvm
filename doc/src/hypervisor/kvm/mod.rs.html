@@ -1537,6 +1537,8 @@
 <span id="1536">1536</span>
 <span id="1537">1537</span>
 <span id="1538">1538</span>
+<span id="1539">1539</span>
+<span id="1540">1540</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2691,6 +2693,8 @@
             <span class="ident">HypervisorCap::UserMemory</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">KvmCap::UserMemory</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
             <span class="ident">HypervisorCap::Xcrs</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">KvmCap::Xcrs</span>),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
+            <span class="ident">HypervisorCap::CalibratedTscLeafRequired</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">libc::EINVAL</span>)),
         }
     }
 }

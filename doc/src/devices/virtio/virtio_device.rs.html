@@ -123,17 +123,83 @@
 <span id="122">122</span>
 <span id="123">123</span>
 <span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">acpi_tables::sdt::SDT</span>;
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Event</span>, <span class="ident">RawDescriptor</span>};
-<span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
+<span class="kw">use</span> <span class="ident">anyhow::Result</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Event</span>, <span class="ident">Protection</span>, <span class="ident">RawDescriptor</span>};
+<span class="kw">use</span> <span class="ident">vm_control::VmMemorySource</span>;
+<span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemory</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci</span>::{<span class="ident">MsixStatus</span>, <span class="ident">PciAddress</span>, <span class="ident">PciBarConfiguration</span>, <span class="ident">PciBarIndex</span>, <span class="ident">PciCapability</span>};
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharedMemoryRegion</span> {
+    <span class="doccomment">/// The id of the shared memory region. A device may have multiple regions, but each</span>
+    <span class="doccomment">/// must have a unique id. The meaning of a particular region is device-specific.</span>
+    <span class="kw">pub</span> <span class="ident">id</span>: <span class="ident">u8</span>,
+    <span class="kw">pub</span> <span class="ident">length</span>: <span class="ident">u64</span>,
+}
+
+<span class="doccomment">/// Trait for mapping memory into the device&#39;s shared memory region.</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SharedMemoryMapper</span>: <span class="ident">Send</span> {
+    <span class="doccomment">/// Maps the given |source| into the shared memory region at |offset|.</span>
+    <span class="kw">fn</span> <span class="ident">add_mapping</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">source</span>: <span class="ident">VmMemorySource</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">prot</span>: <span class="ident">Protection</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Removes the mapping beginning at |offset|.</span>
+    <span class="kw">fn</span> <span class="ident">remove_mapping</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">as_raw_descriptor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+}
 
 <span class="doccomment">/// Trait for virtio devices to be driven by a virtio transport.</span>
 <span class="doccomment">///</span>
@@ -246,6 +312,26 @@
     <span class="kw">fn</span> <span class="ident">pci_address</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PciAddress</span><span class="op">&gt;</span> {
         <span class="prelude-val">None</span>
     }
+
+    <span class="doccomment">/// Returns the device&#39;s shared memory region if present.</span>
+    <span class="kw">fn</span> <span class="ident">get_shared_memory_region</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SharedMemoryRegion</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
+
+    <span class="doccomment">/// Provides the trait object used to map files into the device&#39;s shared</span>
+    <span class="doccomment">/// memory region.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If `get_shared_memory_region` returns `Some`, then this will be called</span>
+    <span class="doccomment">/// before `activate`.</span>
+    <span class="kw">fn</span> <span class="ident">set_shared_memory_mapper</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_mapper</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SharedMemoryMapper</span><span class="op">&gt;</span>) {}
+
+    <span class="doccomment">/// Provides the base address of the shared memory region, if one is present. Will</span>
+    <span class="doccomment">/// be called before `activate`.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// NOTE: Mappings in shared memory regions should be accessed via offset, rather</span>
+    <span class="doccomment">/// than via raw guest physical address. This function is only provided so</span>
+    <span class="doccomment">/// devices can remain backwards compatible with older drivers.</span>
+    <span class="kw">fn</span> <span class="ident">set_shared_memory_region_base</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_addr</span>: <span class="ident">GuestAddress</span>) {}
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="devices" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>

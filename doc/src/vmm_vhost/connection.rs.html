@@ -474,6 +474,10 @@
 <span id="473">473</span>
 <span id="474">474</span>
 <span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -487,7 +491,7 @@
         <span class="kw">mod</span> <span class="ident">unix</span>;
     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
         <span class="kw">mod</span> <span class="ident">tube</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tube</span>::{<span class="ident">TubeEndpoint</span>, <span class="ident">TubeListener</span>};
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tube::TubeEndpoint</span>;
         <span class="kw">mod</span> <span class="ident">windows</span>;
     }
 }
@@ -508,22 +512,18 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Listener</span>: <span class="ident">Sized</span> {
     <span class="doccomment">/// Type of an object created when a connection is accepted.</span>
     <span class="kw">type</span> <span class="ident">Connection</span>;
+    <span class="doccomment">/// Type of endpoint created when a connection is accepted.</span>
+    <span class="kw">type</span> <span class="ident">Endpoint</span>;
 
     <span class="doccomment">/// Accept an incoming connection.</span>
-    <span class="kw">fn</span> <span class="ident">accept</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Connection</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">accept</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Endpoint</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Change blocking status on the listener.</span>
     <span class="kw">fn</span> <span class="ident">set_nonblocking</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Abstracts a vhost-user connection and related operations.</span>
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Req</span><span class="op">&gt;</span>: <span class="ident">Sized</span> {
-    <span class="doccomment">/// Type of an object that Endpoint is created from.</span>
-    <span class="kw">type</span> <span class="ident">Listener</span>: <span class="ident">Listener</span>;
-
-    <span class="doccomment">/// Create an endpoint from a stream object.</span>
-    <span class="kw">fn</span> <span class="ident">from_connection</span>(<span class="ident">sock</span>: <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span> <span class="kw">as</span> <span class="ident">Listener</span><span class="op">&gt;</span><span class="ident">::Connection</span>) -&gt; <span class="self">Self</span>;
-
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Endpoint</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Req</span><span class="op">&gt;</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Send</span> {
     <span class="doccomment">/// Create a new stream by connecting to server at `str`.</span>
     <span class="kw">fn</span> <span class="ident">connect</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>;
 
@@ -885,28 +885,36 @@
     <span class="doccomment">/// accepted and all other file descriptor will be discard silently.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Return:</span>
-    <span class="doccomment">/// * - (message header, message body, size of payload, [received files]) on success.</span>
+    <span class="doccomment">/// * - (message header, message body, payload, [received files]) on success.</span>
     <span class="doccomment">/// * - PartialMessage: received a partial message.</span>
     <span class="doccomment">/// * - InvalidMessage: received a invalid message.</span>
     <span class="doccomment">/// * - backend specific errors</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cargo-clippy&quot;</span>, <span class="ident">allow</span>(<span class="ident">clippy::type_complexity</span>))]</span>
     <span class="kw">fn</span> <span class="ident">recv_payload_into_buf</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">DataInit</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">VhostUserMsgValidator</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>],
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">VhostUserMsgHeader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">VhostUserMsgHeader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">T</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hdr</span> <span class="op">=</span> <span class="ident">VhostUserMsgHeader::default</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">body</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">Default::default</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slices</span> <span class="op">=</span> [<span class="ident">hdr</span>.<span class="ident">as_mut_slice</span>(), <span class="ident">body</span>.<span class="ident">as_mut_slice</span>(), <span class="ident">buf</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slices</span> <span class="op">=</span> [<span class="ident">hdr</span>.<span class="ident">as_mut_slice</span>()];
         <span class="kw">let</span> (<span class="ident">bytes</span>, <span class="ident">files</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">recv_into_bufs_all</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slices</span>)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">total</span> <span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VhostUserMsgHeader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>();
-        <span class="kw">if</span> <span class="ident">bytes</span> <span class="op">&lt;</span> <span class="ident">total</span> {
+        <span class="kw">if</span> <span class="ident">bytes</span> <span class="op">&lt;</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VhostUserMsgHeader</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::PartialMessage</span>);
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">hdr</span>.<span class="ident">is_valid</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">body</span>.<span class="ident">is_valid</span>() {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">hdr</span>.<span class="ident">is_valid</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidMessage</span>);
         }
 
-        <span class="prelude-val">Ok</span>((<span class="ident">hdr</span>, <span class="ident">body</span>, <span class="ident">bytes</span> <span class="op">-</span> <span class="ident">total</span>, <span class="ident">files</span>))
+        <span class="kw">let</span> <span class="ident">payload_size</span> <span class="op">=</span> <span class="ident">hdr</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">payload_size</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slices</span> <span class="op">=</span> [<span class="ident">body</span>.<span class="ident">as_mut_slice</span>(), <span class="ident">buf</span>.<span class="ident">as_mut_slice</span>()];
+        <span class="kw">let</span> (<span class="ident">bytes</span>, <span class="ident">more_files</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">recv_into_bufs_all</span>(<span class="kw-2">&amp;mut</span> <span class="ident">slices</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">bytes</span> <span class="op">&lt;</span> <span class="ident">hdr</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::PartialMessage</span>);
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">body</span>.<span class="ident">is_valid</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">more_files</span>.<span class="ident">is_some</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidMessage</span>);
+        }
+
+        <span class="prelude-val">Ok</span>((<span class="ident">hdr</span>, <span class="ident">body</span>, <span class="ident">buf</span>, <span class="ident">files</span>))
     }
 }
 

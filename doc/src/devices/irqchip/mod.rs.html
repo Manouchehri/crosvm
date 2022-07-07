@@ -240,25 +240,6 @@
 <span id="239">239</span>
 <span id="240">240</span>
 <span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -276,51 +257,32 @@
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
         <span class="kw">mod</span> <span class="ident">kvm</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">x86_64</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">x86_64</span>::<span class="kw-2">*</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">aarch64</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aarch64</span>::<span class="kw-2">*</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">pic</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pic</span>::<span class="kw-2">*</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">ioapic</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ioapic</span>::<span class="kw-2">*</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">apic</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">apic</span>::<span class="kw-2">*</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">userspace</span>;
-
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">userspace</span>::<span class="kw-2">*</span>;
-
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::kvm::KvmKernelIrqChip</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::kvm::KvmSplitIrqChip</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>))]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::kvm</span>::{<span class="ident">AARCH64_GIC_NR_IRQS</span>, <span class="ident">AARCH64_GIC_NR_SPIS</span>};
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;whpx&quot;</span>)]</span>
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">windows</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;whpx&quot;</span>))]</span> {
         <span class="kw">mod</span> <span class="ident">whpx</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;whpx&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::whpx::WhpxSplitIrqChip</span>;
+    }
+}
+
+<span class="macro">cfg_if::cfg_if!</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span> {
+        <span class="kw">mod</span> <span class="ident">x86_64</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">x86_64</span>::<span class="kw-2">*</span>;
+        <span class="kw">mod</span> <span class="ident">pic</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pic</span>::<span class="kw-2">*</span>;
+        <span class="kw">mod</span> <span class="ident">ioapic</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ioapic</span>::<span class="kw-2">*</span>;
+        <span class="kw">mod</span> <span class="ident">apic</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">apic</span>::<span class="kw-2">*</span>;
+        <span class="kw">mod</span> <span class="ident">userspace</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">userspace</span>::<span class="kw-2">*</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>))]</span> {
+        <span class="kw">mod</span> <span class="ident">aarch64</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aarch64</span>::<span class="kw-2">*</span>;
     }
 }
 

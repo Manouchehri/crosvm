@@ -70,6 +70,10 @@
 <span id="69">69</span>
 <span id="70">70</span>
 <span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -85,7 +89,7 @@
     <span class="ident">run_console_device</span>, <span class="ident">run_fs_device</span>, <span class="ident">run_vsock_device</span>, <span class="ident">run_wl_device</span>,
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::cmdline::DevicesSubcommand</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::cmdline</span>::{<span class="ident">Commands</span>, <span class="ident">DevicesSubcommand</span>};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">command</span>: <span class="ident">DevicesSubcommand</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">command</span> {
@@ -140,6 +144,10 @@
             <span class="macro">warn!</span>(<span class="string">&quot;unable to kill all child processes: {}&quot;</span>, <span class="ident">e</span>);
         }
     }
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">run_command</span>(<span class="ident">_cmd</span>: <span class="ident">Commands</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="prelude-val">Err</span>(<span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;invalid command&quot;</span>))
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="crosvm" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>

@@ -251,7 +251,7 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::block::asynchronous</span>::{<span class="ident">flush_disk</span>, <span class="ident">handle_queue</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::block</span>::{<span class="ident">build_avail_features</span>, <span class="ident">build_config_space</span>, <span class="ident">DiskState</span>, <span class="ident">SECTOR_SIZE</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{<span class="ident">sys::Doorbell</span>, <span class="ident">VhostUserBackend</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{<span class="self">self</span>, <span class="ident">block::sys</span>::<span class="kw-2">*</span>, <span class="ident">copy_config</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sys</span>::{<span class="ident">start_device</span> <span class="kw">as</span> <span class="ident">run_block_device</span>, <span class="ident">Options</span>};

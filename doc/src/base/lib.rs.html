@@ -156,6 +156,7 @@
 <span id="155">155</span>
 <span id="156">156</span>
 <span id="157">157</span>
+<span id="158">158</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -190,6 +191,7 @@
 };
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::{<span class="ident">MemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">notifiers</span>::{<span class="ident">CloseNotifier</span>, <span class="ident">ReadNotifier</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::gmtime_secure</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::ioctl</span>::{
     <span class="ident">ioctl</span>, <span class="ident">ioctl_with_mut_ptr</span>, <span class="ident">ioctl_with_mut_ref</span>, <span class="ident">ioctl_with_ptr</span>, <span class="ident">ioctl_with_ref</span>, <span class="ident">ioctl_with_val</span>,
     <span class="ident">IoctlNr</span>,
@@ -259,12 +261,12 @@
             <span class="ident">DuplicateHandleRequest</span>, <span class="ident">DuplicateHandleResponse</span>, <span class="ident">DuplicateHandleTube</span>,
         };
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">set_audio_thread_priorities</span>, <span class="ident">thread</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">BlockingMode</span>, <span class="ident">FramingMode</span>, <span class="ident">StreamChannel</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform::gmtime_secure</span>;
     } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);
     }
 }
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{<span class="ident">BlockingMode</span>, <span class="ident">FramingMode</span>, <span class="ident">StreamChannel</span>};
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">platform</span>::{
     <span class="ident">deserialize_with_descriptors</span>, <span class="ident">EventContext</span>, <span class="ident">FileAllocate</span>, <span class="ident">FileGetLen</span>, <span class="ident">FileSerdeWrapper</span>,

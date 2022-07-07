@@ -144,6 +144,13 @@
 <span id="143">143</span>
 <span id="144">144</span>
 <span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -153,19 +160,46 @@
 <span class="doccomment">//! Emulates virtual and hardware devices.</span>
 
 <span class="kw">mod</span> <span class="ident">bus</span>;
+<span class="kw">mod</span> <span class="ident">cmos</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direct_io</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direct_irq</span>;
+<span class="kw">mod</span> <span class="ident">i8042</span>;
 <span class="kw">mod</span> <span class="ident">irq_event</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">irqchip</span>;
 <span class="kw">mod</span> <span class="ident">pci</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pl030</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">mod</span> <span class="ident">register_space</span>;
+<span class="kw">mod</span> <span class="ident">serial</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">serial_device</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">software_tpm</span>;
 <span class="kw">mod</span> <span class="ident">sys</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">virtio</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">mod</span> <span class="ident">vtpm_proxy</span>;
 
+<span class="macro">cfg_if::cfg_if!</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span> {
+        <span class="kw">mod</span> <span class="ident">pit</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pit</span>::{<span class="ident">Pit</span>, <span class="ident">PitError</span>};
+        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">tsc</span>;
+    }
+}
+
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::bus</span>::{
     <span class="ident">Bus</span>, <span class="ident">BusAccessInfo</span>, <span class="ident">BusDevice</span>, <span class="ident">BusDeviceObj</span>, <span class="ident">BusDeviceSync</span>, <span class="ident">BusRange</span>, <span class="ident">BusResumeDevice</span>, <span class="ident">BusType</span>,
     <span class="ident">HostHotPlugKey</span>, <span class="ident">HotPlugBus</span>,
 };
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::cmos::Cmos</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::direct_io</span>::{<span class="ident">DirectIo</span>, <span class="ident">DirectMmio</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::direct_irq</span>::{<span class="ident">DirectIrq</span>, <span class="ident">DirectIrqError</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::i8042::I8042Device</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::irq_event</span>::{<span class="ident">IrqEdgeEvent</span>, <span class="ident">IrqLevelEvent</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::irqchip</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pci::CrosvmDeviceId</span>;
@@ -174,34 +208,24 @@
     <span class="ident">PciDeviceError</span>, <span class="ident">PciInterruptPin</span>, <span class="ident">PciRoot</span>, <span class="ident">PciVirtualConfigMmio</span>, <span class="ident">StubPciDevice</span>,
     <span class="ident">StubPciParameters</span>,
 };
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pl030::Pl030</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::serial::Serial</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::serial_device</span>::{
+    <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SerialError</span>, <span class="ident">SerialDevice</span>, <span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>,
+};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::software_tpm::SoftwareTpm</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::vtpm_proxy::VtpmProxy</span>;
 
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">cmos</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
         <span class="kw">mod</span> <span class="ident">debugcon</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direct_io</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">direct_irq</span>;
-        <span class="kw">mod</span> <span class="ident">i8042</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">pit</span>;
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pl030</span>;
         <span class="kw">mod</span> <span class="ident">platform</span>;
         <span class="kw">mod</span> <span class="ident">proxy</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
-        <span class="attribute">#[<span class="ident">macro_use</span>]</span>
-        <span class="kw">mod</span> <span class="ident">register_space</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">acpi</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">bat</span>;
-        <span class="kw">mod</span> <span class="ident">serial</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-        <span class="kw">mod</span> <span class="ident">software_tpm</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">tsc</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">usb</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
@@ -211,14 +235,8 @@
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::acpi::ACPIPMResource</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::bat</span>::{<span class="ident">BatteryError</span>, <span class="ident">GoldfishBattery</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::bus::Error</span> <span class="kw">as</span> <span class="ident">BusError</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::cmos::Cmos</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::debugcon::Debugcon</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::direct_io</span>::{<span class="ident">DirectIo</span>, <span class="ident">DirectMmio</span>};
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::direct_irq</span>::{<span class="ident">DirectIrq</span>, <span class="ident">DirectIrqError</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::i8042::I8042Device</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pci</span>::{<span class="ident">Ac97Backend</span>, <span class="ident">Ac97Dev</span>, <span class="ident">Ac97Parameters</span>};
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pci</span>::{ <span class="ident">PciBus</span>,
@@ -226,18 +244,9 @@
             <span class="ident">PvPanicCode</span>, <span class="ident">PcieRootPort</span>, <span class="ident">PcieHostPort</span>,
             <span class="ident">PvPanicPciDevice</span>, <span class="ident">VfioPciDevice</span>, <span class="ident">PciBridge</span>,
         };
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pit</span>::{<span class="ident">Pit</span>, <span class="ident">PitError</span>};
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pl030::Pl030</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::platform::VfioPlatformDevice</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::proxy::Error</span> <span class="kw">as</span> <span class="ident">ProxyError</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::proxy::ProxyDevice</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::serial::Serial</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::serial_device</span>::{
-            <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SerialError</span>, <span class="ident">SerialDevice</span>, <span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>, <span class="ident">SerialType</span>,
-        };
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::software_tpm::SoftwareTpm</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::usb::host_backend::host_backend_device_provider::HostBackendDeviceProvider</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;usb&quot;</span>)]</span>
@@ -285,6 +294,11 @@
             }
         }
     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+        <span class="comment">// We define Minijail as an empty struct on Windows because the concept</span>
+        <span class="comment">// of jailing is baked into a bunch of places where it isn&#39;t easy</span>
+        <span class="comment">// to compile it out. In the long term, this should go away.</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Minijail</span> {}
     } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);
     }

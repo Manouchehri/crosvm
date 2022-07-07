@@ -1028,6 +1028,21 @@
 <span id="1027">1027</span>
 <span id="1028">1028</span>
 <span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
+<span id="1032">1032</span>
+<span id="1033">1033</span>
+<span id="1034">1034</span>
+<span id="1035">1035</span>
+<span id="1036">1036</span>
+<span id="1037">1037</span>
+<span id="1038">1038</span>
+<span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1691,7 +1706,22 @@
             <span class="ident">in_formats</span>.<span class="ident">push</span>(<span class="ident">FormatDesc</span> {
                 <span class="ident">mask</span>: <span class="op">!</span>(<span class="ident">u64::MAX</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SUPPORTED_OUTPUT_FORMATS</span>.<span class="ident">len</span>()),
                 <span class="ident">format</span>,
-                <span class="ident">frame_formats</span>: <span class="macro">vec!</span>[<span class="ident">Default::default</span>()],
+                <span class="ident">frame_formats</span>: <span class="macro">vec!</span>[<span class="ident">FrameFormat</span> {
+                    <span class="comment">// These frame sizes are arbitrary, but avcodec does not seem to have any</span>
+                    <span class="comment">// specific restriction in that regard (or any way to query the supported</span>
+                    <span class="comment">// resolutions).</span>
+                    <span class="ident">width</span>: <span class="ident">FormatRange</span> {
+                        <span class="ident">min</span>: <span class="number">64</span>,
+                        <span class="ident">max</span>: <span class="number">16384</span>,
+                        <span class="ident">step</span>: <span class="number">1</span>,
+                    },
+                    <span class="ident">height</span>: <span class="ident">FormatRange</span> {
+                        <span class="ident">min</span>: <span class="number">64</span>,
+                        <span class="ident">max</span>: <span class="number">16384</span>,
+                        <span class="ident">step</span>: <span class="number">1</span>,
+                    },
+                    <span class="ident">bitrates</span>: <span class="ident">Default::default</span>(),
+                }],
             });
         }
 

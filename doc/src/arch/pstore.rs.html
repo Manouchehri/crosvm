@@ -73,11 +73,23 @@
 <span id="72">72</span>
 <span id="73">73</span>
 <span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::fs::OpenOptions</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">use</span> <span class="ident">std::os::windows::fs::OpenOptionsExt</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Pstore</span>;
 <span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
@@ -85,6 +97,8 @@
 <span class="kw">use</span> <span class="ident">hypervisor::Vm</span>;
 <span class="kw">use</span> <span class="ident">resources::AddressRange</span>;
 <span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">use</span> <span class="ident">winapi::um::winnt::FILE_SHARE_READ</span>;
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RamoopsRegion</span> {
     <span class="kw">pub</span> <span class="ident">address</span>: <span class="ident">u64</span>,
@@ -102,10 +116,16 @@
         <span class="macro">bail!</span>(<span class="string">&quot;insufficient space for pstore {} {}&quot;</span>, <span class="ident">region</span>, <span class="ident">pstore</span>.<span class="ident">size</span>);
     }
 
-    <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">OpenOptions::new</span>()
-        .<span class="ident">read</span>(<span class="bool-val">true</span>)
-        .<span class="ident">write</span>(<span class="bool-val">true</span>)
-        .<span class="ident">create</span>(<span class="bool-val">true</span>)
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">open_opts</span> <span class="op">=</span> <span class="ident">OpenOptions::new</span>();
+    <span class="ident">open_opts</span>.<span class="ident">read</span>(<span class="bool-val">true</span>).<span class="ident">write</span>(<span class="bool-val">true</span>).<span class="ident">create</span>(<span class="bool-val">true</span>);
+
+    <span class="comment">// Allow other applications to read the memory region.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    {
+        <span class="ident">open_opts</span>.<span class="ident">share_mode</span>(<span class="ident">FILE_SHARE_READ</span>);
+    }
+
+    <span class="kw">let</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">open_opts</span>
         .<span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">pstore</span>.<span class="ident">path</span>)
         .<span class="ident">context</span>(<span class="string">&quot;failed to open pstore&quot;</span>)<span class="question-mark">?</span>;
     <span class="ident">file</span>.<span class="ident">set_len</span>(<span class="ident">pstore</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">u64</span>)

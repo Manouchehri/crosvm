@@ -1089,16 +1089,6 @@
 <span id="1088">1088</span>
 <span id="1089">1089</span>
 <span id="1090">1090</span>
-<span id="1091">1091</span>
-<span id="1092">1092</span>
-<span id="1093">1093</span>
-<span id="1094">1094</span>
-<span id="1095">1095</span>
-<span id="1096">1096</span>
-<span id="1097">1097</span>
-<span id="1098">1098</span>
-<span id="1099">1099</span>
-<span id="1100">1100</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -1819,23 +1809,13 @@
         <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
         <span class="ident">hdr</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserMsgHeader</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span>,
     ) -&gt; <span class="ident">VhostUserResult</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">File</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">&gt;</span> <span class="ident">MAX_MSG_SIZE</span>
-            <span class="op">|</span><span class="op">|</span> <span class="ident">hdr</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="ident">hdr</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span> <span class="ident">MAX_MSG_SIZE</span>
-            <span class="op">|</span><span class="op">|</span> <span class="ident">hdr</span>.<span class="ident">is_reply</span>()
-        {
+        <span class="kw">if</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">&gt;</span> <span class="ident">MAX_MSG_SIZE</span> <span class="op">|</span><span class="op">|</span> <span class="ident">hdr</span>.<span class="ident">is_reply</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VhostUserError::InvalidParam</span>);
         }
         <span class="self">self</span>.<span class="ident">check_state</span>()<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">hdr</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()];
-        <span class="kw">let</span> (<span class="ident">reply</span>, <span class="ident">body</span>, <span class="ident">bytes</span>, <span class="ident">files</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">main_sock</span>.<span class="ident">recv_payload_into_buf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buf</span>)<span class="question-mark">?</span>;
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">reply</span>.<span class="ident">is_reply_for</span>(<span class="ident">hdr</span>)
-            <span class="op">|</span><span class="op">|</span> <span class="ident">reply</span>.<span class="ident">get_size</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">!</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">bytes</span>
-            <span class="op">|</span><span class="op">|</span> <span class="ident">files</span>.<span class="ident">is_some</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">body</span>.<span class="ident">is_valid</span>()
-            <span class="op">|</span><span class="op">|</span> <span class="ident">bytes</span> <span class="op">!</span><span class="op">=</span> <span class="ident">buf</span>.<span class="ident">len</span>()
-        {
+        <span class="kw">let</span> (<span class="ident">reply</span>, <span class="ident">body</span>, <span class="ident">buf</span>, <span class="ident">files</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">main_sock</span>.<span class="ident">recv_payload_into_buf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">reply</span>.<span class="ident">is_reply_for</span>(<span class="ident">hdr</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">files</span>.<span class="ident">is_some</span>() <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">body</span>.<span class="ident">is_valid</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VhostUserError::InvalidMessage</span>);
         }
 

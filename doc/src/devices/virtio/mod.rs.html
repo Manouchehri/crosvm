@@ -184,73 +184,85 @@
 <span id="183">183</span>
 <span id="184">184</span>
 <span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="doccomment">//! Implements virtio devices, queues, and transport mechanisms.</span>
 
+<span class="kw">mod</span> <span class="ident">async_device</span>;
 <span class="kw">mod</span> <span class="ident">async_utils</span>;
 <span class="kw">mod</span> <span class="ident">descriptor_utils</span>;
+<span class="kw">mod</span> <span class="ident">input</span>;
 <span class="kw">mod</span> <span class="ident">interrupt</span>;
 <span class="kw">mod</span> <span class="ident">iommu</span>;
 <span class="kw">mod</span> <span class="ident">queue</span>;
+<span class="kw">mod</span> <span class="ident">rng</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tpm</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
+<span class="kw">mod</span> <span class="ident">video</span>;
 <span class="kw">mod</span> <span class="ident">virtio_device</span>;
+<span class="kw">mod</span> <span class="ident">virtio_pci_common_config</span>;
+<span class="kw">mod</span> <span class="ident">virtio_pci_device</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">block</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">console</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">resource_bridge</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vhost</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::block</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::descriptor_utils::Error</span> <span class="kw">as</span> <span class="ident">DescriptorError</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::descriptor_utils</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::input</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::interrupt</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::iommu</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::queue</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::rng</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::tpm</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::video</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::virtio_device</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::virtio_pci_device</span>::<span class="kw-2">*</span>;
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">async_device</span>;
         <span class="kw">mod</span> <span class="ident">balloon</span>;
-        <span class="kw">mod</span> <span class="ident">input</span>;
         <span class="kw">mod</span> <span class="ident">p9</span>;
         <span class="kw">mod</span> <span class="ident">pmem</span>;
-        <span class="kw">mod</span> <span class="ident">rng</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-        <span class="kw">mod</span> <span class="ident">tpm</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
-        <span class="kw">mod</span> <span class="ident">video</span>;
-        <span class="kw">mod</span> <span class="ident">virtio_pci_common_config</span>;
-        <span class="kw">mod</span> <span class="ident">virtio_pci_device</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">wl</span>;
 
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">block</span>;
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">console</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">fs</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">gpu</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">net</span>;
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">resource_bridge</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">snd</span>;
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vhost</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::balloon</span>::<span class="kw-2">*</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::block</span>::<span class="kw-2">*</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::console</span>::<span class="kw-2">*</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::gpu</span>::<span class="kw-2">*</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::input</span>::<span class="kw-2">*</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::iommu::sys::unix::vfio_wrapper</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::net</span>::<span class="kw-2">*</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::p9</span>::<span class="kw-2">*</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::pmem</span>::<span class="kw-2">*</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::rng</span>::<span class="kw-2">*</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::snd</span>::<span class="kw-2">*</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::tpm</span>::<span class="kw-2">*</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::video</span>::<span class="kw-2">*</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::virtio_pci_device</span>::<span class="kw-2">*</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::wl</span>::<span class="kw-2">*</span>;
 
     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">net</span>;
+
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp&quot;</span>)]</span>
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::net</span>::<span class="kw-2">*</span>;
     } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);
     }

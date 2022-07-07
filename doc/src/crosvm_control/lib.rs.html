@@ -375,6 +375,12 @@
 <span id="374">374</span>
 <span id="375">375</span>
 <span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -383,6 +389,12 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This crate is a programmatic alternative to invoking crosvm with subcommands that produce the</span>
 <span class="doccomment">//! result on stdout.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Downstream projects rely on this library maintaining a stable API surface.</span>
+<span class="doccomment">//! Do not make changes to this library without consulting the crosvm externalization team.</span>
+<span class="doccomment">//! Email: crosvm-dev@chromium.org</span>
+<span class="doccomment">//! For more information see:</span>
+<span class="doccomment">//! &lt;https://google.github.io/crosvm/running_crosvm/programmatic_interaction.html#usage&gt;</span>
 
 <span class="kw">use</span> <span class="ident">std::convert</span>::{<span class="ident">TryFrom</span>, <span class="ident">TryInto</span>};
 <span class="kw">use</span> <span class="ident">std::ffi::CStr</span>;

@@ -103,7 +103,7 @@
         <span class="ident">listener</span>.<span class="ident">set_nonblocking</span>(<span class="bool-val">true</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">master</span> <span class="op">=</span> <span class="ident">Master::connect</span>(<span class="ident">path</span>, <span class="number">2</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">slave</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">accept</span>().<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
-        (<span class="ident">master</span>, <span class="ident">SocketEndpoint::from</span>(<span class="ident">slave</span>))
+        (<span class="ident">master</span>, <span class="ident">slave</span>)
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span>

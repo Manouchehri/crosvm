@@ -1441,10 +1441,6 @@
 <span id="1440">1440</span>
 <span id="1441">1441</span>
 <span id="1442">1442</span>
-<span id="1443">1443</span>
-<span id="1444">1444</span>
-<span id="1445">1445</span>
-<span id="1446">1446</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1723,16 +1719,16 @@
         <span class="self">self</span>,
         <span class="ident">map_request</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ExternalMapping</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">gralloc</span>: <span class="kw-2">&amp;mut</span> <span class="ident">RutabagaGralloc</span>,
-        <span class="ident">read_only</span>: <span class="ident">bool</span>,
+        <span class="ident">prot</span>: <span class="ident">Protection</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MappedRegion</span><span class="op">&gt;</span>, <span class="ident">u64</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">mem_region</span>, <span class="ident">size</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">VmMemorySource::Descriptor</span> {
                 <span class="ident">descriptor</span>,
                 <span class="ident">offset</span>,
                 <span class="ident">size</span>,
-            } =&gt; (<span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">descriptor</span>, <span class="ident">offset</span>, <span class="ident">size</span>, <span class="ident">read_only</span>)<span class="question-mark">?</span>, <span class="ident">size</span>),
+            } =&gt; (<span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">descriptor</span>, <span class="ident">offset</span>, <span class="ident">size</span>, <span class="ident">prot</span>)<span class="question-mark">?</span>, <span class="ident">size</span>),
             <span class="ident">VmMemorySource::SharedMemory</span>(<span class="ident">shm</span>) =&gt; {
-                (<span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">shm</span>, <span class="number">0</span>, <span class="ident">shm</span>.<span class="ident">size</span>(), <span class="ident">read_only</span>)<span class="question-mark">?</span>, <span class="ident">shm</span>.<span class="ident">size</span>())
+                (<span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">shm</span>, <span class="number">0</span>, <span class="ident">shm</span>.<span class="ident">size</span>(), <span class="ident">prot</span>)<span class="question-mark">?</span>, <span class="ident">shm</span>.<span class="ident">size</span>())
             }
             <span class="ident">VmMemorySource::Vulkan</span> {
                 <span class="ident">descriptor</span>,
@@ -1814,7 +1810,7 @@
         <span class="doccomment">/// Where to map the memory in the guest.</span>
         <span class="ident">dest</span>: <span class="ident">VmMemoryDestination</span>,
         <span class="doccomment">/// Whether to map the memory read only (true) or read-write (false).</span>
-        <span class="ident">read_only</span>: <span class="ident">bool</span>,
+        <span class="ident">prot</span>: <span class="ident">Protection</span>,
     },
     <span class="doccomment">/// Allocate GPU buffer of a given size/format and register the memory into guest address space.</span>
     <span class="doccomment">/// The response variant is `VmResponse::AllocateAndRegisterGpuMemory`</span>
@@ -1858,14 +1854,10 @@
     ) -&gt; <span class="ident">VmMemoryResponse</span> {
         <span class="kw">use</span> <span class="ident"><span class="self">self</span>::VmMemoryRequest</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">RegisterMemory</span> {
-                <span class="ident">source</span>,
-                <span class="ident">dest</span>,
-                <span class="ident">read_only</span>,
-            } =&gt; {
+            <span class="ident">RegisterMemory</span> { <span class="ident">source</span>, <span class="ident">dest</span>, <span class="ident">prot</span> } =&gt; {
                 <span class="comment">// Correct on Windows because callers of this IPC guarantee descriptor is a mapping</span>
                 <span class="comment">// handle.</span>
-                <span class="kw">let</span> (<span class="ident">mapped_region</span>, <span class="ident">size</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">source</span>.<span class="ident">map</span>(<span class="ident">map_request</span>, <span class="ident">gralloc</span>, <span class="ident">read_only</span>) {
+                <span class="kw">let</span> (<span class="ident">mapped_region</span>, <span class="ident">size</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">source</span>.<span class="ident">map</span>(<span class="ident">map_request</span>, <span class="ident">gralloc</span>, <span class="ident">prot</span>) {
                     <span class="prelude-val">Ok</span>((<span class="ident">region</span>, <span class="ident">size</span>)) =&gt; (<span class="ident">region</span>, <span class="ident">size</span>),
                     <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">VmMemoryResponse::Err</span>(<span class="ident">e</span>),
                 };
@@ -1875,7 +1867,12 @@
                     <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">VmMemoryResponse::Err</span>(<span class="ident">e</span>),
                 };
 
-                <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vm</span>.<span class="ident">add_memory_region</span>(<span class="ident">guest_addr</span>, <span class="ident">mapped_region</span>, <span class="ident">read_only</span>, <span class="bool-val">false</span>) {
+                <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">vm</span>.<span class="ident">add_memory_region</span>(
+                    <span class="ident">guest_addr</span>,
+                    <span class="ident">mapped_region</span>,
+                    <span class="ident">prot</span> <span class="op">==</span> <span class="ident">Protection::read</span>(),
+                    <span class="bool-val">false</span>,
+                ) {
                     <span class="prelude-val">Ok</span>(<span class="ident">slot</span>) =&gt; <span class="ident">slot</span>,
                     <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">VmMemoryResponse::Err</span>(<span class="ident">e</span>),
                 };
@@ -1981,7 +1978,7 @@
         <span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span>
             <span class="kw">unsafe</span> { <span class="ident">SafeDescriptor::from_raw_descriptor</span>(<span class="ident">handle</span>.<span class="ident">os_handle</span>.<span class="ident">into_raw_descriptor</span>()) };
 
-        <span class="kw">let</span> <span class="ident">mapped_region</span> <span class="op">=</span> <span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">descriptor</span>, <span class="number">0</span>, <span class="ident">reqs</span>.<span class="ident">size</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">mapped_region</span> <span class="op">=</span> <span class="ident">map_descriptor</span>(<span class="kw-2">&amp;</span><span class="ident">descriptor</span>, <span class="number">0</span>, <span class="ident">reqs</span>.<span class="ident">size</span>, <span class="ident">Protection::read_write</span>())<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>((<span class="ident">mapped_region</span>, <span class="ident">reqs</span>.<span class="ident">size</span>, <span class="ident">descriptor</span>, <span class="ident">desc</span>))
     }
 }
@@ -2361,14 +2358,9 @@
     <span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
     <span class="ident">offset</span>: <span class="ident">u64</span>,
     <span class="ident">size</span>: <span class="ident">u64</span>,
-    <span class="ident">read_only</span>: <span class="ident">bool</span>,
+    <span class="ident">prot</span>: <span class="ident">Protection</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">MappedRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">size</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">size</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> <span class="ident">SysError::new</span>(<span class="ident">ERANGE</span>))<span class="question-mark">?</span>;
-    <span class="kw">let</span> <span class="ident">prot</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">read_only</span> {
-        <span class="ident">Protection::read</span>()
-    } <span class="kw">else</span> {
-        <span class="ident">Protection::read_write</span>()
-    };
     <span class="kw">match</span> <span class="ident">MemoryMappingBuilder::new</span>(<span class="ident">size</span>)
         .<span class="ident">from_descriptor</span>(<span class="ident">descriptor</span>)
         .<span class="ident">offset</span>(<span class="ident">offset</span>)

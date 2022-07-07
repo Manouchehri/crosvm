@@ -234,34 +234,6 @@
 <span id="233">233</span>
 <span id="234">234</span>
 <span id="235">235</span>
-<span id="236">236</span>
-<span id="237">237</span>
-<span id="238">238</span>
-<span id="239">239</span>
-<span id="240">240</span>
-<span id="241">241</span>
-<span id="242">242</span>
-<span id="243">243</span>
-<span id="244">244</span>
-<span id="245">245</span>
-<span id="246">246</span>
-<span id="247">247</span>
-<span id="248">248</span>
-<span id="249">249</span>
-<span id="250">250</span>
-<span id="251">251</span>
-<span id="252">252</span>
-<span id="253">253</span>
-<span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -276,7 +248,7 @@
     <span class="ident">pci</span>::{<span class="ident">PciBarConfiguration</span>, <span class="ident">PciCapability</span>},
     <span class="ident">virtio</span>::{
         <span class="ident">gpu::QUEUE_SIZES</span>,
-        <span class="ident">vhost::user::vmm</span>::{<span class="ident">worker::Worker</span>, <span class="prelude-ty">Result</span>, <span class="ident">VhostUserHandler</span>},
+        <span class="ident">vhost::user::vmm</span>::{<span class="prelude-ty">Result</span>, <span class="ident">VhostUserHandler</span>},
         <span class="ident">virtio_gpu_config</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">PciCapabilityType</span>, <span class="ident">Queue</span>, <span class="ident">VirtioDevice</span>,
         <span class="ident">VirtioPciShmCap</span>, <span class="ident">GPU_BAR_NUM</span>, <span class="ident">GPU_BAR_OFFSET</span>, <span class="ident">VIRTIO_GPU_F_CONTEXT_INIT</span>,
         <span class="ident">VIRTIO_GPU_F_CREATE_GUEST_HANDLE</span>, <span class="ident">VIRTIO_GPU_F_RESOURCE_BLOB</span>, <span class="ident">VIRTIO_GPU_F_RESOURCE_SYNC</span>,
@@ -301,7 +273,7 @@
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Gpu</span> {
     <span class="ident">kill_evt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
-    <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span><span class="ident">Worker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">worker_thread</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">thread::JoinHandle</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">handler</span>: <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">VhostUserHandler</span><span class="op">&gt;</span>,
     <span class="ident">state</span>: <span class="ident">GpuState</span>,
     <span class="ident">queue_sizes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
@@ -413,45 +385,17 @@
         <span class="ident">queues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Queue</span><span class="op">&gt;</span>,
         <span class="ident">queue_evts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     ) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>
+        <span class="kw">match</span> <span class="self">self</span>
             .<span class="ident">handler</span>
             .<span class="ident">borrow_mut</span>()
-            .<span class="ident">activate</span>(<span class="kw-2">&amp;</span><span class="ident">mem</span>, <span class="kw-2">&amp;</span><span class="ident">interrupt</span>, <span class="kw-2">&amp;</span><span class="ident">queues</span>, <span class="kw-2">&amp;</span><span class="ident">queue_evts</span>)
+            .<span class="ident">activate</span>(<span class="ident">mem</span>, <span class="ident">interrupt</span>, <span class="ident">queues</span>, <span class="ident">queue_evts</span>, <span class="string">&quot;gpu&quot;</span>)
         {
-            <span class="macro">error!</span>(<span class="string">&quot;failed to activate queues: {}&quot;</span>, <span class="ident">e</span>);
-            <span class="kw">return</span>;
-        }
-
-        <span class="kw">let</span> (<span class="ident">self_kill_evt</span>, <span class="ident">kill_evt</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">Event::new</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="prelude-val">Ok</span>((<span class="ident">e</span>.<span class="ident">try_clone</span>()<span class="question-mark">?</span>, <span class="ident">e</span>))) {
-            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;failed creating kill Event pair: {}&quot;</span>, <span class="ident">e</span>);
-                <span class="kw">return</span>;
-            }
-        };
-        <span class="self">self</span>.<span class="ident">kill_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">self_kill_evt</span>);
-
-        <span class="kw">let</span> <span class="ident">worker_result</span> <span class="op">=</span> <span class="ident">thread::Builder::new</span>()
-            .<span class="ident">name</span>(<span class="string">&quot;vhost_user_gpu&quot;</span>.<span class="ident">to_string</span>())
-            .<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">worker</span> <span class="op">=</span> <span class="ident">Worker</span> {
-                    <span class="ident">queues</span>,
-                    <span class="ident">mem</span>,
-                    <span class="ident">kill_evt</span>,
-                };
-
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">worker</span>.<span class="ident">run</span>(<span class="ident">interrupt</span>) {
-                    <span class="macro">error!</span>(<span class="string">&quot;failed to start a worker: {}&quot;</span>, <span class="ident">e</span>);
-                }
-                <span class="ident">worker</span>
-            });
-
-        <span class="kw">match</span> <span class="ident">worker_result</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;failed to spawn vhost_user_gpu worker: {}&quot;</span>, <span class="ident">e</span>);
-            }
-            <span class="prelude-val">Ok</span>(<span class="ident">join_handle</span>) =&gt; {
+            <span class="prelude-val">Ok</span>((<span class="ident">join_handle</span>, <span class="ident">kill_evt</span>)) =&gt; {
                 <span class="self">self</span>.<span class="ident">worker_thread</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">join_handle</span>);
+                <span class="self">self</span>.<span class="ident">kill_evt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">kill_evt</span>);
+            }
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+                <span class="macro">error!</span>(<span class="string">&quot;failed to activate queues: {}&quot;</span>, <span class="ident">e</span>);
             }
         }
     }

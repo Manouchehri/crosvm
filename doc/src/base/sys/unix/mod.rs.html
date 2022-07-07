@@ -679,6 +679,10 @@
 <span id="678">678</span>
 <span id="679">679</span>
 <span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -707,6 +711,7 @@
 <span class="kw">mod</span> <span class="ident">file_flags</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">file_traits</span>;
 <span class="kw">mod</span> <span class="ident">get_filesystem_type</span>;
+<span class="kw">mod</span> <span class="ident">gmtime</span>;
 <span class="kw">mod</span> <span class="ident">mmap</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">net</span>;
 <span class="kw">mod</span> <span class="ident">netlink</span>;
@@ -720,6 +725,7 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">signal</span>;
 <span class="kw">mod</span> <span class="ident">signalfd</span>;
 <span class="kw">mod</span> <span class="ident">sock_ctrl_msg</span>;
+<span class="kw">mod</span> <span class="ident">stream_channel</span>;
 <span class="kw">mod</span> <span class="ident">terminal</span>;
 <span class="kw">mod</span> <span class="ident">timer</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vsock</span>;
@@ -739,6 +745,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">eventfd</span>::{<span class="ident">EventFd</span> <span class="kw">as</span> <span class="ident">Event</span>, <span class="ident">EventFd</span>, <span class="ident">EventReadResult</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">file_flags</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">get_filesystem_type</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">gmtime</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">ioctl</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mmap</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">netlink</span>::<span class="kw-2">*</span>;
@@ -750,6 +757,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">signal</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">signalfd</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sock_ctrl_msg</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">stream_channel</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">terminal</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">timer</span>::<span class="kw-2">*</span>;
 

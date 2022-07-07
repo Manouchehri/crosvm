@@ -1039,10 +1039,10 @@
     }
 
     <span class="kw">fn</span> <span class="ident">setup_vq</span>(<span class="ident">queue</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DeviceQueue</span>, <span class="ident">addrs</span>: <span class="ident">DescTableAddrs</span>) {
-        <span class="ident">queue</span>.<span class="ident">desc_table</span> <span class="op">=</span> <span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">desc</span>);
-        <span class="ident">queue</span>.<span class="ident">avail_ring</span> <span class="op">=</span> <span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">avail</span>);
-        <span class="ident">queue</span>.<span class="ident">used_ring</span> <span class="op">=</span> <span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">used</span>);
-        <span class="ident">queue</span>.<span class="ident">ready</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="ident">queue</span>.<span class="ident">set_desc_table</span>(<span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">desc</span>));
+        <span class="ident">queue</span>.<span class="ident">set_avail_ring</span>(<span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">avail</span>));
+        <span class="ident">queue</span>.<span class="ident">set_used_ring</span>(<span class="ident">IOVA</span>(<span class="ident">addrs</span>.<span class="ident">used</span>));
+        <span class="ident">queue</span>.<span class="ident">set_ready</span>(<span class="bool-val">true</span>);
     }
 
     <span class="kw">fn</span> <span class="ident">device_write</span>(<span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="ident">QueueMemory</span>, <span class="ident">q</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DeviceQueue</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">usize</span> {

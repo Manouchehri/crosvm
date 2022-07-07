@@ -494,12 +494,6 @@
 <span id="493">493</span>
 <span id="494">494</span>
 <span id="495">495</span>
-<span id="496">496</span>
-<span id="497">497</span>
-<span id="498">498</span>
-<span id="499">499</span>
-<span id="500">500</span>
-<span id="501">501</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -525,9 +519,11 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
     <span class="self">self</span>, <span class="ident">gpu</span>,
-    <span class="ident">vhost::user::device::handler</span>::{<span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>},
-    <span class="ident">vhost::user::device::vvu::pci::VvuPciDevice</span>,
-    <span class="ident">vhost::user::device::wl::parse_wayland_sock</span>,
+    <span class="ident">vhost::user::device</span>::{
+        <span class="ident">handler</span>::{<span class="ident">sys::Doorbell</span>, <span class="ident">VhostUserBackend</span>},
+        <span class="ident">listener</span>::{<span class="ident">sys::VhostUserListener</span>, <span class="ident">VhostUserListenerTrait</span>},
+        <span class="ident">wl::parse_wayland_sock</span>,
+    },
     <span class="ident">DescriptorChain</span>, <span class="ident">Gpu</span>, <span class="ident">GpuDisplayParameters</span>, <span class="ident">GpuParameters</span>, <span class="ident">Queue</span>, <span class="ident">QueueReader</span>, <span class="ident">VirtioDevice</span>,
 };
 
@@ -977,7 +973,7 @@
         <span class="ident">channels</span>,
     )));
 
-    <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">GpuBackend</span> {
+    <span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">Box::new</span>(<span class="ident">GpuBackend</span> {
         <span class="ident">ex</span>: <span class="ident">ex</span>.<span class="ident">clone</span>(),
         <span class="ident">gpu</span>,
         <span class="ident">resource_bridges</span>,
@@ -986,20 +982,12 @@
         <span class="ident">fence_state</span>: <span class="ident">Default::default</span>(),
         <span class="ident">display_worker</span>: <span class="prelude-val">None</span>,
         <span class="ident">workers</span>: <span class="ident">Default::default</span>(),
-    };
-    <span class="kw">let</span> <span class="ident">max_queue_num</span> <span class="op">=</span> <span class="ident">backend</span>.<span class="ident">max_queue_num</span>();
+    });
 
-    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
+    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span>
+        <span class="ident">VhostUserListener::new_from_socket_or_vfio</span>(<span class="kw-2">&amp;</span><span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">backend</span>.<span class="ident">max_queue_num</span>(), <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
     <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us flatten.</span>
-    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">socket</span>, <span class="ident">vfio</span>) {
-        (<span class="prelude-val">Some</span>(<span class="ident">socket</span>), <span class="prelude-val">None</span>) =&gt; <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run</span>(<span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>,
-        (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">vfio</span>)) =&gt; {
-            <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="kw-2">&amp;</span><span class="ident">vfio</span>, <span class="ident">max_queue_num</span>)<span class="question-mark">?</span>;
-            <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run_vvu</span>(<span class="ident">device</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
-        }
-        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;exactly one of `--socket` or `--vfio` is required&quot;</span>)),
-    };
-    <span class="ident">res</span>
+    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">listener</span>.<span class="ident">run_backend</span>(<span class="ident">backend</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../../" data-current-crate="devices" data-search-index-js="../../../../../../search-index.js" data-search-js="../../../../../../search.js"></div>

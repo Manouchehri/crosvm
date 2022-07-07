@@ -1279,6 +1279,43 @@
 <span id="1278">1278</span>
 <span id="1279">1279</span>
 <span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
+<span id="1293">1293</span>
+<span id="1294">1294</span>
+<span id="1295">1295</span>
+<span id="1296">1296</span>
+<span id="1297">1297</span>
+<span id="1298">1298</span>
+<span id="1299">1299</span>
+<span id="1300">1300</span>
+<span id="1301">1301</span>
+<span id="1302">1302</span>
+<span id="1303">1303</span>
+<span id="1304">1304</span>
+<span id="1305">1305</span>
+<span id="1306">1306</span>
+<span id="1307">1307</span>
+<span id="1308">1308</span>
+<span id="1309">1309</span>
+<span id="1310">1310</span>
+<span id="1311">1311</span>
+<span id="1312">1312</span>
+<span id="1313">1313</span>
+<span id="1314">1314</span>
+<span id="1315">1315</span>
+<span id="1316">1316</span>
+<span id="1317">1317</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1293,6 +1330,8 @@
     <span class="ident">ptr</span>::{<span class="ident">copy_nonoverlapping</span>, <span class="ident">null_mut</span>, <span class="ident">read_unaligned</span>, <span class="ident">write_unaligned</span>},
 };
 
+<span class="kw">use</span> <span class="ident">log::warn</span>;
+
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">external_mapping::ExternalMapping</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Descriptor</span>,
     <span class="ident">MemoryMapping</span> <span class="kw">as</span> <span class="ident">CrateMemoryMapping</span>, <span class="ident">MemoryMappingBuilder</span>, <span class="ident">RawDescriptor</span>, <span class="ident">SafeDescriptor</span>,
@@ -1301,6 +1340,7 @@
 <span class="kw">use</span> <span class="ident">remain::sorted</span>;
 
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">volatile_memory</span>::<span class="kw-2">*</span>, <span class="ident">DataInit</span>};
+<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
 
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">pagesize</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">ErrnoError</span>};
 
@@ -1331,7 +1371,7 @@
 <span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Memory access type for anonymous shared memory mapping.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Protection</span>(<span class="ident">c_int</span>);
 <span class="kw">impl</span> <span class="ident">Protection</span> {
     <span class="doccomment">/// Returns Protection allowing no access.</span>
@@ -1983,6 +2023,34 @@
         }
     }
 
+    <span class="doccomment">/// Disable host swap for this mapping.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lock_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
+            <span class="comment">// Safe because MLOCK_ONFAULT only affects the swap behavior of the kernel, so it</span>
+            <span class="comment">// has no impact on rust semantics.</span>
+            <span class="comment">// TODO(raging): use the explicit declaration of mlock2, which was being merged</span>
+            <span class="comment">// as of when the call below was being worked on.</span>
+            <span class="ident">libc::syscall</span>(
+                <span class="ident">libc::SYS_mlock2</span>,
+                (<span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">libc::c_void</span>,
+                <span class="self">self</span>.<span class="ident">size</span>(),
+                <span class="ident">libc::MLOCK_ONFAULT</span>,
+            )
+        };
+        <span class="kw">if</span> <span class="ident">ret</span> <span class="op">&lt;</span> <span class="number">0</span> {
+            <span class="kw">let</span> <span class="ident">errno</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::Error::last</span>();
+            <span class="macro">warn!</span>(
+                <span class="string">&quot;failed to mlock at {:#x} with length {}: {}&quot;</span>,
+                (<span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="kw">as</span> <span class="ident">u64</span>,
+                <span class="self">self</span>.<span class="ident">size</span>(),
+                <span class="ident">errno</span>,
+            );
+            <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCallFailed</span>(<span class="ident">errno</span>))
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Ok</span>(())
+        }
+    }
+
     <span class="comment">// Check that offset+count is valid and return the sum.</span>
     <span class="kw">fn</span> <span class="ident">range_end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mem_end</span> <span class="op">=</span> <span class="ident">offset</span>.<span class="ident">checked_add</span>(<span class="ident">count</span>).<span class="ident">ok_or</span>(<span class="ident">Error::InvalidAddress</span>)<span class="question-mark">?</span>;
@@ -2270,12 +2338,18 @@
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Unix</span> {
+    <span class="doccomment">/// Remove the specified range from the mapping.</span>
     <span class="kw">fn</span> <span class="ident">remove_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mem_offset</span>: <span class="ident">usize</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Disable host swap for this mapping.</span>
+    <span class="kw">fn</span> <span class="ident">lock_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">Unix</span> <span class="kw">for</span> <span class="ident">CrateMemoryMapping</span> {
     <span class="kw">fn</span> <span class="ident">remove_range</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mem_offset</span>: <span class="ident">usize</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">remove_range</span>(<span class="ident">mem_offset</span>, <span class="ident">count</span>)
+    }
+    <span class="kw">fn</span> <span class="ident">lock_all</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">lock_all</span>()
     }
 }
 

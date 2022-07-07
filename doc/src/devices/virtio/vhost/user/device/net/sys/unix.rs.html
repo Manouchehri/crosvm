@@ -349,6 +349,13 @@
 <span id="348">348</span>
 <span id="349">349</span>
 <span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -372,16 +379,16 @@
 <span class="kw">use</span> <span class="ident">vm_memory::GuestMemory</span>;
 <span class="kw">use</span> <span class="ident">vmm_vhost::message</span>::{<span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserVirtioFeatures</span>};
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::net::validate_and_configure_tap</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::net</span>::{<span class="ident">process_rx</span>, <span class="ident">NetError</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::handler</span>::{
-    <span class="ident">DeviceRequestHandler</span>, <span class="ident">Doorbell</span>, <span class="ident">VhostUserBackend</span>,
-};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device::net</span>::{
     <span class="ident">run_ctrl_queue</span>, <span class="ident">run_tx_queue</span>, <span class="ident">NetBackend</span>, <span class="ident">NET_EXECUTOR</span>,
 };
-<span class="kw">use</span> <span class="ident">virtio::vhost::user::device::vvu::pci::VvuPciDevice</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::vhost::user::device</span>::{
+    <span class="ident">handler</span>::{<span class="ident">sys::Doorbell</span>, <span class="ident">VhostUserBackend</span>},
+    <span class="ident">listener</span>::{<span class="ident">sys::VhostUserListener</span>, <span class="ident">VhostUserListenerTrait</span>},
+};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">virtio</span>, <span class="ident">PciAddress</span>};
 
 <span class="kw">struct</span> <span class="ident">TapConfig</span> {
     <span class="ident">host_ip</span>: <span class="ident">Ipv4Addr</span>,
@@ -666,26 +673,33 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">threads</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">num_devices</span>);
 
     <span class="kw">for</span> (<span class="ident">conn</span>, <span class="ident">backend</span>) <span class="kw">in</span> <span class="ident">devices</span> {
+        <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
+
         <span class="kw">match</span> <span class="ident">conn</span> {
             <span class="ident">Connection::Socket</span>(<span class="ident">socket</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
                 <span class="ident">threads</span>.<span class="ident">push</span>(<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
                     <span class="ident">NET_EXECUTOR</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">thread_ex</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">thread_ex</span>.<span class="ident">set</span>(<span class="ident">ex</span>.<span class="ident">clone</span>());
                     });
-                    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
+                    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">VhostUserListener::new_socket</span>(<span class="kw-2">&amp;</span><span class="ident">socket</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+                    <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us</span>
+                    <span class="comment">// flatten.</span>
+                    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">listener</span>.<span class="ident">run_backend</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>), <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
                 }));
             }
             <span class="ident">Connection::Vfio</span>(<span class="ident">device_name</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">device</span> <span class="op">=</span> <span class="ident">VvuPciDevice::new</span>(<span class="ident">device_name</span>.<span class="ident">as_str</span>(), <span class="ident">backend</span>.<span class="ident">max_queue_num</span>())<span class="question-mark">?</span>;
-                <span class="kw">let</span> <span class="ident">ex</span> <span class="op">=</span> <span class="ident">Executor::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create executor&quot;</span>)<span class="question-mark">?</span>;
                 <span class="ident">threads</span>.<span class="ident">push</span>(<span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="ident">DeviceRequestHandler::new</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>));
                     <span class="ident">NET_EXECUTOR</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">thread_ex</span><span class="op">|</span> {
                         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">thread_ex</span>.<span class="ident">set</span>(<span class="ident">ex</span>.<span class="ident">clone</span>());
                     });
-                    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">handler</span>.<span class="ident">run_vvu</span>(<span class="ident">device</span>, <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
+                    <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">VhostUserListener::new_vvu</span>(
+                        <span class="ident">PciAddress::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">device_name</span>)<span class="question-mark">?</span>,
+                        <span class="ident">backend</span>.<span class="ident">max_queue_num</span>(),
+                        <span class="prelude-val">None</span>,
+                    )<span class="question-mark">?</span>;
+                    <span class="comment">// run_until() returns an Result&lt;Result&lt;..&gt;&gt; which the ? operator lets us</span>
+                    <span class="comment">// flatten.</span>
+                    <span class="ident">ex</span>.<span class="ident">run_until</span>(<span class="ident">listener</span>.<span class="ident">run_backend</span>(<span class="ident">Box::new</span>(<span class="ident">backend</span>), <span class="kw-2">&amp;</span><span class="ident">ex</span>))<span class="question-mark">?</span>
                 }));
             }
         };
