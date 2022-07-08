@@ -74,13 +74,32 @@
 <span id="73">73</span>
 <span id="74">74</span>
 <span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">thread::sleep</span>, <span class="ident">time::Duration</span>};
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">kill_process_group</span>, <span class="ident">reap_child</span>, <span class="ident">warn</span>};
+<span class="kw">use</span> <span class="ident">anyhow::anyhow</span>;
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">kill_process_group</span>, <span class="ident">reap_child</span>, <span class="ident">syslog</span>, <span class="ident">syslog::LogConfig</span>, <span class="ident">warn</span>};
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device::run_cras_snd_device</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
@@ -89,7 +108,10 @@
     <span class="ident">run_console_device</span>, <span class="ident">run_fs_device</span>, <span class="ident">run_vsock_device</span>, <span class="ident">run_wl_device</span>,
 };
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::cmdline</span>::{<span class="ident">Commands</span>, <span class="ident">DevicesSubcommand</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">crosvm::sys::cmdline</span>::{<span class="ident">Commands</span>, <span class="ident">DevicesSubcommand</span>},
+    <span class="ident">Config</span>,
+};
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">start_device</span>(<span class="ident">command</span>: <span class="ident">DevicesSubcommand</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">command</span> {
@@ -148,6 +170,20 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">run_command</span>(<span class="ident">_cmd</span>: <span class="ident">Commands</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="prelude-val">Err</span>(<span class="macro">anyhow::anyhow!</span>(<span class="string">&quot;invalid command&quot;</span>))
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">init_log</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">log_config</span>: <span class="ident">LogConfig</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>, <span class="ident">_cfg</span>: <span class="kw-2">&amp;</span><span class="ident">Config</span>) -&gt; <span class="ident">anyhow::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;mut</span> <span class="ident">syslog::fmt::Formatter</span>, <span class="kw-2">&amp;</span><span class="ident">log::Record</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span>,
+{
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">LogConfig</span> {
+        <span class="ident">proc_name</span>: <span class="ident">String::from</span>(<span class="string">&quot;crosvm&quot;</span>),
+        ..<span class="ident">log_config</span>
+    }) {
+        <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>));
+    }
+    <span class="prelude-val">Ok</span>(())
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="crosvm" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>

@@ -538,6 +538,49 @@
 <span id="537">537</span>
 <span id="538">538</span>
 <span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -546,16 +589,17 @@
 
 <span class="kw">use</span> <span class="ident">std::fs::OpenOptions</span>;
 <span class="kw">use</span> <span class="ident">std::path::Path</span>;
-<span class="kw">use</span> <span class="ident">std::string::String</span>;
 
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">argh::FromArgs</span>;
 <span class="kw">use</span> <span class="ident">base::syslog::LogConfig</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">syslog</span>};
+<span class="kw">use</span> <span class="ident">cmdline</span>::{<span class="ident">RunCommand</span>, <span class="ident">UsbAttachCommand</span>};
 <span class="kw">mod</span> <span class="ident">crosvm</span>;
+<span class="kw">use</span> <span class="ident">crosvm::cmdline</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">crosvm::config::executable_is_plugin</span>;
 <span class="kw">use</span> <span class="ident">crosvm::config::Config</span>;
-<span class="kw">use</span> <span class="ident">crosvm</span>::{<span class="ident">cmdline</span>, <span class="ident">sys</span> <span class="kw">as</span> <span class="ident">platform</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device</span>::{<span class="ident">run_block_device</span>, <span class="ident">run_net_device</span>};
 <span class="kw">use</span> <span class="ident">disk::QcowFile</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;composite-disk&quot;</span>)]</span>
@@ -571,6 +615,7 @@
     <span class="ident">BalloonControlCommand</span>, <span class="ident">DiskControlCommand</span>, <span class="ident">UsbControlResult</span>, <span class="ident">VmRequest</span>, <span class="ident">VmResponse</span>,
 };
 
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sys::init_log</span>;
 <span class="kw">use</span> <span class="ident">crosvm::cmdline</span>::{<span class="ident">Command</span>, <span class="ident">CrossPlatformCommands</span>, <span class="ident">CrossPlatformDevicesCommands</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;scudo&quot;</span>)]</span>
@@ -585,25 +630,35 @@
     <span class="ident">GuestPanic</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">run_vm</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(
-    <span class="ident">cmd</span>: <span class="ident">cmdline::RunCommand</span>,
-    <span class="ident">log_config</span>: <span class="ident">LogConfig</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
-) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">to_command_status</span>(<span class="ident">result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">sys::ExitState</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span><span class="op">&gt;</span> {
+    <span class="kw">match</span> <span class="ident">result</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">sys::ExitState::Stop</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited normally&quot;</span>);
+            <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmStop</span>)
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">sys::ExitState::Reset</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited normally due to reset request&quot;</span>);
+            <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmReset</span>)
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">sys::ExitState::Crash</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited due to a VM crash&quot;</span>);
+            <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmCrash</span>)
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">sys::ExitState::GuestPanic</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited due to a kernel panic in guest&quot;</span>);
+            <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::GuestPanic</span>)
+        }
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+            <span class="macro">error!</span>(<span class="string">&quot;crosvm has exited with error: {:#}&quot;</span>, <span class="ident">e</span>);
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>)
+        }
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">run_vm</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">cmd</span>: <span class="ident">RunCommand</span>, <span class="ident">log_config</span>: <span class="ident">LogConfig</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;mut</span> <span class="ident">syslog::fmt::Formatter</span>, <span class="kw-2">&amp;</span><span class="ident">log::Record</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span>,
 {
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">LogConfig</span> {
-        <span class="ident">proc_name</span>: <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">tag</span>) <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">syslog_tag</span> {
-            <span class="ident">tag</span>.<span class="ident">clone</span>()
-        } <span class="kw">else</span> {
-            <span class="ident">String::from</span>(<span class="string">&quot;crosvm&quot;</span>)
-        },
-        ..<span class="ident">log_config</span>
-    }) {
-        <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
-    }
-
     <span class="kw">match</span> <span class="ident">TryInto</span>::<span class="op">&lt;</span><span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::try_into</span>(<span class="ident">cmd</span>) {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;plugin&quot;</span>)]</span>
         <span class="prelude-val">Ok</span>(<span class="ident">cfg</span>) <span class="kw">if</span> <span class="ident">executable_is_plugin</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">executable_path</span>) =&gt; {
@@ -614,35 +669,18 @@
                 }
                 <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="macro">error!</span>(<span class="string">&quot;{:#}&quot;</span>, <span class="ident">e</span>);
-                    <span class="prelude-val">Err</span>(())
+                    <span class="prelude-val">Err</span>(<span class="ident">e</span>)
                 }
             }
         }
-        <span class="prelude-val">Ok</span>(<span class="ident">cfg</span>) =&gt; <span class="kw">match</span> <span class="ident">platform::run_config</span>(<span class="ident">cfg</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">platform::ExitState::Stop</span>) =&gt; {
-                <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited normally&quot;</span>);
-                <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmStop</span>)
-            }
-            <span class="prelude-val">Ok</span>(<span class="ident">platform::ExitState::Reset</span>) =&gt; {
-                <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited normally due to reset request&quot;</span>);
-                <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmReset</span>)
-            }
-            <span class="prelude-val">Ok</span>(<span class="ident">platform::ExitState::Crash</span>) =&gt; {
-                <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited due to a VM crash&quot;</span>);
-                <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmCrash</span>)
-            }
-            <span class="prelude-val">Ok</span>(<span class="ident">platform::ExitState::GuestPanic</span>) =&gt; {
-                <span class="macro">info!</span>(<span class="string">&quot;crosvm has exited due to a kernel panic in guest&quot;</span>);
-                <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::GuestPanic</span>)
-            }
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-                <span class="macro">error!</span>(<span class="string">&quot;crosvm has exited with error: {:#}&quot;</span>, <span class="ident">e</span>);
-                <span class="prelude-val">Err</span>(())
-            }
-        },
+        <span class="prelude-val">Ok</span>(<span class="ident">cfg</span>) =&gt; {
+            <span class="ident">init_log</span>(<span class="ident">log_config</span>, <span class="kw-2">&amp;</span><span class="ident">cfg</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">exit_state</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::sys::run_config</span>(<span class="ident">cfg</span>);
+            <span class="ident">to_command_status</span>(<span class="ident">exit_state</span>)
+        }
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
             <span class="macro">error!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>);
-            <span class="prelude-val">Err</span>(())
+            <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>))
         }
     }
 }
@@ -905,7 +943,7 @@
     <span class="ident">vms_request</span>(<span class="kw-2">&amp;</span><span class="ident">VmRequest::MakeRT</span>, <span class="ident">cmd</span>.<span class="ident">socket_path</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">usb_attach</span>(<span class="ident">cmd</span>: <span class="ident">cmdline::UsbAttachCommand</span>) -&gt; <span class="ident">ModifyUsbResult</span><span class="op">&lt;</span><span class="ident">UsbControlResult</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">usb_attach</span>(<span class="ident">cmd</span>: <span class="ident">UsbAttachCommand</span>) -&gt; <span class="ident">ModifyUsbResult</span><span class="op">&lt;</span><span class="ident">UsbControlResult</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">dev_path</span> <span class="op">=</span> <span class="ident">Path::new</span>(<span class="kw-2">&amp;</span><span class="ident">cmd</span>.<span class="ident">dev_path</span>);
 
     <span class="ident">do_usb_attach</span>(<span class="ident">cmd</span>.<span class="ident">socket_path</span>, <span class="ident">dev_path</span>)
@@ -950,7 +988,8 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">fn</span> <span class="ident">crosvm_main</span>() -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">crosvm_main</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>))]</span>
     <span class="ident">sys::set_panic_hook</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::default</span>();
@@ -968,6 +1007,8 @@
                 <span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;--balloon-bias-mib&quot;</span>.<span class="ident">to_string</span>());
             }
             <span class="string">&quot;-h&quot;</span> =&gt; <span class="ident">args</span>.<span class="ident">push</span>(<span class="string">&quot;--help&quot;</span>.<span class="ident">to_string</span>()),
+            <span class="comment">// TODO(238361778): This block should work on windows as well.</span>
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">arg</span> <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">starts_with</span>(<span class="string">&quot;--&quot;</span>) =&gt; {
                 <span class="comment">// Split `--arg=val` into `--arg val`, since argh doesn&#39;t support the former.</span>
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">split_once</span>(<span class="string">&quot;=&quot;</span>) {
@@ -996,7 +1037,7 @@
     }
 
     <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">as_str</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-    <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">crosvm::cmdline::CrosvmCmdlineArgs::from_args</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;crosvm&quot;</span>], <span class="kw-2">&amp;</span><span class="ident">args</span>[<span class="number">1</span>..]) {
+    <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">crosvm::cmdline::CrosvmCmdlineArgs::from_args</span>(<span class="kw-2">&amp;</span><span class="ident">args</span>[..<span class="number">1</span>], <span class="kw-2">&amp;</span><span class="ident">args</span>[<span class="number">1</span>..]) {
         <span class="prelude-val">Ok</span>(<span class="ident">args</span>) =&gt; <span class="ident">args</span>,
         <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
             <span class="macro">println!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>.<span class="ident">output</span>);
@@ -1011,7 +1052,7 @@
         ..<span class="ident">Default::default</span>()
     };
 
-    <span class="kw">let</span> <span class="ident">ret</span>: <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">CommandStatus</span>, ()<span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">command</span> {
+    <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">command</span> {
         <span class="ident">Command::CrossPlatform</span>(<span class="ident">command</span>) =&gt; {
             <span class="comment">// Past this point, usage of exit is in danger of leaking zombie processes.</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">CrossPlatformCommands::Run</span>(<span class="ident">cmd</span>) <span class="op">=</span> <span class="ident">command</span> {
@@ -1019,39 +1060,67 @@
                 <span class="comment">// but also indicates whether the guest requested reset or stop.</span>
                 <span class="ident">run_vm</span>(<span class="ident">cmd</span>, <span class="ident">log_config</span>)
             } <span class="kw">else</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">syslog::init_with</span>(<span class="ident">log_config</span>) {
-                    <span class="macro">eprintln!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>);
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(());
-                }
+                <span class="ident">syslog::init_with</span>(<span class="ident">log_config</span>)
+                    .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;failed to initialize syslog: {}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
+
                 <span class="kw">match</span> <span class="ident">command</span> {
-                    <span class="ident">CrossPlatformCommands::Balloon</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_vms</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::BalloonStats</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">balloon_stats</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Battery</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_battery</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Balloon</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">balloon_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;balloon subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::BalloonStats</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">balloon_stats</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;balloon_stats subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Battery</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">modify_battery</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;battery subcommand failed&quot;</span>))
+                    }
                     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;composite-disk&quot;</span>)]</span>
-                    <span class="ident">CrossPlatformCommands::CreateComposite</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_composite</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::CreateQcow2</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_qcow2</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Device</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">start_device</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Disk</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">disk_cmd</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::MakeRT</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">make_rt</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Resume</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">resume_vms</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::CreateComposite</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">create_composite</span>(<span class="ident">cmd</span>)
+                        .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;create_composite subcommand failed&quot;</span>)),
+                    <span class="ident">CrossPlatformCommands::CreateQcow2</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">create_qcow2</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;create_qcow2 subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Device</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">start_device</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;start_device subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Disk</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">disk_cmd</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;disk subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::MakeRT</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">make_rt</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;make_rt subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Resume</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">resume_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;resume subcommand failed&quot;</span>))
+                    }
                     <span class="ident">CrossPlatformCommands::Run</span>(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
-                    <span class="ident">CrossPlatformCommands::Stop</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">stop_vms</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Suspend</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">suspend_vms</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Powerbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">powerbtn_vms</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Sleepbtn</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">sleepbtn_vms</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Gpe</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">inject_gpe</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Usb</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_usb</span>(<span class="ident">cmd</span>),
-                    <span class="ident">CrossPlatformCommands::Version</span>(<span class="kw">_</span>) =&gt; <span class="ident">pkg_version</span>(),
-                    <span class="ident">CrossPlatformCommands::Vfio</span>(<span class="ident">cmd</span>) =&gt; <span class="ident">modify_vfio</span>(<span class="ident">cmd</span>),
+                    <span class="ident">CrossPlatformCommands::Stop</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">stop_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;stop subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Suspend</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">suspend_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;suspend subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Powerbtn</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">powerbtn_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;powerbtn subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Sleepbtn</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">sleepbtn_vms</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;sleepbtn subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Gpe</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">inject_gpe</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;gpe subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Usb</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">modify_usb</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;usb subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Version</span>(<span class="kw">_</span>) =&gt; {
+                        <span class="ident">pkg_version</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;version subcommand failed&quot;</span>))
+                    }
+                    <span class="ident">CrossPlatformCommands::Vfio</span>(<span class="ident">cmd</span>) =&gt; {
+                        <span class="ident">modify_vfio</span>(<span class="ident">cmd</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="macro">anyhow!</span>(<span class="string">&quot;vfio subcommand failed&quot;</span>))
+                    }
                 }
                 .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>)
             }
         }
-        <span class="ident">cmdline::Command::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::run_command</span>(<span class="ident">command</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>)
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-                <span class="macro">error!</span>(<span class="string">&quot;Failed to run command {}&quot;</span>, <span class="ident">e</span>);
-            }),
+        <span class="ident">cmdline::Command::Sys</span>(<span class="ident">command</span>) =&gt; <span class="ident">sys::run_command</span>(<span class="ident">command</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">CommandStatus::Success</span>),
     };
 
     <span class="ident">sys::cleanup</span>();
@@ -1068,12 +1137,29 @@
 }
 
 <span class="kw">fn</span> <span class="ident">main</span>() {
-    <span class="kw">let</span> <span class="ident">exit_code</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">crosvm_main</span>() {
-        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::Success</span> <span class="op">|</span> <span class="ident">CommandStatus::VmStop</span>) =&gt; <span class="number">0</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmReset</span>) =&gt; <span class="number">32</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmCrash</span>) =&gt; <span class="number">33</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::GuestPanic</span>) =&gt; <span class="number">34</span>,
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="number">1</span>,
+    <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">crosvm_main</span>();
+    <span class="kw">let</span> <span class="ident">exit_code</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">res</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::Success</span> <span class="op">|</span> <span class="ident">CommandStatus::VmStop</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;exiting with success&quot;</span>);
+            <span class="number">0</span>
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmReset</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;exiting with reset&quot;</span>);
+            <span class="number">32</span>
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::VmCrash</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;exiting with crash&quot;</span>);
+            <span class="number">33</span>
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">CommandStatus::GuestPanic</span>) =&gt; {
+            <span class="macro">info!</span>(<span class="string">&quot;exiting with guest panic&quot;</span>);
+            <span class="number">34</span>
+        }
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+            <span class="kw">let</span> <span class="ident">exit_code</span> <span class="op">=</span> <span class="number">1</span>;
+            <span class="macro">error!</span>(<span class="string">&quot;exiting with error {}:{:?}&quot;</span>, <span class="ident">exit_code</span>, <span class="ident">e</span>);
+            <span class="ident">exit_code</span>
+        }
     };
     <span class="ident">std::process::exit</span>(<span class="ident">exit_code</span>);
 }

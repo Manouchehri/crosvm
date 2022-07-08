@@ -1399,7 +1399,7 @@
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">env_fds</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">Descriptor</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::default</span>();
 
-    <span class="kw">let</span> <span class="ident">_default_render_server_params</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::platform::GpuRenderServerParameters</span> {
+    <span class="kw">let</span> <span class="ident">_default_render_server_params</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::GpuRenderServerParameters</span> {
         <span class="ident">path</span>: <span class="ident">std::path::PathBuf::from</span>(<span class="string">&quot;/usr/libexec/virgl_render_server&quot;</span>),
         <span class="ident">cache_path</span>: <span class="prelude-val">None</span>,
         <span class="ident">cache_size</span>: <span class="prelude-val">None</span>,
@@ -1418,13 +1418,13 @@
     <span class="comment">// Hold on to the render server jail so it keeps running until we exit run_config()</span>
     <span class="kw">let</span> (<span class="ident">_render_server_jail</span>, <span class="ident">_render_server_fd</span>) <span class="op">=</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parameters</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">gpu_render_server_parameters</span> {
-            <span class="kw">let</span> (<span class="ident">jail</span>, <span class="ident">fd</span>) <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::platform::gpu::start_gpu_render_server</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>, <span class="ident">parameters</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> (<span class="ident">jail</span>, <span class="ident">fd</span>) <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::gpu::start_gpu_render_server</span>(<span class="kw-2">&amp;</span><span class="ident">cfg</span>, <span class="ident">parameters</span>)<span class="question-mark">?</span>;
             <span class="ident">env_fds</span>.<span class="ident">push</span>((
                 <span class="ident">CROSVM_GPU_SERVER_FD_ENV</span>.<span class="ident">to_string</span>(),
                 <span class="ident">Descriptor</span>(<span class="ident">fd</span>.<span class="ident">as_raw_descriptor</span>()),
             ));
             (
-                <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::platform::jail_helpers::ScopedMinijail</span>(<span class="ident">jail</span>)),
+                <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::crosvm::sys::jail_helpers::ScopedMinijail</span>(<span class="ident">jail</span>)),
                 <span class="prelude-val">Some</span>(<span class="ident">fd</span>),
             )
         } <span class="kw">else</span> {

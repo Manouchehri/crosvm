@@ -16,6 +16,7 @@
 <span id="15">15</span>
 <span id="16">16</span>
 <span id="17">17</span>
+<span id="18">18</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -24,15 +25,16 @@
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">unix</span>;
         <span class="kw">use</span> <span class="ident">unix</span> <span class="kw">as</span> <span class="ident">platform</span>;
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::unix</span>::{<span class="ident">run_config</span>, <span class="ident">ExitState</span>};
     } <span class="kw">else</span> {
         <span class="macro">compile_error!</span>(<span class="string">&quot;Unsupported platform&quot;</span>);
     }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform</span>::{
-    <span class="ident">main</span>::{<span class="ident">cleanup</span>, <span class="ident">run_command</span>, <span class="ident">start_device</span>},
-    <span class="ident">set_panic_hook</span>,
-};
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform::main</span>::{<span class="ident">cleanup</span>, <span class="ident">init_log</span>, <span class="ident">run_command</span>, <span class="ident">start_device</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>))]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident">platform::set_panic_hook</span>;
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="crosvm_direct" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
 </body></html>

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["cleanup",""],["run_command",""],["start_device",""],["wait_all_children",""]]});
+initSidebarItems({"fn":[["cleanup",""],["init_log",""],["run_command",""],["start_device",""],["wait_all_children",""]]});
