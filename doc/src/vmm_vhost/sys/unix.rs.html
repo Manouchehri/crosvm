@@ -50,10 +50,10 @@
 
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span> {
-        <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">connection::socket::Endpoint</span> <span class="kw">as</span> <span class="ident">SocketEndpoint</span>, <span class="ident">message::SlaveReq</span>};
-        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::message::MasterReq</span>;
+        <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">connection::socket::Endpoint</span> <span class="kw">as</span> <span class="ident">SocketEndpoint</span>};
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::message</span>::{<span class="ident">MasterReq</span>, <span class="ident">SlaveReq</span>};
 
-        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SlaveFsCacheReqSocket</span> <span class="op">=</span> <span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">SlaveReq</span><span class="op">&gt;</span>;
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SlaveReqEndpoint</span> <span class="op">=</span> <span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">SlaveReq</span><span class="op">&gt;</span>;
         <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">MasterReqEndpoint</span> <span class="op">=</span> <span class="ident">SocketEndpoint</span><span class="op">&lt;</span><span class="ident">MasterReq</span><span class="op">&gt;</span>;
     }
 }

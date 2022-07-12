@@ -46,6 +46,6 @@ sourcesIndex["vhost"] = {"name":"","files":["lib.rs","net.rs","vsock.rs"]};
 sourcesIndex["virtio_sys"] = {"name":"","files":["lib.rs","vhost.rs","virtio_config.rs","virtio_ids.rs","virtio_net.rs","virtio_ring.rs"]};
 sourcesIndex["vm_control"] = {"name":"","dirs":[{"name":"sys","files":["unix.rs"]}],"files":["client.rs","display.rs","gdb.rs","lib.rs","sys.rs"]};
 sourcesIndex["vm_memory"] = {"name":"","dirs":[{"name":"guest_memory","dirs":[{"name":"sys","files":["unix.rs"]}],"files":["sys.rs"]}],"files":["guest_address.rs","guest_memory.rs","lib.rs","udmabuf.rs","udmabuf_bindings.rs"]};
-sourcesIndex["vmm_vhost"] = {"name":"","dirs":[{"name":"connection","files":["socket.rs","unix.rs","vfio.rs"]},{"name":"sys","files":["unix.rs"]}],"files":["backend.rs","connection.rs","lib.rs","master.rs","master_req_handler.rs","message.rs","slave.rs","slave_fs_cache.rs","slave_req_handler.rs","sys.rs"]};
+sourcesIndex["vmm_vhost"] = {"name":"","dirs":[{"name":"connection","files":["socket.rs","unix.rs","vfio.rs"]},{"name":"sys","files":["unix.rs"]}],"files":["backend.rs","connection.rs","lib.rs","master.rs","master_req_handler.rs","message.rs","slave.rs","slave_proxy.rs","slave_req_handler.rs","sys.rs"]};
 sourcesIndex["x86_64"] = {"name":"","files":["acpi.rs","bootparam.rs","bzimage.rs","cpuid.rs","fdt.rs","gdt.rs","interrupts.rs","lib.rs","mpspec.rs","mptable.rs","msr.rs","msr_index.rs","regs.rs","smbios.rs"]};
 createSourceSidebar();

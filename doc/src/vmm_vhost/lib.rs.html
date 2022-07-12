@@ -542,12 +542,12 @@
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;device&quot;</span>)]</span> {
         <span class="kw">mod</span> <span class="ident">slave_req_handler</span>;
-        <span class="kw">mod</span> <span class="ident">slave_fs_cache</span>;
+        <span class="kw">mod</span> <span class="ident">slave_proxy</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::slave_req_handler</span>::{
             <span class="ident">Protocol</span>, <span class="ident">SlaveReqHandler</span>, <span class="ident">SlaveReqHelper</span>, <span class="ident">VhostUserSlaveReqHandler</span>,
             <span class="ident">VhostUserSlaveReqHandlerMut</span>,
         };
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::slave_fs_cache::SlaveFsCacheReq</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::slave_proxy::Slave</span>;
     }
 }
 <span class="macro">cfg_if::cfg_if!</span> {

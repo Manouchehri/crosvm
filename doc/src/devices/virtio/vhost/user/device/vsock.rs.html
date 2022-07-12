@@ -532,6 +532,10 @@
 <span id="531">531</span>
 <span id="532">532</span>
 <span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -560,9 +564,9 @@
 <span class="kw">use</span> <span class="ident">vmm_vhost</span>::{
     <span class="ident">connection::vfio::Listener</span> <span class="kw">as</span> <span class="ident">VfioListener</span>,
     <span class="ident">message</span>::{
-        <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserInflight</span>, <span class="ident">VhostUserMemoryRegion</span>, <span class="ident">VhostUserProtocolFeatures</span>,
-        <span class="ident">VhostUserSingleMemoryRegion</span>, <span class="ident">VhostUserVirtioFeatures</span>, <span class="ident">VhostUserVringAddrFlags</span>,
-        <span class="ident">VhostUserVringState</span>,
+        <span class="ident">VhostSharedMemoryRegion</span>, <span class="ident">VhostUserConfigFlags</span>, <span class="ident">VhostUserInflight</span>, <span class="ident">VhostUserMemoryRegion</span>,
+        <span class="ident">VhostUserProtocolFeatures</span>, <span class="ident">VhostUserSingleMemoryRegion</span>, <span class="ident">VhostUserVirtioFeatures</span>,
+        <span class="ident">VhostUserVringAddrFlags</span>, <span class="ident">VhostUserVringState</span>,
     },
     <span class="ident">Error</span>, <span class="prelude-ty">Result</span>, <span class="ident">SlaveReqHandler</span>, <span class="ident">VhostUserSlaveReqHandlerMut</span>,
 };
@@ -973,6 +977,10 @@
 
     <span class="kw">fn</span> <span class="ident">remove_mem_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_region</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserSingleMemoryRegion</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidOperation</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_shared_memory_regions</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostSharedMemoryRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[])
     }
 }
 

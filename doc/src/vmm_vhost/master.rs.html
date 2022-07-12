@@ -1089,6 +1089,30 @@
 <span id="1088">1088</span>
 <span id="1089">1089</span>
 <span id="1090">1090</span>
+<span id="1091">1091</span>
+<span id="1092">1092</span>
+<span id="1093">1093</span>
+<span id="1094">1094</span>
+<span id="1095">1095</span>
+<span id="1096">1096</span>
+<span id="1097">1097</span>
+<span id="1098">1098</span>
+<span id="1099">1099</span>
+<span id="1100">1100</span>
+<span id="1101">1101</span>
+<span id="1102">1102</span>
+<span id="1103">1103</span>
+<span id="1104">1104</span>
+<span id="1105">1105</span>
+<span id="1106">1106</span>
+<span id="1107">1107</span>
+<span id="1108">1108</span>
+<span id="1109">1109</span>
+<span id="1110">1110</span>
+<span id="1111">1111</span>
+<span id="1112">1112</span>
+<span id="1113">1113</span>
+<span id="1114">1114</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright (C) 2019 Alibaba Cloud Computing. All rights reserved.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
@@ -1159,6 +1183,9 @@
 
     <span class="doccomment">/// Remove a guest memory mapping from vhost.</span>
     <span class="kw">fn</span> <span class="ident">remove_mem_region</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">region</span>: <span class="kw-2">&amp;</span><span class="ident">VhostUserMemoryRegionInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Gets the shared memory regions used by the device.</span>
+    <span class="kw">fn</span> <span class="ident">get_shared_memory_regions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostSharedMemoryRegion</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Struct for the vhost-user master endpoint.</span>
@@ -1645,6 +1672,27 @@
         );
         <span class="kw">let</span> <span class="ident">hdr</span> <span class="op">=</span> <span class="ident">node</span>.<span class="ident">send_request_with_body</span>(<span class="ident">MasterReq::REM_MEM_REG</span>, <span class="kw-2">&amp;</span><span class="ident">body</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
         <span class="ident">node</span>.<span class="ident">wait_for_ack</span>(<span class="kw-2">&amp;</span><span class="ident">hdr</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_shared_memory_regions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VhostSharedMemoryRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">node</span>();
+        <span class="kw">let</span> <span class="ident">hdr</span> <span class="op">=</span> <span class="ident">node</span>.<span class="ident">send_request_header</span>(<span class="ident">MasterReq::GET_SHARED_MEMORY_REGIONS</span>, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> (<span class="ident">body_reply</span>, <span class="ident">buf_reply</span>, <span class="ident">rfds</span>) <span class="op">=</span> <span class="ident">node</span>.<span class="ident">recv_reply_with_payload</span>::<span class="op">&lt;</span><span class="ident">VhostUserU64</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">hdr</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">struct_size</span> <span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VhostSharedMemoryRegion</span><span class="op">&gt;</span>();
+        <span class="kw">if</span> <span class="ident">rfds</span>.<span class="ident">is_some</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">buf_reply</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">body_reply</span>.<span class="ident">value</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">*</span> <span class="ident">struct_size</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VhostUserError::InvalidMessage</span>);
+        }
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regions</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">body_reply</span>.<span class="ident">value</span> {
+            <span class="ident">regions</span>.<span class="ident">push</span>(
+                <span class="comment">// Can&#39;t fail because the input is the correct size.</span>
+                <span class="ident">VhostSharedMemoryRegion::from_reader</span>(<span class="kw-2">&amp;</span><span class="ident">buf_reply</span>[<span class="ident">offset</span>..(<span class="ident">offset</span> <span class="op">+</span> <span class="ident">struct_size</span>)])
+                    .<span class="ident">unwrap</span>(),
+            );
+            <span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">struct_size</span>;
+        }
+        <span class="prelude-val">Ok</span>(<span class="ident">regions</span>)
     }
 }
 
