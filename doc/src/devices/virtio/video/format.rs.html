@@ -352,7 +352,7 @@
 <span class="macro">impl_try_from_le32_for_enumn!</span>(<span class="ident">Profile</span>, <span class="string">&quot;profile&quot;</span>);
 
 <span class="kw">impl</span> <span class="ident">Profile</span> {
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;libvda&quot;</span>))]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;libvda&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;vaapi&quot;</span>))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_format</span>(<span class="self">self</span>) -&gt; <span class="ident">Format</span> {
         <span class="kw">use</span> <span class="ident">Profile</span>::<span class="kw-2">*</span>;
         <span class="kw">match</span> <span class="self">self</span> {

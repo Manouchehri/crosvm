@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["NUM_SURFACES","The number of surfaces to allocate for this codec. Same as GStreamer’s vavp8dec."]],"struct":[["Vp8Codec",""]]});

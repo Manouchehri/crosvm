@@ -2166,6 +2166,12 @@
 <span id="2165">2165</span>
 <span id="2166">2166</span>
 <span id="2167">2167</span>
+<span id="2168">2168</span>
+<span id="2169">2169</span>
+<span id="2170">2170</span>
+<span id="2171">2171</span>
+<span id="2172">2172</span>
+<span id="2173">2173</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2778,6 +2784,8 @@
         <span class="string">&quot;libvda&quot;</span>,
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ffmpeg&quot;</span>)]</span>
         <span class="string">&quot;ffmpeg&quot;</span>,
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;vaapi&quot;</span>)]</span>
+        <span class="string">&quot;vaapi&quot;</span>,
     ];
 
     <span class="kw">match</span> <span class="ident">s</span> {
@@ -2785,6 +2793,8 @@
             <span class="macro">cfg_if::cfg_if!</span> {
                 <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;libvda&quot;</span>)]</span> {
                     <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::Libvda</span>)
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;vaapi&quot;</span>)]</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::Vaapi</span>)
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ffmpeg&quot;</span>)]</span> {
                     <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::Ffmpeg</span>)
                 } <span class="kw">else</span> {
@@ -2800,6 +2810,8 @@
         <span class="string">&quot;libvda-vd&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::LibvdaVd</span>),
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ffmpeg&quot;</span>)]</span>
         <span class="string">&quot;ffmpeg&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::Ffmpeg</span>),
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;vaapi&quot;</span>)]</span>
+        <span class="string">&quot;vaapi&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">VideoBackendType::Vaapi</span>),
         <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">invalid_value_err</span>(
             <span class="ident">s</span>,
             <span class="macro">format!</span>(<span class="string">&quot;should be one of ({})&quot;</span>, <span class="ident">VALID_VIDEO_BACKENDS</span>.<span class="ident">join</span>(<span class="string">&quot;|&quot;</span>)),
