@@ -871,6 +871,10 @@
 <span id="870">870</span>
 <span id="871">871</span>
 <span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -896,8 +900,8 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">base::warn</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{
-    <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>,
-    <span class="ident">Tube</span>, <span class="ident">TubeError</span>,
+    <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">Error</span> <span class="kw">as</span> <span class="ident">SysError</span>, <span class="ident">Event</span>, <span class="ident">Protection</span>, <span class="ident">RawDescriptor</span>,
+    <span class="prelude-ty">Result</span> <span class="kw">as</span> <span class="ident">SysResult</span>, <span class="ident">Tube</span>, <span class="ident">TubeError</span>,
 };
 <span class="kw">use</span> <span class="ident">cros_async</span>::{<span class="ident">AsyncError</span>, <span class="ident">AsyncTube</span>, <span class="ident">EventAsync</span>, <span class="ident">Executor</span>};
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">DataInit</span>, <span class="ident">Le64</span>};
@@ -910,7 +914,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pci::PciAddress</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::iommu::ipc_memory_mapper</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::iommu::memory_mapper</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">MemoryMapperError</span>, <span class="kw-2">*</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::iommu::memory_mapper</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio::iommu::protocol</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::virtio</span>::{
     <span class="ident">async_utils</span>, <span class="ident">copy_config</span>, <span class="ident">DescriptorChain</span>, <span class="ident">DescriptorError</span>, <span class="ident">DeviceType</span>, <span class="ident">Interrupt</span>, <span class="ident">Queue</span>,
@@ -994,7 +998,7 @@
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to write to guest address: {0}&quot;</span>)]</span>
     <span class="ident">GuestMemoryWrite</span>(<span class="ident">io::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;memory mapper failed: {0}&quot;</span>)]</span>
-    <span class="ident">MemoryMapper</span>(<span class="ident">MemoryMapperError</span>),
+    <span class="ident">MemoryMapper</span>(<span class="ident">anyhow::Error</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to read descriptor asynchronously: {0}&quot;</span>)]</span>
     <span class="ident">ReadAsyncDesc</span>(<span class="ident">AsyncError</span>),
     <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed to read from virtio queue Event: {0}&quot;</span>)]</span>
@@ -1226,24 +1230,21 @@
                 <span class="ident">iova</span>: <span class="ident">req</span>.<span class="ident">virt_start</span>.<span class="ident">into</span>(),
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="ident">req</span>.<span class="ident">phys_start</span>.<span class="ident">into</span>()),
                 <span class="ident">size</span>,
-                <span class="ident">perm</span>: <span class="kw">match</span> <span class="ident">write_en</span> {
-                    <span class="bool-val">true</span> =&gt; <span class="ident">Permission::RW</span>,
-                    <span class="bool-val">false</span> =&gt; <span class="ident">Permission::Read</span>,
+                <span class="ident">prot</span>: <span class="kw">match</span> <span class="ident">write_en</span> {
+                    <span class="bool-val">true</span> =&gt; <span class="ident">Protection::read_write</span>(),
+                    <span class="bool-val">false</span> =&gt; <span class="ident">Protection::read</span>(),
                 },
             });
 
             <span class="kw">match</span> <span class="ident">vfio_map_result</span> {
-                <span class="prelude-val">Ok</span>(()) =&gt; (),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">match</span> <span class="ident">e</span> {
-                    <span class="ident">MemoryMapperError::IovaRegionOverlap</span> =&gt; {
-                        <span class="comment">// If a mapping already exists in the requested range,</span>
-                        <span class="comment">// the device SHOULD reject the request and set status</span>
-                        <span class="comment">// to VIRTIO_IOMMU_S_INVAL.</span>
-                        <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_INVAL</span>;
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
-                    }
-                    <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::MemoryMapper</span>(<span class="ident">e</span>)),
-                },
+                <span class="prelude-val">Ok</span>(<span class="ident">AddMapResult::Ok</span>) =&gt; (),
+                <span class="prelude-val">Ok</span>(<span class="ident">AddMapResult::OverlapFailure</span>) =&gt; {
+                    <span class="comment">// If a mapping already exists in the requested range,</span>
+                    <span class="comment">// the device SHOULD reject the request and set status</span>
+                    <span class="comment">// to VIRTIO_IOMMU_S_INVAL.</span>
+                    <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_INVAL</span>;
+                }
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">IommuError::MemoryMapper</span>(<span class="ident">e</span>)),
             }
         }
 
@@ -1260,11 +1261,18 @@
         <span class="kw">let</span> <span class="ident">domain</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">domain</span>.<span class="ident">into</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">mapper</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">domain_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">domain</span>) {
             <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="ident">u64::from</span>(<span class="ident">req</span>.<span class="ident">virt_end</span>) <span class="op">-</span> <span class="ident">u64::from</span>(<span class="ident">req</span>.<span class="ident">virt_start</span>) <span class="op">+</span> <span class="number">1</span>;
-            <span class="ident">mapper</span>
+            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">mapper</span>
                 .<span class="number">1</span>
                 .<span class="ident">lock</span>()
                 .<span class="ident">remove_map</span>(<span class="ident">u64::from</span>(<span class="ident">req</span>.<span class="ident">virt_start</span>), <span class="ident">size</span>)
                 .<span class="ident">map_err</span>(<span class="ident">IommuError::MemoryMapper</span>)<span class="question-mark">?</span>;
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">res</span> {
+                <span class="comment">// If a mapping affected by the range is not covered in its entirety by the</span>
+                <span class="comment">// range (the UNMAP request would split the mapping), then the device SHOULD</span>
+                <span class="comment">// set the request `status` to VIRTIO_IOMMU_S_RANGE, and SHOULD NOT remove</span>
+                <span class="comment">// any mapping.</span>
+                <span class="ident">tail</span>.<span class="ident">status</span> <span class="op">=</span> <span class="ident">VIRTIO_IOMMU_S_RANGE</span>;
+            }
         } <span class="kw">else</span> {
             <span class="comment">// If domain does not exist, the device SHOULD set the</span>
             <span class="comment">// request status to VIRTIO_IOMMU_S_NOENT</span>

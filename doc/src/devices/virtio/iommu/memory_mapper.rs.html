@@ -742,7 +742,6 @@
 <span id="741">741</span>
 <span id="742">742</span>
 <span id="743">743</span>
-<span id="744">744</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2021 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -753,64 +752,19 @@
 
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
-<span class="kw">use</span> <span class="ident">std::result</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic</span>::{<span class="ident">AtomicU32</span>, <span class="ident">Ordering</span>};
 
-<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">RawDescriptor</span>, <span class="ident">TubeError</span>};
-<span class="kw">use</span> <span class="ident">remain::sorted</span>;
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">anyhow</span>, <span class="ident">bail</span>, <span class="ident">Context</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">AsRawDescriptors</span>, <span class="ident">Protection</span>, <span class="ident">RawDescriptor</span>};
 <span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
-<span class="kw">use</span> <span class="ident">thiserror::Error</span>;
-<span class="kw">use</span> <span class="ident">vm_memory</span>::{<span class="ident">GuestAddress</span>, <span class="ident">GuestMemoryError</span>};
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vfio::VfioError</span>;
-
-<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Permission</span> {
-    <span class="ident">Read</span> <span class="op">=</span> <span class="number">1</span>,
-    <span class="ident">Write</span> <span class="op">=</span> <span class="number">2</span>,
-    <span class="ident">RW</span> <span class="op">=</span> <span class="number">3</span>,
-}
+<span class="kw">use</span> <span class="ident">vm_memory::GuestAddress</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemRegion</span> {
     <span class="kw">pub</span> <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>,
     <span class="kw">pub</span> <span class="ident">len</span>: <span class="ident">u64</span>,
-    <span class="kw">pub</span> <span class="ident">perm</span>: <span class="ident">Permission</span>,
+    <span class="kw">pub</span> <span class="ident">prot</span>: <span class="ident">Protection</span>,
 }
-
-<span class="attribute">#[<span class="ident">sorted</span>]</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Error</span>, <span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span> {
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;address not aligned&quot;</span>)]</span>
-    <span class="ident">AddrNotAligned</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;address start ({0} is greater than or equal to end {1}&quot;</span>)]</span>
-    <span class="ident">AddrStartGeEnd</span>(<span class="ident">u64</span>, <span class="ident">u64</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;failed getting host address: {0}&quot;</span>)]</span>
-    <span class="ident">GetHostAddress</span>(<span class="ident">GuestMemoryError</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;integer overflow&quot;</span>)]</span>
-    <span class="ident">IntegerOverflow</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;invalid iova: {0}, length: {1}&quot;</span>)]</span>
-    <span class="ident">InvalidIOVA</span>(<span class="ident">u64</span>, <span class="ident">u64</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;iommu dma error&quot;</span>)]</span>
-    <span class="ident">IommuDma</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;iova partial overlap&quot;</span>)]</span>
-    <span class="ident">IovaPartialOverlap</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;iova region overlap&quot;</span>)]</span>
-    <span class="ident">IovaRegionOverlap</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;size is zero&quot;</span>)]</span>
-    <span class="ident">SizeIsZero</span>,
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;tube error: {0}&quot;</span>)]</span>
-    <span class="ident">Tube</span>(<span class="ident">TubeError</span>),
-    <span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;unimplemented&quot;</span>)]</span>
-    <span class="ident">Unimplemented</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-    <span class="attribute">#[<span class="ident">error</span>{<span class="string">&quot;vfio error: {0}&quot;</span>}]</span>
-    <span class="ident">Vfio</span>(<span class="ident">VfioError</span>),
-}
-
-<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Manages the mapping from a guest IO virtual address space to the guest physical address space</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -818,22 +772,22 @@
     <span class="kw">pub</span> <span class="ident">iova</span>: <span class="ident">u64</span>,
     <span class="kw">pub</span> <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>,
     <span class="kw">pub</span> <span class="ident">size</span>: <span class="ident">u64</span>,
-    <span class="kw">pub</span> <span class="ident">perm</span>: <span class="ident">Permission</span>,
+    <span class="kw">pub</span> <span class="ident">prot</span>: <span class="ident">Protection</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">MappingInfo</span> {
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">iova</span>: <span class="ident">u64</span>, <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">perm</span>: <span class="ident">Permission</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">iova</span>: <span class="ident">u64</span>, <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>, <span class="ident">size</span>: <span class="ident">u64</span>, <span class="ident">prot</span>: <span class="ident">Protection</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SizeIsZero</span>);
+            <span class="macro">bail!</span>(<span class="string">&quot;can&#39;t create 0 sized region&quot;</span>);
         }
-        <span class="ident">iova</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
-        <span class="ident">gpa</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+        <span class="ident">iova</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">context</span>(<span class="string">&quot;iova overflow&quot;</span>)<span class="question-mark">?</span>;
+        <span class="ident">gpa</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">context</span>(<span class="string">&quot;gpa overflow&quot;</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">iova</span>,
             <span class="ident">gpa</span>,
             <span class="ident">size</span>,
-            <span class="ident">perm</span>,
+            <span class="ident">prot</span>,
         })
     }
 }
@@ -845,10 +799,24 @@
     <span class="ident">id</span>: <span class="ident">u32</span>,
 }
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">AddMapResult</span> {
+    <span class="prelude-val">Ok</span>,
+    <span class="ident">OverlapFailure</span>,
+}
+
 <span class="doccomment">/// A generic interface for vfio and other iommu backends</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MemoryMapper</span>: <span class="ident">Send</span> {
-    <span class="kw">fn</span> <span class="ident">add_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">new_map</span>: <span class="ident">MappingInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
-    <span class="kw">fn</span> <span class="ident">remove_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">iova_start</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="doccomment">/// Creates a new mapping. If the mapping overlaps with an existing</span>
+    <span class="doccomment">/// mapping, return Ok(false).</span>
+    <span class="kw">fn</span> <span class="ident">add_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">new_map</span>: <span class="ident">MappingInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AddMapResult</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Removes all mappings within the specified range.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If a mapped region partially overlaps what is being unmapped, implementations</span>
+    <span class="doccomment">/// SHOULD return Ok(false) without removing any mappings.</span>
+    <span class="kw">fn</span> <span class="ident">remove_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">iova_start</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>;
+
     <span class="kw">fn</span> <span class="ident">get_mask</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Whether or not endpoints can be safely detached from this mapper.</span>
@@ -860,15 +828,15 @@
     <span class="doccomment">/// Gets an identifier for the MemoryMapper instance. Must be unique among</span>
     <span class="doccomment">/// instances of the same trait implementation.</span>
     <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span>;
-}
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Translate</span> {
     <span class="doccomment">/// Multiple MemRegions should be returned when the gpa is discontiguous or perms are different.</span>
-    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iova</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_iova</span>: <span class="ident">u64</span>, <span class="ident">_size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="macro">bail!</span>(<span class="string">&quot;not supported&quot;</span>);
+    }
 }
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MemoryMapperTrait</span>: <span class="ident">MemoryMapper</span> <span class="op">+</span> <span class="ident">Translate</span> <span class="op">+</span> <span class="ident">AsRawDescriptors</span> <span class="op">+</span> <span class="ident">Any</span> {}
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MemoryMapper</span> <span class="op">+</span> <span class="ident">Translate</span> <span class="op">+</span> <span class="ident">AsRawDescriptors</span> <span class="op">+</span> <span class="ident">Any</span><span class="op">&gt;</span> <span class="ident">MemoryMapperTrait</span> <span class="kw">for</span> <span class="ident">T</span> {}
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MemoryMapperTrait</span>: <span class="ident">MemoryMapper</span> <span class="op">+</span> <span class="ident">AsRawDescriptors</span> <span class="op">+</span> <span class="ident">Any</span> {}
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MemoryMapper</span> <span class="op">+</span> <span class="ident">AsRawDescriptors</span> <span class="op">+</span> <span class="ident">Any</span><span class="op">&gt;</span> <span class="ident">MemoryMapperTrait</span> <span class="kw">for</span> <span class="ident">T</span> {}
 
 <span class="kw">impl</span> <span class="ident">BasicMemoryMapper</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mask</span>: <span class="ident">u64</span>) -&gt; <span class="ident">BasicMemoryMapper</span> {
@@ -887,42 +855,36 @@
 }
 
 <span class="kw">impl</span> <span class="ident">MemoryMapper</span> <span class="kw">for</span> <span class="ident">BasicMemoryMapper</span> {
-    <span class="kw">fn</span> <span class="ident">add_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">new_map</span>: <span class="ident">MappingInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">add_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">new_map</span>: <span class="ident">MappingInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AddMapResult</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">new_map</span>.<span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SizeIsZero</span>);
+            <span class="macro">bail!</span>(<span class="string">&quot;can&#39;t map 0 sized region&quot;</span>);
         }
         <span class="kw">let</span> <span class="ident">new_iova_end</span> <span class="op">=</span> <span class="ident">new_map</span>
             .<span class="ident">iova</span>
             .<span class="ident">checked_add</span>(<span class="ident">new_map</span>.<span class="ident">size</span>)
-            .<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+            .<span class="ident">context</span>(<span class="string">&quot;iova overflow&quot;</span>)<span class="question-mark">?</span>;
         <span class="ident">new_map</span>
             .<span class="ident">gpa</span>
             .<span class="ident">checked_add</span>(<span class="ident">new_map</span>.<span class="ident">size</span>)
-            .<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+            .<span class="ident">context</span>(<span class="string">&quot;gpa overflow&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">range</span>(..<span class="ident">new_iova_end</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">map</span>)) <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next_back</span>() {
             <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">iova</span> <span class="op">+</span> <span class="ident">map</span>.<span class="ident">size</span> <span class="op">&gt;</span> <span class="ident">new_map</span>.<span class="ident">iova</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::IovaRegionOverlap</span>);
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">AddMapResult::OverlapFailure</span>);
             }
         }
         <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">insert</span>(<span class="ident">new_map</span>.<span class="ident">iova</span>, <span class="ident">new_map</span>);
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="ident">AddMapResult::Ok</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">remove_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">iova_start</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// From the virtio-iommu spec</span>
-        <span class="comment">//</span>
-        <span class="comment">// If a mapping affected by the range is not covered in its entirety by the</span>
-        <span class="comment">// range (the UNMAP request would split the mapping), then the device SHOULD</span>
-        <span class="comment">// set the request \field{status} to VIRTIO_IOMMU_S_RANGE, and SHOULD NOT</span>
-        <span class="comment">// remove any mapping.</span>
-        <span class="comment">//</span>
-        <span class="comment">// Therefore, this func checks for partial overlap first before removing the maps.</span>
+    <span class="kw">fn</span> <span class="ident">remove_map</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">iova_start</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SizeIsZero</span>);
+            <span class="macro">bail!</span>(<span class="string">&quot;can&#39;t unmap 0 sized region&quot;</span>);
         }
-        <span class="kw">let</span> <span class="ident">iova_end</span> <span class="op">=</span> <span class="ident">iova_start</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">iova_end</span> <span class="op">=</span> <span class="ident">iova_start</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">context</span>(<span class="string">&quot;iova overflow&quot;</span>)<span class="question-mark">?</span>;
 
+        <span class="comment">// So that we invalid requests can be rejected w/o modifying things, check</span>
+        <span class="comment">// for partial overlap before removing the maps.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_be_removed</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> (<span class="ident">key</span>, <span class="ident">map</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">range</span>(..<span class="ident">iova_end</span>).<span class="ident">rev</span>() {
             <span class="kw">let</span> <span class="ident">map_iova_end</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">iova</span> <span class="op">+</span> <span class="ident">map</span>.<span class="ident">size</span>;
@@ -933,13 +895,13 @@
             <span class="kw">if</span> <span class="ident">iova_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">map</span>.<span class="ident">iova</span> <span class="op">&amp;&amp;</span> <span class="ident">map_iova_end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">iova_end</span> {
                 <span class="ident">to_be_removed</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">key</span>);
             } <span class="kw">else</span> {
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::IovaPartialOverlap</span>);
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
             }
         }
         <span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="ident">to_be_removed</span> {
             <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">expect</span>(<span class="string">&quot;map should contain key&quot;</span>);
         }
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">get_mask</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
@@ -957,15 +919,13 @@
     <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">id</span>
     }
-}
 
-<span class="kw">impl</span> <span class="ident">Translate</span> <span class="kw">for</span> <span class="ident">BasicMemoryMapper</span> {
     <span class="doccomment">/// Regions of contiguous iovas and gpas, and identical permission are merged</span>
     <span class="kw">fn</span> <span class="ident">translate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">iova</span>: <span class="ident">u64</span>, <span class="ident">size</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SizeIsZero</span>);
+            <span class="macro">bail!</span>(<span class="string">&quot;can&#39;t translate 0 sized region&quot;</span>);
         }
-        <span class="kw">let</span> <span class="ident">iova_end</span> <span class="op">=</span> <span class="ident">iova</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">iova_end</span> <span class="op">=</span> <span class="ident">iova</span>.<span class="ident">checked_add</span>(<span class="ident">size</span>).<span class="ident">context</span>(<span class="string">&quot;iova overflow&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">maps</span>.<span class="ident">range</span>(..<span class="ident">iova_end</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_iova</span> <span class="op">=</span> <span class="ident">iova_end</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemRegion</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -978,7 +938,7 @@
             <span class="comment">// This is the last region to be inserted / first to be returned when iova &gt;= map.iova</span>
             <span class="kw">let</span> <span class="ident">region_len</span> <span class="op">=</span> <span class="ident">last_iova</span> <span class="op">-</span> <span class="ident">std::cmp::max</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>(<span class="ident">map</span>.<span class="ident">iova</span>, <span class="ident">iova</span>);
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">last</span>) <span class="op">=</span> <span class="ident">regions</span>.<span class="ident">last_mut</span>() {
-                <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">gpa</span>.<span class="ident">unchecked_add</span>(<span class="ident">map</span>.<span class="ident">size</span>) <span class="op">==</span> <span class="ident">last</span>.<span class="ident">gpa</span> <span class="op">&amp;&amp;</span> <span class="ident">map</span>.<span class="ident">perm</span> <span class="op">==</span> <span class="ident">last</span>.<span class="ident">perm</span> {
+                <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">gpa</span>.<span class="ident">unchecked_add</span>(<span class="ident">map</span>.<span class="ident">size</span>) <span class="op">==</span> <span class="ident">last</span>.<span class="ident">gpa</span> <span class="op">&amp;&amp;</span> <span class="ident">map</span>.<span class="ident">prot</span> <span class="op">==</span> <span class="ident">last</span>.<span class="ident">prot</span> {
                     <span class="ident">last</span>.<span class="ident">gpa</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">gpa</span>;
                     <span class="ident">last</span>.<span class="ident">len</span> <span class="op">+</span><span class="op">=</span> <span class="ident">region_len</span>;
                     <span class="ident">new_region</span> <span class="op">=</span> <span class="bool-val">false</span>;
@@ -995,7 +955,7 @@
                 <span class="ident">regions</span>.<span class="ident">push</span>(<span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">map</span>.<span class="ident">gpa</span>,
                     <span class="ident">len</span>: <span class="ident">region_len</span>,
-                    <span class="ident">perm</span>: <span class="ident">map</span>.<span class="ident">perm</span>,
+                    <span class="ident">prot</span>: <span class="ident">map</span>.<span class="ident">prot</span>,
                 });
             }
             <span class="kw">if</span> <span class="ident">iova</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">map</span>.<span class="ident">iova</span> {
@@ -1004,13 +964,13 @@
                 <span class="ident">regions</span>[<span class="number">0</span>].<span class="ident">gpa</span> <span class="op">=</span> <span class="ident">map</span>
                     .<span class="ident">gpa</span>
                     .<span class="ident">checked_add</span>(<span class="ident">iova</span> <span class="op">-</span> <span class="ident">map</span>.<span class="ident">iova</span>)
-                    .<span class="ident">ok_or</span>(<span class="ident">Error::IntegerOverflow</span>)<span class="question-mark">?</span>;
+                    .<span class="ident">context</span>(<span class="string">&quot;gpa overflow&quot;</span>)<span class="question-mark">?</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">regions</span>);
             }
             <span class="ident">last_iova</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">iova</span>;
         }
 
-        <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidIOVA</span>(<span class="ident">iova</span>, <span class="ident">size</span>))
+        <span class="prelude-val">Err</span>(<span class="macro">anyhow!</span>(<span class="string">&quot;invalid iova {:x} {:x}&quot;</span>, <span class="ident">iova</span>, <span class="ident">size</span>))
     }
 }
 
@@ -1028,33 +988,55 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_mapping_info</span>() {
         <span class="comment">// Overflow</span>
-        <span class="ident">MappingInfo::new</span>(<span class="ident">u64::MAX</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1</span>), <span class="number">2</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
-        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="ident">u64::MAX</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">2</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
-        <span class="ident">MappingInfo::new</span>(<span class="ident">u64::MAX</span>, <span class="ident">GuestAddress</span>(<span class="number">1</span>), <span class="number">2</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
-        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="ident">u64::MAX</span>), <span class="number">2</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
-        <span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="ident">u64::MAX</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="ident">u64::MAX</span> <span class="op">-</span> <span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1</span>), <span class="number">2</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="ident">u64::MAX</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">2</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="ident">u64::MAX</span>, <span class="ident">GuestAddress</span>(<span class="number">1</span>), <span class="number">2</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="ident">u64::MAX</span>), <span class="number">2</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="ident">u64::MAX</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
         <span class="comment">// size = 0</span>
-        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="number">0</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap_err</span>();
+        <span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="number">0</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap_err</span>();
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_map_overlap</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">10</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">10</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(
+                <span class="ident">MappingInfo::new</span>(<span class="number">10</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">10</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+            )
             .<span class="ident">unwrap</span>();
-        <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">14</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">1</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_err</span>();
-        <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">12</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_err</span>();
-        <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">16</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">6</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_err</span>();
-        <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">20</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_err</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">mapper</span>
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">14</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">1</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>()
+                )
+                .<span class="ident">unwrap</span>(),
+            <span class="ident">AddMapResult::OverlapFailure</span>
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">mapper</span>
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">12</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>()
+                )
+                .<span class="ident">unwrap</span>(),
+            <span class="ident">AddMapResult::OverlapFailure</span>
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">mapper</span>
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">16</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">6</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>()
+                )
+                .<span class="ident">unwrap</span>(),
+            <span class="ident">AddMapResult::OverlapFailure</span>
+        );
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">mapper</span>
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">20</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>()
+                )
+                .<span class="ident">unwrap</span>(),
+            <span class="ident">AddMapResult::OverlapFailure</span>
+        );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1069,14 +1051,16 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">9</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">9</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="macro">assert_eq!</span>(
@@ -1084,7 +1068,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1008</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">9</span>, <span class="number">1</span>).<span class="ident">unwrap_err</span>();
@@ -1095,17 +1079,21 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="macro">assert_eq!</span>(
@@ -1113,7 +1101,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">51</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">9</span>).<span class="ident">unwrap</span>();
@@ -1124,15 +1112,17 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">9</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">9</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
-            <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">4</span>).<span class="ident">unwrap_err</span>();
+            <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">4</span>).<span class="ident">unwrap</span>());
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">5</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1005</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
         }
@@ -1140,17 +1130,21 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="macro">assert_eq!</span>(
@@ -1158,7 +1152,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">50</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">4</span>).<span class="ident">unwrap</span>();
@@ -1169,7 +1163,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">50</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
         }
@@ -1177,14 +1171,16 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">9</span>, <span class="number">1</span>).<span class="ident">unwrap_err</span>();
@@ -1196,17 +1192,19 @@
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
                 .<span class="ident">unwrap</span>();
             <span class="ident">mapper</span>
-                .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">10</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+                .<span class="ident">add_map</span>(
+                    <span class="ident">MappingInfo::new</span>(<span class="number">10</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>(),
+                )
                 .<span class="ident">unwrap</span>();
             <span class="macro">assert_eq!</span>(
                 <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
                 }
             );
             <span class="macro">assert_eq!</span>(
@@ -1214,7 +1212,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1003</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">4</span>, <span class="number">1</span>).<span class="ident">unwrap_err</span>();
@@ -1223,7 +1221,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">50</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="macro">assert_eq!</span>(
@@ -1231,7 +1229,7 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">53</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>()
                 }
             );
             <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">14</span>).<span class="ident">unwrap</span>();
@@ -1246,28 +1244,28 @@
     <span class="kw">fn</span> <span class="ident">test_remove_map</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">9</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">9</span>, <span class="ident">GuestAddress</span>(<span class="number">50</span>), <span class="number">4</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">6</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">6</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">5</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">5</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">9</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">9</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">6</span>, <span class="number">4</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">6</span>, <span class="number">4</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">6</span>, <span class="number">14</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">6</span>, <span class="number">14</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">3</span>);
         <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">5</span>, <span class="number">4</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-        <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">9</span>).<span class="ident">unwrap_err</span>();
+        <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">1</span>, <span class="number">9</span>).<span class="ident">unwrap</span>());
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">2</span>);
         <span class="ident">mapper</span>.<span class="ident">remove_map</span>(<span class="number">0</span>, <span class="number">15</span>).<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">mapper</span>.<span class="ident">len</span>(), <span class="number">0</span>);
@@ -1285,7 +1283,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mapper</span> <span class="op">=</span> <span class="ident">BasicMemoryMapper::new</span>(<span class="ident">u64::MAX</span>);
         <span class="comment">// [1, 5) -&gt; [1000, 1004)</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">1</span>, <span class="ident">GuestAddress</span>(<span class="number">1000</span>), <span class="number">4</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">1</span>, <span class="number">0</span>).<span class="ident">unwrap_err</span>();
         <span class="macro">assert_eq!</span>(
@@ -1293,7 +1291,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                 <span class="ident">len</span>: <span class="number">1</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1301,7 +1299,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                 <span class="ident">len</span>: <span class="number">2</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1309,7 +1307,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                 <span class="ident">len</span>: <span class="number">3</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1317,7 +1315,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                 <span class="ident">len</span>: <span class="number">1</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1325,13 +1323,13 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                 <span class="ident">len</span>: <span class="number">2</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">1</span>, <span class="number">5</span>).<span class="ident">unwrap_err</span>();
         <span class="comment">// [1, 9) -&gt; [1000, 1008)</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">1004</span>), <span class="number">4</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">5</span>, <span class="ident">GuestAddress</span>(<span class="number">1004</span>), <span class="number">4</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="comment">// Spanned across 2 maps</span>
         <span class="macro">assert_eq!</span>(
@@ -1339,7 +1337,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                 <span class="ident">len</span>: <span class="number">5</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1347,7 +1345,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                 <span class="ident">len</span>: <span class="number">6</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1355,20 +1353,20 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                 <span class="ident">len</span>: <span class="number">7</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">2</span>, <span class="number">8</span>).<span class="ident">unwrap_err</span>();
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">3</span>, <span class="number">10</span>).<span class="ident">unwrap_err</span>();
         <span class="comment">// [1, 9) -&gt; [1000, 1008), [11, 17) -&gt; [1010, 1016)</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">11</span>, <span class="ident">GuestAddress</span>(<span class="number">1010</span>), <span class="number">6</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">11</span>, <span class="ident">GuestAddress</span>(<span class="number">1010</span>), <span class="number">6</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="comment">// Discontiguous iova</span>
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">3</span>, <span class="number">10</span>).<span class="ident">unwrap_err</span>();
         <span class="comment">// [1, 17) -&gt; [1000, 1016)</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">9</span>, <span class="ident">GuestAddress</span>(<span class="number">1008</span>), <span class="number">2</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">9</span>, <span class="ident">GuestAddress</span>(<span class="number">1008</span>), <span class="number">2</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="comment">// Spanned across 4 maps</span>
         <span class="macro">assert_eq!</span>(
@@ -1376,7 +1374,7 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1002</span>),
                 <span class="ident">len</span>: <span class="number">10</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="macro">assert_eq!</span>(
@@ -1384,21 +1382,21 @@
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                 <span class="ident">len</span>: <span class="number">16</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">1</span>, <span class="number">17</span>).<span class="ident">unwrap_err</span>();
         <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">16</span>).<span class="ident">unwrap_err</span>();
         <span class="comment">// [0, 1) -&gt; [5, 6), [1, 17) -&gt; [1000, 1016)</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="number">1</span>, <span class="ident">Permission::Read</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">0</span>, <span class="ident">GuestAddress</span>(<span class="number">5</span>), <span class="number">1</span>, <span class="ident">Protection::read</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="macro">assert_eq!</span>(
             <span class="ident">mapper</span>.<span class="ident">translate</span>(<span class="number">0</span>, <span class="number">1</span>).<span class="ident">unwrap</span>()[<span class="number">0</span>],
             <span class="ident">MemRegion</span> {
                 <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">5</span>),
                 <span class="ident">len</span>: <span class="number">1</span>,
-                <span class="ident">perm</span>: <span class="ident">Permission::Read</span>
+                <span class="ident">prot</span>: <span class="ident">Protection::read</span>()
             }
         );
         <span class="comment">// Discontiguous gpa</span>
@@ -1408,12 +1406,12 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">5</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
             ],
         );
@@ -1423,18 +1421,18 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">5</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">15</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
             ],
         );
         <span class="comment">// [0, 1) -&gt; [5, 6), [1, 17) -&gt; [1000, 1016), [17, 18) -&gt; [1016, 1017) &lt;RW&gt;</span>
         <span class="ident">mapper</span>
-            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">17</span>, <span class="ident">GuestAddress</span>(<span class="number">1016</span>), <span class="number">2</span>, <span class="ident">Permission::RW</span>).<span class="ident">unwrap</span>())
+            .<span class="ident">add_map</span>(<span class="ident">MappingInfo::new</span>(<span class="number">17</span>, <span class="ident">GuestAddress</span>(<span class="number">1016</span>), <span class="number">2</span>, <span class="ident">Protection::read_write</span>()).<span class="ident">unwrap</span>())
             .<span class="ident">unwrap</span>();
         <span class="comment">// Contiguous iova and gpa, but different perm</span>
         <span class="ident">assert_vec_eq</span>(
@@ -1443,12 +1441,12 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1000</span>),
                     <span class="ident">len</span>: <span class="number">16</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1016</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>(),
                 },
             ],
         );
@@ -1459,12 +1457,12 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                     <span class="ident">len</span>: <span class="number">15</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1016</span>),
                     <span class="ident">len</span>: <span class="number">1</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>(),
                 },
             ],
         );
@@ -1474,12 +1472,12 @@
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1001</span>),
                     <span class="ident">len</span>: <span class="number">15</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::Read</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read</span>(),
                 },
                 <span class="ident">MemRegion</span> {
                     <span class="ident">gpa</span>: <span class="ident">GuestAddress</span>(<span class="number">1016</span>),
                     <span class="ident">len</span>: <span class="number">2</span>,
-                    <span class="ident">perm</span>: <span class="ident">Permission::RW</span>,
+                    <span class="ident">prot</span>: <span class="ident">Protection::read_write</span>(),
                 },
             ],
         );
