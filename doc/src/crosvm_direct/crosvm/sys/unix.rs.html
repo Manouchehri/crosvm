@@ -3038,11 +3038,11 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
     {
-        <span class="kw">for</span> <span class="ident">cras_snd</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">cras_snds</span> {
-            <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_cras_snd_device</span>(
+        <span class="kw">for</span> <span class="ident">virtio_snd</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">virtio_snds</span> {
+            <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_virtio_snd_device</span>(
                 <span class="ident">cfg</span>.<span class="ident">protected_vm</span>,
                 <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">jail_config</span>,
-                <span class="ident">cras_snd</span>.<span class="ident">clone</span>(),
+                <span class="ident">virtio_snd</span>.<span class="ident">clone</span>(),
             )<span class="question-mark">?</span>);
         }
     }

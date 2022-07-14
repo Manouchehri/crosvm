@@ -204,11 +204,17 @@
 <span id="203">203</span>
 <span id="204">204</span>
 <span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">std::path</span>::{<span class="ident">Path</span>, <span class="ident">PathBuf</span>};
+<span class="kw">use</span> <span class="ident">std::path::Path</span>;
 <span class="kw">use</span> <span class="ident">std::str</span>;
 
 <span class="kw">use</span> <span class="ident">libc</span>::{<span class="self">self</span>, <span class="ident">c_ulong</span>, <span class="ident">gid_t</span>, <span class="ident">uid_t</span>};
@@ -219,10 +225,12 @@
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config::JailConfig</span>;
 
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">SandboxConfig</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">limit_caps</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">log_failures</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">seccomp_policy</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span>,
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">seccomp_policy_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">seccomp_policy_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">uid_map</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">gid_map</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">remount_mode</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">c_ulong</span><span class="op">&gt;</span>,
@@ -275,7 +283,7 @@
         <span class="comment">// command-line parameter for an explanation about why the |log_failures|</span>
         <span class="comment">// flag forces the use of .policy files (and the build-time alternative to</span>
         <span class="comment">// this run-time flag).</span>
-        <span class="kw">let</span> <span class="ident">bpf_policy_file</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">seccomp_policy</span>.<span class="ident">with_extension</span>(<span class="string">&quot;bpf&quot;</span>);
+        <span class="kw">let</span> <span class="ident">bpf_policy_file</span> <span class="op">=</span> <span class="ident">config</span>.<span class="ident">seccomp_policy_path</span>.<span class="ident">unwrap</span>().<span class="ident">with_extension</span>(<span class="string">&quot;bpf&quot;</span>);
         <span class="kw">if</span> <span class="ident">bpf_policy_file</span>.<span class="ident">exists</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">config</span>.<span class="ident">log_failures</span> {
             <span class="ident">j</span>.<span class="ident">parse_seccomp_program</span>(<span class="kw-2">&amp;</span><span class="ident">bpf_policy_file</span>)
                 .<span class="ident">context</span>(<span class="string">&quot;failed to parse precompiled seccomp policy&quot;</span>)<span class="question-mark">?</span>;
@@ -287,7 +295,7 @@
             <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">log_failures</span> {
                 <span class="ident">j</span>.<span class="ident">log_seccomp_filter_failures</span>();
             }
-            <span class="ident">j</span>.<span class="ident">parse_seccomp_filters</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">seccomp_policy</span>.<span class="ident">with_extension</span>(<span class="string">&quot;policy&quot;</span>))
+            <span class="ident">j</span>.<span class="ident">parse_seccomp_filters</span>(<span class="kw-2">&amp;</span><span class="ident">config</span>.<span class="ident">seccomp_policy_path</span>.<span class="ident">unwrap</span>().<span class="ident">with_extension</span>(<span class="string">&quot;policy&quot;</span>))
                 .<span class="ident">context</span>(<span class="string">&quot;failed to parse seccomp policy&quot;</span>)<span class="question-mark">?</span>;
         }
         <span class="ident">j</span>.<span class="ident">use_seccomp_filter</span>();
@@ -327,11 +335,15 @@
                 <span class="ident">jail_config</span>.<span class="ident">pivot_root</span>
             );
         }
-        <span class="kw">let</span> <span class="ident">policy_path</span>: <span class="ident">PathBuf</span> <span class="op">=</span> <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span>.<span class="ident">join</span>(<span class="ident">policy</span>);
+        <span class="kw">let</span> <span class="ident">policy_path</span> <span class="op">=</span> <span class="ident">jail_config</span>
+            .<span class="ident">seccomp_policy_dir</span>
+            .<span class="ident">as_ref</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">dir</span><span class="op">|</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="ident">policy</span>));
         <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="ident">SandboxConfig</span> {
             <span class="ident">limit_caps</span>: <span class="bool-val">true</span>,
             <span class="ident">log_failures</span>: <span class="ident">jail_config</span>.<span class="ident">seccomp_log_failures</span>,
-            <span class="ident">seccomp_policy</span>: <span class="kw-2">&amp;</span><span class="ident">policy_path</span>,
+            <span class="ident">seccomp_policy_path</span>: <span class="ident">policy_path</span>.<span class="ident">as_deref</span>(),
+            <span class="ident">seccomp_policy_name</span>: <span class="ident">policy</span>,
             <span class="ident">uid_map</span>: <span class="prelude-val">None</span>,
             <span class="ident">gid_map</span>: <span class="prelude-val">None</span>,
             <span class="ident">remount_mode</span>: <span class="prelude-val">None</span>,

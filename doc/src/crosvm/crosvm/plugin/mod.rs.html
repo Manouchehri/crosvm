@@ -887,6 +887,16 @@
 <span id="886">886</span>
 <span id="887">887</span>
 <span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2018 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1033,7 +1043,11 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">create_plugin_jail</span>(<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">log_failures</span>: <span class="ident">bool</span>, <span class="ident">seccomp_policy</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Minijail</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">create_plugin_jail</span>(
+    <span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
+    <span class="ident">log_failures</span>: <span class="ident">bool</span>,
+    <span class="ident">seccomp_policy</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Path</span><span class="op">&gt;</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Minijail</span><span class="op">&gt;</span> {
     <span class="comment">// All child jails run in a new user namespace without any users mapped,</span>
     <span class="comment">// they run as nobody unless otherwise configured.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="ident">Minijail::new</span>().<span class="ident">context</span>(<span class="string">&quot;failed to create jail&quot;</span>)<span class="question-mark">?</span>;
@@ -1060,7 +1074,7 @@
     <span class="comment">// command-line parameter for an explanation about why the |log_failures|</span>
     <span class="comment">// flag forces the use of .policy files (and the build-time alternative to</span>
     <span class="comment">// this run-time flag).</span>
-    <span class="kw">let</span> <span class="ident">bpf_policy_file</span> <span class="op">=</span> <span class="ident">seccomp_policy</span>.<span class="ident">with_extension</span>(<span class="string">&quot;bpf&quot;</span>);
+    <span class="kw">let</span> <span class="ident">bpf_policy_file</span> <span class="op">=</span> <span class="ident">seccomp_policy</span>.<span class="ident">unwrap</span>().<span class="ident">with_extension</span>(<span class="string">&quot;bpf&quot;</span>);
     <span class="kw">if</span> <span class="ident">bpf_policy_file</span>.<span class="ident">exists</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">log_failures</span> {
         <span class="ident">j</span>.<span class="ident">parse_seccomp_program</span>(<span class="kw-2">&amp;</span><span class="ident">bpf_policy_file</span>)
             .<span class="ident">context</span>(<span class="string">&quot;failed to parse jail seccomp BPF program&quot;</span>)<span class="question-mark">?</span>;
@@ -1072,7 +1086,7 @@
         <span class="kw">if</span> <span class="ident">log_failures</span> {
             <span class="ident">j</span>.<span class="ident">log_seccomp_filter_failures</span>();
         }
-        <span class="ident">j</span>.<span class="ident">parse_seccomp_filters</span>(<span class="kw-2">&amp;</span><span class="ident">seccomp_policy</span>.<span class="ident">with_extension</span>(<span class="string">&quot;policy&quot;</span>))
+        <span class="ident">j</span>.<span class="ident">parse_seccomp_filters</span>(<span class="kw-2">&amp;</span><span class="ident">seccomp_policy</span>.<span class="ident">unwrap</span>().<span class="ident">with_extension</span>(<span class="string">&quot;policy&quot;</span>))
             .<span class="ident">context</span>(<span class="string">&quot;failed to parse jail seccomp filter&quot;</span>)<span class="question-mark">?</span>;
     }
     <span class="ident">j</span>.<span class="ident">use_seccomp_filter</span>();
@@ -1450,9 +1464,15 @@
             <span class="macro">bail!</span>(<span class="string">&quot;specified root directory is not a directory&quot;</span>);
         }
 
-        <span class="kw">let</span> <span class="ident">policy_path</span> <span class="op">=</span> <span class="ident">jail_config</span>.<span class="ident">seccomp_policy_dir</span>.<span class="ident">join</span>(<span class="string">&quot;plugin&quot;</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">jail</span> <span class="op">=</span>
-            <span class="ident">create_plugin_jail</span>(<span class="ident">root_path</span>, <span class="ident">jail_config</span>.<span class="ident">seccomp_log_failures</span>, <span class="kw-2">&amp;</span><span class="ident">policy_path</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">policy_path</span> <span class="op">=</span> <span class="ident">jail_config</span>
+            .<span class="ident">seccomp_policy_dir</span>
+            .<span class="ident">as_ref</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">dir</span><span class="op">|</span> <span class="ident">dir</span>.<span class="ident">join</span>(<span class="string">&quot;plugin&quot;</span>));
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">jail</span> <span class="op">=</span> <span class="ident">create_plugin_jail</span>(
+            <span class="ident">root_path</span>,
+            <span class="ident">jail_config</span>.<span class="ident">seccomp_log_failures</span>,
+            <span class="ident">policy_path</span>.<span class="ident">as_deref</span>(),
+        )<span class="question-mark">?</span>;
 
         <span class="comment">// Update gid map of the jail if caller provided supplemental groups.</span>
         <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">plugin_gid_maps</span>.<span class="ident">is_empty</span>() {

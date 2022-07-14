@@ -1693,6 +1693,40 @@
 <span id="1692">1692</span>
 <span id="1693">1693</span>
 <span id="1694">1694</span>
+<span id="1695">1695</span>
+<span id="1696">1696</span>
+<span id="1697">1697</span>
+<span id="1698">1698</span>
+<span id="1699">1699</span>
+<span id="1700">1700</span>
+<span id="1701">1701</span>
+<span id="1702">1702</span>
+<span id="1703">1703</span>
+<span id="1704">1704</span>
+<span id="1705">1705</span>
+<span id="1706">1706</span>
+<span id="1707">1707</span>
+<span id="1708">1708</span>
+<span id="1709">1709</span>
+<span id="1710">1710</span>
+<span id="1711">1711</span>
+<span id="1712">1712</span>
+<span id="1713">1713</span>
+<span id="1714">1714</span>
+<span id="1715">1715</span>
+<span id="1716">1716</span>
+<span id="1717">1717</span>
+<span id="1718">1718</span>
+<span id="1719">1719</span>
+<span id="1720">1720</span>
+<span id="1721">1721</span>
+<span id="1722">1722</span>
+<span id="1723">1723</span>
+<span id="1724">1724</span>
+<span id="1725">1725</span>
+<span id="1726">1726</span>
+<span id="1727">1727</span>
+<span id="1728">1728</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1733,7 +1767,7 @@
 <span class="kw">use</span> <span class="ident">base::getpid</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">devices::virtio::cras_backend::Parameters</span> <span class="kw">as</span> <span class="ident">CrasSndParameters</span>;
+<span class="kw">use</span> <span class="ident">devices::virtio::common_backend::Parameters</span> <span class="kw">as</span> <span class="ident">SndParameters</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::device</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::VideoBackendType</span>;
@@ -2192,18 +2226,23 @@
         num_output_devices=1,num_input_devices=1,num_output_streams=1,num_input_streams=1]&quot;</span>,
         <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;cras-snd&quot;</span>
     )]</span>
-    <span class="doccomment">/// comma separated key=value pairs for setting up cras snd</span>
+    <span class="doccomment">/// comma separated key=value pairs for setting up virtio snd</span>
     <span class="doccomment">/// devices.</span>
     <span class="doccomment">/// Possible key values:</span>
-    <span class="doccomment">///     capture - Enable audio capture. Default to false.</span>
-    <span class="doccomment">///     client_type - Set specific client type for cras backend.</span>
-    <span class="doccomment">///     num_output_devices - Set number of output PCM devices.</span>
-    <span class="doccomment">///     num_input_devices - Set number of input PCM devices.</span>
-    <span class="doccomment">///     num_output_streams - Set number of output PCM streams</span>
+    <span class="doccomment">///     capture=(false,true) - Disable/enable audio capture.</span>
+    <span class="doccomment">///         Default is false.</span>
+    <span class="doccomment">///     client_type=(crosvm,arcvm,borealis) - Set specific</span>
+    <span class="doccomment">///         client type for cras backend. Default is crosvm.</span>
+    <span class="doccomment">///     socket_type=(legacy,unified) Set specific socket type</span>
+    <span class="doccomment">///         for cras backend. Default is unified.</span>
+    <span class="doccomment">///     num_output_devices=INT - Set number of output PCM</span>
+    <span class="doccomment">///         devices.</span>
+    <span class="doccomment">///     num_input_devices=INT - Set number of input PCM devices.</span>
+    <span class="doccomment">///     num_output_streams=INT - Set number of output PCM</span>
+    <span class="doccomment">///         streams per device.</span>
+    <span class="doccomment">///     num_input_streams=INT - Set number of input PCM streams</span>
     <span class="doccomment">///         per device.</span>
-    <span class="doccomment">///     num_input_streams - Set number of input PCM streams</span>
-    <span class="doccomment">///         per device.</span>
-    <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CrasSndParameters</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SndParameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// don&#39;t set VCPUs real-time until make-rt command is run</span>
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
@@ -2837,6 +2876,32 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;single-touch&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH:WIDTH:HEIGHT&quot;</span>)]</span>
     <span class="doccomment">/// path to a socket from where to read single touch input events (such as those from a touchscreen) and write status updates to, optionally followed by width and height (defaults to 800x1280)</span>
     <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(
+        <span class="ident">option</span>,
+        <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;[capture=true,backend=BACKEND,num_output_devices=1,
+        num_input_devices=1,num_output_streams=1,num_input_streams=1]&quot;</span>,
+        <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;virtio-snd&quot;</span>
+    )]</span>
+    <span class="doccomment">/// comma separated key=value pairs for setting up virtio snd</span>
+    <span class="doccomment">/// devices.</span>
+    <span class="doccomment">/// Possible key values:</span>
+    <span class="doccomment">///     capture=(false,true) - Disable/enable audio capture.</span>
+    <span class="doccomment">///         Default is false.</span>
+    <span class="doccomment">///     backend=(null,[cras]) - Which backend to use for</span>
+    <span class="doccomment">///         virtio-snd.</span>
+    <span class="doccomment">///     client_type=(crosvm,arcvm,borealis) - Set specific</span>
+    <span class="doccomment">///         client type for cras backend. Default is crosvm.</span>
+    <span class="doccomment">///     socket_type=(legacy,unified) Set specific socket type</span>
+    <span class="doccomment">///         for cras backend. Default is unified.</span>
+    <span class="doccomment">///     num_output_devices=INT - Set number of output PCM</span>
+    <span class="doccomment">///         devices.</span>
+    <span class="doccomment">///     num_input_devices=INT - Set number of input PCM devices.</span>
+    <span class="doccomment">///     num_output_streams=INT - Set number of output PCM</span>
+    <span class="doccomment">///         streams per device.</span>
+    <span class="doccomment">///     num_input_streams=INT - Set number of input PCM streams</span>
+    <span class="doccomment">///         per device.</span>
+    <span class="kw">pub</span> <span class="ident">virtio_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SndParameters</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;switches&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// path to a socket from where to read switch input events and write status updates to</span>
     <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
@@ -3188,7 +3253,10 @@
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
         {
-            <span class="ident">cfg</span>.<span class="ident">cras_snds</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">cras_snds</span>;
+            <span class="ident">cfg</span>.<span class="ident">virtio_snds</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">virtio_snds</span>;
+            <span class="comment">// cmd.cras_snds is the old parameter for virtio snd with cras backend.</span>
+            <span class="comment">// backend is assigned by Parameters Default implementation</span>
+            <span class="ident">cfg</span>.<span class="ident">virtio_snds</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">cmd</span>.<span class="ident">cras_snds</span>);
         }
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
@@ -3229,7 +3297,7 @@
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>) <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">seccomp_policy_dir</span> {
                 <span class="ident">cfg</span>.<span class="ident">jail_config</span>
                     .<span class="ident">get_or_insert_with</span>(<span class="ident">Default::default</span>)
-                    .<span class="ident">seccomp_policy_dir</span> <span class="op">=</span> <span class="ident">d</span>;
+                    .<span class="ident">seccomp_policy_dir</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>);
             }
 
             <span class="kw">if</span> <span class="ident">cmd</span>.<span class="ident">seccomp_log_failures</span> {

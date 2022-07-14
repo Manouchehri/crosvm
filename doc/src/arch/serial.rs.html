@@ -397,19 +397,29 @@
 <span id="396">396</span>
 <span id="397">397</span>
 <span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::collections::BTreeMap</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::thread</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-<span class="kw">use</span> <span class="ident">std::io::Read</span>;
+<span class="comment">/* Re-enable once b/233951530 is done.
+#[cfg(windows)]
+use std::io::Read;
+
+#[cfg(windows)]
+use std::thread;
+
+#[cfg(windows)]
+use std::time::Duration;
+*/</span>
 
 <span class="kw">use</span> <span class="ident">base::Event</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
@@ -576,29 +586,31 @@
 
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
                 {
-                    <span class="kw">if</span> <span class="op">!</span><span class="ident">param</span>.<span class="ident">stdin</span> {
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">SerialType::SystemSerialType</span> <span class="op">=</span> <span class="ident">param</span>.<span class="ident">type_</span> {
-                            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">in_pipe_result</span> <span class="op">=</span>
-                                <span class="ident">com</span>.<span class="ident">lock</span>().<span class="ident">in_stream</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">try_clone</span>();
-                            <span class="ident">thread::spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                                <span class="kw">let</span> <span class="ident">serial_input</span> <span class="op">=</span> <span class="ident">SerialInput::new_local</span>(<span class="ident">com</span>);
-                                <span class="kw">let</span> <span class="ident">in_pipe</span> <span class="op">=</span> <span class="ident">in_pipe_result</span>.<span class="ident">as_mut</span>().<span class="ident">unwrap</span>();
+                    <span class="comment">/* Re-enable once b/233951530 is done.
+                    if !param.stdin {
+                        if let SerialType::SystemSerialType = param.type_ {
+                            let mut in_pipe_result =
+                                com.lock().in_stream.as_ref().unwrap().try_clone();
+                            thread::spawn(move || {
+                                let serial_input = SerialInput::new_local(com);
+                                let in_pipe = in_pipe_result.as_mut().unwrap();
 
-                                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span>: [<span class="ident">u8</span>; <span class="number">255</span>] <span class="op">=</span> [<span class="number">0</span>; <span class="number">255</span>];
-                                <span class="kw">loop</span> {
-                                    <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">in_pipe</span>.<span class="ident">read</span>(<span class="kw-2">&amp;mut</span> <span class="ident">buffer</span>).<span class="ident">unwrap_or</span>(<span class="number">0</span>);
-                                    <span class="kw">if</span> <span class="ident">bytes</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                                        <span class="ident">serial_input</span>.<span class="ident">queue_input_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">buffer</span>[<span class="number">0</span>..<span class="ident">bytes</span>]).<span class="ident">unwrap</span>();
+                                let mut buffer: [u8; 255] = [0; 255];
+                                loop {
+                                    let bytes = in_pipe.read(&amp;mut buffer).unwrap_or(0);
+                                    if bytes &gt; 0 {
+                                        serial_input.queue_input_bytes(&amp;buffer[0..bytes]).unwrap();
                                     }
-                                    <span class="comment">// We can&#39;t issue blocking reads here and overlapped I/O is</span>
-                                    <span class="comment">// incompatible with the call site where writes to this pipe are being</span>
-                                    <span class="comment">// made, so instead we issue a small wait to prevent us from hogging</span>
-                                    <span class="comment">// the CPU. This 20ms delay while typing doesn&#39;t seem to be noticeable.</span>
-                                    <span class="ident">thread::sleep</span>(<span class="ident">Duration::from_millis</span>(<span class="number">20</span>));
+                                    // We can&#39;t issue blocking reads here and overlapped I/O is
+                                    // incompatible with the call site where writes to this pipe are being
+                                    // made, so instead we issue a small wait to prevent us from hogging
+                                    // the CPU. This 20ms delay while typing doesn&#39;t seem to be noticeable.
+                                    thread::sleep(Duration::from_millis(20));
                                 }
                             });
                         }
                     }
+                    */</span>
                 }
             }
         }

@@ -1,7 +1,7 @@
 var N = null;var sourcesIndex = {};
 sourcesIndex["aarch64"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["acpi_tables"] = {"name":"","files":["aml.rs","facs.rs","lib.rs","rsdp.rs","sdt.rs"]};
-sourcesIndex["arch"] = {"name":"","files":["android.rs","fdt.rs","lib.rs","pstore.rs","serial.rs"]};
+sourcesIndex["arch"] = {"name":"","dirs":[{"name":"pstore","dirs":[{"name":"sys","files":["unix.rs"]}],"files":["sys.rs"]},{"name":"sys","files":["unix.rs"]}],"files":["android.rs","fdt.rs","lib.rs","pstore.rs","serial.rs","sys.rs"]};
 sourcesIndex["argh_helpers"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["base"] = {"name":"","dirs":[{"name":"sys","dirs":[{"name":"unix","dirs":[{"name":"linux","files":["mod.rs","syslog.rs"]}],"files":["acpi_event.rs","capabilities.rs","descriptor.rs","eventfd.rs","file_flags.rs","file_traits.rs","get_filesystem_type.rs","gmtime.rs","handle_eintr.rs","ioctl.rs","mmap.rs","mod.rs","net.rs","netlink.rs","notifiers.rs","platform_timer_resolution.rs","poll.rs","priority.rs","sched.rs","scoped_signal_handler.rs","shm.rs","signal.rs","signalfd.rs","sock_ctrl_msg.rs","stream_channel.rs","syslog.rs","terminal.rs","timer.rs","tube.rs","vsock.rs","write_zeroes.rs"]}]}],"files":["alloc.rs","clock.rs","descriptor.rs","descriptor_reflection.rs","errno.rs","event.rs","external_mapping.rs","lib.rs","mmap.rs","notifiers.rs","shm.rs","sys.rs","syslog.rs","timer.rs","tube.rs","wait_context.rs","write_zeroes.rs"]};
 sourcesIndex["base_event_token_derive"] = {"name":"","files":["event_token_derive.rs"]};

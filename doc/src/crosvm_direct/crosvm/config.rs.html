@@ -2172,6 +2172,87 @@
 <span id="2171">2171</span>
 <span id="2172">2172</span>
 <span id="2173">2173</span>
+<span id="2174">2174</span>
+<span id="2175">2175</span>
+<span id="2176">2176</span>
+<span id="2177">2177</span>
+<span id="2178">2178</span>
+<span id="2179">2179</span>
+<span id="2180">2180</span>
+<span id="2181">2181</span>
+<span id="2182">2182</span>
+<span id="2183">2183</span>
+<span id="2184">2184</span>
+<span id="2185">2185</span>
+<span id="2186">2186</span>
+<span id="2187">2187</span>
+<span id="2188">2188</span>
+<span id="2189">2189</span>
+<span id="2190">2190</span>
+<span id="2191">2191</span>
+<span id="2192">2192</span>
+<span id="2193">2193</span>
+<span id="2194">2194</span>
+<span id="2195">2195</span>
+<span id="2196">2196</span>
+<span id="2197">2197</span>
+<span id="2198">2198</span>
+<span id="2199">2199</span>
+<span id="2200">2200</span>
+<span id="2201">2201</span>
+<span id="2202">2202</span>
+<span id="2203">2203</span>
+<span id="2204">2204</span>
+<span id="2205">2205</span>
+<span id="2206">2206</span>
+<span id="2207">2207</span>
+<span id="2208">2208</span>
+<span id="2209">2209</span>
+<span id="2210">2210</span>
+<span id="2211">2211</span>
+<span id="2212">2212</span>
+<span id="2213">2213</span>
+<span id="2214">2214</span>
+<span id="2215">2215</span>
+<span id="2216">2216</span>
+<span id="2217">2217</span>
+<span id="2218">2218</span>
+<span id="2219">2219</span>
+<span id="2220">2220</span>
+<span id="2221">2221</span>
+<span id="2222">2222</span>
+<span id="2223">2223</span>
+<span id="2224">2224</span>
+<span id="2225">2225</span>
+<span id="2226">2226</span>
+<span id="2227">2227</span>
+<span id="2228">2228</span>
+<span id="2229">2229</span>
+<span id="2230">2230</span>
+<span id="2231">2231</span>
+<span id="2232">2232</span>
+<span id="2233">2233</span>
+<span id="2234">2234</span>
+<span id="2235">2235</span>
+<span id="2236">2236</span>
+<span id="2237">2237</span>
+<span id="2238">2238</span>
+<span id="2239">2239</span>
+<span id="2240">2240</span>
+<span id="2241">2241</span>
+<span id="2242">2242</span>
+<span id="2243">2243</span>
+<span id="2244">2244</span>
+<span id="2245">2245</span>
+<span id="2246">2246</span>
+<span id="2247">2247</span>
+<span id="2248">2248</span>
+<span id="2249">2249</span>
+<span id="2250">2250</span>
+<span id="2251">2251</span>
+<span id="2252">2252</span>
+<span id="2253">2253</span>
+<span id="2254">2254</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2190,7 +2271,7 @@
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">devices::virtio::cras_backend::Parameters</span> <span class="kw">as</span> <span class="ident">CrasSndParameters</span>;
+<span class="kw">use</span> <span class="ident">devices::virtio::common_backend::Parameters</span> <span class="kw">as</span> <span class="ident">SndParameters</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::gpu::GpuParameters</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-decoder&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;video-encoder&quot;</span>))]</span>
@@ -2734,21 +2815,33 @@
     <span class="kw">pub</span> <span class="ident">hp_gpe</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>, <span class="ident">serde_keyvalue::FromKeyValues</span>)]</span>
-<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">deny_unknown_fields</span>)]</span>
+<span class="kw">fn</span> <span class="ident">jail_config_default_pivot_root</span>() -&gt; <span class="ident">PathBuf</span> {
+    <span class="ident">PathBuf::from</span>(<span class="macro">option_env!</span>(<span class="string">&quot;DEFAULT_PIVOT_ROOT&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;/var/empty&quot;</span>))
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+<span class="kw">fn</span> <span class="ident">jail_config_default_seccomp_policy_dir</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+    <span class="prelude-val">Some</span>(<span class="ident">PathBuf::from</span>(<span class="ident">SECCOMP_POLICY_DIR</span>))
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">PartialEq</span>, <span class="ident">serde_keyvalue::FromKeyValues</span>)]</span>
+<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">deny_unknown_fields</span>, <span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;kebab-case&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">JailConfig</span> {
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span> <span class="op">=</span> <span class="string">&quot;jail_config_default_pivot_root&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">pivot_root</span>: <span class="ident">PathBuf</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">seccomp_policy_dir</span>: <span class="ident">PathBuf</span>,
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span> <span class="op">=</span> <span class="string">&quot;jail_config_default_seccomp_policy_dir&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">seccomp_policy_dir</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">default</span>)]</span>
     <span class="kw">pub</span> <span class="ident">seccomp_log_failures</span>: <span class="ident">bool</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">JailConfig</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">JailConfig</span> {
-            <span class="ident">pivot_root</span>: <span class="ident">PathBuf::from</span>(<span class="macro">option_env!</span>(<span class="string">&quot;DEFAULT_PIVOT_ROOT&quot;</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;/var/empty&quot;</span>)),
+            <span class="ident">pivot_root</span>: <span class="ident">jail_config_default_pivot_root</span>(),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-            <span class="ident">seccomp_policy_dir</span>: <span class="ident">PathBuf::from</span>(<span class="ident">SECCOMP_POLICY_DIR</span>),
+            <span class="ident">seccomp_policy_dir</span>: <span class="ident">jail_config_default_seccomp_policy_dir</span>(),
             <span class="ident">seccomp_log_failures</span>: <span class="bool-val">false</span>,
         }
     }
@@ -3454,9 +3547,6 @@
     <span class="kw">pub</span> <span class="ident">coiommu_param</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">devices::CoIommuParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">u32</span><span class="op">&gt;</span>, <span class="comment">// CPU index -&gt; capacity</span>
     <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
-    <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CrasSndParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">direct_edge_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
@@ -3574,6 +3664,9 @@
     <span class="kw">pub</span> <span class="ident">virtio_mice</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">virtio_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SndParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_trackpad</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
@@ -3597,8 +3690,6 @@
             <span class="ident">cid</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">coiommu_param</span>: <span class="prelude-val">None</span>,
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
-            <span class="ident">cras_snds</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap::new</span>(),
             <span class="ident">cpu_clusters</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">delay_rt</span>: <span class="bool-val">false</span>,
@@ -3719,6 +3810,8 @@
             <span class="ident">virtio_mice</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_single_touch</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+            <span class="ident">virtio_snds</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_switches</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_trackpad</span>: <span class="ident">Vec::new</span>(),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chromeos&quot;</span>, <span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>))]</span>
@@ -4343,6 +4436,75 @@
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10,type=w,action=pass,from=f&quot;</span>).<span class="ident">is_err</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;0x10&quot;</span>).<span class="ident">is_err</span>());
         <span class="macro">assert!</span>(<span class="ident">parse_userspace_msr_options</span>(<span class="string">&quot;hoge&quot;</span>).<span class="ident">is_err</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">parse_jailconfig</span>() {
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">Default::default</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">config</span>,
+            <span class="ident">JailConfig</span> {
+                <span class="ident">pivot_root</span>: <span class="ident">jail_config_default_pivot_root</span>(),
+                <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
+                <span class="ident">seccomp_policy_dir</span>: <span class="ident">jail_config_default_seccomp_policy_dir</span>(),
+                <span class="ident">seccomp_log_failures</span>: <span class="bool-val">false</span>,
+            }
+        );
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">from_key_values</span>(<span class="string">&quot;&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">config</span>, <span class="ident">Default::default</span>());
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">from_key_values</span>(<span class="string">&quot;pivot-root=/path/to/pivot/root&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">config</span>,
+            <span class="ident">JailConfig</span> {
+                <span class="ident">pivot_root</span>: <span class="string">&quot;/path/to/pivot/root&quot;</span>.<span class="ident">into</span>(),
+                ..<span class="ident">Default::default</span>()
+            }
+        );
+
+        <span class="macro">cfg_if::cfg_if!</span> {
+            <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
+                <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">from_key_values</span>(<span class="string">&quot;seccomp-policy-dir=/path/to/seccomp/dir&quot;</span>).<span class="ident">unwrap</span>();
+                <span class="macro">assert_eq!</span>(<span class="ident">config</span>, <span class="ident">JailConfig</span> {
+                    <span class="ident">seccomp_policy_dir</span>: <span class="prelude-val">Some</span>(<span class="string">&quot;/path/to/seccomp/dir&quot;</span>.<span class="ident">into</span>()),
+                    ..<span class="ident">Default::default</span>()
+                });
+            }
+        }
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">from_key_values</span>(<span class="string">&quot;seccomp-log-failures&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">config</span>,
+            <span class="ident">JailConfig</span> {
+                <span class="ident">seccomp_log_failures</span>: <span class="bool-val">true</span>,
+                ..<span class="ident">Default::default</span>()
+            }
+        );
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span> <span class="ident">from_key_values</span>(<span class="string">&quot;seccomp-log-failures=false&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">config</span>,
+            <span class="ident">JailConfig</span> {
+                <span class="ident">seccomp_log_failures</span>: <span class="bool-val">false</span>,
+                ..<span class="ident">Default::default</span>()
+            }
+        );
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="ident">JailConfig</span> <span class="op">=</span>
+            <span class="ident">from_key_values</span>(<span class="string">&quot;pivot-root=/path/to/pivot/root,seccomp-log-failures=true&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">config</span>,
+            <span class="ident">JailConfig</span> {
+                <span class="ident">pivot_root</span>: <span class="string">&quot;/path/to/pivot/root&quot;</span>.<span class="ident">into</span>(),
+                <span class="ident">seccomp_log_failures</span>: <span class="bool-val">true</span>,
+                ..<span class="ident">Default::default</span>()
+            }
+        );
+
+        <span class="kw">let</span> <span class="ident">config</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">JailConfig</span>, <span class="ident">String</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="ident">from_key_values</span>(<span class="string">&quot;seccomp-log-failures,invalid-arg=value&quot;</span>);
+        <span class="macro">assert!</span>(<span class="ident">config</span>.<span class="ident">is_err</span>());
     }
 }
 </code></pre></div>

@@ -141,12 +141,27 @@
 <span id="140">140</span>
 <span id="141">141</span>
 <span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
 <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="self">self</span>, <span class="ident">Write</span>};
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+<span class="kw">use</span> <span class="ident">base::named_pipes</span>;
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">error</span>, <span class="ident">Event</span>, <span class="ident">FileSync</span>, <span class="ident">RawDescriptor</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">hypervisor::ProtectionType</span>;
 
@@ -171,6 +186,17 @@
         <span class="ident">_keep_rds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span>,
     ) -&gt; <span class="ident">Debugcon</span> {
         <span class="ident">Debugcon</span> { <span class="ident">out</span> }
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">new_with_pipe</span>(
+        <span class="ident">_protected_vm</span>: <span class="ident">ProtectionType</span>,
+        <span class="ident">_interrupt_evt</span>: <span class="ident">Event</span>,
+        <span class="ident">_pipe_in</span>: <span class="ident">named_pipes::PipeConnection</span>,
+        <span class="ident">_pipe_out</span>: <span class="ident">named_pipes::PipeConnection</span>,
+        <span class="ident">_keep_rds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="ident">Debugcon</span> {
+        <span class="macro">unimplemented!</span>(<span class="string">&quot;new_with_pipe unimplemented for Debugcon&quot;</span>);
     }
 }
 
