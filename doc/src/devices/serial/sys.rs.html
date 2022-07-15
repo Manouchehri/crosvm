@@ -20,10 +20,10 @@
 
 <span class="macro">cfg_if::cfg_if!</span> {
     <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">unix</span>;
+        <span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::serial</span>) <span class="kw">mod</span> <span class="ident">unix</span>;
         <span class="kw">use</span> <span class="ident">unix</span> <span class="kw">as</span> <span class="ident">platform</span>;
     } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
-        <span class="kw">mod</span> <span class="ident">windows</span>;
+        <span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::serial</span>) <span class="kw">mod</span> <span class="ident">windows</span>;
         <span class="kw">use</span> <span class="ident">windows</span> <span class="kw">as</span> <span class="ident">platform</span>;
     }
 }
