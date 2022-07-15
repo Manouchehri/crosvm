@@ -476,11 +476,11 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">profile</span>: <span class="ident">bindings::VAProfile::Type</span>,
         <span class="ident">entrypoint</span>: <span class="ident">bindings::VAEntrypoint::Type</span>,
-        <span class="ident">attributes</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">bindings::VAConfigAttrib</span><span class="op">&gt;</span>,
+        <span class="ident">attributes</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">bindings::VAConfigAttrib</span>],
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="comment">// Safe because `self` represents a valid VADisplay. The vector length</span>
+        <span class="comment">// Safe because `self` represents a valid VADisplay. The slice length</span>
         <span class="comment">// is passed to the C function, so it is impossible to write past the</span>
-        <span class="comment">// end of the vector&#39;s storage by mistake.</span>
+        <span class="comment">// end of the slice&#39;s storage by mistake.</span>
         <span class="ident">Status</span>(<span class="kw">unsafe</span> {
             <span class="ident">bindings::vaGetConfigAttributes</span>(
                 <span class="self">self</span>.<span class="ident">handle</span>,
