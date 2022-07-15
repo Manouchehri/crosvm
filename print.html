@@ -2070,6 +2070,10 @@ directive near the top:</p>
 </code></pre>
 <p>The common device policy for <code>x86_64</code> is:</p>
 <pre><code>@frequency ./common_device.frequency
+
+# rseq should be first due to frequency and purpose to decrease nptl latency
+rseq: 1
+
 brk: 1
 clock_gettime: 1
 clone: arg0 &amp; CLONE_THREAD
