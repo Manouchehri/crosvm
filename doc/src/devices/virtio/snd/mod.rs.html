@@ -17,6 +17,11 @@
 <span id="16">16</span>
 <span id="17">17</span>
 <span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -31,10 +36,15 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cras_backend</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">null_backend</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vios_backend</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vios_backend::new_sound</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vios_backend::SoundError</span>;
+<span class="macro">cfg_if::cfg_if!</span> {
+    <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span> {
+        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vios_backend</span>;
+
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vios_backend::new_sound</span>;
+        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">vios_backend::SoundError</span>;
+    }
+}
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="devices" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
 </body></html>

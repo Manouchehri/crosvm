@@ -215,9 +215,12 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">block</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">console</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">resource_bridge</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">snd</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">vhost</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::block</span>::<span class="kw-2">*</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::console</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::descriptor_utils::Error</span> <span class="kw">as</span> <span class="ident">DescriptorError</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::descriptor_utils</span>::<span class="kw-2">*</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::input</span>::<span class="kw-2">*</span>;
@@ -242,11 +245,8 @@
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">gpu</span>;
         <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">net</span>;
-        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">snd</span>;
 
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::balloon</span>::<span class="kw-2">*</span>;
-        <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::console</span>::<span class="kw-2">*</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::gpu</span>::<span class="kw-2">*</span>;
         <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="self">self</span>::iommu::sys::unix::vfio_wrapper</span>;
