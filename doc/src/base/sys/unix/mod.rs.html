@@ -1315,7 +1315,7 @@
 <span class="doccomment">/// Returns the number of online logical cores on the system.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">number_of_logical_cores</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="comment">// Safe because we pass a flag for this call and the host supports this system call</span>
-    <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="ident">libc::sysconf</span>(<span class="ident">libc::_SC_NPROCESSORS_ONLN</span>) } <span class="kw">as</span> <span class="ident">usize</span>)
+    <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="ident">libc::sysconf</span>(<span class="ident">libc::_SC_NPROCESSORS_CONF</span>) } <span class="kw">as</span> <span class="ident">usize</span>)
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
