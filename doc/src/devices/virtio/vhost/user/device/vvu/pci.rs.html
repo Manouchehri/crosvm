@@ -777,7 +777,7 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">write_notify_cfg_field</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">device</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>.<span class="ident">write_obj</span>(
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>.<span class="ident">write_obj_volatile</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>,
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">device</span>.<span class="ident">caps</span>.<span class="ident">notify_cfg_addr</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>
                 <span class="op">+</span> <span class="macro">offset_of!</span>(<span class="ident">virtio_pci_notification_cfg</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>),
@@ -787,7 +787,7 @@
 
 <span class="macro">macro_rules!</span> <span class="ident">read_notify_cfg_field</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">device</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>:<span class="ident">ident</span>) =&gt; {
-        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>.<span class="ident">read_obj</span>(
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">mmap</span>.<span class="ident">read_obj_volatile</span>(
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">device</span>.<span class="ident">caps</span>.<span class="ident">notify_cfg_addr</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>
                 <span class="op">+</span> <span class="macro">offset_of!</span>(<span class="ident">virtio_pci_notification_cfg</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>),
         )
@@ -827,7 +827,7 @@
         <span class="comment">// anyway. The mmap address should be correct as initialized in the &#39;new()&#39; function</span>
         <span class="comment">// according to the given vfio device.</span>
         <span class="self">self</span>.<span class="ident">mmap</span>
-            .<span class="ident">write_obj</span>(<span class="number">0_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">write_obj_volatile</span>(<span class="number">0_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;unable to write to mmap area&quot;</span>);
     }
 }

@@ -351,6 +351,72 @@
 <span id="350">350</span>
 <span id="351">351</span>
 <span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -360,7 +426,8 @@
     <span class="ident">fs::File</span>,
     <span class="ident">intrinsics::copy_nonoverlapping</span>,
     <span class="ident">mem::size_of</span>,
-    <span class="ident">ptr</span>::{<span class="ident">read_unaligned</span>, <span class="ident">write_unaligned</span>},
+    <span class="ident">ptr</span>::{<span class="ident">read_unaligned</span>, <span class="ident">read_volatile</span>, <span class="ident">write_unaligned</span>, <span class="ident">write_volatile</span>},
+    <span class="ident">sync::atomic</span>::{<span class="ident">fence</span>, <span class="ident">Ordering</span>},
 };
 
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">volatile_memory</span>::<span class="kw-2">*</span>, <span class="ident">DataInit</span>};
@@ -481,6 +548,9 @@
     <span class="doccomment">/// Writes an object to the memory region at the specified offset.</span>
     <span class="doccomment">/// Returns Ok(()) if the object fits, or Err if it extends past the end.</span>
     <span class="doccomment">///</span>
+    <span class="doccomment">/// This method is for writing to regular memory. If writing to a mapped</span>
+    <span class="doccomment">/// I/O region, use [`MemoryMapping::write_obj_volatile`].</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">/// * Write a u64 at offset 16.</span>
     <span class="doccomment">///</span>
@@ -504,6 +574,9 @@
     <span class="doccomment">/// mid-read.  However, as long as the type T is plain old data and can</span>
     <span class="doccomment">/// handle random initialization, everything will be OK.</span>
     <span class="doccomment">///</span>
+    <span class="doccomment">/// This method is for reading from regular memory. If reading from a</span>
+    <span class="doccomment">/// mapped I/O region, use [`MemoryMapping::read_obj_volatile`].</span>
+    <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">/// * Read a u64 written to offset 32.</span>
     <span class="doccomment">///</span>
@@ -521,6 +594,65 @@
         <span class="comment">// still be valid.</span>
         <span class="kw">unsafe</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">read_unaligned</span>(
+                <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>
+            ))
+        }
+    }
+
+    <span class="doccomment">/// Writes an object to the memory region at the specified offset.</span>
+    <span class="doccomment">/// Returns Ok(()) if the object fits, or Err if it extends past the end.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The write operation will be volatile, i.e. it will not be reordered by</span>
+    <span class="doccomment">/// the compiler and is suitable for I/O, but must be aligned. When writing</span>
+    <span class="doccomment">/// to regular memory, prefer [`MemoryMapping::write_obj`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">/// * Write a u32 at offset 16.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// #   use base::MemoryMappingBuilder;</span>
+    <span class="doccomment">/// #   let mut mem_map = MemoryMappingBuilder::new(1024).build().unwrap();</span>
+    <span class="doccomment">///     let res = mem_map.write_obj_volatile(0xf00u32, 16);</span>
+    <span class="doccomment">///     assert!(res.is_ok());</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_obj_volatile</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DataInit</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">range_end</span>(<span class="ident">offset</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
+        <span class="comment">// Make sure writes to memory have been committed before performing I/O that could</span>
+        <span class="comment">// potentially depend on them.</span>
+        <span class="ident">fence</span>(<span class="ident">Ordering::SeqCst</span>);
+        <span class="comment">// This is safe because we checked the bounds above.</span>
+        <span class="kw">unsafe</span> {
+            <span class="ident">write_volatile</span>(<span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>, <span class="ident">val</span>);
+        }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="doccomment">/// Reads on object from the memory region at the given offset.</span>
+    <span class="doccomment">/// Reading from a volatile area isn&#39;t strictly safe as it could change</span>
+    <span class="doccomment">/// mid-read.  However, as long as the type T is plain old data and can</span>
+    <span class="doccomment">/// handle random initialization, everything will be OK.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The read operation will be volatile, i.e. it will not be reordered by</span>
+    <span class="doccomment">/// the compiler and is suitable for I/O, but must be aligned. When reading</span>
+    <span class="doccomment">/// from regular memory, prefer [`MemoryMapping::read_obj`].</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">/// * Read a u32 written to offset 16.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// #   use base::MemoryMappingBuilder;</span>
+    <span class="doccomment">/// #   let mut mem_map = MemoryMappingBuilder::new(1024).build().unwrap();</span>
+    <span class="doccomment">///     let res = mem_map.write_obj(0xf00u32, 16);</span>
+    <span class="doccomment">///     assert!(res.is_ok());</span>
+    <span class="doccomment">///     let num: u32 = mem_map.read_obj(16).unwrap();</span>
+    <span class="doccomment">///     assert_eq!(0xf00, num);</span>
+    <span class="doccomment">/// ```</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_obj_volatile</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DataInit</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">range_end</span>(<span class="ident">offset</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
+        <span class="comment">// This is safe because by definition Copy types can have their bits set arbitrarily and</span>
+        <span class="comment">// still be valid.</span>
+        <span class="kw">unsafe</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">read_volatile</span>(
                 <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>
             ))
         }

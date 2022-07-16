@@ -117,7 +117,7 @@
         <span class="comment">// anyway. The mmap address should be correct as initialized in the &#39;new()&#39; function</span>
         <span class="comment">// according to the given vfio device.</span>
         <span class="self">self</span>.<span class="ident">mmap</span>
-            .<span class="ident">write_obj</span>(<span class="number">1_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">write_obj_volatile</span>(<span class="number">1_u8</span>, <span class="self">self</span>.<span class="ident">addr</span> <span class="kw">as</span> <span class="ident">usize</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;unable to write to mmap area&quot;</span>);
     }
 
