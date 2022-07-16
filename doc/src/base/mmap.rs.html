@@ -227,11 +227,141 @@
 <span id="226">226</span>
 <span id="227">227</span>
 <span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
 
-<span class="kw">use</span> <span class="ident">std::fs::File</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+    <span class="ident">cmp::min</span>,
+    <span class="ident">fs::File</span>,
+    <span class="ident">intrinsics::copy_nonoverlapping</span>,
+    <span class="ident">mem::size_of</span>,
+    <span class="ident">ptr</span>::{<span class="ident">read_unaligned</span>, <span class="ident">write_unaligned</span>},
+};
 
 <span class="kw">use</span> <span class="ident">data_model</span>::{<span class="ident">volatile_memory</span>::<span class="kw-2">*</span>, <span class="ident">DataInit</span>};
 <span class="kw">use</span> <span class="ident">libc::c_int</span>;
@@ -239,11 +369,11 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">descriptor</span>::{<span class="ident">AsRawDescriptor</span>, <span class="ident">SafeDescriptor</span>},
-    <span class="ident">platform</span>::{<span class="ident">MappedRegion</span>, <span class="ident">MemoryMapping</span> <span class="kw">as</span> <span class="ident">SysUtilMmap</span>, <span class="ident">MmapError</span>, <span class="ident">PROT_READ</span>, <span class="ident">PROT_WRITE</span>},
+    <span class="ident">platform</span>::{<span class="ident">MemoryMapping</span> <span class="kw">as</span> <span class="ident">PlatformMmap</span>, <span class="ident">MmapError</span> <span class="kw">as</span> <span class="ident">Error</span>, <span class="ident">PROT_READ</span>, <span class="ident">PROT_WRITE</span>},
     <span class="ident">SharedMemory</span>,
 };
 
-<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">MmapError</span><span class="op">&gt;</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Memory access type for anonymous shared memory mapping.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
@@ -303,7 +433,7 @@
 <span class="doccomment">/// documentation.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemoryMapping</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">mapping</span>: <span class="ident">SysUtilMmap</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">mapping</span>: <span class="ident">PlatformMmap</span>,
 
     <span class="comment">// File backed mappings on Windows need to keep the underlying file open while the mapping is</span>
     <span class="comment">// open.</span>
@@ -317,19 +447,83 @@
 
 <span class="kw">impl</span> <span class="ident">MemoryMapping</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">write_slice</span>(<span class="ident">buf</span>, <span class="ident">offset</span>)
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">size</span>().<span class="ident">checked_sub</span>(<span class="ident">offset</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">size_past_offset</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">bytes_copied</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">size_past_offset</span>, <span class="ident">buf</span>.<span class="ident">len</span>());
+                <span class="comment">// The bytes_copied equation above ensures we don&#39;t copy bytes out of range of</span>
+                <span class="comment">// either buf or this slice. We also know that the buffers do not overlap because</span>
+                <span class="comment">// slices can never occupy the same memory as a volatile slice.</span>
+                <span class="kw">unsafe</span> {
+                    <span class="ident">copy_nonoverlapping</span>(<span class="ident">buf</span>.<span class="ident">as_ptr</span>(), <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>), <span class="ident">bytes_copied</span>);
+                }
+                <span class="prelude-val">Ok</span>(<span class="ident">bytes_copied</span>)
+            }
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidAddress</span>),
+        }
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">read_slice</span>(<span class="ident">buf</span>, <span class="ident">offset</span>)
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">size</span>().<span class="ident">checked_sub</span>(<span class="ident">offset</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">size_past_offset</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">bytes_copied</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">size_past_offset</span>, <span class="ident">buf</span>.<span class="ident">len</span>());
+                <span class="comment">// The bytes_copied equation above ensures we don&#39;t copy bytes out of range of</span>
+                <span class="comment">// either buf or this slice. We also know that the buffers do not overlap because</span>
+                <span class="comment">// slices can never occupy the same memory as a volatile slice.</span>
+                <span class="kw">unsafe</span> {
+                    <span class="ident">copy_nonoverlapping</span>(<span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>), <span class="ident">buf</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">bytes_copied</span>);
+                }
+                <span class="prelude-val">Ok</span>(<span class="ident">bytes_copied</span>)
+            }
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidAddress</span>),
+        }
     }
 
+    <span class="doccomment">/// Writes an object to the memory region at the specified offset.</span>
+    <span class="doccomment">/// Returns Ok(()) if the object fits, or Err if it extends past the end.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">/// * Write a u64 at offset 16.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// #   use base::MemoryMappingBuilder;</span>
+    <span class="doccomment">/// #   let mut mem_map = MemoryMappingBuilder::new(1024).build().unwrap();</span>
+    <span class="doccomment">///     let res = mem_map.write_obj(55u64, 16);</span>
+    <span class="doccomment">///     assert!(res.is_ok());</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_obj</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DataInit</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">T</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">write_obj</span>(<span class="ident">val</span>, <span class="ident">offset</span>)
+        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">range_end</span>(<span class="ident">offset</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
+        <span class="comment">// This is safe because we checked the bounds above.</span>
+        <span class="kw">unsafe</span> {
+            <span class="ident">write_unaligned</span>(<span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">T</span>, <span class="ident">val</span>);
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="doccomment">/// Reads on object from the memory region at the given offset.</span>
+    <span class="doccomment">/// Reading from a volatile area isn&#39;t strictly safe as it could change</span>
+    <span class="doccomment">/// mid-read.  However, as long as the type T is plain old data and can</span>
+    <span class="doccomment">/// handle random initialization, everything will be OK.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Examples</span>
+    <span class="doccomment">/// * Read a u64 written to offset 32.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">/// #   use base::MemoryMappingBuilder;</span>
+    <span class="doccomment">/// #   let mut mem_map = MemoryMappingBuilder::new(1024).build().unwrap();</span>
+    <span class="doccomment">///     let res = mem_map.write_obj(55u64, 32);</span>
+    <span class="doccomment">///     assert!(res.is_ok());</span>
+    <span class="doccomment">///     let num: u64 = mem_map.read_obj(32).unwrap();</span>
+    <span class="doccomment">///     assert_eq!(55, num);</span>
+    <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_obj</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">DataInit</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">read_obj</span>(<span class="ident">offset</span>)
+        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">range_end</span>(<span class="ident">offset</span>, <span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>())<span class="question-mark">?</span>;
+        <span class="comment">// This is safe because by definition Copy types can have their bits set arbitrarily and</span>
+        <span class="comment">// still be valid.</span>
+        <span class="kw">unsafe</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">read_unaligned</span>(
+                <span class="self">self</span>.<span class="ident">as_ptr</span>().<span class="ident">add</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">u8</span> <span class="kw">as</span> <span class="kw-2">*const</span> <span class="ident">T</span>
+            ))
+        }
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">msync</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
@@ -414,11 +608,11 @@
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">build_fixed</span>(<span class="self">self</span>, <span class="ident">addr</span>: <span class="kw-2">*mut</span> <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMapping</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">populate</span> {
             <span class="comment">// Population not supported for fixed mapping.</span>
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">MmapError::InvalidArgument</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidArgument</span>);
         }
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">descriptor</span> {
             <span class="prelude-val">None</span> =&gt; <span class="ident">MemoryMappingBuilder::wrap</span>(
-                <span class="ident">SysUtilMmap::new_protection_fixed</span>(
+                <span class="ident">PlatformMmap::new_protection_fixed</span>(
                     <span class="ident">addr</span>,
                     <span class="self">self</span>.<span class="ident">size</span>,
                     <span class="self">self</span>.<span class="ident">protection</span>.<span class="ident">unwrap_or_else</span>(<span class="ident">Protection::read_write</span>),
@@ -426,7 +620,7 @@
                 <span class="prelude-val">None</span>,
             ),
             <span class="prelude-val">Some</span>(<span class="ident">descriptor</span>) =&gt; <span class="ident">MemoryMappingBuilder::wrap</span>(
-                <span class="ident">SysUtilMmap::from_descriptor_offset_protection_fixed</span>(
+                <span class="ident">PlatformMmap::from_descriptor_offset_protection_fixed</span>(
                     <span class="ident">addr</span>,
                     <span class="ident">descriptor</span>,
                     <span class="self">self</span>.<span class="ident">size</span>,
@@ -441,7 +635,61 @@
 
 <span class="kw">impl</span> <span class="ident">VolatileMemory</span> <span class="kw">for</span> <span class="ident">MemoryMapping</span> {
     <span class="kw">fn</span> <span class="ident">get_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">count</span>: <span class="ident">usize</span>) -&gt; <span class="ident">VolatileMemoryResult</span><span class="op">&lt;</span><span class="ident">VolatileSlice</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">mapping</span>.<span class="ident">get_slice</span>(<span class="ident">offset</span>, <span class="ident">count</span>)
+        <span class="kw">let</span> <span class="ident">mem_end</span> <span class="op">=</span> <span class="ident">calc_offset</span>(<span class="ident">offset</span>, <span class="ident">count</span>)<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">mem_end</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">size</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">VolatileMemoryError::OutOfBounds</span> { <span class="ident">addr</span>: <span class="ident">mem_end</span> });
+        }
+
+        <span class="kw">let</span> <span class="ident">new_addr</span> <span class="op">=</span>
+            (<span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>)
+                .<span class="ident">checked_add</span>(<span class="ident">offset</span>)
+                .<span class="ident">ok_or</span>(<span class="ident">VolatileMemoryError::Overflow</span> {
+                    <span class="ident">base</span>: <span class="self">self</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>,
+                    <span class="ident">offset</span>,
+                })<span class="question-mark">?</span>;
+
+        <span class="comment">// Safe because we checked that offset + count was within our range and we only ever hand</span>
+        <span class="comment">// out volatile accessors.</span>
+        <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="ident">VolatileSlice::from_raw_parts</span>(<span class="ident">new_addr</span> <span class="kw">as</span> <span class="kw-2">*mut</span> <span class="ident">u8</span>, <span class="ident">count</span>) })
+    }
+}
+
+<span class="doccomment">/// A range of memory that can be msynced, for abstracting over different types of memory mappings.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Safe when implementers guarantee `ptr`..`ptr+size` is an mmaped region owned by this object that</span>
+<span class="doccomment">/// can&#39;t be unmapped during the `MappedRegion`&#39;s lifetime.</span>
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">MappedRegion</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> {
+    <span class="doccomment">/// Returns a pointer to the beginning of the memory region. Should only be</span>
+    <span class="doccomment">/// used for passing this region to ioctls for setting guest memory.</span>
+    <span class="kw">fn</span> <span class="ident">as_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">u8</span>;
+
+    <span class="doccomment">/// Returns the size of the memory region in bytes.</span>
+    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
+
+    <span class="doccomment">/// Maps `size` bytes starting at `fd_offset` bytes from within the given `fd`</span>
+    <span class="doccomment">/// at `offset` bytes from the start of the region with `prot` protections.</span>
+    <span class="doccomment">/// `offset` must be page aligned.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Arguments</span>
+    <span class="doccomment">/// * `offset` - Page aligned offset into the arena in bytes.</span>
+    <span class="doccomment">/// * `size` - Size of memory region in bytes.</span>
+    <span class="doccomment">/// * `fd` - File descriptor to mmap from.</span>
+    <span class="doccomment">/// * `fd_offset` - Offset in bytes from the beginning of `fd` to start the mmap.</span>
+    <span class="doccomment">/// * `prot` - Protection (e.g. readable/writable) of the memory region.</span>
+    <span class="kw">fn</span> <span class="ident">add_fd_mapping</span>(
+        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+        <span class="ident">_offset</span>: <span class="ident">usize</span>,
+        <span class="ident">_size</span>: <span class="ident">usize</span>,
+        <span class="ident">_fd</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">AsRawDescriptor</span>,
+        <span class="ident">_fd_offset</span>: <span class="ident">u64</span>,
+        <span class="ident">_prot</span>: <span class="ident">Protection</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="prelude-val">Err</span>(<span class="ident">Error::AddFdMappingIsUnsupported</span>)
+    }
+
+    <span class="doccomment">/// Remove `size`-byte mapping starting at `offset`.</span>
+    <span class="kw">fn</span> <span class="ident">remove_mapping</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">_offset</span>: <span class="ident">usize</span>, <span class="ident">_size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="prelude-val">Err</span>(<span class="ident">Error::RemoveMappingIsUnsupported</span>)
     }
 }
 
