@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["MemoryMapping","See MemoryMapping for struct- and method-level documentation."],["MemoryMappingBuilder",""]],"type":[["Result",""]]});
+initSidebarItems({"struct":[["MemoryMapping","See MemoryMapping for struct- and method-level documentation."],["MemoryMappingBuilder",""],["Protection","Memory access type for anonymous shared memory mapping."]],"type":[["Result",""]]});
