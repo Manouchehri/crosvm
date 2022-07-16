@@ -1323,12 +1323,6 @@
 <span id="1322">1322</span>
 <span id="1323">1323</span>
 <span id="1324">1324</span>
-<span id="1325">1325</span>
-<span id="1326">1326</span>
-<span id="1327">1327</span>
-<span id="1328">1328</span>
-<span id="1329">1329</span>
-<span id="1330">1330</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1387,12 +1381,6 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Protection</span>(<span class="ident">c_int</span>);
 <span class="kw">impl</span> <span class="ident">Protection</span> {
-    <span class="doccomment">/// Returns Protection allowing no access.</span>
-    <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">none</span>() -&gt; <span class="ident">Protection</span> {
-        <span class="ident">Protection</span>(<span class="ident">libc::PROT_NONE</span>)
-    }
-
     <span class="doccomment">/// Returns Protection allowing read/write access.</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_write</span>() -&gt; <span class="ident">Protection</span> {
@@ -2151,7 +2139,7 @@
     <span class="doccomment">/// * `size` - Size of memory region in bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryMappingArena</span><span class="op">&gt;</span> {
         <span class="comment">// Reserve the arena&#39;s memory using an anonymous read-only mmap.</span>
-        <span class="ident">MemoryMapping::new_protection</span>(<span class="ident">size</span>, <span class="ident">Protection::none</span>().<span class="ident">set_read</span>()).<span class="ident">map</span>(<span class="ident">From::from</span>)
+        <span class="ident">MemoryMapping::new_protection</span>(<span class="ident">size</span>, <span class="ident">Protection::read</span>()).<span class="ident">map</span>(<span class="ident">From::from</span>)
     }
 
     <span class="doccomment">/// Anonymously maps `size` bytes at `offset` bytes from the start of the arena</span>
