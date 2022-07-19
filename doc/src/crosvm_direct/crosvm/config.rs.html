@@ -2234,7 +2234,7 @@
 <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">debug</span>, <span class="ident">pagesize</span>};
 <span class="kw">use</span> <span class="ident">devices::serial_device</span>::{<span class="ident">SerialHardware</span>, <span class="ident">SerialParameters</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::block::block::DiskOption</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::common_backend::Parameters</span> <span class="kw">as</span> <span class="ident">SndParameters</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::gpu::GpuParameters</span>;
@@ -3577,7 +3577,7 @@
     <span class="kw">pub</span> <span class="ident">virtio_mice</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_single_touch</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TouchDeviceOption</span><span class="op">&gt;</span>,
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
     <span class="kw">pub</span> <span class="ident">virtio_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SndParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">virtio_switches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
@@ -3723,7 +3723,7 @@
             <span class="ident">virtio_mice</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_multi_touch</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_single_touch</span>: <span class="ident">Vec::new</span>(),
-            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
             <span class="ident">virtio_snds</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_switches</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">virtio_trackpad</span>: <span class="ident">Vec::new</span>(),

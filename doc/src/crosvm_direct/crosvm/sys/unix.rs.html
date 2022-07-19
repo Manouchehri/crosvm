@@ -3036,7 +3036,7 @@
         <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_vhost_user_wl_device</span>(<span class="ident">cfg</span>.<span class="ident">protected_vm</span>, <span class="ident">opt</span>)<span class="question-mark">?</span>);
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
     {
         <span class="kw">for</span> <span class="ident">virtio_snd</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">cfg</span>.<span class="ident">virtio_snds</span> {
             <span class="ident">devs</span>.<span class="ident">push</span>(<span class="ident">create_virtio_snd_device</span>(

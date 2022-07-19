@@ -1457,6 +1457,8 @@
 <span id="1456">1456</span>
 <span id="1457">1457</span>
 <span id="1458">1458</span>
+<span id="1459">1459</span>
+<span id="1460">1460</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2017 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1484,7 +1486,7 @@
 <span class="kw">use</span> <span class="ident">devices::virtio::console::asynchronous::AsyncConsole</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::ipc_memory_mapper</span>::{<span class="ident">create_ipc_mapper</span>, <span class="ident">CreateIpcMapperRet</span>};
 <span class="kw">use</span> <span class="ident">devices::virtio::memory_mapper</span>::{<span class="ident">BasicMemoryMapper</span>, <span class="ident">MemoryMapperTrait</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices::virtio::snd::common_backend::Parameters</span> <span class="kw">as</span> <span class="ident">SndParameters</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::vfio_wrapper::VfioWrapper</span>;
 <span class="kw">use</span> <span class="ident">devices::virtio::vhost::user::proxy::VirtioVhostUser</span>;
@@ -1799,7 +1801,7 @@
     })
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_virtio_snd_device</span>(
     <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
     <span class="ident">jail_config</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
@@ -1813,6 +1815,7 @@
     .<span class="ident">context</span>(<span class="string">&quot;failed to create cras sound device&quot;</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">backend</span> {
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
         <span class="ident">virtio::common_backend::StreamSourceBackend::CRAS</span> =&gt; <span class="string">&quot;snd_cras_device&quot;</span>,
         <span class="ident">virtio::common_backend::StreamSourceBackend::NULL</span> =&gt; <span class="string">&quot;snd_null_device&quot;</span>,
     };
@@ -1821,6 +1824,7 @@
         <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">jail</span>) =&gt; {
             <span class="comment">// Create a tmpfs in the device&#39;s root directory for cras_snd_device.</span>
             <span class="comment">// The size is 20*1024, or 20 KB.</span>
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio_cras&quot;</span>)]</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">virtio::common_backend::StreamSourceBackend::CRAS</span> <span class="op">=</span> <span class="ident">backend</span> {
                 <span class="ident">jail</span>.<span class="ident">mount_with_data</span>(
                     <span class="ident">Path::new</span>(<span class="string">&quot;none&quot;</span>),
