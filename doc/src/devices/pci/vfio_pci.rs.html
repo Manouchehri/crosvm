@@ -1866,10 +1866,6 @@
 <span id="1865">1865</span>
 <span id="1866">1866</span>
 <span id="1867">1867</span>
-<span id="1868">1868</span>
-<span id="1869">1869</span>
-<span id="1870">1870</span>
-<span id="1871">1871</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2019 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1892,7 +1888,7 @@
     <span class="ident">error</span>, <span class="ident">pagesize</span>, <span class="ident">warn</span>, <span class="ident">AsRawDescriptor</span>, <span class="ident">AsRawDescriptors</span>, <span class="ident">Event</span>, <span class="ident">EventToken</span>, <span class="ident">Protection</span>,
     <span class="ident">RawDescriptor</span>, <span class="ident">Tube</span>, <span class="ident">WaitContext</span>,
 };
-<span class="kw">use</span> <span class="ident">hypervisor</span>::{<span class="ident">Datamatch</span>, <span class="ident">MemSlot</span>};
+<span class="kw">use</span> <span class="ident">hypervisor::MemSlot</span>;
 
 <span class="kw">use</span> <span class="ident">resources</span>::{<span class="ident">Alloc</span>, <span class="ident">MmioType</span>, <span class="ident">SystemAllocator</span>};
 
@@ -3419,10 +3415,6 @@
 
     <span class="kw">fn</span> <span class="ident">register_device_capabilities</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">PciDeviceError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">fn</span> <span class="ident">ioevents</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="ident">Event</span>, <span class="ident">u64</span>, <span class="ident">Datamatch</span>)<span class="op">&gt;</span> {
-        <span class="ident">Vec::new</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">read_config_register</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg_idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span> {
