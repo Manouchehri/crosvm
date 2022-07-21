@@ -2217,6 +2217,92 @@
 <span id="2216">2216</span>
 <span id="2217">2217</span>
 <span id="2218">2218</span>
+<span id="2219">2219</span>
+<span id="2220">2220</span>
+<span id="2221">2221</span>
+<span id="2222">2222</span>
+<span id="2223">2223</span>
+<span id="2224">2224</span>
+<span id="2225">2225</span>
+<span id="2226">2226</span>
+<span id="2227">2227</span>
+<span id="2228">2228</span>
+<span id="2229">2229</span>
+<span id="2230">2230</span>
+<span id="2231">2231</span>
+<span id="2232">2232</span>
+<span id="2233">2233</span>
+<span id="2234">2234</span>
+<span id="2235">2235</span>
+<span id="2236">2236</span>
+<span id="2237">2237</span>
+<span id="2238">2238</span>
+<span id="2239">2239</span>
+<span id="2240">2240</span>
+<span id="2241">2241</span>
+<span id="2242">2242</span>
+<span id="2243">2243</span>
+<span id="2244">2244</span>
+<span id="2245">2245</span>
+<span id="2246">2246</span>
+<span id="2247">2247</span>
+<span id="2248">2248</span>
+<span id="2249">2249</span>
+<span id="2250">2250</span>
+<span id="2251">2251</span>
+<span id="2252">2252</span>
+<span id="2253">2253</span>
+<span id="2254">2254</span>
+<span id="2255">2255</span>
+<span id="2256">2256</span>
+<span id="2257">2257</span>
+<span id="2258">2258</span>
+<span id="2259">2259</span>
+<span id="2260">2260</span>
+<span id="2261">2261</span>
+<span id="2262">2262</span>
+<span id="2263">2263</span>
+<span id="2264">2264</span>
+<span id="2265">2265</span>
+<span id="2266">2266</span>
+<span id="2267">2267</span>
+<span id="2268">2268</span>
+<span id="2269">2269</span>
+<span id="2270">2270</span>
+<span id="2271">2271</span>
+<span id="2272">2272</span>
+<span id="2273">2273</span>
+<span id="2274">2274</span>
+<span id="2275">2275</span>
+<span id="2276">2276</span>
+<span id="2277">2277</span>
+<span id="2278">2278</span>
+<span id="2279">2279</span>
+<span id="2280">2280</span>
+<span id="2281">2281</span>
+<span id="2282">2282</span>
+<span id="2283">2283</span>
+<span id="2284">2284</span>
+<span id="2285">2285</span>
+<span id="2286">2286</span>
+<span id="2287">2287</span>
+<span id="2288">2288</span>
+<span id="2289">2289</span>
+<span id="2290">2290</span>
+<span id="2291">2291</span>
+<span id="2292">2292</span>
+<span id="2293">2293</span>
+<span id="2294">2294</span>
+<span id="2295">2295</span>
+<span id="2296">2296</span>
+<span id="2297">2297</span>
+<span id="2298">2298</span>
+<span id="2299">2299</span>
+<span id="2300">2300</span>
+<span id="2301">2301</span>
+<span id="2302">2302</span>
+<span id="2303">2303</span>
+<span id="2304">2304</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -2254,6 +2340,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;audio&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">devices</span>::{<span class="ident">Ac97Backend</span>, <span class="ident">Ac97Parameters</span>};
 
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::sys::HypervisorKind</span>;
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">argument::parse_hex_or_decimal</span>, <span class="ident">check_opt_path</span>};
 
 <span class="macro">cfg_if::cfg_if!</span> {
@@ -2268,6 +2355,10 @@
         <span class="kw">static</span> <span class="ident">KVM_PATH</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;/dev/kvm&quot;</span>;
         <span class="kw">static</span> <span class="ident">VHOST_NET_PATH</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;/dev/vhost-net&quot;</span>;
         <span class="kw">static</span> <span class="ident">SECCOMP_POLICY_DIR</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;/usr/share/policy/crosvm&quot;</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+        <span class="kw">use</span> <span class="ident">base</span>::{<span class="ident">Event</span>, <span class="ident">Tube</span>};
+
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::windows::config::IrqChipKind</span>;
     }
 }
 
@@ -3455,11 +3546,21 @@
     <span class="kw">pub</span> <span class="ident">balloon_bias</span>: <span class="ident">i64</span>,
     <span class="kw">pub</span> <span class="ident">balloon_control</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">battery_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BatteryType</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">block_control_tube</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">block_vhost_user_tube</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">broker_shutdown_event</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="kw">pub</span> <span class="ident">coiommu_param</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">devices::CoIommuParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">u32</span><span class="op">&gt;</span>, <span class="comment">// CPU index -&gt; capacity</span>
     <span class="kw">pub</span> <span class="ident">cpu_clusters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">crash_pipe_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">crash_report_uuid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">direct_edge_irq</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
@@ -3478,6 +3579,8 @@
     <span class="kw">pub</span> <span class="ident">dmi_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">enable_pnp_data</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">executable_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Executable</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">exit_stats</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">file_backed_mappings</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FileBackedMappingParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">force_calibrated_tsc_leaf</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">force_s2idle</span>: <span class="ident">bool</span>,
@@ -3488,20 +3591,33 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>))]</span>
     <span class="kw">pub</span> <span class="ident">gpu_render_server_parameters</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GpuRenderServerParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">host_guid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">host_ip</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
+    <span class="kw">pub</span> <span class="ident">hypervisor</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HypervisorKind</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">init_memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">initrd_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">irq_chip</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqChipKind</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">jail_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">JailConfig</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">kernel_log_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="kw">pub</span> <span class="ident">kvm_device_path</span>: <span class="ident">PathBuf</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="kw">pub</span> <span class="ident">lock_guest_memory</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">log_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">logs_directory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">mac_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net_util::MacAddress</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">memory_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AddressRange</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">net_vhost_user_tube</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tube</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">net_vq_pairs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">netmask</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">net::Ipv4Addr</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">no_i8042</span>: <span class="ident">bool</span>,
@@ -3521,17 +3637,33 @@
     <span class="kw">pub</span> <span class="ident">plugin_root</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">pmem_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DiskOption</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">process_invariants_data_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">process_invariants_data_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">product_channel</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">product_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">product_version</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">ProtectionType</span>,
     <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">pvclock</span>: <span class="ident">bool</span>,
     <span class="doccomment">/// Must be `Some` iff `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
     <span class="kw">pub</span> <span class="ident">pvm_fw</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">rng</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">rt_cpus</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">with</span> <span class="op">=</span> <span class="string">&quot;serde_serial_params&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span>(<span class="ident">SerialHardware</span>, <span class="ident">u8</span>), <span class="ident">SerialParameters</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;kiwi&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">service_pipe_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">serde</span>(<span class="ident">skip</span>)]</span>
     <span class="kw">pub</span> <span class="ident">shared_dirs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SharedDir</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp-ring-capture&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">slirp_capture_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
     <span class="kw">pub</span> <span class="ident">software_tpm</span>: <span class="ident">bool</span>,
@@ -3541,6 +3673,8 @@
     <span class="kw">pub</span> <span class="ident">strict_balloon</span>: <span class="ident">bool</span>,
     <span class="kw">pub</span> <span class="ident">stub_pci_devices</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StubPciParameters</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">swiotlb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">syslog_tag</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="kw">pub</span> <span class="ident">tap_fd</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RawDescriptor</span><span class="op">&gt;</span>,
     <span class="kw">pub</span> <span class="ident">tap_name</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
@@ -3600,9 +3734,19 @@
             <span class="ident">balloon_bias</span>: <span class="number">0</span>,
             <span class="ident">balloon_control</span>: <span class="prelude-val">None</span>,
             <span class="ident">battery_type</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">block_control_tube</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">block_vhost_user_tube</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">broker_shutdown_event</span>: <span class="prelude-val">None</span>,
             <span class="ident">cid</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">coiommu_param</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+            <span class="ident">crash_pipe_name</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+            <span class="ident">crash_report_uuid</span>: <span class="prelude-val">None</span>,
             <span class="ident">cpu_capacity</span>: <span class="ident">BTreeMap::new</span>(),
             <span class="ident">cpu_clusters</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">delay_rt</span>: <span class="bool-val">false</span>,
@@ -3623,6 +3767,8 @@
             <span class="ident">dmi_path</span>: <span class="prelude-val">None</span>,
             <span class="ident">enable_pnp_data</span>: <span class="bool-val">false</span>,
             <span class="ident">executable_path</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">exit_stats</span>: <span class="bool-val">false</span>,
             <span class="ident">file_backed_mappings</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">force_calibrated_tsc_leaf</span>: <span class="bool-val">false</span>,
             <span class="ident">force_s2idle</span>: <span class="bool-val">false</span>,
@@ -3633,24 +3779,41 @@
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">unix</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;gpu&quot;</span>))]</span>
             <span class="ident">gpu_render_server_parameters</span>: <span class="prelude-val">None</span>,
             <span class="ident">host_cpu_topology</span>: <span class="bool-val">false</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">host_guid</span>: <span class="prelude-val">None</span>,
             <span class="ident">host_ip</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">product_version</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">product_channel</span>: <span class="prelude-val">None</span>,
             <span class="ident">hugepages</span>: <span class="bool-val">false</span>,
+            <span class="ident">hypervisor</span>: <span class="prelude-val">None</span>,
             <span class="ident">init_memory</span>: <span class="prelude-val">None</span>,
             <span class="ident">initrd_path</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">irq_chip</span>: <span class="prelude-val">None</span>,
             <span class="ident">itmt</span>: <span class="bool-val">false</span>,
             <span class="ident">jail_config</span>: <span class="kw">if</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;default-no-sandbox&quot;</span>) {
                 <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>())
             } <span class="kw">else</span> {
                 <span class="prelude-val">None</span>
             },
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">kernel_log_file</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">kvm_device_path</span>: <span class="ident">PathBuf::from</span>(<span class="ident">KVM_PATH</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">lock_guest_memory</span>: <span class="bool-val">false</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">log_file</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">logs_directory</span>: <span class="prelude-val">None</span>,
             <span class="ident">mac_address</span>: <span class="prelude-val">None</span>,
             <span class="ident">memory</span>: <span class="prelude-val">None</span>,
             <span class="ident">memory_file</span>: <span class="prelude-val">None</span>,
             <span class="ident">mmio_address_ranges</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">net_vhost_user_tube</span>: <span class="prelude-val">None</span>,
             <span class="ident">net_vq_pairs</span>: <span class="prelude-val">None</span>,
             <span class="ident">netmask</span>: <span class="prelude-val">None</span>,
             <span class="ident">no_i8042</span>: <span class="bool-val">false</span>,
@@ -3670,14 +3833,26 @@
             <span class="ident">plugin_root</span>: <span class="prelude-val">None</span>,
             <span class="ident">pmem_devices</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">privileged_vm</span>: <span class="bool-val">false</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+            <span class="ident">process_invariants_data_handle</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+            <span class="ident">process_invariants_data_size</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">product_name</span>: <span class="prelude-val">None</span>,
             <span class="ident">protected_vm</span>: <span class="ident">ProtectionType::Unprotected</span>,
             <span class="ident">pstore</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">pvclock</span>: <span class="bool-val">false</span>,
             <span class="ident">pvm_fw</span>: <span class="prelude-val">None</span>,
             <span class="ident">rng</span>: <span class="bool-val">true</span>,
             <span class="ident">rt_cpus</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">serial_parameters</span>: <span class="ident">BTreeMap::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;kiwi&quot;</span>)]</span>
+            <span class="ident">service_pipe_name</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">shared_dirs</span>: <span class="ident">Vec::new</span>(),
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp-ring-capture&quot;</span>)]</span>
+            <span class="ident">slirp_capture_file</span>: <span class="prelude-val">None</span>,
             <span class="ident">socket_path</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tpm&quot;</span>)]</span>
             <span class="ident">software_tpm</span>: <span class="bool-val">false</span>,
@@ -3687,6 +3862,8 @@
             <span class="ident">strict_balloon</span>: <span class="bool-val">false</span>,
             <span class="ident">stub_pci_devices</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">swiotlb</span>: <span class="prelude-val">None</span>,
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+            <span class="ident">syslog_tag</span>: <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
             <span class="ident">tap_fd</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">tap_name</span>: <span class="ident">Vec::new</span>(),
@@ -3749,11 +3926,6 @@
     {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Executable does not exist&quot;</span>.<span class="ident">to_string</span>());
     }
-
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
-    <span class="kw">if</span> <span class="op">!</span><span class="ident">cfg</span>.<span class="ident">kvm_device_path</span>.<span class="ident">exists</span>() {
-        <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;kvm path {:?} does not exist&quot;</span>, <span class="ident">cfg</span>.<span class="ident">kvm_device_path</span>));
-    };
 
     <span class="macro">check_opt_path!</span>(<span class="ident">cfg</span>.<span class="ident">android_fstab</span>);
 

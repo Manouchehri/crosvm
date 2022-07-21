@@ -1733,6 +1733,102 @@
 <span id="1732">1732</span>
 <span id="1733">1733</span>
 <span id="1734">1734</span>
+<span id="1735">1735</span>
+<span id="1736">1736</span>
+<span id="1737">1737</span>
+<span id="1738">1738</span>
+<span id="1739">1739</span>
+<span id="1740">1740</span>
+<span id="1741">1741</span>
+<span id="1742">1742</span>
+<span id="1743">1743</span>
+<span id="1744">1744</span>
+<span id="1745">1745</span>
+<span id="1746">1746</span>
+<span id="1747">1747</span>
+<span id="1748">1748</span>
+<span id="1749">1749</span>
+<span id="1750">1750</span>
+<span id="1751">1751</span>
+<span id="1752">1752</span>
+<span id="1753">1753</span>
+<span id="1754">1754</span>
+<span id="1755">1755</span>
+<span id="1756">1756</span>
+<span id="1757">1757</span>
+<span id="1758">1758</span>
+<span id="1759">1759</span>
+<span id="1760">1760</span>
+<span id="1761">1761</span>
+<span id="1762">1762</span>
+<span id="1763">1763</span>
+<span id="1764">1764</span>
+<span id="1765">1765</span>
+<span id="1766">1766</span>
+<span id="1767">1767</span>
+<span id="1768">1768</span>
+<span id="1769">1769</span>
+<span id="1770">1770</span>
+<span id="1771">1771</span>
+<span id="1772">1772</span>
+<span id="1773">1773</span>
+<span id="1774">1774</span>
+<span id="1775">1775</span>
+<span id="1776">1776</span>
+<span id="1777">1777</span>
+<span id="1778">1778</span>
+<span id="1779">1779</span>
+<span id="1780">1780</span>
+<span id="1781">1781</span>
+<span id="1782">1782</span>
+<span id="1783">1783</span>
+<span id="1784">1784</span>
+<span id="1785">1785</span>
+<span id="1786">1786</span>
+<span id="1787">1787</span>
+<span id="1788">1788</span>
+<span id="1789">1789</span>
+<span id="1790">1790</span>
+<span id="1791">1791</span>
+<span id="1792">1792</span>
+<span id="1793">1793</span>
+<span id="1794">1794</span>
+<span id="1795">1795</span>
+<span id="1796">1796</span>
+<span id="1797">1797</span>
+<span id="1798">1798</span>
+<span id="1799">1799</span>
+<span id="1800">1800</span>
+<span id="1801">1801</span>
+<span id="1802">1802</span>
+<span id="1803">1803</span>
+<span id="1804">1804</span>
+<span id="1805">1805</span>
+<span id="1806">1806</span>
+<span id="1807">1807</span>
+<span id="1808">1808</span>
+<span id="1809">1809</span>
+<span id="1810">1810</span>
+<span id="1811">1811</span>
+<span id="1812">1812</span>
+<span id="1813">1813</span>
+<span id="1814">1814</span>
+<span id="1815">1815</span>
+<span id="1816">1816</span>
+<span id="1817">1817</span>
+<span id="1818">1818</span>
+<span id="1819">1819</span>
+<span id="1820">1820</span>
+<span id="1821">1821</span>
+<span id="1822">1822</span>
+<span id="1823">1823</span>
+<span id="1824">1824</span>
+<span id="1825">1825</span>
+<span id="1826">1826</span>
+<span id="1827">1827</span>
+<span id="1828">1828</span>
+<span id="1829">1829</span>
+<span id="1830">1830</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2022 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1752,6 +1848,9 @@
             <span class="ident">parse_coiommu_params</span>, <span class="ident">VfioCommand</span>, <span class="ident">parse_vfio</span>, <span class="ident">parse_vfio_platform</span>,
         };
         <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::config::SharedDir</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span> {
+        <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::sys::config::IrqChipKind</span>;
+
     }
 }
 
@@ -1794,8 +1893,8 @@
     <span class="ident">numbered_disk_option</span>, <span class="ident">parse_battery_options</span>, <span class="ident">parse_bus_id_addr</span>, <span class="ident">parse_cpu_affinity</span>,
     <span class="ident">parse_cpu_capacity</span>, <span class="ident">parse_cpu_set</span>, <span class="ident">parse_file_backed_mapping</span>, <span class="ident">parse_mmio_address_range</span>,
     <span class="ident">parse_pstore</span>, <span class="ident">parse_serial_options</span>, <span class="ident">parse_stub_pci_parameters</span>, <span class="ident">Executable</span>,
-    <span class="ident">FileBackedMappingParameters</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>, <span class="ident">VhostUserOption</span>,
-    <span class="ident">VhostUserWlOption</span>, <span class="ident">VvuOption</span>,
+    <span class="ident">FileBackedMappingParameters</span>, <span class="ident">HypervisorKind</span>, <span class="ident">TouchDeviceOption</span>, <span class="ident">VhostUserFsOption</span>,
+    <span class="ident">VhostUserOption</span>, <span class="ident">VhostUserWlOption</span>, <span class="ident">VvuOption</span>,
 };
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;direct&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::crosvm::config</span>::{
@@ -2249,6 +2348,10 @@
     <span class="doccomment">///     num_input_streams=INT - Set number of input PCM streams</span>
     <span class="doccomment">///         per device.</span>
     <span class="kw">pub</span> <span class="ident">cras_snds</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SndParameters</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;crash-pipe-name&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;\\\\.\\pipe\\PIPE_NAME&quot;</span>)]</span>
+    <span class="doccomment">/// the crash handler ipc pipe name.</span>
+    <span class="kw">pub</span> <span class="ident">crash_pipe_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// don&#39;t set VCPUs real-time until make-rt command is run</span>
     <span class="kw">pub</span> <span class="ident">delay_rt</span>: <span class="ident">bool</span>,
@@ -2319,6 +2422,10 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">positional</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;KERNEL&quot;</span>)]</span>
     <span class="doccomment">/// bzImage of kernel to run</span>
     <span class="kw">pub</span> <span class="ident">executable_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;exit-stats&quot;</span>)]</span>
+    <span class="doccomment">/// gather and display statistics on Vm Exits and Bus Reads/Writes.</span>
+    <span class="kw">pub</span> <span class="ident">exit_stats</span>: <span class="ident">bool</span>,
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
         <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;file-backed-mapping&quot;</span>,
@@ -2384,8 +2491,6 @@
     <span class="doccomment">///     angle[=true|=false] - If the gfxstream backend should</span>
     <span class="doccomment">///        use ANGLE (OpenGL on Vulkan) as its native OpenGL</span>
     <span class="doccomment">///        driver.</span>
-    <span class="doccomment">///     syncfd[=true|=false] - If the gfxstream backend should</span>
-    <span class="doccomment">///        support EGL_ANDROID_native_fence_sync</span>
     <span class="doccomment">///     vulkan[=true|=false] - If the backend should support</span>
     <span class="doccomment">///        vulkan</span>
     <span class="doccomment">///     wsi=vk - If the gfxstream backend should use the Vulkan</span>
@@ -2409,6 +2514,10 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// use mirror cpu topology of Host for Guest VM, also copy some cpu feature to Guest VM</span>
     <span class="kw">pub</span> <span class="ident">host_cpu_topology</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;host-guid&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// string representation of the host guid in registry format, for namespacing vsock connections.</span>
+    <span class="kw">pub</span> <span class="ident">host_guid</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;IP&quot;</span>)]</span>
     <span class="doccomment">/// IP address to assign to host tap interface</span>
@@ -2416,15 +2525,26 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// advise the kernel to use Huge Pages for guest memory mappings</span>
     <span class="kw">pub</span> <span class="ident">hugepages</span>: <span class="ident">bool</span>,
+    <span class="doccomment">/// hypervisor backend</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>)]</span>
+    <span class="kw">pub</span> <span class="ident">hypervisor</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HypervisorKind</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;init-mem&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;N&quot;</span>)]</span>
     <span class="doccomment">/// amount of guest memory outside the balloon at boot in MiB. (default: --mem)</span>
     <span class="kw">pub</span> <span class="ident">init_memory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">short</span> <span class="op">=</span> <span class="string">&#39;i&#39;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;initrd&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// initial ramdisk to load</span>
     <span class="kw">pub</span> <span class="ident">initrd_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;irqchip&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;kernel|split|userspace&quot;</span>)]</span>
+    <span class="doccomment">/// type of interrupt controller emulation.  \&quot;split\&quot; is only available for x86 KVM.</span>
+    <span class="kw">pub</span> <span class="ident">irq_chip</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IrqChipKind</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// allow to enable ITMT scheduling feature in VM. The success of enabling depends on HWP and ACPI CPPC support on hardware</span>
     <span class="kw">pub</span> <span class="ident">itmt</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;kernel-log-file&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// forward hypervisor kernel driver logs for this VM to a file.</span>
+    <span class="kw">pub</span> <span class="ident">kernel_log_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;kvm-device&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// path to the KVM device. (default /dev/kvm)</span>
@@ -2433,6 +2553,14 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// disable host swap on guest VM pages.</span>
     <span class="kw">pub</span> <span class="ident">lock_guest_memory</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;log-file&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// redirect logs to the supplied log file at PATH rather than stderr. For multi-process mode, use --logs-directory instead</span>
+    <span class="kw">pub</span> <span class="ident">log_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;logs-directory&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// path to the logs directory used for crosvm processes. Logs will be sent to stderr if unset, and stderr/stdout will be uncaptured</span>
+    <span class="kw">pub</span> <span class="ident">logs_directory</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;MAC&quot;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;mac&quot;</span>)]</span>
     <span class="doccomment">/// MAC address for VM</span>
@@ -2537,6 +2665,26 @@
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// grant this Guest VM certian privileges to manage Host resources, such as power management</span>
     <span class="kw">pub</span> <span class="ident">privileged_vm</span>: <span class="ident">bool</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;process-invariants-handle&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// shared read-only memory address for a serialized EmulatorProcessInvariants proto</span>
+    <span class="kw">pub</span> <span class="ident">process_invariants_data_handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;process-invariants-size&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// size of the serialized EmulatorProcessInvariants proto pointed at by process-invariants-handle</span>
+    <span class="kw">pub</span> <span class="ident">process_invariants_data_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;product-channel&quot;</span>)]</span>
+    <span class="doccomment">/// product channel</span>
+    <span class="kw">pub</span> <span class="ident">product_channel</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;product-name&quot;</span>)]</span>
+    <span class="doccomment">/// the product name for file paths.</span>
+    <span class="kw">pub</span> <span class="ident">product_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;product-version&quot;</span>)]</span>
+    <span class="doccomment">/// product version</span>
+    <span class="kw">pub</span> <span class="ident">product_version</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
     <span class="doccomment">/// prevent host access to guest memory</span>
     <span class="kw">pub</span> <span class="ident">protected_vm</span>: <span class="ident">bool</span>,
@@ -2547,6 +2695,10 @@
     <span class="doccomment">/// path to pstore buffer backend file followed by size</span>
     <span class="doccomment">///     [--pstore &lt;path=PATH,size=SIZE&gt;]</span>
     <span class="kw">pub</span> <span class="ident">pstore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pstore</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">switch</span>)]</span>
+    <span class="doccomment">/// enable virtio-pvclock.</span>
+    <span class="kw">pub</span> <span class="ident">pvclock</span>: <span class="ident">bool</span>,
     <span class="comment">// Must be `Some` iff `protected_vm == ProtectionType::UnprotectedWithFirmware`.</span>
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;unprotected-vm-with-firmware&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// (EXPERIMENTAL/FOR DEBUGGING) Use VM firmware, but allow host access to guest memory</span>
@@ -2648,6 +2800,10 @@
     <span class="doccomment">///        Can only be given once. Will default to first serial</span>
     <span class="doccomment">///        port if not provided.</span>
     <span class="kw">pub</span> <span class="ident">serial_parameters</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SerialParameters</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;kiwi&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;service-pipe-name&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PIPE_NAME&quot;</span>)]</span>
+    <span class="doccomment">/// the service ipc pipe name. (Prefix \\\\.\\pipe\\ not needed.</span>
+    <span class="kw">pub</span> <span class="ident">service_pipe_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
     <span class="attribute">#[<span class="ident">argh</span>(
         <span class="ident">option</span>,
@@ -2701,6 +2857,10 @@
     <span class="doccomment">///        when the underlying file system supports POSIX ACLs.</span>
     <span class="doccomment">///        The default value for this option is &quot;true&quot;.</span>
     <span class="kw">pub</span> <span class="ident">shared_dirs</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SharedDir</span><span class="op">&gt;</span>,
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp-ring-capture&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;slirp-capture-file&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
+    <span class="doccomment">/// Redirects slirp network packets to the supplied log file rather than the current directory as `slirp_capture_packets.pcap`</span>
+    <span class="kw">pub</span> <span class="ident">slirp_capture_file</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">argh</span>(<span class="ident">option</span>, <span class="ident">short</span> <span class="op">=</span> <span class="string">&#39;s&#39;</span>, <span class="ident">long</span> <span class="op">=</span> <span class="string">&quot;socket&quot;</span>, <span class="ident">arg_name</span> <span class="op">=</span> <span class="string">&quot;PATH&quot;</span>)]</span>
     <span class="doccomment">/// path to put the control socket. If PATH is a directory, a name will be generated</span>
     <span class="kw">pub</span> <span class="ident">socket_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
@@ -3009,6 +3169,8 @@
 
         <span class="ident">cfg</span>.<span class="ident">hugepages</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">hugepages</span>;
 
+        <span class="ident">cfg</span>.<span class="ident">hypervisor</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">hypervisor</span>;
+
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
         {
             <span class="ident">cfg</span>.<span class="ident">lock_guest_memory</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">lock_guest_memory</span>;
@@ -3126,6 +3288,36 @@
             <span class="ident">cfg</span>.<span class="ident">pmem_devices</span>.<span class="ident">push</span>(<span class="ident">pmem</span>);
         }
 
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
+        {
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;crash-report&quot;</span>)]</span>
+            {
+                <span class="ident">cfg</span>.<span class="ident">product_name</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">product_name</span>;
+
+                <span class="ident">cfg</span>.<span class="ident">crash_pipe_name</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">crash_pipe_name</span>;
+            }
+            <span class="ident">cfg</span>.<span class="ident">exit_stats</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">exit_stats</span>;
+            <span class="ident">cfg</span>.<span class="ident">host_guid</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">host_guid</span>;
+            <span class="ident">cfg</span>.<span class="ident">irq_chip</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">irq_chip</span>;
+            <span class="ident">cfg</span>.<span class="ident">kernel_log_file</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">kernel_log_file</span>;
+            <span class="ident">cfg</span>.<span class="ident">log_file</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">log_file</span>;
+            <span class="ident">cfg</span>.<span class="ident">logs_directory</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">logs_directory</span>;
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;process-invariants&quot;</span>)]</span>
+            {
+                <span class="ident">cfg</span>.<span class="ident">process_invariants_data_handle</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">process_invariants_data_handle</span>;
+
+                <span class="ident">cfg</span>.<span class="ident">process_invariants_data_size</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">process_invariants_data_size</span>;
+            }
+            <span class="ident">cfg</span>.<span class="ident">pvclock</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">pvclock</span>;
+            <span class="ident">cfg</span>.<span class="ident">service_pipe_name</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">service_pipe_name</span>;
+            <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;slirp-ring-capture&quot;</span>)]</span>
+            {
+                <span class="ident">cfg</span>.<span class="ident">slirp_capture_file</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">slirp_capture_file</span>;
+            }
+            <span class="ident">cfg</span>.<span class="ident">syslog_tag</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">syslog_tag</span>;
+            <span class="ident">cfg</span>.<span class="ident">product_channel</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">product_channel</span>;
+            <span class="ident">cfg</span>.<span class="ident">product_version</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">product_version</span>;
+        }
         <span class="ident">cfg</span>.<span class="ident">pstore</span> <span class="op">=</span> <span class="ident">cmd</span>.<span class="ident">pstore</span>;
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>

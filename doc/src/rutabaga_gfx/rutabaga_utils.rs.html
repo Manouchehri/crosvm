@@ -625,12 +625,6 @@
 <span id="624">624</span>
 <span id="625">625</span>
 <span id="626">626</span>
-<span id="627">627</span>
-<span id="628">628</span>
-<span id="629">629</span>
-<span id="630">630</span>
-<span id="631">631</span>
-<span id="632">632</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1041,7 +1035,6 @@
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_USE_SURFACELESS</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">3</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_USE_GLES</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_VK_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>;
-<span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_GUEST_USES_ANGLE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">21</span>;
 <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_VULKAN_NATIVE_SWAPCHAIN_BIT</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">22</span>;
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GFXSTREAM_RENDERER_FLAGS_ASYNC_FENCE_CB</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">23</span>;
@@ -1087,11 +1080,6 @@
     <span class="doccomment">/// Use GLES drivers.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_gles</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
         <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_USE_GLES</span>, <span class="ident">v</span>)
-    }
-
-    <span class="doccomment">/// Use external synchronization.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_syncfd</span>(<span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">GfxstreamFlags</span> {
-        <span class="self">self</span>.<span class="ident">set_flag</span>(<span class="ident">GFXSTREAM_RENDERER_FLAGS_NO_SYNCFD_BIT</span>, <span class="op">!</span><span class="ident">v</span>)
     }
 
     <span class="doccomment">/// Support using Vulkan.</span>

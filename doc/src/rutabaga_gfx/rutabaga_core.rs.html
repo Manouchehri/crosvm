@@ -1017,12 +1017,6 @@
 <span id="1016">1016</span>
 <span id="1017">1017</span>
 <span id="1018">1018</span>
-<span id="1019">1019</span>
-<span id="1020">1020</span>
-<span id="1021">1021</span>
-<span id="1022">1022</span>
-<span id="1023">1023</span>
-<span id="1024">1024</span>
 </pre><pre class="rust"><code><span class="comment">// Copyright 2020 The Chromium OS Authors. All rights reserved.</span>
 <span class="comment">// Use of this source code is governed by a BSD-style license that can be</span>
 <span class="comment">// found in the LICENSE file.</span>
@@ -1853,12 +1847,6 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_use_vulkan</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
         <span class="self">self</span>.<span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">gfxstream_flags</span>.<span class="ident">use_vulkan</span>(<span class="ident">v</span>);
         <span class="self">self</span>.<span class="ident">virglrenderer_flags</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">virglrenderer_flags</span>.<span class="ident">use_venus</span>(<span class="ident">v</span>);
-        <span class="self">self</span>
-    }
-
-    <span class="doccomment">/// Set use syncfd in gfxstream</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_use_syncfd</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">v</span>: <span class="ident">bool</span>) -&gt; <span class="ident">RutabagaBuilder</span> {
-        <span class="self">self</span>.<span class="ident">gfxstream_flags</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">gfxstream_flags</span>.<span class="ident">use_syncfd</span>(<span class="ident">v</span>);
         <span class="self">self</span>
     }
 
